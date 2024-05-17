@@ -31,7 +31,7 @@ empty = Parameter.empty
 def _wrap_resp(resp, cls):
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
-    if isinstance(resp, list): return HTMLResponse(to_xml(resp))
+    if isinstance(resp, (list,tuple)): return HTMLResponse(to_xml(resp))
     if isinstance(resp, str): cls = HTMLResponse 
     elif isinstance(resp, Mapping): cls = JSONResponse 
     else:
