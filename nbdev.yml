@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "fasthtml"
+  site-url: "https://AnswerDotAI.github.io/fasthtml"
+  description: "The fastest way to create an HTML app"
+  repo-branch: main
+  repo-url: "https://github.com/AnswerDotAI/fasthtml"

@@ -1,0 +1,14 @@
+name: Deploy to GitHub Pages
+
+permissions:
+  contents: write
+  pages: write
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps: [uses: fastai/workflows/quarto-ghp@master]
