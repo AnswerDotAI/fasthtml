@@ -20,8 +20,8 @@ def Hidden(value:str="", **kw):
 
 # %% ../01_components.ipynb 8
 def A(txt, hx_get, target_id=None, hx_swap=None, href='#', **kw):
-    if target_id: target_id = '#'+target_id
-    return xt('a', txt, href=href, hx_get=hx_get, hx_target=target_id, hx_swap=hx_swap, **kw)
+    if target_id: kw['hx_target'] = '#'+target_id
+    return xt('a', txt, href=href, hx_get=hx_get, hx_swap=hx_swap, **kw)
 
 # %% ../01_components.ipynb 10
 def set_val(tag, attr, val):
