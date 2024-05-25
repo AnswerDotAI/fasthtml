@@ -51,4 +51,3 @@ async def get_todo(id:int):
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
-
