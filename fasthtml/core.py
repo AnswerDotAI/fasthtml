@@ -29,18 +29,6 @@ from starlette.convertors import Convertor, StringConvertor, register_url_conver
 empty = Parameter.empty
 
 # %% ../nbs/00_core.ipynb 5
-def _wrap_resp(resp, cls):
-    if isinstance(resp, Response): return resp
-    if cls is not empty: return cls(resp)
-    if isinstance(resp, (list,tuple)): return HTMLResponse(to_xml(resp))
-    if isinstance(resp, str): cls = HTMLResponse 
-    elif isinstance(resp, Mapping): cls = JSONResponse 
-    else:
-        resp = str(resp)
-        cls = HTMLResponse
-    return cls(resp)
-
-# %% ../nbs/00_core.ipynb 6
 def _fix_anno(t):
     origin = get_origin(t)
     if origin is Union or origin is UnionType:
@@ -48,10 +36,10 @@ def _fix_anno(t):
     if t==bool: return str2bool
     return t
 
-# %% ../nbs/00_core.ipynb 7
+# %% ../nbs/00_core.ipynb 6
 def date(s): return dateutil.parser.parse(s)
 
-# %% ../nbs/00_core.ipynb 8
+# %% ../nbs/00_core.ipynb 7
 def _form_arg(fld, body):
     res = body.get(fld.name, None)
     if not res: res = fld.default
@@ -60,18 +48,18 @@ def _form_arg(fld, body):
     if res is not None: res = anno(res)
     return res
 
-# %% ../nbs/00_core.ipynb 9
+# %% ../nbs/00_core.ipynb 8
 async def _from_body(req, arg, p):
     body = await req.form()
     cargs = {o.name:_form_arg(o, body) for o in fields(p.annotation)}
     return p.annotation(**cargs)
 
-# %% ../nbs/00_core.ipynb 10
+# %% ../nbs/00_core.ipynb 9
 def snake2hyphens(s):
     s = snake2camel(s)
     return camel2words(s, '-')
 
-# %% ../nbs/00_core.ipynb 11
+# %% ../nbs/00_core.ipynb 10
 htmx_hdrs = dict(
     boosted="HX-Boosted",
     current_url="HX-Current-URL",
@@ -86,7 +74,7 @@ def _get_htmx(req):
     res = {k:req.headers.get(v.lower(), None) for k,v in htmx_hdrs.items()}
     return ns(**res) if res else None
 
-# %% ../nbs/00_core.ipynb 12
+# %% ../nbs/00_core.ipynb 11
 async def _find_p(req, arg:str, p):
     if p.annotation is empty:
         if 'request'.startswith(arg.lower()): return req
@@ -103,46 +91,70 @@ async def _find_p(req, arg:str, p):
     if res is not None and anno is not empty: res = anno(res)
     return res
 
-# %% ../nbs/00_core.ipynb 13
+# %% ../nbs/00_core.ipynb 12
 async def _wrap_req(req, params):
-    if not params: return []
-#     items = [(k,v) for k,v in params.items()
-#              if v.annotation is not empty or v.default is not empty]
-#     if len(params)==1 and not items: return [req]
     return [await _find_p(req, arg, p) for arg,p in params.items()]
 
+# %% ../nbs/00_core.ipynb 13
+def _xt_resp(req, resp, hdrs, **bodykw):
+    if resp and 'hx-request' not in req.headers and isinstance(resp,tuple) and resp[0][0] not in ('!doctype','html'):
+        title,bdy = resp
+        if isinstance(title,str): title=Title(title)
+        resp = Html(Header(title, *hdrs), Body(bdy, **bodykw))
+    return HTMLResponse(to_xml(resp))
+
 # %% ../nbs/00_core.ipynb 14
-def _wrap_ep(f):
+def _wrap_resp(req, resp, cls, hdrs, **bodykw):
+    if isinstance(resp, Response): return resp
+    if cls is not empty: return cls(resp)
+    if isinstance(resp, (list,tuple)): return _xt_resp(req, resp, hdrs, **bodykw)
+    if isinstance(resp, str): cls = HTMLResponse 
+    elif isinstance(resp, Mapping): cls = JSONResponse 
+    else:
+        resp = str(resp)
+        cls = HTMLResponse
+    return cls(resp)
+
+# %% ../nbs/00_core.ipynb 15
+def _wrap_ep(f, hdrs, **bodykw):
     if not (isfunction(f) or ismethod(f)): return f
     sig = signature(f)
     params = sig.parameters
     cls = sig.return_annotation
 
     async def _f(req):
-        req = await _wrap_req(req, params)
-        resp = f(*req)
+        wreq = await _wrap_req(req, params)
+        resp = f(*wreq)
         if is_async_callable(f): resp = await resp
-        return _wrap_resp(resp, cls)
+        return _wrap_resp(req, resp, cls, hdrs, **bodykw)
     return _f
 
-# %% ../nbs/00_core.ipynb 15
-class RouteX(Route):
-    def __init__(self, path, endpoint, *args, **kw):
-        ep = _wrap_ep(endpoint)
-        super().__init__(path, ep, *args, **kw)
-
 # %% ../nbs/00_core.ipynb 16
-class RouterX(Router):
-    def add_route( self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
-        route = RouteX(path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema)
-        self.routes.append(route)
+class RouteX(Route):
+    def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
+                hdrs=None, **bodykw):
+        super().__init__(path, _wrap_ep(endpoint, hdrs, **bodykw), methods=methods, name=name,
+                         include_in_schema=include_in_schema, middleware=middleware)
 
 # %% ../nbs/00_core.ipynb 17
+class RouterX(Router):
+    def __init__(self, routes=None, redirect_slashes=True, default=None, on_startup=None, on_shutdown=None,
+                 lifespan=None, *, middleware=None, hdrs=None, **bodykw):
+        super().__init__(routes, redirect_slashes, default, on_startup, on_shutdown,
+                 lifespan=lifespan, middleware=middleware)
+        self.hdrs,self.bodykw = hdrs or (),bodykw
+
+    def add_route( self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
+        route = RouteX(path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema,
+                      hdrs=self.hdrs, **self.bodykw)
+        self.routes.append(route)
+
+# %% ../nbs/00_core.ipynb 18
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
-                 on_startup=None, on_shutdown=None, lifespan=None):
+                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, **bodykw):
         super().__init__(debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan=lifespan)
-        self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
+        self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, hdrs=hdrs, **bodykw)
 
     def route(self, path:str, methods=None, name=None, include_in_schema=True):
         if isinstance(methods,str): methods=[methods]
@@ -154,7 +166,7 @@ class FastHTML(Starlette):
 for o in 'get post put delete patch head trace options'.split():
     setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o.capitalize()))
 
-# %% ../nbs/00_core.ipynb 18
+# %% ../nbs/00_core.ipynb 19
 def reg_re_param(m, s):
     cls = get_class(f'{m}Conv', sup=StringConvertor, regex=s)
     register_url_convertor(m, cls())

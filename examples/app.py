@@ -19,7 +19,8 @@ class NotFoundException(HTTPException):
 async def not_found(request: Request, exc: Exception):
     return HTMLResponse(content=exc.detail, status_code=exc.status_code)
 
-app = FastHTML(exception_handlers={ 404: not_found, NotFoundException: not_found })
+app = FastHTML(hdrs=(htmxscr, picolink, mycss),
+               exception_handlers={ 404: not_found, NotFoundException: not_found })
 
 reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js")
 @app.get("/{fname:path}.{ext:static}")
@@ -33,15 +34,10 @@ def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New 
 async def get_todos(req):
     add = Form(Group(mk_input(), Button("Add")),
                hx_post="/", target_id=id_list, hx_swap="beforeend")
-    todos = Ul(*TODO_LIST, id=id_list)
-    main = Main(
-        H1('Todo list'), 
-        Card(todos, header=add, footer=Div(id=id_curr)),
-        cls='container')
-    return Html(
-        Head(Title('TODO list'), htmxscr, picolink, mycss),
-        Body(main)
-    )
+    card = Card(Ul(*TODO_LIST, id=id_list),
+                header=add, footer=Div(id=id_curr)),
+    title = 'Todo list'
+    return (title, Main(H1(title), card, cls='container'))
 
 @app.post("/")
 async def add_item(todo:TodoItem):
