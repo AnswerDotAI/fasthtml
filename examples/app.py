@@ -1,7 +1,10 @@
+import uvicorn
 from starlette.responses import FileResponse, RedirectResponse, JSONResponse, HTMLResponse
+from starlette.exceptions import HTTPException
 from fastcore.utils import *
 from fastcore.xml import *
 from fasthtml import *
+from starlette.requests import Request
 
 from impl import *
 
@@ -10,7 +13,13 @@ htmxscr = Script(
     integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2")
 mycss = Link(rel="stylesheet", href="picovars.css")
 
-app = FastHTML()
+class NotFoundException(HTTPException):
+    def __init__(self, detail=None): return super().__init__(404, detail=detail)
+
+async def not_found(request: Request, exc: Exception):
+    return HTMLResponse(content=exc.detail, status_code=exc.status_code)
+
+app = FastHTML(exception_handlers={ 404: not_found, NotFoundException: not_found })
 
 reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js")
 @app.get("/{fname:path}.{ext:static}")
@@ -18,11 +27,21 @@ async def image(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 @app.get("/static/{fname:path}")
 async def static(fname:str): return FileResponse(f'static/{fname}')
 
+def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
+
 @app.get("/")
 async def get_todos(req):
+    add = Form(Group(mk_input(), Button("Add")),
+               hx_post="/", target_id=id_list, hx_swap="beforeend")
+    todos = Ul(*TODO_LIST, id=id_list)
+    main = Main(
+        H1('Todo list'), 
+        Card(todos, header=add, footer=Div(id=id_curr)),
+        cls='container')
     return Html(
         Head(Title('TODO list'), htmxscr, picolink, mycss),
-        Body(Main(H1('Todo list'), get_card(TODO_LIST), cls='container')))
+        Body(main)
+    )
 
 @app.post("/")
 async def add_item(todo:TodoItem):
@@ -51,3 +70,5 @@ async def get_todo(id:int):
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
+
+if __name__ == "__main__": uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
