@@ -1,3 +1,5 @@
+*.db
+.gitattributes
 _proc/
 _quarto.yml
 sidebar.yml

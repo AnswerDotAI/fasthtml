@@ -5,16 +5,19 @@ __all__ = ['id_curr', 'id_list', 'TODO_LIST', 'tid', 'TodoItem', 'find_todo', 'g
 
 # %% impl.ipynb 2
 from dataclasses import dataclass
+from typing import Any,Union,Tuple,List
 
 from fastcore.utils import *
 from fastcore.xml import *
+from fastcore.xtras import hl_md
 from fasthtml import *
 
-# %% impl.ipynb 9
+# %% impl.ipynb 7
 id_curr = 'current-todo'
 id_list = 'todo-list'
 def tid(id): return f'todo-{id}'
 
+# %% impl.ipynb 8
 @dataclass
 class TodoItem():
     title: str; id: int = -1; done: bool = False
@@ -27,17 +30,17 @@ class TodoItem():
 
     _repr_html_ = showtags
 
-# %% impl.ipynb 10
+#|export
 TODO_LIST = [TodoItem(id=0, title="Start writing todo list", done=True),
              TodoItem(id=1, title="???", done=False),
              TodoItem(id=2, title="Profit", done=False)]
 
-# %% impl.ipynb 14
+# %% impl.ipynb 12
 def find_todo(id):
     try: return next(o for o in TODO_LIST if o.id==id)
     except: raise NotFoundException(f'Todo #{id}') from None
 
-# %% impl.ipynb 16
+# %% impl.ipynb 14
 def get_editform(id):
     todo = find_todo(id)
     res = Form(Group(Input(id="title"), Button("Save")),

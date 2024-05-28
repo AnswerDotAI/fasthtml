@@ -12,7 +12,7 @@ __all__ = ['named', 'html_attrs', 'hx_attrs', 'show', 'xt_html', 'xt_hx', 'set_v
 
 # %% ../nbs/01_components.ipynb 2
 from html.parser import HTMLParser
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -81,7 +81,8 @@ def fill_form(form, obj):
     "Modifies form in-place and returns it"
     inps = find_inps(form)
     inps = {attrs['id']:(tag,attrs) for tag,c,attrs in inps if 'id' in attrs}
-    for nm,val in asdict(obj).items():
+    if not isinstance(obj,dict): obj = asdict(obj)
+    for nm,val in obj.items():
         if nm in inps:
             tag,attr = inps[nm]
             set_val(tag, attr, val)
