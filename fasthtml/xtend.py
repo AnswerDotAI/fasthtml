@@ -32,9 +32,7 @@ new MutationObserver(ms => {
     m.addedNodes.forEach(n => {
       if (n.nodeType === 1) {
         var nc = n.classList;
-        if (nc && (nc.contains('cell-output') || nc.contains('output_area'))) {
-          nc.add('pico');
-        }
+        if (nc && (nc.contains('cell-output') || nc.contains('output_area'))) nc.add('pico');
         n.querySelectorAll(sel).forEach(e => e.classList.add('pico'));
       }
     });
@@ -60,9 +58,9 @@ def AX(txt, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs):
 
 # %% ../nbs/02_xtend.ipynb 14
 @delegates(xt_hx, keep=True)
-def Checkbox(checked:bool=False, label=None, **kwargs):
+def Checkbox(checked:bool=False, label=None, value="1", **kwargs):
     if not checked: checked=None
-    res = Input(type="checkbox", checked=checked, **kwargs)
+    res = Input(type="checkbox", checked=checked, value=value, **kwargs)
     if label: res = Label(res, label)
     return res
 

@@ -1,32 +1,33 @@
 import uvicorn
+from dataclasses import dataclass
 from starlette.responses import FileResponse, RedirectResponse, JSONResponse, HTMLResponse
+from starlette.requests import Request
 from starlette.exceptions import HTTPException
 from fastcore.utils import *
 from fastcore.xml import *
 from fasthtml import *
-from starlette.requests import Request
 
-from impl import *
+id_curr = 'current-todo'
+id_list = 'todo-list'
+def tid(id): return f'todo-{id}'
 
-htmxscr = Script(
-    src="https://unpkg.com/htmx.org@1.9.12", crossorigin="anonymous",
-    integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2")
-mycss = Link(rel="stylesheet", href="picovars.css")
+@dataclass
+class TodoItem():
+    title: str; id: int = -1; done: bool = False
+    def __xt__(self):
+        show = AX(self.title, f'/todos/{self.id}', id_curr)
+        edit = AX('edit',     f'/edit/{self.id}' , id_curr)
+        dt = ' (done)' if self.done else ''
+        return Li(show, dt, ' | ', edit, id=tid(self.id))
 
-class NotFoundException(HTTPException):
-    def __init__(self, detail=None): return super().__init__(404, detail=detail)
+TODO_LIST = [TodoItem(id=0, title="Start writing todo list", done=True),
+             TodoItem(id=1, title="???", done=False),
+             TodoItem(id=2, title="Profit", done=False)]
 
-async def not_found(request: Request, exc: Exception):
-    return HTMLResponse(content=exc.detail, status_code=exc.status_code)
+app = FastHTML(hdrs=(picolink, Link(rel="stylesheet", href="picovars.css")))
 
-app = FastHTML(hdrs=(htmxscr, picolink, mycss),
-               exception_handlers={ 404: not_found, NotFoundException: not_found })
-
-reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js")
 @app.get("/{fname:path}.{ext:static}")
 async def image(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
-@app.get("/static/{fname:path}")
-async def static(fname:str): return FileResponse(f'static/{fname}')
 
 def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
 
@@ -37,7 +38,7 @@ async def get_todos(req):
     card = Card(Ul(*TODO_LIST, id=id_list),
                 header=add, footer=Div(id=id_curr)),
     title = 'Todo list'
-    return (title, Main(H1(title), card, cls='container'))
+    return title, Main(H1(title), card, cls='container')
 
 @app.post("/")
 async def add_item(todo:TodoItem):
@@ -46,9 +47,16 @@ async def add_item(todo:TodoItem):
     return todo, mk_input(hx_swap_oob='true')
 
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
+def find_todo(id): return next(o for o in TODO_LIST if o.id==id)
 
 @app.get("/edit/{id}")
-async def edit_item(id:int): return get_editform(id)
+async def edit_item(id:int):
+    todo = find_todo(id)
+    res = Form(Group(Input(id="title"), Button("Save")),
+        Hidden(id="id"), Checkbox(id="done", label='Done'),
+        hx_put="/", target_id=tid(id), id="edit")
+    fill_form(res, todo)
+    return res
 
 @app.put("/")
 async def update(todo: TodoItem):
@@ -66,5 +74,3 @@ async def get_todo(id:int):
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
-
-if __name__ == "__main__": uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

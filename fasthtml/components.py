@@ -37,7 +37,7 @@ def xt_html(tag: str, *c, id=None, cls=None, title=None, style=None, **kwargs):
     kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style
     tag,c,kw = xt(tag, *c, **kwargs)
     if tag in named and 'id' in kw and 'name' not in kw: kw['name'] = kw['id']
-    return XT([tag,c,kw])
+    return XT(tag,c,kw)
 
 # %% ../nbs/01_components.ipynb 7
 @use_kwargs(hx_attrs, keep=True)
