@@ -11,11 +11,9 @@ def row(todo):
 @app["/"]
 def get():
     inp = Input(id="new-title", name="title", placeholder="New Todo")
-    add = Form(Group(inp, Button("Add")),
-               hx_post="/", target_id='todo-list', hx_swap="beforeend")
+    add = Form(Group(inp, Button("Add")), hx_post="/", target_id='todo-list', hx_swap="beforeend")
     rows = [row(o) for o in todos()]
-    card = Card(Ul(*rows, id='todo-list'),
-                header=add, footer=Div(id='current-todo')),
+    card = Card(Ul(*rows, id='todo-list'), header=add, footer=Div(id='current-todo')),
     return 'Todo list', Main(H1('Todos'), card, cls='container')
 
 @app["/todos/{id}"]
@@ -41,7 +39,7 @@ def put(todo: Todo): return row(todos.upsert(todo)), clear('current-todo')
 @app["/todos/{id}"]
 def get(id:int):
     todo = todos.get(id)
-    btn = Button('delete', hx_delete=f'/todos/{todo.id}',
-                 target_id=f'todo-{id}', hx_swap="outerHTML")
+    btn = Button('delete', hx_delete=f'/todos/{todo.id}', target_id=f'todo-{id}', hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
+
 
