@@ -9,7 +9,7 @@ def row(todo):
     return Li(show, dt, ' | ', edit, id=f'todo-{todo.id}')
 
 @app["/"]
-async def get():
+def get():
     inp = Input(id="new-title", name="title", placeholder="New Todo")
     add = Form(Group(inp, Button("Add")),
                hx_post="/", target_id='todo-list', hx_swap="beforeend")
@@ -19,27 +19,27 @@ async def get():
     return 'Todo list', Main(H1('Todos'), card, cls='container')
 
 @app["/todos/{id}"]
-async def delete(id:int):
+def delete(id:int):
     todos.delete(id)
     return clear('current-todo')
 
 @app["/"]
-async def post(todo:Todo):
+def post(todo:Todo):
     return (row(todos.insert(todo)),
             Input(id="new-title", name="title", placeholder="New Todo", hx_swap_oob='true'))
 
 @app["/edit/{id}"]
-async def get(id:int):
+def get(id:int):
     res = Form(Group(Input(id="title"), Button("Save")),
         Hidden(id="id"), Checkbox(id="done", label='Done'),
         hx_put="/", target_id=f'todo-{id}', id="edit")
     return fill_form(res, todos.get(id))
 
 @app["/"]
-async def put(todo: Todo): return row(todos.upsert(todo)), clear('current-todo')
+def put(todo: Todo): return row(todos.upsert(todo)), clear('current-todo')
 
 @app["/todos/{id}"]
-async def get(id:int):
+def get(id:int):
     todo = todos.get(id)
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=f'todo-{id}', hx_swap="outerHTML")
