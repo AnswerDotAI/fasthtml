@@ -1,4 +1,3 @@
-import uvicorn
 from starlette.responses import FileResponse
 from fastcore.utils import *
 from fastcore.xml import *
@@ -23,14 +22,14 @@ def __xt__(self:Todo):
 
 app = FastHTML(hdrs=(picolink, Link(rel="stylesheet", href="picovars.css")))
 
-@app.get("/{fname:path}.{ext:static}")
-async def static(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
+@app["/{fname:path}.{ext:static}"]
+async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 
 def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
 
-@app.get("/")
-async def get_todos():
+@app["/"]
+async def get():
     add = Form(Group(mk_input(), Button("Add")),
                hx_post="/", target_id=id_list, hx_swap="beforeend")
     card = Card(Ul(*todos(), id=id_list),
@@ -38,26 +37,26 @@ async def get_todos():
     title = 'Todo list'
     return title, Main(H1(title), card, cls='container')
 
-@app.delete("/todos/{id}")
-async def del_todo(id:int):
+@app["/todos/{id}"]
+async def delete(id:int):
     todos.delete(id)
     return clr_details()
 
-@app.post("/")
-async def add_item(todo:Todo): return todos.insert(todo), mk_input(hx_swap_oob='true')
+@app["/"]
+async def post(todo:Todo): return todos.insert(todo), mk_input(hx_swap_oob='true')
 
-@app.get("/edit/{id}")
-async def edit_item(id:int):
+@app["/edit/{id}"]
+async def get(id:int):
     res = Form(Group(Input(id="title"), Button("Save")),
         Hidden(id="id"), Checkbox(id="done", label='Done'),
         hx_put="/", target_id=tid(id), id="edit")
     return fill_form(res, todos.get(id))
 
-@app.put("/")
-async def update(todo: Todo): return todos.upsert(todo), clr_details()
+@app["/"]
+async def put(todo: Todo): return todos.upsert(todo), clr_details()
 
-@app.get("/todos/{id}")
-async def get_todo(id:int):
+@app["/todos/{id}"]
+async def get(id:int):
     todo = todos.get(id)
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
