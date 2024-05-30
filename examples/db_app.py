@@ -1,15 +1,10 @@
 import uvicorn
-from dataclasses import dataclass
-from starlette.responses import FileResponse, RedirectResponse, JSONResponse, HTMLResponse
-from starlette.requests import Request
-from starlette.exceptions import HTTPException
+from starlette.responses import FileResponse
 from fastcore.utils import *
 from fastcore.xml import *
 from fasthtml import *
-
 from sqlite_utils import Database
 from fastlite import *
-from fastlite.kw import *
 
 db = Database('todos.db')
 todos = db.t.todos
