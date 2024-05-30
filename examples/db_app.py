@@ -12,7 +12,8 @@ from fastlite import *
 from fastlite.kw import *
 
 db = Database('todos.db')
-todos = db['todos']
+todos = db.t.todos
+if todos not in db.t: todos.create(id=int, title=str, done=bool, pk='id')
 Todo = todos.dataclass()
 
 id_curr,id_list = 'current-todo','todo-list'
@@ -42,13 +43,13 @@ async def get_todos():
     title = 'Todo list'
     return title, Main(H1(title), card, cls='container')
 
-@app.post("/")
-async def add_item(todo:Todo): return todos.insert(todo), mk_input(hx_swap_oob='true')
-
 @app.delete("/todos/{id}")
 async def del_todo(id:int):
     todos.delete(id)
     return clr_details()
+
+@app.post("/")
+async def add_item(todo:Todo): return todos.insert(todo), mk_input(hx_swap_oob='true')
 
 @app.get("/edit/{id}")
 async def edit_item(id:int):
