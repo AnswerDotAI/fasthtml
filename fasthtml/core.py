@@ -132,9 +132,8 @@ async def _wrap_req(req, params):
 
 # %% ../nbs/00_core.ipynb 15
 def _xt_resp(req, resp, hdrs, **bodykw):
-    if resp and 'hx-request' not in req.headers and isinstance(resp,tuple) and resp[0][0] not in ('!doctype','html'):
+    if resp and 'hx-request' not in req.headers and isinstance(resp,tuple) and resp[0][0]=='title':
         title,bdy = resp
-        if isinstance(title,str): title=Title(title)
         resp = Html(Header(title, *hdrs), Body(bdy, **bodykw))
     return HTMLResponse(to_xml(resp))
 
