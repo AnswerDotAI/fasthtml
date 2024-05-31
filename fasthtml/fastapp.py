@@ -30,3 +30,5 @@ def fast_app(db=None, render=None, hdrs=None, tbls=None, **kwargs):
 def clear(id): return Div(hx_swap_oob='innerHTML', id=id)
 target = dict(hx_target='main', hx_swap='outerHTML')
 
+def Page(title, *con): return Title(title), Container(H1(title), *con), HttpHeader('hx-push-url','true')
+

@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'htmxscr', 'all_meths', 'is_namedtuple', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int',
-           'RouteX', 'RouterX', 'FastHTML', 'reg_re_param']
+           'HttpHeader', 'RouteX', 'RouterX', 'FastHTML', 'reg_re_param']
 
 # %% ../nbs/00_core.ipynb 2
 import json, dateutil
@@ -122,7 +122,9 @@ async def _find_p(req, arg:str, p):
     if not res: res = req.cookies.get(arg, None)
     if not res: res = req.headers.get(snake2hyphens(arg), None)
     if not res: res = p.default
-    if res is empty or res is None: return None
+    if res is empty or res is None:
+        body = await req.form()
+        res = body.get(arg, None)
     if not isinstance(res, str) or anno is empty: return res
     return _fix_anno(anno)(res)
 
@@ -131,13 +133,19 @@ async def _wrap_req(req, params):
     return [await _find_p(req, arg, p) for arg,p in params.items()]
 
 # %% ../nbs/00_core.ipynb 15
-def _xt_resp(req, resp, hdrs, **bodykw):
-    if resp and 'hx-request' not in req.headers and isinstance(resp,tuple) and resp[0][0]=='title':
-        title,bdy = resp
-        resp = Html(Header(title, *hdrs), Body(bdy, **bodykw))
-    return HTMLResponse(to_xml(resp))
+@dataclass
+class HttpHeader: k:str;v:str
 
 # %% ../nbs/00_core.ipynb 16
+def _xt_resp(req, resp, hdrs, **bodykw):
+    http_hdrs,resp = partition(resp, risinstance(HttpHeader))
+    http_hdrs = {o.k:str(o.v) for o in http_hdrs}
+    titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '')=='title')
+    if resp and 'hx-request' not in req.headers and isinstance(resp,tuple) and titles:
+        resp = Html(Header(titles[0], *hdrs), Body(bdy, **bodykw))
+    return HTMLResponse(to_xml(resp), headers=http_hdrs)
+
+# %% ../nbs/00_core.ipynb 17
 def _wrap_resp(req, resp, cls, hdrs, **bodykw):
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
@@ -149,7 +157,7 @@ def _wrap_resp(req, resp, cls, hdrs, **bodykw):
         cls = HTMLResponse
     return cls(resp)
 
-# %% ../nbs/00_core.ipynb 17
+# %% ../nbs/00_core.ipynb 18
 def _wrap_ep(f, hdrs, **bodykw):
     if not (isfunction(f) or ismethod(f)): return f
     sig = signature(f)
@@ -163,14 +171,14 @@ def _wrap_ep(f, hdrs, **bodykw):
         return _wrap_resp(req, resp, cls, hdrs, **bodykw)
     return _f
 
-# %% ../nbs/00_core.ipynb 18
+# %% ../nbs/00_core.ipynb 19
 class RouteX(Route):
     def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
                 hdrs=None, **bodykw):
         super().__init__(path, _wrap_ep(endpoint, hdrs, **bodykw), methods=methods, name=name,
                          include_in_schema=include_in_schema, middleware=middleware)
 
-# %% ../nbs/00_core.ipynb 19
+# %% ../nbs/00_core.ipynb 20
 class RouterX(Router):
     def __init__(self, routes=None, redirect_slashes=True, default=None, on_startup=None, on_shutdown=None,
                  lifespan=None, *, middleware=None, hdrs=None, **bodykw):
@@ -184,12 +192,12 @@ class RouterX(Router):
         self.routes = [o for o in self.routes if o.methods!=methods or o.path!=path]
         self.routes.append(route)
 
-# %% ../nbs/00_core.ipynb 20
+# %% ../nbs/00_core.ipynb 21
 htmxscr = Script(
     src="https://unpkg.com/htmx.org@1.9.12", crossorigin="anonymous",
     integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2")
 
-# %% ../nbs/00_core.ipynb 21
+# %% ../nbs/00_core.ipynb 22
 all_meths = 'get post put delete patch head trace options'.split()
 
 class FastHTML(Starlette):
@@ -219,7 +227,7 @@ class FastHTML(Starlette):
 for o in all_meths:
     setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o.capitalize()))
 
-# %% ../nbs/00_core.ipynb 22
+# %% ../nbs/00_core.ipynb 23
 def reg_re_param(m, s):
     cls = get_class(f'{m}Conv', sup=StringConvertor, regex=s)
     register_url_convertor(m, cls())
