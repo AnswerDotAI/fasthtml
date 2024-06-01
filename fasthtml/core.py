@@ -1,13 +1,10 @@
-__all__ = ['empty', 'htmx_hdrs', 'htmxscr', 'all_meths', 'is_namedtuple', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int',
-           'HttpHeader', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'reg_re_param']
-
 import json, dateutil, uuid
 
 from fastcore.utils import *
 from fastcore.xml import *
 
 from types import UnionType, SimpleNamespace as ns
-from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping
+from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict
 from datetime import datetime
 from dataclasses import dataclass,fields,is_dataclass,MISSING,asdict
 from collections import namedtuple
@@ -18,6 +15,10 @@ from .starlette import *
 
 
 empty = Parameter.empty
+
+def is_typeddict(cls:type)->bool:
+    attrs = 'annotations', 'required_keys', 'optional_keys'
+    return isinstance(cls, type) and all(hasattr(cls, f'__{attr}__') for attr in attrs)
 
 def is_namedtuple(cls):
     "`True` is `cls` is a namedtuple type"
@@ -75,7 +76,8 @@ def _form_arg(k, v, d):
     return _fix_anno(anno)(v)
 
 def _is_body(anno):
-    return issubclass(anno, (dict,ns)) or is_dataclass(anno) or is_namedtuple(anno) or get_annotations(anno)
+    return issubclass(anno, (dict,ns)) or is_dataclass(anno) or is_namedtuple(anno) or \
+        get_annotations(anno) or is_typeddict(anno)
 
 def _anno2flds(anno):
     if is_dataclass(anno): return {o.name:o.type for o in fields(anno)}
