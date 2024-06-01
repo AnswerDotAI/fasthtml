@@ -2,10 +2,10 @@
 
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'htmxscr', 'all_meths', 'is_namedtuple', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int',
-           'HttpHeader', 'RouteX', 'RouterX', 'FastHTML', 'reg_re_param']
+           'HttpHeader', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'reg_re_param']
 
 # %% ../nbs/00_core.ipynb 2
-import json, dateutil
+import json, dateutil, uuid
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -18,14 +18,7 @@ from collections import namedtuple
 from inspect import isfunction,ismethod,signature,Parameter,get_annotations
 from functools import wraps, partialmethod
 
-from starlette.applications import Starlette
-from starlette.routing import Route, Mount, Router
-from starlette.responses import Response, HTMLResponse, FileResponse, JSONResponse
-from starlette.requests import Request
-from starlette.staticfiles import StaticFiles
-from starlette.exceptions import HTTPException
-from starlette._utils import is_async_callable
-from starlette.convertors import Convertor, StringConvertor, register_url_convertor, CONVERTOR_TYPES
+from .starlette import *
 
 # %% ../nbs/00_core.ipynb 4
 empty = Parameter.empty
@@ -114,6 +107,7 @@ async def _find_p(req, arg:str, p):
         if _is_body(anno): return await _from_body(req, arg, p)
     if anno is empty:
         if 'request'.startswith(arg.lower()): return req
+        if 'session'.startswith(arg.lower()): return req.scope.get('session', {})
         if arg.lower()=='htmx': return _get_htmx(req)
         if arg.lower()=='app': return req.scope['app']
         return None
@@ -121,6 +115,7 @@ async def _find_p(req, arg:str, p):
     if not res: res = req.query_params.get(arg, None)
     if not res: res = req.cookies.get(arg, None)
     if not res: res = req.headers.get(snake2hyphens(arg), None)
+    if not res: res = nested_idx(req.scope, 'session', arg)
     if not res: res = p.default
     if res is empty or res is None:
         body = await req.form()
@@ -198,36 +193,43 @@ htmxscr = Script(
     integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2")
 
 # %% ../nbs/00_core.ipynb 22
-all_meths = 'get post put delete patch head trace options'.split()
+def get_key(key=None, fname='.sesskey'):
+    if key: return key
+    fname = Path(fname)
+    if fname.exists(): return fname.read_text()
+    key = str(uuid.uuid4())
+    fname.write_text(key)
+    return key
 
+# %% ../nbs/00_core.ipynb 24
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
-                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, **bodykw):
+                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None,
+                 secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
+                 same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', **bodykw):
+        if not middleware: middleware = []
+        secret_key = get_key(secret_key, key_fname)
+        sess = Middleware(SessionMiddleware, secret_key=secret_key, session_cookie=session_cookie,
+                          max_age=max_age, path=sess_path, same_site=same_site,
+                          https_only=sess_https_only, domain=sess_domain)
+        middleware.append(sess)
         super().__init__(debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan=lifespan)
         hdrs = list([] if hdrs is None else hdrs) + [htmxscr]
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, hdrs=hdrs, **bodykw)
 
-    def __getitem__(self, path):
-        name = None
-        if isinstance(path, tuple): path,name = path
-        def f(func):
-            meth = func.__name__
-            if meth not in all_meths: meth='get'
-            self.router.add_route(path, func, methods=[meth], name=name)
-            return func
-        return f
-
     def route(self, path:str, methods=None, name=None, include_in_schema=True):
-        if isinstance(methods,str): methods=[methods]
         def f(func):
-            self.router.add_route(path, func, methods=methods, name=name, include_in_schema=include_in_schema)
+            m = [methods] if isinstance(methods,str) else [func.__name__] if not methods else methods
+            self.router.add_route(path, func, methods=m, name=name, include_in_schema=include_in_schema)
             return func
         return f
 
+# %% ../nbs/00_core.ipynb 25
+all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths:
-    setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o.capitalize()))
+    setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
-# %% ../nbs/00_core.ipynb 23
+# %% ../nbs/00_core.ipynb 26
 def reg_re_param(m, s):
     cls = get_class(f'{m}Conv', sup=StringConvertor, regex=s)
     register_url_convertor(m, cls())

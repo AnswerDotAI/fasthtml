@@ -14,7 +14,7 @@ def fast_app(db=None, render=None, hdrs=None, tbls=None, **kwargs):
     h = (picolink,)
     if hdrs: h += tuple(hdrs)
     app = FastHTML(hdrs=h)
-    @app["/{fname:path}.{ext:static}"]
+    @app.route("/{fname:path}.{ext:static}")
     async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
     if not db: return app
 

@@ -17,14 +17,15 @@ def __xt__(self:Todo):
 
 css = Style(':root { --pico-font-size: 100%; }')
 app = FastHTML(hdrs=(picolink, css))
+rt = app.route
 
-@app["/{fname:path}.{ext:static}"]
+@rt("/{fname:path}.{ext:static}")
 async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 
 def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
 
-@app["/"]
+@rt("/")
 async def get():
     add = Form(Group(mk_input(), Button("Add")),
                hx_post="/", target_id='todo-list', hx_swap="beforeend")
@@ -33,25 +34,25 @@ async def get():
     title = 'Todo list'
     return Title(title), Main(H1(title), card, cls='container')
 
-@app["/todos/{id}"]
+@rt("/todos/{id}")
 async def delete(id:int):
     todos.delete(id)
     return clr_details()
 
-@app["/"]
+@rt("/")
 async def post(todo:Todo): return todos.insert(todo), mk_input(hx_swap_oob='true')
 
-@app["/edit/{id}"]
+@rt("/edit/{id}")
 async def get(id:int):
     res = Form(Group(Input(id="title"), Button("Save")),
         Hidden(id="id"), Checkbox(id="done", label='Done'),
         hx_put="/", target_id=tid(id), id="edit")
     return fill_form(res, todos.get(id))
 
-@app["/"]
+@rt("/")
 async def put(todo: Todo): return todos.upsert(todo), clr_details()
 
-@app["/todos/{id}"]
+@rt("/todos/{id}")
 async def get(id:int):
     todo = todos.get(id)
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',

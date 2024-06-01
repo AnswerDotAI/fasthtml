@@ -1,6 +1,7 @@
 from fasthtml.fastapp import *
 
 app,todos,Todo = fast_app('todos.db', id=int, title=str, done=bool, pk='id')
+rt = app.route
 
 def TodoRow(todo):
     show = A(todo.title, hx_get=f'/todos/{todo.id}')
@@ -16,25 +17,25 @@ def home():
                 header=add, footer=Div(id='current-todo'))
     return Page('Todo list', card)
 
-@app["/"]
+@rt("/")
 def get(): return home()
 
-@app["/"]
+@rt("/")
 def post(todo:Todo):
     todos.insert(todo)
     return home()
 
-@app["/"]
+@rt("/")
 def put(todo: Todo):
     todos.upsert(todo)
     return home()
 
-@app["/"]
+@rt("/")
 async def delete(id:int):
     todos.delete(id)
     return home()
 
-@app["/edit/{id}"]
+@rt("/edit/{id}")
 def get(id:int):
     grp = Group(Input(id="title"), Button("Save"))
     res = Form(grp, Hidden(id="id"), Checkbox(id="done", label='Done'),
@@ -42,7 +43,7 @@ def get(id:int):
     frm = fill_form(res, todos.get(id))
     return Page('Edit Todo', frm)
 
-@app["/todos/{id}"]
+@rt("/todos/{id}")
 def get(id:int):
     btn_del =  Button('Delete', hx_delete='/', value=id, name="id")
     btn_back = Button('Back', hx_get='/')

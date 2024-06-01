@@ -1,3 +1,4 @@
+.sesskey
 *.db
 .gitattributes
 _proc/
