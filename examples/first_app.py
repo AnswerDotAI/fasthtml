@@ -13,8 +13,7 @@ def home():
     inp = Input(name="title", placeholder="New Todo")
     add = Form(Group(inp, Button("Add")), hx_post="/")
     rows = map(TodoRow, todos())
-    card = Card(Ul(*rows, id='todo-list'),
-                header=add, footer=Div(id='current-todo'))
+    card = Card(Ul(*rows, id='todo-list'), header=add, footer=Div(id='current-todo'))
     return Page('Todo list', card)
 
 @rt("/")
@@ -31,14 +30,15 @@ def put(todo: Todo):
     return home()
 
 @rt("/")
-async def delete(id:int):
+def delete(id:int):
     todos.delete(id)
     return home()
 
 @rt("/edit/{id}")
 def get(id:int):
     grp = Group(Input(id="title"), Button("Save"))
-    res = Form(grp, Hidden(id="id"), Checkbox(id="done", label='Done'),
+    btn_back = Button('Back', hx_get='/')
+    res = Form(grp, Hidden(id="id"), Checkbox(id="done", label='Done'), btn_back,
                hx_put="/", id="edit")
     frm = fill_form(res, todos.get(id))
     return Page('Edit Todo', frm)
