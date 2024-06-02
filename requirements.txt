@@ -1,7 +1,1 @@
-fastcore
-python-dateutil
-starlette
-oauthlib
-itsdangerous
-uvicorn
-httpx
+fasthtml
