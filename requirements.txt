@@ -1,1 +1,1 @@
-fasthtml
+python-fasthtml
