@@ -111,7 +111,7 @@ async def _find_p(req, arg:str, p):
     if not res: res = req.query_params.get(arg, None)
     if not res: res = req.cookies.get(arg, None)
     if not res: res = req.headers.get(snake2hyphens(arg), None)
-    if not res: res = nested_idx(req.scope, 'session', arg)
+    if not res: res = nested_idx(req.scope, 'session', arg) or None
     if res is empty or res is None:
         body = await req.form()
         res = body.get(arg, None)
