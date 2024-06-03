@@ -11,6 +11,14 @@ Todo = todos.dataclass()
 id_curr = 'current-todo'
 def tid(id): return f'todo-{id}'
 
+css = Style(':root { --pico-font-size: 100%; }')
+auth = user_pwd_auth(user='s3kret', skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css'])
+app = FastHTML(hdrs=(picolink, css), middleware=[auth])
+rt = app.route
+
+@rt("/{fname:path}.{ext:static}")
+async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
+
 @patch
 def __xt__(self:Todo):
     show = AX(self.title, f'/todos/{self.id}', id_curr)
@@ -18,26 +26,17 @@ def __xt__(self:Todo):
     dt = ' (done)' if self.done else ''
     return Li(show, dt, ' | ', edit, id=tid(self.id))
 
-css = Style(':root { --pico-font-size: 100%; }')
-auth = user_pwd_auth('user', 's3kret')
-app = FastHTML(hdrs=(picolink, css), middleware=[auth])
-rt = app.route
-
-@rt("/{fname:path}.{ext:static}")
-async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
-
 def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
 
 @rt("/")
-async def get(request, Host:str):
+async def get(request):
     add = Form(Group(mk_input(), Button("Add")),
                hx_post="/", target_id='todo-list', hx_swap="beforeend")
     card = Card(Ul(*todos(), id='todo-list'),
                 header=add, footer=Div(id=id_curr)),
     title = 'Todo list'
-    top = Grid(H1(title), Div(A('logout', href=basic_logout(request)), style='text-align: right'))
-    return Title(title), Main(top, card, cls='container')
+    return Title(title), Main(H1(title), card, cls='container')
 
 @rt("/todos/{id}")
 async def delete(id:int):
@@ -55,7 +54,7 @@ async def get(id:int):
     return fill_form(res, todos.get(id))
 
 @rt("/")
-async def put(todo: Todo): return todos.upsert(todo), clr_details()
+async def put(todo: Todo): return todos.update(todo), clr_details()
 
 @rt("/todos/{id}")
 async def get(id:int):

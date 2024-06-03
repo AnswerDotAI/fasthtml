@@ -1,10 +1,15 @@
 from fasthtml.all import *
 
-db = Database('todos.db')
+path = Path('data')
+path.mkdir(exist_ok=True)
+
+db = Database(path/'utodos.db')
 db.enable_wal()
-todos = db.t.todos
-if todos not in db.t: todos.create(id=int, title=str, done=bool, pk='id')
-Todo = todos.dataclass()
+todos,users = db.t.todos,db.t.users
+if todos not in db.t:
+    todos.create(id=int, title=str, done=bool, pk='id')
+    users.create(name=str, pwd=str, pk='name')
+Todo,User = todos.dataclass(),users.dataclass()
 
 id_curr = 'current-todo'
 def tid(id): return f'todo-{id}'
@@ -16,8 +21,14 @@ def __xt__(self:Todo):
     dt = ' (done)' if self.done else ''
     return Li(show, dt, ' | ', edit, id=tid(self.id))
 
+def lookup_user(u,p):
+    user = users.get(u)
+    if not user: user = users.insert(name=u, pwd=p)
+    return user.pwd==p
+
 css = Style(':root { --pico-font-size: 100%; }')
-app = FastHTML(hdrs=(picolink, css))
+auth = user_pwd_auth(lookup_user, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css'])
+app = FastHTML(hdrs=(picolink, css), middleware=[auth])
 rt = app.route
 
 @rt("/{fname:path}.{ext:static}")
@@ -27,13 +38,14 @@ def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New 
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
 
 @rt("/")
-async def get():
+async def get(request, auth):
     add = Form(Group(mk_input(), Button("Add")),
                hx_post="/", target_id='todo-list', hx_swap="beforeend")
     card = Card(Ul(*todos(), id='todo-list'),
                 header=add, footer=Div(id=id_curr)),
     title = 'Todo list'
-    return Title(title), Main(H1(title), card, cls='container')
+    top = Grid(H1(f"{auth}'s {title}"), Div(A('logout', href=basic_logout(request)), style='text-align: right'))
+    return Title(title), Main(top, card, cls='container')
 
 @rt("/todos/{id}")
 async def delete(id:int):
@@ -59,3 +71,4 @@ async def get(id:int):
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
+

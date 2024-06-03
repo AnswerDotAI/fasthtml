@@ -1,4 +1,4 @@
-import json,dateutil,uuid,base64,binascii,inspect
+import json,dateutil,uuid,inspect
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -95,6 +95,7 @@ async def _from_body(req, arg, p):
 
 async def _find_p(req, arg:str, p):
     anno = p.annotation
+    if arg.lower()=='auth': return req.scope['auth']
     if isinstance(anno, type):
         if issubclass(anno, Request): return req
         if issubclass(anno, HtmxHeaders): return _get_htmx(req)
@@ -220,48 +221,9 @@ def reg_re_param(m, s):
 reg_re_param("path", ".*?")
 reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml")
 
-
 class MiddlewareBase:
     async def __call__(self, scope, receive, send) -> None:
         if scope["type"] not in ["http", "websocket"]:
             await self.app(scope, receive, send)
             return
         return HTTPConnection(scope)
-
-class BasicAuthMiddleware(MiddlewareBase):
-    def __init__(self, app, cb): self.app,self.cb = app,cb
-
-    async def __call__(self, scope, receive, send) -> None:
-        conn = await super().__call__(scope, receive, send)
-        if not conn: return
-        fail = ''
-        try: auth_result = await self.authenticate(conn)
-        except AuthenticationError as exc: fail = str(exc)
-        if not fail and auth_result is None: fail = 'not authenticated'
-        if fail:
-            response = Response(fail, status_code=401, headers={'WWW-Authenticate': 'Basic realm="login"'})
-            if scope["type"] == "websocket": await send({"type": "websocket.close", "code": 1000})
-            else: await response(scope, receive, send)
-            return
-        scope["auth"], scope["user"] = auth_result
-        await self.app(scope, receive, send)
-
-    async def authenticate(self, conn):
-        if "Authorization" not in conn.headers: return
-        auth = conn.headers["Authorization"]
-        try:
-            scheme, credentials = auth.split()
-            if scheme.lower() != 'basic': return
-            decoded = base64.b64decode(credentials).decode("ascii")
-        except (ValueError, UnicodeDecodeError, binascii.Error) as exc: raise AuthenticationError('Invalid credentials')
-        user, _, pwd = decoded.partition(":")
-        if not self.cb(user,pwd): raise AuthenticationError('Invalid credentials')
-        return AuthCredentials(["authenticated"]), SimpleUser(user)
-
-def user_pwd_auth(user,pwd):
-    def cb(u,p): return user!='logout' and user==u and pwd==p
-    return Middleware(BasicAuthMiddleware, cb=cb)
-
-def basic_logout(request):
-    return f'{request.url.scheme}://logout:logout@{request.headers["host"]}/'
-
