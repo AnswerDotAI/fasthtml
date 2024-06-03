@@ -1,4 +1,4 @@
-import json, dateutil, uuid
+import json,dateutil,uuid,base64,binascii,inspect
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -111,10 +111,10 @@ async def _find_p(req, arg:str, p):
     if not res: res = req.cookies.get(arg, None)
     if not res: res = req.headers.get(snake2hyphens(arg), None)
     if not res: res = nested_idx(req.scope, 'session', arg)
-    if not res: res = p.default
     if res is empty or res is None:
         body = await req.form()
         res = body.get(arg, None)
+    if not res: res = p.default
     if not isinstance(res, str) or anno is empty: return res
     return _fix_anno(anno)(res)
 
@@ -136,8 +136,8 @@ def _wrap_resp(req, resp, cls, hdrs, **bodykw):
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
     if isinstance(resp, (list,tuple)): return _xt_resp(req, resp, hdrs, **bodykw)
-    if isinstance(resp, str): cls = HTMLResponse 
-    elif isinstance(resp, Mapping): cls = JSONResponse 
+    if isinstance(resp, str): cls = HTMLResponse
+    elif isinstance(resp, Mapping): cls = JSONResponse
     else:
         resp = str(resp)
         cls = HTMLResponse
@@ -219,4 +219,49 @@ def reg_re_param(m, s):
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
 reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml")
+
+
+class MiddlewareBase:
+    async def __call__(self, scope, receive, send) -> None:
+        if scope["type"] not in ["http", "websocket"]:
+            await self.app(scope, receive, send)
+            return
+        return HTTPConnection(scope)
+
+class BasicAuthMiddleware(MiddlewareBase):
+    def __init__(self, app, cb): self.app,self.cb = app,cb
+
+    async def __call__(self, scope, receive, send) -> None:
+        conn = await super().__call__(scope, receive, send)
+        if not conn: return
+        fail = ''
+        try: auth_result = await self.authenticate(conn)
+        except AuthenticationError as exc: fail = str(exc)
+        if not fail and auth_result is None: fail = 'not authenticated'
+        if fail:
+            response = Response(fail, status_code=401, headers={'WWW-Authenticate': 'Basic realm="login"'})
+            if scope["type"] == "websocket": await send({"type": "websocket.close", "code": 1000})
+            else: await response(scope, receive, send)
+            return
+        scope["auth"], scope["user"] = auth_result
+        await self.app(scope, receive, send)
+
+    async def authenticate(self, conn):
+        if "Authorization" not in conn.headers: return
+        auth = conn.headers["Authorization"]
+        try:
+            scheme, credentials = auth.split()
+            if scheme.lower() != 'basic': return
+            decoded = base64.b64decode(credentials).decode("ascii")
+        except (ValueError, UnicodeDecodeError, binascii.Error) as exc: raise AuthenticationError('Invalid credentials')
+        user, _, pwd = decoded.partition(":")
+        if not self.cb(user,pwd): raise AuthenticationError('Invalid credentials')
+        return AuthCredentials(["authenticated"]), SimpleUser(user)
+
+def user_pwd_auth(user,pwd):
+    def cb(u,p): return user!='logout' and user==u and pwd==p
+    return Middleware(BasicAuthMiddleware, cb=cb)
+
+def basic_logout(request):
+    return f'{request.url.scheme}://logout:logout@{request.headers["host"]}/'
 

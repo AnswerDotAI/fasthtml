@@ -19,7 +19,8 @@ def __xt__(self:Todo):
     return Li(show, dt, ' | ', edit, id=tid(self.id))
 
 css = Style(':root { --pico-font-size: 100%; }')
-app = FastHTML(hdrs=(picolink, css))
+auth = user_pwd_auth('user', 's3kret')
+app = FastHTML(hdrs=(picolink, css), middleware=[auth])
 rt = app.route
 
 @rt("/{fname:path}.{ext:static}")
@@ -29,13 +30,14 @@ def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New 
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
 
 @rt("/")
-async def get():
+async def get(request, Host:str):
     add = Form(Group(mk_input(), Button("Add")),
                hx_post="/", target_id='todo-list', hx_swap="beforeend")
     card = Card(Ul(*todos(), id='todo-list'),
                 header=add, footer=Div(id=id_curr)),
     title = 'Todo list'
-    return Title(title), Main(H1(title), card, cls='container')
+    top = Grid(H1(title), Div(A('logout', href=basic_logout(request)), style='text-align: right'))
+    return Title(title), Main(top, card, cls='container')
 
 @rt("/todos/{id}")
 async def delete(id:int):
@@ -61,3 +63,4 @@ async def get(id:int):
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
+
