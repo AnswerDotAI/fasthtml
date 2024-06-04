@@ -10,13 +10,6 @@ Todo,User = todos.dataclass(),users.dataclass()
 id_curr = 'current-todo'
 def tid(id): return f'todo-{id}'
 
-@patch
-def __xt__(self:Todo):
-    show = AX(self.title, f'/todos/{self.id}', id_curr)
-    edit = AX('edit',     f'/edit/{self.id}' , id_curr)
-    dt = ' (done)' if self.done else ''
-    return Li(show, dt, ' | ', edit, id=tid(self.id))
-
 def lookup_user(u,p):
     try: user = users[u]
     except NotFoundError: user = users.insert(name=u, pwd=p)
@@ -32,6 +25,13 @@ rt = app.route
 
 @rt("/{fname:path}.{ext:static}")
 async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
+
+@patch
+def __xt__(self:Todo):
+    show = AX(self.title, f'/todos/{self.id}', id_curr)
+    edit = AX('edit',     f'/edit/{self.id}' , id_curr)
+    dt = ' (done)' if self.done else ''
+    return Li(show, dt, ' | ', edit, id=tid(self.id))
 
 def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
