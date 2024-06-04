@@ -16,7 +16,7 @@ def fast_app(db=None, render=None, hdrs=None, tbls=None, **kwargs):
     async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
     if not db: return app
 
-    db = database(db)
+    db = Database(db)
     if not tbls: tbls={}
     if kwargs:
         kwargs['render'] = render
