@@ -48,14 +48,14 @@ async def get(id:int):
     res = Form(Group(Input(id="title"), Button("Save")),
         Hidden(id="id"), Checkbox(id="done", label='Done'),
         hx_put="/", target_id=tid(id), id="edit")
-    return fill_form(res, todos.get(id))
+    return fill_form(res, todos[id])
 
 @rt("/")
 async def put(todo: Todo): return todos.update(todo), clr_details()
 
 @rt("/todos/{id}")
 async def get(id:int):
-    todo = todos.get(id)
+    todo = todos[id]
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)

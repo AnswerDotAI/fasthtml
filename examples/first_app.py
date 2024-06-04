@@ -40,12 +40,12 @@ def get(id:int):
     btn_back = Button('Back', hx_get='/')
     res = Form(grp, Hidden(id="id"), Checkbox(id="done", label='Done'), btn_back,
                hx_put="/", id="edit")
-    frm = fill_form(res, todos.get(id))
+    frm = fill_form(res, todos[id])
     return Page('Edit Todo', frm)
 
 @rt("/todos/{id}")
 def get(id:int):
     btn_del =  Button('Delete', hx_delete='/', value=id, name="id")
     btn_back = Button('Back', hx_get='/')
-    return Page('Todo details', Div(todos.get(id).title), btn_del, btn_back)
+    return Page('Todo details', Div(todos[id].title), btn_del, btn_back)
 
