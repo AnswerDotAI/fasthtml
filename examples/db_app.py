@@ -1,9 +1,6 @@
 from fasthtml.all import *
 
-path = Path('data')
-path.mkdir(exist_ok=True)
-db = Database(path/'todos.db')
-db.enable_wal()
+db = database('data/todos.db')
 todos = db.t.todos
 if todos not in db.t: todos.create(id=int, title=str, done=bool, pk='id')
 Todo = todos.dataclass()

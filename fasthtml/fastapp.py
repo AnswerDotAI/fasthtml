@@ -16,12 +16,11 @@ def fast_app(db=None, render=None, hdrs=None, tbls=None, **kwargs):
     async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
     if not db: return app
 
+    db = database(db)
     if not tbls: tbls={}
     if kwargs:
         kwargs['render'] = render
         tbls['items'] = kwargs
-    db = Database(db)
-    db.enable_wal()
     dbtbls = [get_tbl(db.t, k, v) for k,v in tbls.items()]
     if len(dbtbls)==1: dbtbls=dbtbls[0]
     return app,*dbtbls

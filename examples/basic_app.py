@@ -6,7 +6,7 @@ def render(todo):
     dt = ' (done)' if todo.done else ''
     return Li(show, dt, ' | ', edit, id=f'todo-{todo.id}')
 
-app,todos,Todo = fast_app('todos.db', render, id=int, title=str, done=bool, pk='id')
+app,todos,Todo = fast_app('data/todos.db', render, id=int, title=str, done=bool, pk='id')
 rt = app.route
 
 @rt("/")
