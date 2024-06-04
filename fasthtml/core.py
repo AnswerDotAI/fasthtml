@@ -144,35 +144,42 @@ def _wrap_resp(req, resp, cls, hdrs, **bodykw):
         cls = HTMLResponse
     return cls(resp)
 
-def _wrap_ep(f, hdrs, **bodykw):
+def _wrap_ep(f, hdrs, before, **bodykw):
     if not (isfunction(f) or ismethod(f)): return f
     sig = signature(f)
     params = sig.parameters
     cls = sig.return_annotation
 
     async def _f(req):
-        wreq = await _wrap_req(req, params)
-        resp = f(*wreq)
-        if is_async_callable(f): resp = await resp
+        resp = None
+        for b in before:
+            if not resp:
+                wreq = await _wrap_req(req, signature(b).parameters)
+                resp = b(*wreq)
+                if is_async_callable(b): resp = await resp
+        if not resp:
+            wreq = await _wrap_req(req, params)
+            resp = f(*wreq)
+            if is_async_callable(f): resp = await resp
         return _wrap_resp(req, resp, cls, hdrs, **bodykw)
     return _f
 
 class RouteX(Route):
     def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
-                hdrs=None, **bodykw):
-        super().__init__(path, _wrap_ep(endpoint, hdrs, **bodykw), methods=methods, name=name,
+                hdrs=None, before=None, **bodykw):
+        super().__init__(path, _wrap_ep(endpoint, hdrs, before, **bodykw), methods=methods, name=name,
                          include_in_schema=include_in_schema, middleware=middleware)
 
 class RouterX(Router):
     def __init__(self, routes=None, redirect_slashes=True, default=None, on_startup=None, on_shutdown=None,
-                 lifespan=None, *, middleware=None, hdrs=None, **bodykw):
+                 lifespan=None, *, middleware=None, hdrs=None, before=None, **bodykw):
         super().__init__(routes, redirect_slashes, default, on_startup, on_shutdown,
                  lifespan=lifespan, middleware=middleware)
-        self.hdrs,self.bodykw = hdrs or (),bodykw
+        self.hdrs,self.bodykw,self.before = hdrs or (),bodykw,before or ()
 
     def add_route( self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
         route = RouteX(path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema,
-                      hdrs=self.hdrs, **self.bodykw)
+                      hdrs=self.hdrs, before=self.before, **self.bodykw)
         self.routes = [o for o in self.routes if o.methods!=methods or o.path!=path]
         self.routes.append(route)
 
@@ -188,12 +195,14 @@ def get_key(key=None, fname='.sesskey'):
     fname.write_text(key)
     return key
 
+def _list(o): return [] if not o else o if isinstance(o, (tuple,list)) else [o]
+
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
-                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None,
+                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, before=None,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', **bodykw):
-        if not middleware: middleware = []
+        middleware,before = _list(middleware),_list(before)
         secret_key = get_key(secret_key, key_fname)
         sess = Middleware(SessionMiddleware, secret_key=secret_key, session_cookie=session_cookie,
                           max_age=max_age, path=sess_path, same_site=same_site,
@@ -201,7 +210,8 @@ class FastHTML(Starlette):
         middleware.append(sess)
         super().__init__(debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan=lifespan)
         hdrs = list([] if hdrs is None else hdrs) + [htmxscr]
-        self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, hdrs=hdrs, **bodykw)
+        self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, hdrs=hdrs,
+                              before=before, **bodykw)
 
     def route(self, path:str, methods=None, name=None, include_in_schema=True):
         def f(func):

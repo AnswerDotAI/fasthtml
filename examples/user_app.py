@@ -25,7 +25,10 @@ def lookup_user(u,p):
 
 css = Style(':root { --pico-font-size: 100%; }')
 authmw = user_pwd_auth(lookup_user, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css'])
-app = FastHTML(hdrs=(picolink, css), middleware=[authmw])
+
+def before(auth): todos.xtra(name=auth)
+
+app = FastHTML(hdrs=(picolink, css), middleware=authmw, before=before)
 rt = app.route
 
 @rt("/{fname:path}.{ext:static}")
@@ -35,8 +38,7 @@ def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New 
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
 
 @rt("/")
-async def get(request, auth):
-    todos.xtra(name=auth)
+async def get(request):
     add = Form(Group(mk_input(), Button("Add")),
                hx_post="/", target_id='todo-list', hx_swap="beforeend")
     card = Card(Ul(*todos(), id='todo-list'),
@@ -46,32 +48,27 @@ async def get(request, auth):
     return Title(title), Main(top, card, cls='container')
 
 @rt("/todos/{id}")
-async def delete(id:int, auth):
-    todos.xtra(name=auth)
+async def delete(id:int):
     todos.delete(id)
     return clr_details()
 
 @rt("/")
-async def post(todo:Todo, auth):
-    todos.xtra(name=auth)
+async def post(todo:Todo):
     return todos.insert(todo), mk_input(hx_swap_oob='true')
 
 @rt("/edit/{id}")
-async def get(id:int, auth):
-    todos.xtra(name=auth)
+async def get(id:int):
     res = Form(Group(Input(id="title"), Button("Save")),
         Hidden(id="id"), Checkbox(id="done", label='Done'),
         hx_put="/", target_id=tid(id), id="edit")
     return fill_form(res, todos.get(id))
 
 @rt("/")
-async def put(todo: Todo, auth):
-    todos.xtra(name=auth)
+async def put(todo: Todo):
     return todos.upsert(todo), clr_details()
 
 @rt("/todos/{id}")
-async def get(id:int, auth):
-    todos.xtra(name=auth)
+async def get(id:int):
     todo = todos.get(id)
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
