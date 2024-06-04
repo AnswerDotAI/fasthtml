@@ -4,8 +4,7 @@ db = database('data/utodos.db')
 todos,users = db.t.todos,db.t.users
 if todos not in db.t:
     users.create(name=str, pwd=str, pk='name')
-    todos.create(id=int, title=str, done=bool, name=str, pk='id',
-                 foreign_keys=[('name', 'users', 'name')])
+    todos.create(id=int, title=str, done=bool, name=str, pk='id')
 Todo,User = todos.dataclass(),users.dataclass()
 
 id_curr = 'current-todo'
@@ -38,7 +37,7 @@ def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New 
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
 
 @rt("/")
-async def get(request):
+async def get(request, auth):
     add = Form(Group(mk_input(), Button("Add")),
                hx_post="/", target_id='todo-list', hx_swap="beforeend")
     card = Card(Ul(*todos(), id='todo-list'),
