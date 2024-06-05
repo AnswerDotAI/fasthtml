@@ -13,7 +13,6 @@ from subprocess import run
 @call_parse
 def railway_link():
     t = run("railway status --json".split(), capture_output=True)
-    print(t.stdout.decode())
     j = json.loads(t.stdout)
     prj = j['id']
     idxpath = 'edges', 0, 'node', 'id'
@@ -21,5 +20,4 @@ def railway_link():
     svc = nested_idx(j, 'services', *idxpath)
 
     cmd = f"railway link -e {env} -p {prj} -s {svc}"
-    print(cmd)
     res = run(cmd.split(), capture_output=True)

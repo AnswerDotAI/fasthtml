@@ -113,3 +113,9 @@ def find_elems(s:XT|str, tag=None, attr=None, **props):
     o = _FindElems(tag, attr, **props)
     o.feed(to_xml(s))
     return o.res
+
+# %% ../nbs/01_components.ipynb 23
+def __getattr__(tag):
+    if tag.startswith('_') or tag[0].islower(): raise AttributeError
+    def _f(*c, target_id=None, **kwargs): return xt_hx(tag, *c, target_id=target_id, **kwargs)
+    return _f

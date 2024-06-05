@@ -1,3 +1,4 @@
+include *.pyi
 include settings.ini
 include LICENSE
 include CONTRIBUTING.md

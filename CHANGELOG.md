@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.0.9
+
+### New Features
+
+- add railway cli link command ([#4](https://github.com/AnswerDotAI/fasthtml/issues/4))
+
+
+
 
 ## 0.0.5
 
