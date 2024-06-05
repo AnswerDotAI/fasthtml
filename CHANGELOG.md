@@ -6,9 +6,8 @@
 
 ### New Features
 
+- Module `__getattr__` for components ([#5](https://github.com/AnswerDotAI/fasthtml/issues/5))
 - add railway cli link command ([#4](https://github.com/AnswerDotAI/fasthtml/issues/4))
-
-
 
 
 ## 0.0.5
