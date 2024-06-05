@@ -48,4 +48,3 @@ def get(id:int):
     btn_del =  Button('Delete', hx_delete='/', value=id, name="id")
     btn_back = Button('Back', hx_get='/')
     return Page('Todo details', Div(todos[id].title), btn_del, btn_back)
-

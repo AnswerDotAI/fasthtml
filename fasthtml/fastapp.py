@@ -30,4 +30,3 @@ target = dict(hx_target='main', hx_swap='outerHTML')
 
 def Container(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
 def Page(title, *con): return Title(title), Container(H1(title), *con)
-

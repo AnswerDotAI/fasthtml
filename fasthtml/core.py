@@ -95,7 +95,7 @@ async def _from_body(req, arg, p):
 
 async def _find_p(req, arg:str, p):
     anno = p.annotation
-    if arg.lower()=='auth': return req.scope['auth']
+    if arg.lower()=='auth': return req.scope.get('auth', None)
     if isinstance(anno, type):
         if issubclass(anno, Request): return req
         if issubclass(anno, HtmxHeaders): return _get_htmx(req)
