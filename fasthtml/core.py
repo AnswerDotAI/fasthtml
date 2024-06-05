@@ -130,7 +130,7 @@ def _xt_resp(req, resp, hdrs, **bodykw):
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
     titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '')=='title')
     if resp and 'hx-request' not in req.headers and isinstance(resp,tuple) and titles:
-        resp = Html(Header(titles[0], *hdrs), Body(bdy, **bodykw))
+        resp = Html(Head(titles[0], *hdrs), Body(bdy, **bodykw))
     return HTMLResponse(to_xml(resp), headers=http_hdrs)
 
 def _wrap_resp(req, resp, cls, hdrs, **bodykw):
