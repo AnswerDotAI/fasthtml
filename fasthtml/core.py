@@ -95,7 +95,6 @@ async def _from_body(req, arg, p):
 
 async def _find_p(req, arg:str, p):
     anno = p.annotation
-    if arg.lower()=='auth': return req.scope.get('auth', None)
     if isinstance(anno, type):
         if issubclass(anno, Request): return req
         if issubclass(anno, HtmxHeaders): return _get_htmx(req)
@@ -104,6 +103,7 @@ async def _find_p(req, arg:str, p):
     if anno is empty:
         if 'request'.startswith(arg.lower()): return req
         if 'session'.startswith(arg.lower()): return req.scope.get('session', {})
+        if arg.lower()=='auth': return req.scope.get('auth', None)
         if arg.lower()=='htmx': return _get_htmx(req)
         if arg.lower()=='app': return req.scope['app']
         return None
