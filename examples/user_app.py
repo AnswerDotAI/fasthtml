@@ -1,10 +1,11 @@
 from fasthtml.all import *
+from fasthtml.js import MarkdownJS
 
 db = database('data/utodos.db')
 todos,users = db.t.todos,db.t.users
 if todos not in db.t:
     users.create(name=str, pwd=str, pk='name')
-    todos.create(id=int, title=str, done=bool, name=str, pk='id')
+    todos.create(id=int, title=str, done=bool, name=str, details=str, pk='id')
 Todo,User = todos.dataclass(),users.dataclass()
 
 id_curr = 'current-todo'
@@ -15,12 +16,14 @@ def lookup_user(u,p):
     except NotFoundError: user = users.insert(name=u, pwd=p)
     return user.pwd==p
 
-css = Style(':root { --pico-font-size: 100%; }')
 authmw = user_pwd_auth(lookup_user, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css'])
 
 def before(auth): todos.xtra(name=auth)
 
-app = FastHTML(hdrs=(picolink, css), middleware=authmw, before=before)
+app = FastHTML(middleware=[authmw], before=before,
+               hdrs=(picolink,
+                     Style(':root { --pico-font-size: 100%; }'),
+                     MarkdownJS('.markdown')))
 rt = app.route
 
 @rt("/{fname:path}.{ext:static}")
@@ -30,8 +33,8 @@ async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 def __xt__(self:Todo):
     show = AX(self.title, f'/todos/{self.id}', id_curr)
     edit = AX('edit',     f'/edit/{self.id}' , id_curr)
-    dt = ' (done)' if self.done else ''
-    return Li(show, dt, ' | ', edit, id=tid(self.id))
+    dt = '✅ ' if self.done else ''
+    return Li(dt, show, ' | ', edit, id=tid(self.id))
 
 def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
@@ -59,6 +62,7 @@ async def post(todo:Todo):
 async def get(id:int):
     res = Form(Group(Input(id="title"), Button("Save")),
         Hidden(id="id"), Checkbox(id="done", label='Done'),
+        Textarea(id="details", name="details", rows=10),
         hx_put="/", target_id=tid(id), id="edit")
     return fill_form(res, todos[id])
 
@@ -71,4 +75,4 @@ async def get(id:int):
     todo = todos[id]
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
-    return Div(Div(todo.title), btn)
+    return Div(Div(todo.title), Div(todo.details, cls="markdown"), btn)
