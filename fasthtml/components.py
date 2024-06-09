@@ -88,15 +88,17 @@ def fill_dataclass(src, dest):
     return dest
 
 # %% ../nbs/01_components.ipynb 17
-def find_inputs(e):
+def find_inputs(e, tags='input', **kw):
+    # Recursively find all elements in `e` with `tags` and attrs matching `kw`
+    if not isinstance(e, (list,tuple)): return []
     inputs = []
+    if isinstance(tags,str): tags = [tags]
+    elif tags is None: tags = []
+    cs = e
     if isinstance(e, list):
-        if e[0] == 'input': inputs.append(e)
-        for o in e[1]:
-            if isinstance(o, (list, tuple)): inputs += find_inputs(o)
-    elif isinstance(e, tuple):
-        for o in e:
-            if isinstance(o, (list, tuple)): inputs += find_inputs(sube)
+        tag,cs,attr = e
+        if e[0] in tags and kw.items()<=e[2].items(): inputs.append(e)
+    for o in cs: inputs += find_inputs(o, tags, **kw)
     return inputs
 
 # %% ../nbs/01_components.ipynb 21

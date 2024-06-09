@@ -4,7 +4,7 @@ from fastcore.utils import *
 from fastcore.xml import *
 
 from types import UnionType, SimpleNamespace as ns
-from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict
+from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List
 from datetime import datetime
 from dataclasses import dataclass,fields,is_dataclass,MISSING,asdict
 from collections import namedtuple
@@ -63,7 +63,7 @@ def str2int(s)->int:
 def _fix_anno(t):
     "Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"
     origin = get_origin(t)
-    if origin is Union or origin is UnionType:
+    if origin is Union or origin is UnionType or origin in (list,List):
         t = first(o for o in get_args(t) if o!=type(None))
     d = {bool: str2bool, int: str2int}
     return d.get(t, t)
@@ -73,7 +73,9 @@ def _form_arg(k, v, d):
     if v is None: return
     anno = d.get(k, None)
     if not anno: return v
-    return _fix_anno(anno)(v)
+    anno = _fix_anno(anno)
+    if isinstance(v, list): return [anno(o) for o in v]
+    return anno(v)
 
 def _is_body(anno):
     return issubclass(anno, (dict,ns)) or is_dataclass(anno) or is_namedtuple(anno) or \
@@ -86,11 +88,20 @@ def _anno2flds(anno):
     if annoanno: return annoanno
     return {}
 
+def _formitem(form, k):
+    o = form.getlist(k)
+    return o[0] if len(o) == 1 else o
+
+def form2dict(form: FormData) -> dict:
+    "Convert starlette form data to a dict"
+    return {k: _formitem(form, k) for k in form}
+
 async def _from_body(req, arg, p):
-    body = await req.form()
+    form = await req.form()
     anno = p.annotation
     d = _anno2flds(anno)
-    cargs = {k:_form_arg(k, v, d) for k,v in body.items()}
+    items = form2dict(form).items()
+    cargs = {k:_form_arg(k, v, d) for k,v in items}
     return anno(**cargs)
 
 async def _find_p(req, arg:str, p):
@@ -108,16 +119,21 @@ async def _find_p(req, arg:str, p):
         if arg.lower()=='app': return req.scope['app']
         return None
     res = req.path_params.get(arg, None)
-    if not res: res = req.query_params.get(arg, None)
-    if not res: res = req.cookies.get(arg, None)
-    if not res: res = req.headers.get(snake2hyphens(arg), None)
-    if not res: res = nested_idx(req.scope, 'session', arg) or None
+    if res is empty or res is None: res = req.query_params.get(arg, None)
+    if res is empty or res is None: res = req.cookies.get(arg, None)
+    if res is empty or res is None: res = req.headers.get(snake2hyphens(arg), None)
+    if res is empty or res is None: res = nested_idx(req.scope, 'session', arg) or None
     if res is empty or res is None:
-        body = await req.form()
-        res = body.get(arg, None)
-    if not res: res = p.default
-    if not isinstance(res, str) or anno is empty: return res
-    return _fix_anno(anno)(res)
+        #import pdb; pdb.set_trace()
+        frm = await req.form()
+        res = frm.getlist(arg)
+        if res:
+            if len(res)==1: res=res[0]
+        else: res = None
+    if res is empty or res is None: res = p.default
+    if not isinstance(res, (list,str)) or anno is empty: return res
+    anno = _fix_anno(anno)
+    return [anno(o) for o in res] if isinstance(res,list) else anno(res)
 
 async def _wrap_req(req, params):
     return [await _find_p(req, arg, p) for arg,p in params.items()]
@@ -144,6 +160,9 @@ def _wrap_resp(req, resp, cls, hdrs, **bodykw):
         cls = HTMLResponse
     return cls(resp)
 
+class Beforeware:
+    def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
+
 def _wrap_ep(f, hdrs, before, **bodykw):
     if not (isfunction(f) or ismethod(f)): return f
     sig = signature(f)
@@ -154,9 +173,12 @@ def _wrap_ep(f, hdrs, before, **bodykw):
         resp = None
         for b in before:
             if not resp:
-                wreq = await _wrap_req(req, signature(b).parameters)
-                resp = b(*wreq)
-                if is_async_callable(b): resp = await resp
+                if isinstance(b, Beforeware): bf,skip = b.f,b.skip
+                else: bf,skip = b,[]
+                if not any(re.match(r, req.url.path) for r in skip):
+                    wreq = await _wrap_req(req, signature(bf).parameters)
+                    resp = bf(*wreq)
+                    if is_async_callable(bf): resp = await resp
         if not resp:
             wreq = await _wrap_req(req, params)
             resp = f(*wreq)
@@ -229,7 +251,7 @@ def reg_re_param(m, s):
 
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
-reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml")
+reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml|html")
 
 class MiddlewareBase:
     async def __call__(self, scope, receive, send) -> None:

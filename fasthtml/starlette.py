@@ -6,7 +6,7 @@ from starlette.authentication import AuthCredentials, AuthenticationBackend, Aut
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.responses import Response, HTMLResponse, FileResponse, JSONResponse
-from starlette.requests import Request, HTTPConnection
+from starlette.requests import Request, HTTPConnection, FormData
 from starlette.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 from starlette._utils import is_async_callable

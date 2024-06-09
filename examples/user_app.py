@@ -1,5 +1,4 @@
 from fasthtml.all import *
-from fasthtml.js import MarkdownJS
 
 db = database('data/utodos.db')
 todos,users = db.t.todos,db.t.users
@@ -22,8 +21,7 @@ def before(auth): todos.xtra(name=auth)
 
 app = FastHTML(middleware=[authmw], before=before,
                hdrs=(picolink,
-                     Style(':root { --pico-font-size: 100%; }'),
-                     MarkdownJS('.markdown')))
+                     Style(':root { --pico-font-size: 100%; }')))
 rt = app.route
 
 @rt("/{fname:path}.{ext:static}")
@@ -34,7 +32,7 @@ def __xt__(self:Todo):
     show = AX(self.title, f'/todos/{self.id}', id_curr)
     edit = AX('edit',     f'/edit/{self.id}' , id_curr)
     dt = '✅ ' if self.done else ''
-    return Li(dt, show, ' | ', edit, id=tid(self.id))
+    return Li(dt, show, ' | ', edit, Hidden(id="id", value=self.id), id=tid(self.id))
 
 def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
@@ -62,7 +60,6 @@ async def post(todo:Todo):
 async def get(id:int):
     res = Form(Group(Input(id="title"), Button("Save")),
         Hidden(id="id"), Checkbox(id="done", label='Done'),
-        Textarea(id="details", name="details", rows=10),
         hx_put="/", target_id=tid(id), id="edit")
     return fill_form(res, todos[id])
 
@@ -75,4 +72,4 @@ async def get(id:int):
     todo = todos[id]
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
-    return Div(Div(todo.title), Div(todo.details, cls="markdown"), btn)
+    return Div(Div(todo.title), btn)
