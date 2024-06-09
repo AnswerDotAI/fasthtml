@@ -2,6 +2,15 @@
 
 <!-- do not remove -->
 
+## 0.0.10
+
+### New Features
+
+- sortable js support ([#7](https://github.com/AnswerDotAI/fasthtml/issues/7))
+- Add `MarkdownJS` and support textareas ([#6](https://github.com/AnswerDotAI/fasthtml/issues/6))
+- Handle multi-value form data correctly
+
+
 ## 0.0.9
 
 ### New Features
