@@ -202,7 +202,14 @@ class RouterX(Router):
     def add_route( self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
         route = RouteX(path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema,
                       hdrs=self.hdrs, before=self.before, **self.bodykw)
-        self.routes = [o for o in self.routes if o.methods!=methods or o.path!=path]
+        # TODO:
+        #  self.routes = [o for o in self.routes if or o.methods != methods or o.path != path]
+        #  throws the following error for a WebSocketRoute:
+        #    `AttributeError: 'WebSocketRoute' object has no attribute 'methods'`
+        #  not 100% sure what the `if or o.methods != methods or o.path != path` check does,
+        #  so here's a temporary placeholder fix before we figure out something better.
+        self.routes = [o for o in self.routes if
+                       isinstance(self.routes[0], WebSocketRoute) or o.methods != methods or o.path != path]
         self.routes.append(route)
 
 htmxscr = Script(
