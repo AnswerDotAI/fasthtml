@@ -4,7 +4,7 @@ db = database('data/utodos.db')
 todos,users = db.t.todos,db.t.users
 if todos not in db.t:
     users.create(name=str, pwd=str, pk='name')
-    todos.create(id=int, title=str, done=bool, name=str, pk='id')
+    todos.create(id=int, title=str, done=bool, name=str, details=str, pk='id')
 Todo,User = todos.dataclass(),users.dataclass()
 
 id_curr = 'current-todo'
@@ -15,12 +15,13 @@ def lookup_user(u,p):
     except NotFoundError: user = users.insert(name=u, pwd=p)
     return user.pwd==p
 
-css = Style(':root { --pico-font-size: 100%; }')
 authmw = user_pwd_auth(lookup_user, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css'])
 
 def before(auth): todos.xtra(name=auth)
 
-app = FastHTML(hdrs=(picolink, css), middleware=authmw, before=before)
+app = FastHTML(middleware=[authmw], before=before,
+               hdrs=(picolink,
+                     Style(':root { --pico-font-size: 100%; }')))
 rt = app.route
 
 @rt("/{fname:path}.{ext:static}")
@@ -30,8 +31,8 @@ async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 def __xt__(self:Todo):
     show = AX(self.title, f'/todos/{self.id}', id_curr)
     edit = AX('edit',     f'/edit/{self.id}' , id_curr)
-    dt = ' (done)' if self.done else ''
-    return Li(show, dt, ' | ', edit, id=tid(self.id))
+    dt = '✅ ' if self.done else ''
+    return Li(dt, show, ' | ', edit, Hidden(id="id", value=self.id), id=tid(self.id))
 
 def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
