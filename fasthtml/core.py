@@ -202,7 +202,7 @@ class RouterX(Router):
     def add_route( self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
         route = RouteX(path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema,
                       hdrs=self.hdrs, before=self.before, **self.bodykw)
-        self.routes = [o for o in self.routes if getattr(o,'methods')!=methods or o.path!=path]
+        self.routes = [o for o in self.routes if getattr(o,'methods',None)!=methods or o.path!=path]
         self.routes.append(route)
 
 htmxscr = Script(
