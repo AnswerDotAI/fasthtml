@@ -59,3 +59,4 @@ class FastHTMLWithLiveReload(FastHTML):
         kwargs["hdrs"] = [*(kwargs.get("hdrs") or []), self.LIVE_RELOAD_HEADER]
         kwargs["routes"] = [*(kwargs.get("routes") or []), self.LIVE_RELOAD_ROUTE]
         super().__init__(*args, **kwargs)
+
