@@ -22,6 +22,7 @@ LIVE_RELOAD_SCRIPT = """
     })();
 """
 
+
 async def live_reload_websocket(websocket):
     await websocket.accept()
 
@@ -54,6 +55,7 @@ class FastHTMLWithLiveReload(FastHTML):
     LIVE_RELOAD_ROUTE = WebSocketRoute("/live-reload", endpoint=live_reload_websocket)
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("hdrs", []).append(self.LIVE_RELOAD_HEADER)
-        kwargs.setdefault("routes", []).append(self.LIVE_RELOAD_ROUTE)
+        # "hdrs" and "routes" can be missing, None, a list or a tuple.
+        kwargs["hdrs"] = [*(kwargs.get("hdrs") or []), self.LIVE_RELOAD_HEADER]
+        kwargs["routes"] = [*(kwargs.get("routes") or []), self.LIVE_RELOAD_ROUTE]
         super().__init__(*args, **kwargs)
