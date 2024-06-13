@@ -1,12 +1,13 @@
 from fastcore.utils import *
 from fasthtml.components import Script
 
-def MarkdownJS(sel):
+def MarkdownJS(sel='.marked'):
     src = """
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 htmx.onLoad(elt => htmx.findAll(elt, "%s").forEach(e => e.innerHTML = marked.parse(e.textContent)));
 """ % sel
     return Script(NotStr(src), type='module')
+
 
 def SortableJS(sel='.sortable', ghost_class='blue-background-class'):
     src = """
