@@ -2,14 +2,14 @@
 
 <!-- do not remove -->
 
-## 0.0.12
+## 0.0.13
 
 ### New Features
 
 - Add `html2xt` ([#11](https://github.com/AnswerDotAI/fasthtml/issues/11))
 
 
-## 0.0.11
+## 0.0.12
 
 ### New Features
 
