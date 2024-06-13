@@ -1,3 +1,5 @@
+import uvicorn
+
 from .starlette import *
 from fastcore.utils import *
 from fastcore.xml import *
