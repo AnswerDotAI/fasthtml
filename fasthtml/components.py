@@ -113,9 +113,10 @@ def html2xt(html):
     rev_map = {'class': 'cls', 'for': 'fr'}
     
     def _parse(elm, lvl=0):
-        if not elm: return ''
-        if isinstance(elm, str): return repr(elm.strip())
+        if isinstance(elm, str): return repr(elm.strip()) if elm.strip() else ''
+        if isinstance(elm, list): return '\n'.join(_parse(o, lvl) for o in elm)
         tag_name = elm.name.capitalize()
+        if tag_name=='[document]': return _parse(list(elm.children), lvl)
         cts = elm.contents
         cs = [repr(c.strip()) if isinstance(c, str) else _parse(c, lvl+1)
               for c in cts if str(c).strip()]
@@ -130,5 +131,4 @@ def html2xt(html):
         if onlychild: return f'{tag_name}({inner})'
         return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*2})'
 
-    soup = BeautifulSoup(html.strip(), 'html.parser')
-    return _parse(first(soup.children), 1)
+    return _parse(BeautifulSoup(html.strip(), 'html.parser'), 1)
