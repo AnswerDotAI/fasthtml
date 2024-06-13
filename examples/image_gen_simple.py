@@ -1,4 +1,4 @@
-from sqlite_utils import Database
+from sqlite_minutils import Database
 from fastlite import *
 from fastlite.kw import *
 from fastcore.parallel import threaded

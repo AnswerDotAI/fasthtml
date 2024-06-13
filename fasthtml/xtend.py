@@ -5,7 +5,6 @@ __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls',
            'Search', 'Grid', 'DialogX', 'Hidden']
 
 # %% ../nbs/02_xtend.ipynb 2
-from html.parser import HTMLParser
 from dataclasses import dataclass, asdict
 
 from fastcore.utils import *

@@ -11,7 +11,6 @@ __all__ = ['named', 'html_attrs', 'hx_attrs', 'show', 'xt_html', 'xt_hx', 'fill_
            'Script', 'Noscript', 'Template', 'Slot']
 
 # %% ../nbs/01_components.ipynb 2
-from html.parser import HTMLParser
 from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
 
 from fastcore.utils import *
