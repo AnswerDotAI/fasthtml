@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.0.12
+
+### New Features
+
+- Live Reloading ([#9](https://github.com/AnswerDotAI/fasthtml/pull/9)), thanks to [@comhar](https://github.com/comhar)
+- Add `adv_app` example ([#8](https://github.com/AnswerDotAI/fasthtml/issues/8))
+
+### Bugs Squashed
+
+- use `sqlite_minutils` in all.py ([#10](https://github.com/AnswerDotAI/fasthtml/issues/10))
+
+
 ## 0.0.10
 
 ### New Features
