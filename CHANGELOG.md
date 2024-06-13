@@ -6,6 +6,13 @@
 
 ### New Features
 
+- Add `html2xt` ([#11](https://github.com/AnswerDotAI/fasthtml/issues/11))
+
+
+## 0.0.11
+
+### New Features
+
 - Live Reloading ([#9](https://github.com/AnswerDotAI/fasthtml/pull/9)), thanks to [@comhar](https://github.com/comhar)
 - Add `adv_app` example ([#8](https://github.com/AnswerDotAI/fasthtml/issues/8))
 
