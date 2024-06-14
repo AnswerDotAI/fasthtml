@@ -2,6 +2,7 @@ import json,dateutil,uuid,inspect
 
 from fastcore.utils import *
 from fastcore.xml import *
+from fasthtml.xtend import *
 
 from types import UnionType, SimpleNamespace as ns
 from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List
@@ -13,6 +14,7 @@ from functools import wraps, partialmethod
 
 from .starlette import *
 
+__all__ = "is_typeddict is_namedtuple date snake2hyphens htmx_hdrs HtmxHeaders str2int HttpHeader form2dict RouteX RouterX FastHTML htmx_hdrs reg_re_param MiddlewareBase get_key".split()
 
 empty = Parameter.empty
 
@@ -145,7 +147,8 @@ def _xt_resp(req, resp, hdrs, **bodykw):
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
     titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '')=='title')
-    if resp and 'hx-request' not in req.headers and isinstance(resp,tuple) and titles:
+    if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
+        if not titles: titles = [Title('FastHTML page')]
         resp = Html(Head(titles[0], *hdrs), Body(bdy, **bodykw))
     return HTMLResponse(to_xml(resp), headers=http_hdrs)
 

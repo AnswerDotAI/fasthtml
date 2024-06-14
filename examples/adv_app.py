@@ -65,7 +65,7 @@ def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New 
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
 
 @rt("/reorder")
-def post(id:list[int], auth):
+def post(id:list[int]):
     for i,id_ in enumerate(id): todos.update({'priority':i}, id_)
 
 @rt("/")
