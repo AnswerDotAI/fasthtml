@@ -14,7 +14,7 @@ from functools import wraps, partialmethod
 
 from .starlette import *
 
-__all__ = "is_typeddict is_namedtuple date snake2hyphens htmx_hdrs HtmxHeaders str2int HttpHeader form2dict RouteX RouterX FastHTML htmx_hdrs reg_re_param MiddlewareBase get_key".split()
+__all__ = "is_typeddict is_namedtuple date snake2hyphens htmx_hdrs HtmxHeaders str2int HttpHeader form2dict RouteX RouterX FastHTML htmx_hdrs reg_re_param MiddlewareBase Beforeware get_key".split()
 
 empty = Parameter.empty
 

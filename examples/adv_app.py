@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from fasthtml.all import *
 from fasthtml.js import MarkdownJS, SortableJS
 from starlette.responses import RedirectResponse
