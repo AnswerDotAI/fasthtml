@@ -2,6 +2,21 @@
 
 <!-- do not remove -->
 
+## 0.0.14
+
+### New Features
+
+- Add surreal js and scope scripts to default headers, and add `default_hdrs` bool to allow removing default headers ([#16](https://github.com/AnswerDotAI/fasthtml/issues/16))
+- Add xtend.py `Script` and `Style` that do not need `NotStr` ([#15](https://github.com/AnswerDotAI/fasthtml/issues/15))
+- Add `jsd` ([#14](https://github.com/AnswerDotAI/fasthtml/issues/14))
+- Handle lists of `hdrs` ([#14](https://github.com/AnswerDotAI/fasthtml/issues/14))
+- Autogen HTML wrapper for non-htmx partials ([#13](https://github.com/AnswerDotAI/fasthtml/issues/13))
+
+### Bugs Squashed
+
+- `html2txt` only parses first partial ([#12](https://github.com/AnswerDotAI/fasthtml/issues/12))
+
+
 ## 0.0.13
 
 ### New Features
