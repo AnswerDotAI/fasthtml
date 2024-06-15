@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from fasthtml.all import *
 from fasthtml.js import MarkdownJS, SortableJS
 from starlette.responses import RedirectResponse
+from hmac import compare_digest
 
 db = database('data/utodos.db')
 todos,users = db.t.todos,db.t.users
@@ -12,10 +13,11 @@ Todo,User = todos.dataclass(),users.dataclass()
 
 id_curr = 'current-todo'
 def tid(id): return f'todo-{id}'
+login_redir = RedirectResponse('/login', status_code=303)
 
 def before(req, sess):
     auth = req.scope['auth'] = sess.get('auth', None)
-    if not auth: return RedirectResponse('/login')
+    if not auth: return login_redir
     todos.xtra(name=auth)
 
 app = FastHTML(before=Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login']),
@@ -39,17 +41,19 @@ class Login: name:str; pwd:str
 
 @rt("/login")
 def post(login:Login, sess):
-    if not login.name or not login.pwd: return RedirectResponse('/login', status_code=303)
+    if not login.name or not login.pwd: return login_redir
     try: u = users[login.name]
     except NotFoundError: u = users.insert(login)
-    if u.pwd != login.pwd: return RedirectResponse('/login', status_code=303)
+    # This compares the passwords using a constant time string comparison
+    # https://sqreen.github.io/DevelopersSecurityBestPractices/timing-attack/python
+    if not compare_digest(u.pwd.encode("utf-8"), login.pwd.encode("utf-8")): return login_redir
     sess['auth'] = u.name
     return RedirectResponse('/', status_code=303)
 
 @rt("/logout")
 def get(sess):
     del sess['auth']
-    return RedirectResponse('/login')
+    return login_redir
 
 @rt("/{fname:path}.{ext:static}")
 async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')

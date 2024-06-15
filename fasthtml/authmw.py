@@ -2,6 +2,7 @@ import base64, binascii
 from fasthtml.core import *
 from fasthtml.starlette import *
 from typing import Mapping
+from hmac import compare_digest
 
 auth_hdrs = {'WWW-Authenticate': 'Basic realm="login"'}
 
@@ -38,7 +39,7 @@ def user_pwd_auth(lookup=None, skip=None, **kwargs):
     def cb(u,p):
         if u=='logout' or not u or not p: return
         if callable(lookup): return lookup(u,p)
-        return kwargs.get(u,None) == p
+        return compare_digest(kwargs.get(u,'').encode("utf-8"), p.encode("utf-8"))
     return Middleware(BasicAuthMiddleware, cb=cb, skip=skip)
 
 def basic_logout(request):
