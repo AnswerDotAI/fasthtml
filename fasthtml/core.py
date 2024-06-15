@@ -217,6 +217,8 @@ class RouterX(Router):
 htmxscr = Script(
     src="https://unpkg.com/htmx.org@1.9.12", crossorigin="anonymous",
     integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2")
+surrsrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/surreal/surreal.js")
+scopesrc = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline/script.js")
 
 def get_key(key=None, fname='.sesskey'):
     if key: return key
@@ -230,7 +232,7 @@ def _list(o): return [] if not o else o if isinstance(o, (tuple,list)) else [o]
 
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
-                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, before=None,
+                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, before=None, default_hdrs=True,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', **bodykw):
         middleware,before = _list(middleware),_list(before)
@@ -240,7 +242,8 @@ class FastHTML(Starlette):
                           https_only=sess_https_only, domain=sess_domain)
         middleware.append(sess)
         super().__init__(debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan=lifespan)
-        hdrs = list([] if hdrs is None else hdrs) + [htmxscr]
+        hdrs = list([] if hdrs is None else hdrs)
+        if default_hdrs: hdrs = [htmxscr,surrsrc,scopesrc] + hdrs
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, hdrs=hdrs,
                               before=before, **bodykw)
 
