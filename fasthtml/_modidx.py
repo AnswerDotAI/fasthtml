@@ -44,5 +44,7 @@ d = { 'settings': { 'branch': 'main',
                                 'fasthtml.xtend.Group': ('xtend.html#group', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.Hidden': ('xtend.html#hidden', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.Html': ('xtend.html#html', 'fasthtml/xtend.py'),
+                                'fasthtml.xtend.ScriptX': ('xtend.html#scriptx', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.Search': ('xtend.html#search', 'fasthtml/xtend.py'),
+                                'fasthtml.xtend.jsd': ('xtend.html#jsd', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.set_pico_cls': ('xtend.html#set_pico_cls', 'fasthtml/xtend.py')}}}

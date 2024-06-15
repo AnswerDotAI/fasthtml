@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group',
-           'Search', 'Grid', 'DialogX', 'Hidden']
+           'Search', 'Grid', 'DialogX', 'Hidden', 'ScriptX', 'jsd']
 
 # %% ../nbs/02_xtend.ipynb 2
 from dataclasses import dataclass, asdict
@@ -96,3 +96,17 @@ def DialogX(*c, open=None, header=None, footer=None, id=None, **kwargs):
 @delegates(xt_hx, keep=True)
 def Hidden(value:str="", **kwargs):
     return Input(type="hidden", value=value, **kwargs)
+
+# %% ../nbs/02_xtend.ipynb 28
+@delegates(xt_hx, keep=True)
+def ScriptX(code:str="", **kwargs):
+    "A Script tag that doesn't escape its code"
+    return Script(NotStr(code), **kwargs)
+
+# %% ../nbs/02_xtend.ipynb 29
+def jsd(org, repo, root, path, typ='script', ver=None, esm=False, **kwargs):
+    "jsdelivr `Script` or CSS `Link` tag, or URL"
+    ver = '@'+ver if ver else ''
+    s = f'https://cdn.jsdelivr.net/gh/{org}/{repo}{ver}/{root}/{path}'
+    if esm: s += '/+esm'
+    return Script(src=s, **kwargs) if typ=='script' else Link(rel='stylesheet', href=s, **kwargs) if typ=='css' else s

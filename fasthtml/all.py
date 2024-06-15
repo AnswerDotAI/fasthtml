@@ -6,4 +6,5 @@ from fastcore.xml import *
 from sqlite_minutils import Database
 from fastlite import *
 from . import *
+from .js import *
 

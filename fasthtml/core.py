@@ -126,7 +126,6 @@ async def _find_p(req, arg:str, p):
     if res is empty or res is None: res = req.headers.get(snake2hyphens(arg), None)
     if res is empty or res is None: res = nested_idx(req.scope, 'session', arg) or None
     if res is empty or res is None:
-        #import pdb; pdb.set_trace()
         frm = await req.form()
         res = frm.getlist(arg)
         if res:
@@ -143,13 +142,20 @@ async def _wrap_req(req, params):
 @dataclass
 class HttpHeader: k:str;v:str
 
+def flat_xt(lst):
+    result = []
+    for item in lst:
+        if isinstance(item, (list,tuple)) and not isinstance(item, XT): result.extend(item)
+        else: result.append(item)
+    return result
+
 def _xt_resp(req, resp, hdrs, **bodykw):
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
     titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '')=='title')
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
         if not titles: titles = [Title('FastHTML page')]
-        resp = Html(Head(titles[0], *hdrs), Body(bdy, **bodykw))
+        resp = Html(Head(titles[0], *flat_xt(hdrs)), Body(bdy, **bodykw))
     return HTMLResponse(to_xml(resp), headers=http_hdrs)
 
 def _wrap_resp(req, resp, cls, hdrs, **bodykw):
