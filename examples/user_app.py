@@ -1,4 +1,4 @@
-from fasthtml.all import *
+from fasthtml.common import *
 
 db = database('data/utodos.db')
 todos,users = db.t.todos,db.t.users

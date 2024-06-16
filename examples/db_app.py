@@ -1,4 +1,4 @@
-from fasthtml.all import *
+from fasthtml.common import *
 
 db = database('data/todos.db')
 todos = db.t.todos

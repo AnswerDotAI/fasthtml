@@ -1,4 +1,4 @@
-from fasthtml.all import *
+from fasthtml.common import *
 
 def get_tbl(dt, nm, schema):
     render = schema.pop('render', None)

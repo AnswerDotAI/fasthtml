@@ -37,7 +37,7 @@ For a minimal app, create a file “main.py” as follows:
 **main.py**
 
 ``` python
-from fasthtml.all import *
+from fasthtml.common import *
 import uvicorn
 
 app = FastHTML()
@@ -55,10 +55,10 @@ if __name__ == '__main__':
 
 ## How to use
 
-Import from `fasthtml.all`:
+Import from `fasthtml.common`:
 
 ``` python
-from fasthtml.all import *
+from fasthtml.common import *
 ```
 
 Create your app.

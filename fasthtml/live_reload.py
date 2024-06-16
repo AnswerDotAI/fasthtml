@@ -45,7 +45,7 @@ class FastHTMLWithLiveReload(FastHTML):
       for "developer has saved some changes".
 
     Usage
-        >>> from fasthtml.all import *
+        >>> from fasthtml.common import *
         >>> app = FastHTMLWithLiveReload()
 
         Run:
