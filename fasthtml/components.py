@@ -123,7 +123,7 @@ def html2xt(html):
         attrs = []
         for key, value in elm.attrs.items():
             if isinstance(value,(tuple,list)): value = " ".join(value)
-            attrs.append(f'{rev_map.get(key, key)}={value!r}')
+            attrs.append(f'{rev_map.get(key, key).replace("-", "_")}={value!r}')
         spc = " "*lvl*2
         onlychild = not cts or (len(cts)==1 and isinstance(cts[0],str))
         j = ', ' if onlychild else f',\n{spc}'
