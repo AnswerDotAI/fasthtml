@@ -2,6 +2,15 @@
 
 <!-- do not remove -->
 
+## 0.0.15
+
+### New Features
+
+- Add `Titled` ([#18](https://github.com/AnswerDotAI/fasthtml/issues/18))
+- Disable PicoCSS font scaling
+- Use constant time string comparison for password checking, h/t José Valim ([#17](https://github.com/AnswerDotAI/fasthtml/issues/17))
+
+
 ## 0.0.14
 
 ### New Features
