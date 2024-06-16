@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.0.16
+
+### New Features
+
+- Update dashes to underscores in attrs in `html2xt` ([#20](https://github.com/AnswerDotAI/fasthtml/issues/20))
+- Rename fasthtml.all to fasthtml.common ([#19](https://github.com/AnswerDotAI/fasthtml/issues/19))
+
+
 ## 0.0.15
 
 ### New Features
