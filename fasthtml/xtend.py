@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group',
-           'Search', 'Grid', 'DialogX', 'Hidden', 'Script', 'Style', 'jsd']
+           'Search', 'Grid', 'DialogX', 'Hidden', 'Script', 'Style', 'Titled', 'jsd']
 
 # %% ../nbs/02_xtend.ipynb 2
 from dataclasses import dataclass, asdict
@@ -17,9 +17,11 @@ except ImportError: display=None
 
 # %% ../nbs/02_xtend.ipynb 4
 picocss = "https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css"
-picolink = Link(rel="stylesheet", href=picocss)
+picolink = (Link(rel="stylesheet", href=picocss),
+            Style(":root { --pico-font-size: 100%; }"))
 picocondcss = "https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.conditional.min.css"
-picocondlink = Link(rel="stylesheet", href=picocondcss)
+picocondlink = (Link(rel="stylesheet", href=picocondcss),
+                Style(":root { --pico-font-size: 100%; }"))
 
 # %% ../nbs/02_xtend.ipynb 7
 def set_pico_cls():
@@ -110,6 +112,12 @@ def Style(css:str="", **kwargs):
     return xt_html('style', NotStr(css), **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 30
+@delegates(xt_hx, keep=True)
+def Titled(title:str="FastHTML app", *args, **kwargs):
+    "An HTML partial containing a `Title`, and `H1`, and any provided children"
+    return Title(title), Main(H1(title), *args, cls="container", **kwargs)
+
+# %% ../nbs/02_xtend.ipynb 31
 def jsd(org, repo, root, path, typ='script', ver=None, esm=False, **kwargs):
     "jsdelivr `Script` or CSS `Link` tag, or URL"
     ver = '@'+ver if ver else ''

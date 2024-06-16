@@ -159,6 +159,7 @@ def _xt_resp(req, resp, hdrs, **bodykw):
     return HTMLResponse(to_xml(resp), headers=http_hdrs)
 
 def _wrap_resp(req, resp, cls, hdrs, **bodykw):
+    if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
     if isinstance(resp, (list,tuple)): return _xt_resp(req, resp, hdrs, **bodykw)
