@@ -150,6 +150,7 @@ def flat_xt(lst):
     return result
 
 def _xt_resp(req, resp, hdrs, **bodykw):
+    if not isinstance(resp, (tuple,list)): resp = (resp,)
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
     titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '')=='title')
@@ -162,7 +163,7 @@ def _wrap_resp(req, resp, cls, hdrs, **bodykw):
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
-    if isinstance(resp, (list,tuple)): return _xt_resp(req, resp, hdrs, **bodykw)
+    if isinstance(resp, (list,tuple)) or hasattr(resp, '__xt__'): return _xt_resp(req, resp, hdrs, **bodykw)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:
@@ -196,6 +197,10 @@ def _wrap_ep(f, hdrs, before, **bodykw):
         return _wrap_resp(req, resp, cls, hdrs, **bodykw)
     return _f
 
+class WS_RouteX(WebSocketRoute):
+    def __init__(self, path:str, endpoint, *, name=None, middleware=None, hdrs=None, before=None, **bodykw):
+        super().__init__(path, _wrap_ep(endpoint, hdrs, before, **bodykw), name=name, middleware=middleware)
+
 class RouteX(Route):
     def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
                 hdrs=None, before=None, **bodykw):
@@ -215,11 +220,10 @@ class RouterX(Router):
         self.routes = [o for o in self.routes if getattr(o,'methods',None)!=methods or o.path!=path]
         self.routes.append(route)
 
-htmxscr = Script(
-    src="https://unpkg.com/htmx.org@1.9.12", crossorigin="anonymous",
-    integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2")
-surrsrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/surreal/surreal.js")
-scopesrc = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline/script.js")
+htmxscr   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
+htmxwsscr = Script(src="https://unpkg.com/htmx-ext-ws/ws.js")
+surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/gnat/surreal/surreal.js")
+scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline/script.js")
 
 def get_key(key=None, fname='.sesskey'):
     if key: return key

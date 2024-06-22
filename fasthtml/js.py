@@ -35,14 +35,7 @@ def SortableJS(sel='.sortable', ghost_class='blue-background-class'):
     src = """
 import {Sortable} from 'https://cdn.jsdelivr.net/npm/sortablejs/+esm';
 import {proc_htmx} from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
-proc_htmx('%s', elm => {
-    const s = new Sortable(elm, {
-        animation: 150, ghostClass: '%s', filter: ".htmx-indicator",
-        onMove: e => !e.related.classList.contains('htmx-indicator'),
-        onEnd: () => s.option("disabled", true),
-    });
-    htmx.on("htmx:afterSwap", () => s.option("disabled", false), elm);
-});
-""" % (sel, ghost_class)
+proc_htmx('%s', Sortable.create);
+""" % sel
     return Script(src, type='module')
 

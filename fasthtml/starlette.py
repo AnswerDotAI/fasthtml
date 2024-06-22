@@ -5,7 +5,7 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.authentication import AuthCredentials, AuthenticationBackend, AuthenticationError, SimpleUser, requires
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-from starlette.responses import Response, HTMLResponse, FileResponse, JSONResponse
+from starlette.responses import Response, HTMLResponse, FileResponse, JSONResponse, RedirectResponse
 from starlette.requests import Request, HTTPConnection, FormData
 from starlette.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException

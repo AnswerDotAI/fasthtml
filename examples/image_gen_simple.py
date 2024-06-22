@@ -15,7 +15,7 @@ from PIL import Image
 
 # Replicate setup (for generating images)
 replicate_api_token = open("replicate_key.txt", "r").read().strip()
-client = replicate.Client(api_token=replicate_api_token)  
+client = replicate.Client(api_token=replicate_api_token)
 
 # gens database for storing generated image details
 tables = Database('gens.db').t
@@ -49,8 +49,8 @@ def generation_preview(g):
                        Img(src=image_path, alt="Card image", cls="card-img-top"),
                        Div(P(B("Prompt: "), g.prompt, cls="card-text"),cls="card-body"),
                    ), id=f'gen-{g.id}', cls=grid_cls)
-    return Div(f"Generating gen {g.id} with prompt {g.prompt}", 
-            id=f'gen-{g.id}', hx_get=f"/gens/{g.id}", 
+    return Div(f"Generating gen {g.id} with prompt {g.prompt}",
+            id=f'gen-{g.id}', hx_get=f"/gens/{g.id}",
             hx_trigger="every 2s", hx_swap="outerHTML", cls=grid_cls)
 
 # A pending preview keeps polling this route until we return the image preview
@@ -89,3 +89,4 @@ def generate_and_save(prompt, id, folder):
     )
     Image.open(requests.get(output[0], stream=True).raw).save(f"{folder}/{id}.png")
     return True
+
