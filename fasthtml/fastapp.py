@@ -28,6 +28,6 @@ def fast_app(db=None, render=None, hdrs=None, tbls=None, **kwargs):
 def clear(id): return Div(hx_swap_oob='innerHTML', id=id)
 target = dict(hx_target='main', hx_swap='outerHTML')
 
-def Container(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
-def Page(title, *con): return Title(title), Container(H1(title), *con)
+def ContainerX(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
+def Page(title, *con): return Title(title), ContainerX(H1(title), *con)
 

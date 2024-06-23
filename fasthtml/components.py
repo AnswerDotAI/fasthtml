@@ -2,13 +2,16 @@
 
 # %% auto 0
 __all__ = ['voids', 'named', 'html_attrs', 'hx_attrs', 'show', 'xt_html', 'xt_hx', 'fill_form', 'fill_dataclass', 'find_inputs',
-           'html2xt', 'Html', 'Head', 'Title', 'Meta', 'Link', 'Style', 'Body', 'Pre', 'Code', 'Div', 'Span', 'P', 'H1',
-           'H2', 'H3', 'H4', 'H5', 'H6', 'Strong', 'Em', 'B', 'I', 'U', 'S', 'Strike', 'Sub', 'Sup', 'Hr', 'Br', 'Img',
-           'Nav', 'Ul', 'Ol', 'Li', 'Dl', 'Dt', 'Dd', 'Table', 'Thead', 'Tbody', 'Tfoot', 'Tr', 'Th', 'Td', 'Caption',
-           'Col', 'Colgroup', 'Form', 'Input', 'Textarea', 'Button', 'Select', 'Option', 'Label', 'Fieldset', 'Legend',
-           'Details', 'Dialog', 'Summary', 'Main', 'Header', 'Footer', 'Section', 'Article', 'Aside', 'Figure',
-           'Figcaption', 'Mark', 'Small', 'Iframe', 'Object', 'Embed', 'Param', 'Video', 'Audio', 'Source', 'Canvas',
-           'Svg', 'Math', 'Script', 'Noscript', 'Template', 'Slot']
+           'html2xt', 'A', 'Abbr', 'Address', 'Area', 'Article', 'Aside', 'Audio', 'B', 'Base', 'Bdi', 'Bdo',
+           'Blockquote', 'Body', 'Br', 'Button', 'Canvas', 'Caption', 'Cite', 'Code', 'Col', 'Colgroup', 'Data',
+           'Datalist', 'Dd', 'Del', 'Details', 'Dfn', 'Dialog', 'Div', 'Dl', 'Dt', 'Em', 'Embed', 'Fencedframe',
+           'Fieldset', 'Figcaption', 'Figure', 'Footer', 'Form', 'H1', 'Head', 'Header', 'Hgroup', 'Hr', 'Html', 'I',
+           'Iframe', 'Img', 'Input', 'Ins', 'Kbd', 'Label', 'Legend', 'Li', 'Link', 'Main', 'Map', 'Mark', 'Menu',
+           'Meta', 'Meter', 'Nav', 'Noscript', 'Object', 'Ol', 'Optgroup', 'Option', 'Output', 'P', 'Picture',
+           'PortalExperimental', 'Pre', 'Progress', 'Q', 'Rp', 'Rt', 'Ruby', 'S', 'Samp', 'Script', 'Search', 'Section',
+           'Select', 'Slot', 'Small', 'Source', 'Span', 'Strong', 'Style', 'Sub', 'Summary', 'Sup', 'Table', 'Tbody',
+           'Td', 'Template', 'Textarea', 'Tfoot', 'Th', 'Thead', 'Time', 'Title', 'Tr', 'Track', 'U', 'Ul', 'Var',
+           'Video', 'Wbr']
 
 # %% ../nbs/01_components.ipynb 2
 from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
@@ -49,16 +52,15 @@ def xt_hx(tag: str, *c, target_id=None, **kwargs):
 
 # %% ../nbs/01_components.ipynb 8
 _g = globals()
-_all_ = ['Html', 'Head', 'Title', 'Meta', 'Link', 'Style', 'Body', 'Pre', 'Code',
-    'Div', 'Span', 'P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'Strong', 'Em', 'B',
-    'I', 'U', 'S', 'Strike', 'Sub', 'Sup', 'Hr', 'Br', 'Img', 'Link', 'Nav',
-    'Ul', 'Ol', 'Li', 'Dl', 'Dt', 'Dd', 'Table', 'Thead', 'Tbody', 'Tfoot', 'Tr',
-    'Th', 'Td', 'Caption', 'Col', 'Colgroup', 'Form', 'Input', 'Textarea',
-    'Button', 'Select', 'Option', 'Label', 'Fieldset', 'Legend', 'Details', 'Dialog',
-    'Summary', 'Main', 'Header', 'Footer', 'Section', 'Article', 'Aside', 'Figure',
-    'Figcaption', 'Mark', 'Small', 'Iframe', 'Object', 'Embed', 'Param', 'Video',
-    'Audio', 'Source', 'Canvas', 'Svg', 'Math', 'Script', 'Noscript', 'Template', 'Slot']
-
+_all_ = [
+    'A', 'Abbr', 'Address', 'Area', 'Article', 'Aside', 'Audio', 'B', 'Base', 'Bdi', 'Bdo', 'Blockquote', 'Body', 'Br',
+    'Button', 'Canvas', 'Caption', 'Cite', 'Code', 'Col', 'Colgroup', 'Data', 'Datalist', 'Dd', 'Del', 'Details', 'Dfn',
+    'Dialog', 'Div', 'Dl', 'Dt', 'Em', 'Embed', 'Fencedframe', 'Fieldset', 'Figcaption', 'Figure', 'Footer', 'Form',
+    'H1', 'Head', 'Header', 'Hgroup', 'Hr', 'Html', 'I', 'Iframe', 'Img', 'Input', 'Ins', 'Kbd', 'Label', 'Legend', 'Li',
+    'Link', 'Main', 'Map', 'Mark', 'Menu', 'Meta', 'Meter', 'Nav', 'Noscript', 'Object', 'Ol', 'Optgroup', 'Option', 'Output',
+    'P', 'Picture', 'PortalExperimental', 'Pre', 'Progress', 'Q', 'Rp', 'Rt', 'Ruby', 'S', 'Samp', 'Script', 'Search',
+    'Section', 'Select', 'Slot', 'Small', 'Source', 'Span', 'Strong', 'Style', 'Sub', 'Summary', 'Sup', 'Table', 'Tbody',
+    'Td', 'Template', 'Textarea', 'Tfoot', 'Th', 'Thead', 'Time', 'Title', 'Tr', 'Track', 'U', 'Ul', 'Var', 'Video', 'Wbr']
 for o in _all_: _g[o] = partial(xt_hx, o.lower())
 
 # %% ../nbs/01_components.ipynb 12
