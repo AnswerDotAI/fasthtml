@@ -6,10 +6,11 @@ __all__ = ['railway_link']
 # %% ../nbs/04_cli.ipynb 1
 from fastcore.utils import *
 from fastcore.script import call_parse
-import json
 from subprocess import run
 
-# %% ../nbs/04_cli.ipynb 2
+import json
+
+# %% ../nbs/04_cli.ipynb 3
 @call_parse
 def railway_link():
     t = run("railway status --json".split(), capture_output=True)

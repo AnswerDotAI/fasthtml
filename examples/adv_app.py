@@ -1,6 +1,14 @@
 # The "idiomatic" fasthtml app includes functionality from fastcore, starlette, fastlite, and fasthtml itself.
 # Importing from `fasthtml.common` brings the key parts of all of these together.
-from fasthtml.common import *
+# For simplicity, you can just `from fasthtml.common import *`, or you can import each symbol explicitly:
+from fasthtml.common import (
+    # These are the HTML components we use in this app
+    A, AX, Button, Card, Checkbox, Div, Form, Grid, Group, H1, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Ul
+    # These are FastHTML symbols we'll use
+    Beforeware, FastHTML, SortableJS, fill_form, picolink
+    # These are from Starlette, Fastlite, and fastcore
+    FileResponse, NotFoundError, RedirectResponse, database, patch
+)
 from hmac import compare_digest
 from dataclasses import dataclass
 
