@@ -3,14 +3,13 @@
 # For simplicity, you can just `from fasthtml.common import *`, or you can import each symbol explicitly:
 from fasthtml.common import (
     # These are the HTML components we use in this app
-    A, AX, Button, Card, Checkbox, Div, Form, Grid, Group, H1, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Ul
+    A, AX, Button, Card, Checkbox, Container, Div, Form, Grid, Group, H1, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Ul,
     # These are FastHTML symbols we'll use
-    Beforeware, FastHTML, SortableJS, fill_form, picolink
-    # These are from Starlette, Fastlite, and fastcore
-    FileResponse, NotFoundError, RedirectResponse, database, patch
+    Beforeware, FastHTML, SortableJS, fill_form, picolink,
+    # These are from Starlette, Fastlite, fastcore, and the Python stdlib
+    FileResponse, NotFoundError, RedirectResponse, database, patch, dataclass
 )
 from hmac import compare_digest
-from dataclasses import dataclass
 
 # You can use any database you want; it'll be easier if you pick a lib that supports the MiniDataAPI spec.
 # Here we are using SQLite, with the FastLite library, which supports the MiniDataAPI spec.
@@ -93,13 +92,12 @@ def get():
         Input(id='pwd', type='password', placeholder='Password'),
         Button('login'),
         action='/login', method='post')
-    # A handler can return either a single `XT` object or string, or a tuple of them.
-    # In the case of a tuple, the stringified objects are concatenated and returned to the browser.
-    # The `Title` tag has a special purpose: it sets the title of the page.
     # If a user visits the URL directly, FastHTML auto-generates a full HTML page.
     # However, if the URL is accessed by HTMX, then one HTML partial is created for each element of the tuple.
     # To avoid this auto-generation of a full page, return a `HTML` object, or a Starlette `Response`.
-    return Title("Login"), Main(H1('Login'), frm, cls='container')
+    # `Titled` returns a tuple of a `Title` with the first arg and a `Container` with the rest.
+    # See the comments for `Title` later for details.
+    return Titled("Login", frm)
 
 # Handlers are passed whatever information they "request" in the URL, as keyword arguments.
 # Dataclasses, dicts, namedtuples, TypedDicts, and custom classes are automatically instantiated
@@ -190,9 +188,11 @@ def get(auth):
                id='todo-list', cls='sortable', hx_post="/reorder", hx_trigger="end")
     # We create an empty 'current-todo' Div at the bottom of our page, as a target for the details and editing views.
     card = Card(Ul(frm), header=add, footer=Div(id='current-todo'))
-    # PicoCSS uses `<Main class='container'>` page content, so we can use that here.
-    # Because `class` is a reserved keyword in Python, we use `cls` instead, which FastHTML auto-converts.
-    return Title(title), Main(top, card, cls='container')
+    # PicoCSS uses `<Main class='container'>` page content; `Container` is a tiny function that generates that.
+    # A handler can return either a single `XT` object or string, or a tuple of them.
+    # In the case of a tuple, the stringified objects are concatenated and returned to the browser.
+    # The `Title` tag has a special purpose: it sets the title of the page.
+    return Title(title), Container(top, card)
 
 # This is the handler for the reordering of todos.
 # It's a POST request, which is used by the 'sortable' js library.
@@ -271,4 +271,5 @@ async def get(id:int):
                  target_id=f'todo-{todo.id}', hx_swap="outerHTML")
     # The "markdown" class is used here because that's the CSS selector we used in the JS earlier.
     # Therefore this will trigger the JS to parse the markdown in the details field.
+    # Because `class` is a reserved keyword in Python, we use `cls` instead, which FastHTML auto-converts.
     return Div(Div(todo.title), Div(todo.details, cls="markdown"), btn)

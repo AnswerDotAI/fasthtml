@@ -1,4 +1,5 @@
 import uvicorn
+from dataclasses import dataclass
 
 from .starlette import *
 from fastcore.utils import *

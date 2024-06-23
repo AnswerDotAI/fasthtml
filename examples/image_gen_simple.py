@@ -38,7 +38,7 @@ async def get(token:str):
     add = Form(Group(inp, Button("Generate")), hx_post="/", target_id='gen-list', hx_swap="afterbegin")
     gen_containers = [generation_preview(g) for g in gens(limit=10)] # Start with last 10
     gen_list = Div(*gen_containers[::-1], id='gen-list', cls="row") # flexbox container: class = row
-    return Title('Image Generation Demo'), Main(H1('Magic Image Generation'), add, gen_list, cls='container')
+    return Titled('Image Generation Demo', add, gen_list)
 
 # Show the image (if available) and prompt for a generation
 def generation_preview(g):

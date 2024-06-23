@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group',
-           'Search', 'Grid', 'DialogX', 'Hidden', 'Script', 'Style', 'Titled', 'jsd']
+           'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'Titled', 'jsd']
 
 # %% ../nbs/02_xtend.ipynb 2
 from dataclasses import dataclass, asdict
@@ -42,24 +42,28 @@ new MutationObserver(ms => {
     return display.Javascript(js)
 
 # %% ../nbs/02_xtend.ipynb 10
-def Html(*c, doctype=True, **kwargs):
+def Html(*c, doctype=True, **kwargs)->XT:
+    "An HTML tag, optionally preceeded by `!DOCTYPE HTML`"
     res = xt('html', *c, **kwargs)
     if not doctype: return res
     return (xt('!DOCTYPE', html=True), res)
 
 # %% ../nbs/02_xtend.ipynb 11
 @delegates(xt_hx, keep=True)
-def A(*c, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs):
+def A(*c, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs)->XT:
+    "An A tag; `href` defaults to '#' for more concise use with HTMX"
     return xt_hx('a', *c, href=href, hx_get=hx_get, target_id=target_id, hx_swap=hx_swap, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 13
 @delegates(xt_hx, keep=True)
-def AX(txt, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs):
+def AX(txt, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs)->XT:
+    "An A tag with just one text child, allowing hx_get, target_id, and hx_swap to be positional params"
     return xt_hx('a', txt, href=href, hx_get=hx_get, target_id=target_id, hx_swap=hx_swap, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 15
 @delegates(xt_hx, keep=True)
-def Checkbox(checked:bool=False, label=None, value="1", **kwargs):
+def Checkbox(checked:bool=False, label=None, value="1", **kwargs)->XT:
+    "A Checkbox optionally inside a Label"
     if not checked: checked=None
     res = Input(type="checkbox", checked=checked, value=value, **kwargs)
     if label: res = Label(res, label)
@@ -67,58 +71,70 @@ def Checkbox(checked:bool=False, label=None, value="1", **kwargs):
 
 # %% ../nbs/02_xtend.ipynb 17
 @delegates(xt_hx, keep=True)
-def Card(*c, header=None, footer=None, **kwargs):
+def Card(*c, header=None, footer=None, **kwargs)->XT:
+    "A PicoCSS Card, implemented as an Article with optional Header and Footer"
     if header: c = (Header(header),) + c
     if footer: c += (Footer(footer),)
     return Article(*c, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 19
 @delegates(xt_hx, keep=True)
-def Group(*c, **kwargs):
+def Group(*c, **kwargs)->XT:
+    "A PicoCSS Group, implemented as a Fieldset with role 'group'"
     return Fieldset(*c, role="group", **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 21
 @delegates(xt_hx, keep=True)
-def Search(*c, **kwargs):
+def Search(*c, **kwargs)->XT:
+    "A PicoCSS Search, implemented as a Form with role 'search'"
     return Form(*c, role="search", **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 23
 @delegates(xt_hx, keep=True)
-def Grid(*c, cls='grid', **kwargs):
+def Grid(*c, cls='grid', **kwargs)->XT:
+    "A PicoCSS Grid, implemented as child Divs in a Div with class 'grid'"
     c = tuple(o if isinstance(o,list) else Div(o) for o in c)
     return xt_hx('div', *c, cls=cls, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 25
 @delegates(xt_hx, keep=True)
-def DialogX(*c, open=None, header=None, footer=None, id=None, **kwargs):
+def DialogX(*c, open=None, header=None, footer=None, id=None, **kwargs)->XT:
+    "A PicoCSS Dialog, with children inside a Card"
     card = Card(*c, header=header, footer=footer, **kwargs)
     return Dialog(card, open=open, id=id)
 
 # %% ../nbs/02_xtend.ipynb 27
 @delegates(xt_hx, keep=True)
-def Hidden(value:str="", **kwargs):
+def Hidden(value:str="", **kwargs)->XT:
+    "An Input of type 'hidden'"
     return Input(type="hidden", value=value, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 28
-@delegates(xt_html, keep=True)
-def Script(code:str="", **kwargs):
-    "A Script tag that doesn't escape its code"
-    return xt_html('script', NotStr(code), **kwargs)
+@delegates(xt_hx, keep=True)
+def Container(*args, **kwargs)->XT:
+    "A PicoCSS Container, implemented as a Main with class 'container'"
+    return Main(*args, cls="container", **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 29
 @delegates(xt_html, keep=True)
-def Style(css:str="", **kwargs):
+def Script(code:str="", **kwargs)->XT:
+    "A Script tag that doesn't escape its code"
+    return xt_html('script', NotStr(code), **kwargs)
+
+# %% ../nbs/02_xtend.ipynb 30
+@delegates(xt_html, keep=True)
+def Style(css:str="", **kwargs)->XT:
     "A Style tag that doesn't escape its code"
     return xt_html('style', NotStr(css), **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 30
+# %% ../nbs/02_xtend.ipynb 31
 @delegates(xt_hx, keep=True)
-def Titled(title:str="FastHTML app", *args, **kwargs):
+def Titled(title:str="FastHTML app", *args, **kwargs)->XT:
     "An HTML partial containing a `Title`, and `H1`, and any provided children"
     return Title(title), Main(H1(title), *args, cls="container", **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 31
-def jsd(org, repo, root, path, typ='script', ver=None, esm=False, **kwargs):
+# %% ../nbs/02_xtend.ipynb 32
+def jsd(org, repo, root, path, typ='script', ver=None, esm=False, **kwargs)->XT:
     "jsdelivr `Script` or CSS `Link` tag, or URL"
     ver = '@'+ver if ver else ''
     s = f'https://cdn.jsdelivr.net/gh/{org}/{repo}{ver}/{root}/{path}'

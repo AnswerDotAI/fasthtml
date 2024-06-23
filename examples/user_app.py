@@ -45,7 +45,7 @@ async def get(request, auth):
                 header=add, footer=Div(id=id_curr)),
     title = 'Todo list'
     top = Grid(H1(f"{auth}'s {title}"), Div(A('logout', href=basic_logout(request)), style='text-align: right'))
-    return Title(title), Main(top, card, cls='container')
+    return Titled(title, top, card)
 
 @rt("/todos/{id}")
 async def delete(id:int):

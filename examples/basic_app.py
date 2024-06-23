@@ -14,7 +14,7 @@ def get():
     inp = Input(id="new-title", name="title", placeholder="New Todo")
     add = Form(Group(inp, Button("Add")), hx_post="/", target_id='todo-list', hx_swap="beforeend")
     card = Card(Ul(*todos(), id='todo-list'), header=add, footer=Div(id='current-todo')),
-    return Title('Todo list'), Main(H1('Todos'), card, cls='container')
+    return Titled('Todo list', card)
 
 @rt("/")
 def post(todo:Todo):

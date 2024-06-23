@@ -1,11 +1,4 @@
-import uvicorn
-from dataclasses import dataclass
-from starlette.responses import FileResponse, RedirectResponse, JSONResponse, HTMLResponse
-from starlette.requests import Request
-from starlette.exceptions import HTTPException
-from fastcore.utils import *
-from fastcore.xml import *
-from fasthtml import *
+from fasthtml.common import *
 
 id_curr = 'current-todo'
 id_list = 'todo-list'
@@ -37,8 +30,7 @@ async def get_todos(req):
                hx_post="/", target_id=id_list, hx_swap="beforeend")
     card = Card(Ul(*TODO_LIST, id=id_list),
                 header=add, footer=Div(id=id_curr)),
-    title = 'Todo list'
-    return title, Main(H1(title), card, cls='container')
+    return Titled('Todo list', card)
 
 @app.post("/")
 async def add_item(todo:TodoItem):
@@ -74,3 +66,4 @@ async def get_todo(id:int):
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
+
