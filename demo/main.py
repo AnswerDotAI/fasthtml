@@ -14,8 +14,8 @@ rt = app.route
 @rt("/")
 async def get(request):
     new_frm = Form(Group(Input(name='title', placeholder='Title'),
-                         Button('Add')), hx_post='/', hx_swap='beforeend')
-    items = Ul(*todos())
+                         Button('Add')), hx_post='/', target_id='todo-list', hx_swap='beforeend')
+    items = Ul(*todos(), id='todo-list')
     logout = A('logout', href=basic_logout(request))
     return Titled('Todo list', new_frm, items, logout)
 
