@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.0
+
+### New Features
+
+- Add `railway_deploy` ([#26](https://github.com/AnswerDotAI/fasthtml/issues/26))
+
+
 ## 0.0.17
 
 ### New Features
