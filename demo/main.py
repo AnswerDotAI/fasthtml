@@ -26,3 +26,4 @@ async def post(todo:Todo): return todos.insert(todo)
 async def delete(id:int): todos.delete(id)
 
 run_uv()
+
