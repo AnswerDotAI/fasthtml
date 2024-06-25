@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.0.17
+
+### New Features
+
+- Add `run_uv()` ([#25](https://github.com/AnswerDotAI/fasthtml/issues/25))
+- New demo app ([#25](https://github.com/AnswerDotAI/fasthtml/issues/25))
+- Add `Container` component ([#24](https://github.com/AnswerDotAI/fasthtml/issues/24))
+- Add all HTML elements ([#22](https://github.com/AnswerDotAI/fasthtml/issues/22))
+- Add svg.py ([#21](https://github.com/AnswerDotAI/fasthtml/issues/21))
+
+
 ## 0.0.16
 
 ### New Features
