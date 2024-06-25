@@ -16,10 +16,13 @@ async def get(request):
     new_frm = Form(Group(Input(name='title', placeholder='Title'),
                          Button('Add')), hx_post='/', hx_swap='beforeend')
     items = Ul(*todos())
-    return Titled('Todo list', new_frm, items)
+    logout = A('logout', href=basic_logout(request))
+    return Titled('Todo list', new_frm, items, logout)
 
 @rt("/")
 async def post(todo:Todo): return todos.insert(todo)
 
 @rt("/todo/{id}")
 async def delete(id:int): todos.delete(id)
+
+run_uv()
