@@ -1,4 +1,4 @@
-import base64, binascii
+import base64, binascii, re
 from fasthtml.core import *
 from fasthtml.starlette import *
 from typing import Mapping

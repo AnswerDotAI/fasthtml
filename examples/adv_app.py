@@ -3,7 +3,7 @@
 # For simplicity, you can just `from fasthtml.common import *`, or you can import each symbol explicitly:
 from fasthtml.common import (
     # These are the HTML components we use in this app
-    A, AX, Button, Card, Checkbox, Container, Div, Form, Grid, Group, H1, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Ul,
+    A, AX, Button, Card, Checkbox, Container, Div, Form, Grid, Group, H1, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Titled, Ul,
     # These are FastHTML symbols we'll use
     Beforeware, FastHTML, SortableJS, fill_form, picolink,
     # These are from Starlette, Fastlite, fastcore, and the Python stdlib

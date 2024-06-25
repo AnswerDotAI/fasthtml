@@ -66,3 +66,4 @@ def get(id:int):
         Button('Back', hx_get='/')
     )
     return Page('Todo details', contents)
+
