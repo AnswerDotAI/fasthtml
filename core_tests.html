@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.557">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>fasthtml - FastHTML tests</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="fasthtml - FastHTML tests">
+<meta property="og:description" content="The fastest way to create an HTML app">
+<meta property="og:site_name" content="fasthtml">
+<meta name="twitter:title" content="fasthtml - FastHTML tests">
+<meta name="twitter:description" content="The fastest way to create an HTML app">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">fasthtml</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./core_tests.html">FastHTML tests</a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">fasthtml</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Components</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./xtend.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Component extensions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./oauth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OAuth</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04_cli.html</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./by_example.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FastHTML By Example</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./core_tests.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">FastHTML tests</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#is_typeddict" id="toc-is_typeddict" class="nav-link active" data-scroll-target="#is_typeddict">is_typeddict</a></li>
+  <li><a href="#is_namedtuple" id="toc-is_namedtuple" class="nav-link" data-scroll-target="#is_namedtuple">is_namedtuple</a></li>
+  <li><a href="#date" id="toc-date" class="nav-link" data-scroll-target="#date">date</a></li>
+  <li><a href="#snake2hyphens" id="toc-snake2hyphens" class="nav-link" data-scroll-target="#snake2hyphens">snake2hyphens</a></li>
+  <li><a href="#htmxheaders" id="toc-htmxheaders" class="nav-link" data-scroll-target="#htmxheaders">HtmxHeaders</a></li>
+  <li><a href="#str2int" id="toc-str2int" class="nav-link" data-scroll-target="#str2int">str2int</a></li>
+  <li><a href="#httpheader" id="toc-httpheader" class="nav-link" data-scroll-target="#httpheader">HttpHeader</a></li>
+  <li><a href="#form2dict" id="toc-form2dict" class="nav-link" data-scroll-target="#form2dict">form2dict</a></li>
+  <li><a href="#flat_xt" id="toc-flat_xt" class="nav-link" data-scroll-target="#flat_xt">flat_xt</a></li>
+  <li><a href="#beforeware" id="toc-beforeware" class="nav-link" data-scroll-target="#beforeware">Beforeware</a></li>
+  <li><a href="#ws_routex" id="toc-ws_routex" class="nav-link" data-scroll-target="#ws_routex">WS_RouteX</a></li>
+  <li><a href="#routex" id="toc-routex" class="nav-link" data-scroll-target="#routex">RouteX</a></li>
+  <li><a href="#routerx" id="toc-routerx" class="nav-link" data-scroll-target="#routerx">RouterX</a></li>
+  <li><a href="#get_key" id="toc-get_key" class="nav-link" data-scroll-target="#get_key">get_key</a></li>
+  <li><a href="#fasthtml" id="toc-fasthtml" class="nav-link" data-scroll-target="#fasthtml">FastHTML</a></li>
+  <li><a href="#reg_re_param" id="toc-reg_re_param" class="nav-link" data-scroll-target="#reg_re_param">reg_re_param</a></li>
+  <li><a href="#middlewarebase" id="toc-middlewarebase" class="nav-link" data-scroll-target="#middlewarebase">MiddlewareBase</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">FastHTML tests</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<div id="7f5d0a72" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython <span class="im">import</span> display</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> enum <span class="im">import</span> Enum</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastcore.test <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> starlette.testclient <span class="im">import</span> TestClient</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> starlette.requests <span class="im">import</span> Headers</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L28" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="is_typeddict" class="level3">
+<h3 class="anchored" data-anchor-id="is_typeddict">is_typeddict</h3>
+<blockquote class="blockquote">
+<pre><code> is_typeddict (cls:type)</code></pre>
+</blockquote>
+<p><em>Check if <code>cls</code> is a <code>TypedDict</code></em></p>
+<div id="515d6666" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MyDict(TypedDict): name:<span class="bu">str</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> is_typeddict(MyDict)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> is_typeddict({<span class="st">'a'</span>:<span class="dv">1</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L34" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="is_namedtuple" class="level3">
+<h3 class="anchored" data-anchor-id="is_namedtuple">is_namedtuple</h3>
+<blockquote class="blockquote">
+<pre><code> is_namedtuple (cls)</code></pre>
+</blockquote>
+<p><em><code>True</code> is <code>cls</code> is a namedtuple type</em></p>
+<div id="ac88a10b" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> is_namedtuple(namedtuple(<span class="st">'tst'</span>, [<span class="st">'a'</span>]))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> is_namedtuple(<span class="bu">tuple</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L39" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="date" class="level3">
+<h3 class="anchored" data-anchor-id="date">date</h3>
+<blockquote class="blockquote">
+<pre><code> date (s:str)</code></pre>
+</blockquote>
+<p><em>Convert <code>s</code> to a datetime</em></p>
+<div id="5331a3e7" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>date(<span class="st">'2pm'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>datetime.datetime(2024, 6, 22, 14, 0)</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L44" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="snake2hyphens" class="level3">
+<h3 class="anchored" data-anchor-id="snake2hyphens">snake2hyphens</h3>
+<blockquote class="blockquote">
+<pre><code> snake2hyphens (s:str)</code></pre>
+</blockquote>
+<p><em>Convert <code>s</code> from snake case to hyphenated and capitalised</em></p>
+<div id="442a5aac" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>snake2hyphens(<span class="st">"snake_case"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Snake-Case'</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L61" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="htmxheaders" class="level3">
+<h3 class="anchored" data-anchor-id="htmxheaders">HtmxHeaders</h3>
+<blockquote class="blockquote">
+<pre><code> HtmxHeaders (boosted:str|None=None, current_url:str|None=None,
+              history_restore_request:str|None=None, prompt:str|None=None,
+              request:str|None=None, target:str|None=None,
+              trigger_name:str|None=None, trigger:str|None=None)</code></pre>
+</blockquote>
+<div id="5b4b5d95" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_request(url: <span class="bu">str</span><span class="op">=</span><span class="st">'/'</span>, headers: <span class="bu">dict</span><span class="op">=</span>{}, method: <span class="bu">str</span><span class="op">=</span><span class="st">'get'</span>) <span class="op">-&gt;</span> Request:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    scope <span class="op">=</span> {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'type'</span>: <span class="st">'http'</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'method'</span>: method,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'path'</span>: url,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'headers'</span>: Headers(headers).raw,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'query_string'</span>: <span class="st">b''</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'scheme'</span>: <span class="st">'http'</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'client'</span>: (<span class="st">'127.0.0.1'</span>, <span class="dv">8000</span>),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'server'</span>: (<span class="st">'127.0.0.1'</span>, <span class="dv">8000</span>),</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    receive <span class="op">=</span> <span class="kw">lambda</span>: {<span class="st">"body"</span>: <span class="st">b""</span>, <span class="st">"more_body"</span>: <span class="va">False</span>}</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Request(scope, receive)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="36e2cac0" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>h <span class="op">=</span> test_request(headers<span class="op">=</span>Headers({<span class="st">'HX-Request'</span>:<span class="st">'1'</span>}))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>_get_htmx(h)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>HtmxHeaders(boosted=None, current_url=None, history_restore_request=None, prompt=None, request='1', target=None, trigger_name=None, trigger=None)</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L71" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="str2int" class="level3">
+<h3 class="anchored" data-anchor-id="str2int">str2int</h3>
+<blockquote class="blockquote">
+<pre><code> str2int (s)</code></pre>
+</blockquote>
+<p><em>Convert <code>s</code> to an <code>int</code></em></p>
+<div id="e68fead1" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>str2int(<span class="st">'1'</span>),str2int(<span class="st">'none'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(1, 0)</code></pre>
+</div>
+</div>
+<div id="1d53e8e7" class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _mk_list(t, v): <span class="cf">return</span> [t(o) <span class="cf">for</span> o <span class="kw">in</span> v]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="95b1f5c9" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>_fix_anno(Union[<span class="bu">str</span>,<span class="va">None</span>]),_fix_anno(<span class="bu">float</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(str, float)</code></pre>
+</div>
+</div>
+<div id="1dbe4780" class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>_fix_anno(<span class="bu">int</span>)(<span class="st">'1'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>1</code></pre>
+</div>
+</div>
+<div id="a4405165" class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>_fix_anno(<span class="bu">list</span>[<span class="bu">int</span>])([<span class="st">'1'</span>,<span class="st">'2'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[1, 2]</code></pre>
+</div>
+</div>
+<div id="a9331734" class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>_fix_anno(<span class="bu">list</span>[<span class="bu">int</span>])(<span class="st">'1'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[1]</code></pre>
+</div>
+</div>
+<div id="59757d76" class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="bu">dict</span>(k<span class="op">=</span><span class="bu">int</span>, l<span class="op">=</span>List[<span class="bu">int</span>])</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>_form_arg(<span class="st">'k'</span>, <span class="st">"1"</span>, d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>1</code></pre>
+</div>
+</div>
+<div id="50455eb8" class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>_form_arg(<span class="st">'l'</span>, <span class="st">"1"</span>, d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[1]</code></pre>
+</div>
+</div>
+<div id="136175ad" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>_form_arg(<span class="st">'l'</span>, [<span class="st">"1"</span>,<span class="st">"2"</span>], d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[1, 2]</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L100" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="httpheader" class="level3">
+<h3 class="anchored" data-anchor-id="httpheader">HttpHeader</h3>
+<blockquote class="blockquote">
+<pre><code> HttpHeader (k:str, v:str)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L118" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="form2dict" class="level3">
+<h3 class="anchored" data-anchor-id="form2dict">form2dict</h3>
+<blockquote class="blockquote">
+<pre><code> form2dict (form:starlette.datastructures.FormData)</code></pre>
+</blockquote>
+<p><em>Convert starlette form data to a dict</em></p>
+<div id="cf80ea34" class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> [(<span class="st">'a'</span>,<span class="dv">1</span>),(<span class="st">'a'</span>,<span class="dv">2</span>),(<span class="st">'b'</span>,<span class="dv">0</span>)]</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>fd <span class="op">=</span> FormData(d)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> form2dict(fd)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>test_eq(res[<span class="st">'a'</span>], [<span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>test_eq(res[<span class="st">'b'</span>], <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="2a8b10f4" class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> f(req):</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _f(p:HttpHeader): ...</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> first(signature(_f).parameters.values())</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> <span class="cf">await</span> _from_body(req, p)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> JSONResponse(result.__dict__)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> Starlette(routes<span class="op">=</span>[Route(<span class="st">'/'</span>, f, methods<span class="op">=</span>[<span class="st">'POST'</span>])])</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> TestClient(app)</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="bu">dict</span>(k<span class="op">=</span><span class="st">'value1'</span>,v<span class="op">=</span>[<span class="st">'value2'</span>,<span class="st">'value3'</span>])</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> client.post(<span class="st">'/'</span>, data<span class="op">=</span>d)</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response.json())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'k': 'value1', 'v': "['value2', 'value3']"}</code></pre>
+</div>
+</div>
+<div id="bf945ee8" class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> g(req, this:Starlette, a:<span class="bu">str</span>, b:HttpHeader): ...</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> f(req):</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> <span class="cf">await</span> _wrap_req(req, signature(g).parameters)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Response(<span class="bu">str</span>(a))</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> Starlette(routes<span class="op">=</span>[Route(<span class="st">'/'</span>, f, methods<span class="op">=</span>[<span class="st">'POST'</span>])])</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> TestClient(app)</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> client.post(<span class="st">'/?a=1'</span>, data<span class="op">=</span>d)</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response.text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[&lt;starlette.requests.Request object&gt;, &lt;starlette.applications.Starlette object&gt;, '1', HttpHeader(k='value1', v="['value2', 'value3']")]</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L169" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="flat_xt" class="level3">
+<h3 class="anchored" data-anchor-id="flat_xt">flat_xt</h3>
+<blockquote class="blockquote">
+<pre><code> flat_xt (lst)</code></pre>
+</blockquote>
+<p><em>Flatten lists, except for <code>XT</code>s</em></p>
+<div id="2ee5adf1" class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> XT(<span class="st">'a'</span>,<span class="dv">1</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>flat_xt([x, x, [x,x]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[['a', 1, {}], ['a', 1, {}], ['a', 1, {}], ['a', 1, {}]]</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L202" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="beforeware" class="level3">
+<h3 class="anchored" data-anchor-id="beforeware">Beforeware</h3>
+<blockquote class="blockquote">
+<pre><code> Beforeware (f, skip=None)</code></pre>
+</blockquote>
+<p><em>Initialize self. See help(type(self)) for accurate signature.</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L230" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="ws_routex" class="level3">
+<h3 class="anchored" data-anchor-id="ws_routex">WS_RouteX</h3>
+<blockquote class="blockquote">
+<pre><code> WS_RouteX (path:str, endpoint, name=None, middleware=None, hdrs=None,
+            before=None, **bodykw)</code></pre>
+</blockquote>
+<p><em>Initialize self. See help(type(self)) for accurate signature.</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L235" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="routex" class="level3">
+<h3 class="anchored" data-anchor-id="routex">RouteX</h3>
+<blockquote class="blockquote">
+<pre><code> RouteX (path:str, endpoint, methods=None, name=None,
+         include_in_schema=True, middleware=None, hdrs=None, before=None,
+         **bodykw)</code></pre>
+</blockquote>
+<p><em>Initialize self. See help(type(self)) for accurate signature.</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L242" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="routerx" class="level3">
+<h3 class="anchored" data-anchor-id="routerx">RouterX</h3>
+<blockquote class="blockquote">
+<pre><code> RouterX (routes=None, redirect_slashes=True, default=None,
+          on_startup=None, on_shutdown=None, lifespan=None,
+          middleware=None, hdrs=None, before=None, **bodykw)</code></pre>
+</blockquote>
+<p><em>Initialize self. See help(type(self)) for accurate signature.</em></p>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L265" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_key" class="level3">
+<h3 class="anchored" data-anchor-id="get_key">get_key</h3>
+<blockquote class="blockquote">
+<pre><code> get_key (key=None, fname='.sesskey')</code></pre>
+</blockquote>
+<div id="4771838e" class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>get_key()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'08b63b51-be3a-4f54-8d26-4cd27eb17c0d'</code></pre>
+</div>
+</div>
+<div id="042666e2" class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _list(o): <span class="cf">return</span> [] <span class="cf">if</span> <span class="kw">not</span> o <span class="cf">else</span> o <span class="cf">if</span> <span class="bu">isinstance</span>(o, (<span class="bu">tuple</span>,<span class="bu">list</span>)) <span class="cf">else</span> [o]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L274" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fasthtml" class="level3">
+<h3 class="anchored" data-anchor-id="fasthtml">FastHTML</h3>
+<blockquote class="blockquote">
+<pre><code> FastHTML (debug=False, routes=None, middleware=None,
+           exception_handlers=None, on_startup=None, on_shutdown=None,
+           lifespan=None, hdrs=None, before=None, default_hdrs=True,
+           secret_key=None, session_cookie='session_', max_age=31536000,
+           sess_path='/', same_site='lax', sess_https_only=False,
+           sess_domain=None, key_fname='.sesskey', **bodykw)</code></pre>
+</blockquote>
+<p>*Creates an application instance.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><strong>debug</strong> - Boolean indicating if debug tracebacks should be returned on errors.</li>
+<li><strong>routes</strong> - A list of routes to serve incoming HTTP and WebSocket requests.</li>
+<li><strong>middleware</strong> - A list of middleware to run for every request. A starlette application will always automatically include two middleware classes. <code>ServerErrorMiddleware</code> is added as the very outermost middleware, to handle any uncaught errors occurring anywhere in the entire stack. <code>ExceptionMiddleware</code> is added as the very innermost middleware, to deal with handled exception cases occurring in the routing or endpoints.</li>
+<li><strong>exception_handlers</strong> - A mapping of either integer status codes, or exception class types onto callables which handle the exceptions. Exception handler callables should be of the form <code>handler(request, exc) -&gt; response</code> and may be either standard functions, or async functions.</li>
+<li><strong>on_startup</strong> - A list of callables to run on application startup. Startup handler callables do not take any arguments, and may be either standard functions, or async functions.</li>
+<li><strong>on_shutdown</strong> - A list of callables to run on application shutdown. Shutdown handler callables do not take any arguments, and may be either standard functions, or async functions.</li>
+<li><strong>lifespan</strong> - A lifespan context function, which can be used to perform startup and shutdown tasks. This is a newer style that replaces the <code>on_startup</code> and <code>on_shutdown</code> handlers. Use one or the other, not both.*</li>
+</ul>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L302" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="reg_re_param" class="level3">
+<h3 class="anchored" data-anchor-id="reg_re_param">reg_re_param</h3>
+<blockquote class="blockquote">
+<pre><code> reg_re_param (m, s)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/test.py#L312" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="middlewarebase" class="level3">
+<h3 class="anchored" data-anchor-id="middlewarebase">MiddlewareBase</h3>
+<blockquote class="blockquote">
+<pre><code> MiddlewareBase ()</code></pre>
+</blockquote>
+<p><em>Initialize self. See help(type(self)) for accurate signature.</em></p>
+<div id="a35c27ff" class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_cli(app): <span class="cf">return</span> app,TestClient(app),app.route</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="4e3d0e99" class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>app,cli,rt <span class="op">=</span> get_cli(FastHTML(secret_key<span class="op">=</span><span class="st">'soopersecret'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="3edc4781" class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/hi"</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> <span class="st">'Hi there'</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> cli.get(<span class="st">'/hi'</span>)</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>r.text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Hi there'</code></pre>
+</div>
+</div>
+<div id="07fe773b" class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/hi"</span>)</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(): <span class="cf">return</span> <span class="st">'Postal'</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>cli.post(<span class="st">'/hi'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Postal'</code></pre>
+</div>
+</div>
+<div id="bb4f8b67" class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_host(req): <span class="cf">return</span> req.headers[<span class="st">'host'</span>]</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'testserver'</code></pre>
+</div>
+</div>
+<div id="64343367" class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/user/</span><span class="sc">{nm}</span><span class="st">'</span>, name<span class="op">=</span><span class="st">'gday'</span>)</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(nm:<span class="bu">str</span>): <span class="cf">return</span> <span class="ss">f"Good day to you, </span><span class="sc">{</span>nm<span class="sc">}</span><span class="ss">!"</span></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/user/Alexis'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Good day to you, Alexis!'</code></pre>
+</div>
+</div>
+<div id="db0281cf" class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>test_eq(app.router.url_path_for(<span class="st">'gday'</span>, nm<span class="op">=</span><span class="st">'Jeremy'</span>), <span class="st">'/user/Jeremy'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="b827960a" class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>hxhdr <span class="op">=</span> {<span class="st">'headers'</span>:{<span class="st">'hx-request'</span>:<span class="st">"1"</span>}}</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/xt'</span>)</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> Title(<span class="st">'Foo'</span>),H1(<span class="st">'bar'</span>)</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>txt <span class="op">=</span> cli.get(<span class="st">'/xt'</span>).text</span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'&lt;title&gt;Foo&lt;/title&gt;'</span> <span class="kw">in</span> txt <span class="kw">and</span> <span class="st">'&lt;h1&gt;bar&lt;/h1&gt;'</span> <span class="kw">in</span> txt <span class="kw">and</span> <span class="st">'&lt;html&gt;'</span> <span class="kw">in</span> txt</span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/xt2'</span>)</span>
+<span id="cb66-10"><a href="#cb66-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> H1(<span class="st">'bar'</span>)</span>
+<span id="cb66-11"><a href="#cb66-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-12"><a href="#cb66-12" aria-hidden="true" tabindex="-1"></a>txt <span class="op">=</span> cli.get(<span class="st">'/xt2'</span>).text</span>
+<span id="cb66-13"><a href="#cb66-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'&lt;title&gt;FastHTML page&lt;/title&gt;'</span> <span class="kw">in</span> txt <span class="kw">and</span> <span class="st">'&lt;h1&gt;bar&lt;/h1&gt;'</span> <span class="kw">in</span> txt <span class="kw">and</span> <span class="st">'&lt;html&gt;'</span> <span class="kw">in</span> txt</span>
+<span id="cb66-14"><a href="#cb66-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-15"><a href="#cb66-15" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> cli.get(<span class="st">'/xt2'</span>, <span class="op">**</span>hxhdr).text.strip() <span class="op">==</span> <span class="st">'&lt;h1&gt;bar&lt;/h1&gt;'</span></span>
+<span id="cb66-16"><a href="#cb66-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-17"><a href="#cb66-17" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/xt3'</span>)</span>
+<span id="cb66-18"><a href="#cb66-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> Html(Head(Title(<span class="st">'hi'</span>)), Body(P(<span class="st">'there'</span>)))</span>
+<span id="cb66-19"><a href="#cb66-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-20"><a href="#cb66-20" aria-hidden="true" tabindex="-1"></a>txt <span class="op">=</span> cli.get(<span class="st">'/xt3'</span>).text</span>
+<span id="cb66-21"><a href="#cb66-21" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'&lt;title&gt;FastHTML page&lt;/title&gt;'</span> <span class="kw">not</span> <span class="kw">in</span> txt <span class="kw">and</span> <span class="st">'&lt;title&gt;hi&lt;/title&gt;'</span> <span class="kw">in</span> txt <span class="kw">and</span> <span class="st">'&lt;p&gt;there&lt;/p&gt;'</span> <span class="kw">in</span> txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="6b022adb" class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_r(cli, path, exp, meth<span class="op">=</span><span class="st">'get'</span>, hx<span class="op">=</span><span class="va">False</span>, <span class="op">**</span>kwargs):</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> hx: kwargs[<span class="st">'headers'</span>] <span class="op">=</span> {<span class="st">'hx-request'</span>:<span class="st">"1"</span>}</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>    test_eq(<span class="bu">getattr</span>(cli, meth)(path, <span class="op">**</span>kwargs).text, exp)</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>app.chk <span class="op">=</span> <span class="st">'foo'</span></span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>ModelName <span class="op">=</span> str_enum(<span class="st">'ModelName'</span>, <span class="st">"alexnet"</span>, <span class="st">"resnet"</span>, <span class="st">"lenet"</span>)</span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>fake_db <span class="op">=</span> [{<span class="st">"name"</span>: <span class="st">"Foo"</span>}, {<span class="st">"name"</span>: <span class="st">"Bar"</span>}]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="0bfd7af6" class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/html/</span><span class="sc">{idx}</span><span class="st">'</span>)</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(idx:<span class="bu">int</span>): <span class="cf">return</span> Body(H4(<span class="ss">f'Next is </span><span class="sc">{</span>idx<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">.'</span>))</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>reg_re_param(<span class="st">"imgext"</span>, <span class="st">"ico|gif|jpg|jpeg|webm"</span>)</span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="vs">r'/static/{path:path}</span><span class="sc">{fn}</span><span class="vs">.{ext:imgext}'</span>)</span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(fn:<span class="bu">str</span>, path:<span class="bu">str</span>, ext:<span class="bu">str</span>): <span class="cf">return</span> <span class="ss">f"Getting </span><span class="sc">{</span>fn<span class="sc">}</span><span class="ss">.</span><span class="sc">{</span>ext<span class="sc">}</span><span class="ss"> from /</span><span class="sc">{</span>path<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-9"><a href="#cb68-9" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/models/</span><span class="sc">{nm}</span><span class="st">"</span>)</span>
+<span id="cb68-10"><a href="#cb68-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(nm:ModelName): <span class="cf">return</span> nm</span>
+<span id="cb68-11"><a href="#cb68-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-12"><a href="#cb68-12" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/files/</span><span class="sc">{path}</span><span class="st">"</span>)</span>
+<span id="cb68-13"><a href="#cb68-13" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(path: Path): <span class="cf">return</span> path.with_suffix(<span class="st">'.txt'</span>)</span>
+<span id="cb68-14"><a href="#cb68-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-15"><a href="#cb68-15" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/items/"</span>)</span>
+<span id="cb68-16"><a href="#cb68-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(idx:<span class="bu">int</span><span class="op">|</span><span class="va">None</span> <span class="op">=</span> <span class="dv">0</span>): <span class="cf">return</span> fake_db[idx]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="09b24265" class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/html/1'</span>, <span class="st">'&lt;body&gt;</span><span class="ch">\n</span><span class="st">  &lt;h4&gt;Next is 2.&lt;/h4&gt;</span><span class="ch">\n</span><span class="st">&lt;/body&gt;</span><span class="ch">\n</span><span class="st">'</span>, hx<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/static/foo/jph.ico'</span>, <span class="st">'Getting jph.ico from /foo/'</span>)</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/models/alexnet'</span>, <span class="st">'alexnet'</span>)</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/files/foo'</span>, <span class="st">'foo.txt'</span>)</span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/items/?idx=1'</span>, <span class="st">'{"name":"Bar"}'</span>)</span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/items/'</span>, <span class="st">'{"name":"Foo"}'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="b8be4ef3" class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/booly/"</span>)</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(coming:<span class="bu">bool</span><span class="op">=</span><span class="va">True</span>): <span class="cf">return</span> <span class="st">'Coming'</span> <span class="cf">if</span> coming <span class="cf">else</span> <span class="st">'Not coming'</span></span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/datie/"</span>)</span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(d:date): <span class="cf">return</span> d</span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/ua"</span>)</span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> _(user_agent:<span class="bu">str</span>): <span class="cf">return</span> user_agent</span>
+<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/hxtest"</span>)</span>
+<span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(htmx): <span class="cf">return</span> htmx.request</span>
+<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/hxtest2"</span>)</span>
+<span id="cb70-14"><a href="#cb70-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(foo:HtmxHeaders, req): <span class="cf">return</span> foo.request</span>
+<span id="cb70-15"><a href="#cb70-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-16"><a href="#cb70-16" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/app"</span>)</span>
+<span id="cb70-17"><a href="#cb70-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(app): <span class="cf">return</span> app.chk</span>
+<span id="cb70-18"><a href="#cb70-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-19"><a href="#cb70-19" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/app2"</span>)</span>
+<span id="cb70-20"><a href="#cb70-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(foo:FastHTML): <span class="cf">return</span> foo.chk,HttpHeader(<span class="st">"mykey"</span>, <span class="st">"myval"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="5f045cf9" class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/booly/?coming=true'</span>, <span class="st">'Coming'</span>)</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/booly/?coming=no'</span>, <span class="st">'Not coming'</span>)</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>date_str <span class="op">=</span> <span class="st">"17th of May, 2024, 2p"</span></span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="ss">f'/datie/?d=</span><span class="sc">{</span>date_str<span class="sc">}</span><span class="ss">'</span>, <span class="st">'2024-05-17 14:00:00'</span>)</span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/ua'</span>, <span class="st">'FastHTML'</span>, headers<span class="op">=</span>{<span class="st">'User-Agent'</span>:<span class="st">'FastHTML'</span>})</span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/hxtest'</span> , <span class="st">'1'</span>, headers<span class="op">=</span>{<span class="st">'HX-Request'</span>:<span class="st">'1'</span>})</span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/hxtest2'</span>, <span class="st">'1'</span>, headers<span class="op">=</span>{<span class="st">'HX-Request'</span>:<span class="st">'1'</span>})</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/app'</span> , <span class="st">'foo'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="52f9f934" class="cell">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> cli.get(<span class="st">'/app2'</span>, <span class="op">**</span>hxhdr)</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>test_eq(r.text, <span class="st">'foo</span><span class="ch">\n</span><span class="st">'</span>)</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>test_eq(r.headers[<span class="st">'mykey'</span>], <span class="st">'myval'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="3366d88f" class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Bodie: a:<span class="bu">int</span><span class="op">;</span>b:<span class="bu">str</span></span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/bodie/</span><span class="sc">{nm}</span><span class="st">/"</span>)</span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> post(nm:<span class="bu">str</span>, data:Bodie):</span>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> asdict(data)</span>
+<span id="cb73-7"><a href="#cb73-7" aria-hidden="true" tabindex="-1"></a>    res[<span class="st">'nm'</span>] <span class="op">=</span> nm</span>
+<span id="cb73-8"><a href="#cb73-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> res</span>
+<span id="cb73-9"><a href="#cb73-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-10"><a href="#cb73-10" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/bodied/"</span>)</span>
+<span id="cb73-11"><a href="#cb73-11" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> bodied(nm:<span class="bu">str</span>, data:<span class="bu">dict</span>): <span class="cf">return</span> data</span>
+<span id="cb73-12"><a href="#cb73-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-13"><a href="#cb73-13" aria-hidden="true" tabindex="-1"></a>nt <span class="op">=</span> namedtuple(<span class="st">'Bodient'</span>, [<span class="st">'a'</span>,<span class="st">'b'</span>])</span>
+<span id="cb73-14"><a href="#cb73-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-15"><a href="#cb73-15" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/bodient/"</span>)</span>
+<span id="cb73-16"><a href="#cb73-16" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> bodient(data:nt): <span class="cf">return</span> data._asdict()</span>
+<span id="cb73-17"><a href="#cb73-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-18"><a href="#cb73-18" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BodieTD(TypedDict): a:<span class="bu">int</span><span class="op">;</span>b:<span class="bu">str</span><span class="op">=</span><span class="st">'foo'</span></span>
+<span id="cb73-19"><a href="#cb73-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-20"><a href="#cb73-20" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/bodietd/"</span>)</span>
+<span id="cb73-21"><a href="#cb73-21" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> bodient(data:BodieTD): <span class="cf">return</span> data</span>
+<span id="cb73-22"><a href="#cb73-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-23"><a href="#cb73-23" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Bodie2:</span>
+<span id="cb73-24"><a href="#cb73-24" aria-hidden="true" tabindex="-1"></a>    a:<span class="bu">int</span><span class="op">|</span><span class="va">None</span><span class="op">;</span> b:<span class="bu">str</span></span>
+<span id="cb73-25"><a href="#cb73-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, a, b<span class="op">=</span><span class="st">'foo'</span>): store_attr()</span>
+<span id="cb73-26"><a href="#cb73-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-27"><a href="#cb73-27" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/bodie2/"</span>)</span>
+<span id="cb73-28"><a href="#cb73-28" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> bodie(d:Bodie2): <span class="cf">return</span> <span class="ss">f"a: </span><span class="sc">{</span>d<span class="sc">.</span>a<span class="sc">}</span><span class="ss">; b: </span><span class="sc">{</span>d<span class="sc">.</span>b<span class="sc">}</span><span class="ss">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="48f0a45e" class="cell">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="bu">dict</span>(a<span class="op">=</span><span class="dv">1</span>, b<span class="op">=</span><span class="st">'foo'</span>)</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/bodie/me'</span>, <span class="st">'{"a":1,"b":"foo","nm":"me"}'</span>, <span class="st">'post'</span>, data<span class="op">=</span>d)</span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/bodied/'</span>, <span class="st">'{"a":"1","b":"foo"}'</span>, <span class="st">'post'</span>, data<span class="op">=</span>d)</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/bodie2/'</span>, <span class="st">'a: 1; b: foo'</span>, <span class="st">'post'</span>, data<span class="op">=</span>{<span class="st">'a'</span>:<span class="dv">1</span>})</span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/bodient/'</span>, <span class="st">'{"a":"1","b":"foo"}'</span>, <span class="st">'post'</span>, data<span class="op">=</span>d)</span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>test_r(cli, <span class="st">'/bodietd/'</span>, <span class="st">'{"a":1,"b":"foo"}'</span>, <span class="st">'post'</span>, data<span class="op">=</span>d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="8057b34b" class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/setcookie"</span>)</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(req):</span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>    now <span class="op">=</span> datetime.now()</span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> Response(<span class="ss">f'Set to </span><span class="sc">{</span>now<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>    res.set_cookie(<span class="st">'now'</span>, <span class="bu">str</span>(now))</span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> res</span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/getcookie"</span>)</span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(now:date): <span class="cf">return</span> <span class="ss">f'Cookie was set at time </span><span class="sc">{</span>now<span class="sc">.</span>time()<span class="sc">}</span><span class="ss">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cbdcbe74" class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/setcookie'</span>).text)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>time.sleep(<span class="fl">0.01</span>)</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/getcookie'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Set to 2024-06-15 09:33:00.521810</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>'Cookie was set at time 09:33:00.521810'</code></pre>
+</div>
+</div>
+<div id="5bce33f0" class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/setsess"</span>)</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(sess):</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>    now <span class="op">=</span> datetime.now()</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>    sess[<span class="st">'noo'</span>] <span class="op">=</span> <span class="bu">str</span>(now)</span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f'Set to </span><span class="sc">{</span>now<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/getsess"</span>)</span>
+<span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(noo:date): <span class="cf">return</span> <span class="ss">f'Session time: </span><span class="sc">{</span>noo<span class="sc">.</span>time()<span class="sc">}</span><span class="ss">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="d872ef1c" class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/setsess'</span>).text)</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>time.sleep(<span class="fl">0.01</span>)</span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/getsess'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Set to 2024-06-15 09:33:01.830672</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>'Session time: 09:33:01.830672'</code></pre>
+</div>
+</div>
+<div id="4121c4ab" class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/upload"</span>)</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> post(uploadfile:<span class="bu">str</span>): <span class="cf">return</span> (<span class="cf">await</span> uploadfile.read()).decode()</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>fn <span class="op">=</span> <span class="st">'../CHANGELOG.md'</span></span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {<span class="st">'message'</span>: <span class="st">'Hello, world!'</span>}</span>
+<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(fn, <span class="st">'rb'</span>) <span class="im">as</span> f:</span>
+<span id="cb83-7"><a href="#cb83-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(cli.post(<span class="st">'/upload'</span>, files<span class="op">=</span>{<span class="st">'uploadfile'</span>: f}, data<span class="op">=</span>data).text[:<span class="dv">80</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># Release notes
+
+&lt;!-- do not remove --&gt;
+
+## 0.0.13
+
+### New Features
+
+- Add `htm</code></pre>
+</div>
+</div>
+<div id="90341316" class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>auth <span class="op">=</span> user_pwd_auth(testuser<span class="op">=</span><span class="st">'spycraft'</span>)</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>app,cli,rt <span class="op">=</span> get_cli(FastHTML(middleware<span class="op">=</span>[auth]))</span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/locked"</span>)</span>
+<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(auth): <span class="cf">return</span> <span class="st">'Hello, '</span> <span class="op">+</span> auth</span>
+<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a>test_eq(cli.get(<span class="st">'/locked'</span>).text, <span class="st">'not authenticated'</span>)</span>
+<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>test_eq(cli.get(<span class="st">'/locked'</span>, auth<span class="op">=</span>(<span class="st">"testuser"</span>,<span class="st">"spycraft"</span>)).text, <span class="st">'Hello, testuser'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="97f2553c" class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>hdrs, routes <span class="op">=</span> app.router.hdrs, app.routes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="fa194d53" class="cell">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>app,cli,rt <span class="op">=</span> get_cli(FastHTMLWithLiveReload())</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/hi"</span>)</span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> <span class="st">'Hi there'</span></span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>test_eq(cli.get(<span class="st">'/hi'</span>).text, <span class="st">"Hi there"</span>)</span>
+<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>lr_hdrs, lr_routes <span class="op">=</span> app.router.hdrs, app.routes</span>
+<span id="cb87-9"><a href="#cb87-9" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="bu">len</span>(lr_hdrs), <span class="bu">len</span>(hdrs)<span class="op">+</span><span class="dv">1</span>)</span>
+<span id="cb87-10"><a href="#cb87-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> app.LIVE_RELOAD_HEADER <span class="kw">in</span> lr_hdrs</span>
+<span id="cb87-11"><a href="#cb87-11" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="bu">len</span>(lr_routes), <span class="bu">len</span>(routes)<span class="op">+</span><span class="dv">1</span>)</span>
+<span id="cb87-12"><a href="#cb87-12" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> app.LIVE_RELOAD_ROUTE <span class="kw">in</span> lr_routes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/AnswerDotAI\.github\.io\/fasthtml");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
