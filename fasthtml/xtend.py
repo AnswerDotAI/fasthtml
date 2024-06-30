@@ -134,9 +134,9 @@ def Titled(title:str="FastHTML app", *args, **kwargs)->XT:
     return Title(title), Main(H1(title), *args, cls="container", **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 32
-def jsd(org, repo, root, path, typ='script', ver=None, esm=False, **kwargs)->XT:
+def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **kwargs)->XT:
     "jsdelivr `Script` or CSS `Link` tag, or URL"
     ver = '@'+ver if ver else ''
-    s = f'https://cdn.jsdelivr.net/gh/{org}/{repo}{ver}/{root}/{path}'
+    s = f'https://cdn.jsdelivr.net/{prov}/{org}/{repo}{ver}/{root}/{path}'
     if esm: s += '/+esm'
     return Script(src=s, **kwargs) if typ=='script' else Link(rel='stylesheet', href=s, **kwargs) if typ=='css' else s
