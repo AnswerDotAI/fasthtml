@@ -261,15 +261,23 @@ async def _send_ws(ws, resp):
 
 def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None, **bodykw):
     cls = type('WS_Endp', (WebSocketEndpoint,), {"encoding":"text"})
-    async def _recv(self, ws, data):
-        wd = _wrap_ws(ws, loads(data), signature(recv).parameters)
-        resp = recv(*wd)
+    
+    async def _generic_handler(handler, ws, data=None):
+        wd = _wrap_ws(ws, loads(data) if data else {}, signature(handler).parameters)
+        resp = handler(*wd)
         if resp:
-            if is_async_callable(recv): resp = await resp
+            if is_async_callable(handler): resp = await resp
             await _send_ws(ws, resp)
+
+    async def _connect(self, ws):
+        await ws.accept()
+        await _generic_handler(conn, ws)
+    async def _disconnect(self, ws, close_code): await _generic_handler(disconn, ws)
+    async def _recv(self, ws, data): await _generic_handler(recv, ws, data)
+
+    if    conn: cls.on_connect    = _connect
+    if disconn: cls.on_disconnect = _disconnect
     cls.on_receive = _recv
-    if    conn: cls.on_connect    = conn
-    if disconn: cls.on_disconnect = disconn
     return cls
 
 # %% ../nbs/00_core.ipynb 46
@@ -346,9 +354,9 @@ class FastHTML(Starlette):
             return func
         return f
 
-    def ws(self, path:str, name=None):
+    def ws(self, path:str, conn=None, disconn=None, name=None):
         def f(func):
-            self.router.add_ws(path, func, name=name)
+            self.router.add_ws(path, func, conn=conn, disconn=disconn, name=name)
             return func
         return f
 
