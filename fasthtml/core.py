@@ -153,10 +153,10 @@ def _xt_resp(req, resp, hdrs, **bodykw):
     if not isinstance(resp, (tuple,list)): resp = (resp,)
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
-    titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '')=='title')
+    titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in ('title','meta'))
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
         if not titles: titles = [Title('FastHTML page')]
-        resp = Html(Head(titles[0], *flat_xt(hdrs)), Body(bdy, **bodykw))
+        resp = Html(Head(*titles, *flat_xt(hdrs)), Body(bdy, **bodykw))
     return HTMLResponse(to_xml(resp), headers=http_hdrs)
 
 def _wrap_resp(req, resp, cls, hdrs, **bodykw):
