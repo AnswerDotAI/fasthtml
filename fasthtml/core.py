@@ -255,6 +255,7 @@ def _wrap_ws(ws, data, params):
 
 # %% ../nbs/00_core.ipynb 44
 async def _send_ws(ws, resp):
+    if not resp: return
     res = to_xml(resp) if isinstance(resp, (list,tuple)) or hasattr(resp, '__xt__') else resp
     await ws.send_text(res)
 
