@@ -1,5 +1,6 @@
 from asyncio import sleep
 from fasthtml.common import *
+from fasthtml.xtend import Titled
 
 app = FastHTML(ws_hdr=True)
 rt = app.route
