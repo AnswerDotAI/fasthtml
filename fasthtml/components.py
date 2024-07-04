@@ -15,12 +15,13 @@ __all__ = ['voids', 'named', 'html_attrs', 'hx_attrs', 'show', 'xt_html', 'xt_hx
 
 # %% ../nbs/01_components.ipynb 2
 from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
-
 from bs4 import BeautifulSoup
 
 from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
+
+import types
 
 try: from IPython import display
 except ImportError: display=None
@@ -39,6 +40,7 @@ hx_attrs = html_attrs + [f'hx_{o}' for o in hx_attrs.split()]
 
 # %% ../nbs/01_components.ipynb 6
 def xt_html(tag: str, *c, id=None, cls=None, title=None, style=None, **kwargs):
+    if len(c)==1 and isinstance(c[0], (types.GeneratorType, map, filter)): c = tuple(c[0])
     kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style
     tag,c,kw = xt(tag, *c, **kwargs)
     if tag in named and 'id' in kw and 'name' not in kw: kw['name'] = kw['id']

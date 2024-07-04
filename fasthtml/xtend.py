@@ -123,9 +123,9 @@ def Script(code:str="", **kwargs)->XT:
 
 # %% ../nbs/02_xtend.ipynb 30
 @delegates(xt_html, keep=True)
-def Style(css:str="", **kwargs)->XT:
+def Style(*c, **kwargs)->XT:
     "A Style tag that doesn't escape its code"
-    return xt_html('style', NotStr(css), **kwargs)
+    return xt_html('style', map(NotStr,c), **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 31
 @delegates(xt_hx, keep=True)
