@@ -5,7 +5,7 @@ __all__ = ['empty', 'htmx_hdrs', 'htmxscr', 'htmxwsscr', 'surrsrc', 'scopesrc', 
            'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware',
            'WS_RouteX', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'reg_re_param', 'MiddlewareBase']
 
-# %% ../nbs/00_core.ipynb 2
+# %% ../nbs/00_core.ipynb 3
 import json,dateutil,uuid,inspect,types
 
 from fastcore.utils import *
@@ -25,29 +25,29 @@ from .starlette import *
 
 empty = Parameter.empty
 
-# %% ../nbs/00_core.ipynb 4
+# %% ../nbs/00_core.ipynb 5
 def is_typeddict(cls:type)->bool:
     "Check if `cls` is a `TypedDict`"
     attrs = 'annotations', 'required_keys', 'optional_keys'
     return isinstance(cls, type) and all(hasattr(cls, f'__{attr}__') for attr in attrs)
 
-# %% ../nbs/00_core.ipynb 6
+# %% ../nbs/00_core.ipynb 7
 def is_namedtuple(cls):
     "`True` is `cls` is a namedtuple type"
     return issubclass(cls, tuple) and hasattr(cls, '_fields')
 
-# %% ../nbs/00_core.ipynb 8
+# %% ../nbs/00_core.ipynb 9
 def date(s:str):
     "Convert `s` to a datetime"
     return dateutil.parser.parse(s)
 
-# %% ../nbs/00_core.ipynb 10
+# %% ../nbs/00_core.ipynb 11
 def snake2hyphens(s:str):
     "Convert `s` from snake case to hyphenated and capitalised"
     s = snake2camel(s)
     return camel2words(s, '-')
 
-# %% ../nbs/00_core.ipynb 12
+# %% ../nbs/00_core.ipynb 13
 htmx_hdrs = dict(
     boosted="HX-Boosted",
     current_url="HX-Current-URL",
@@ -68,7 +68,7 @@ def _get_htmx(h):
     res = {k:h.get(v.lower(), None) for k,v in htmx_hdrs.items()}
     return HtmxHeaders(**res)
 
-# %% ../nbs/00_core.ipynb 15
+# %% ../nbs/00_core.ipynb 16
 def str2int(s)->int:
     "Convert `s` to an `int`"
     s = s.lower()
@@ -76,7 +76,7 @@ def str2int(s)->int:
     if s=='none': return 0
     return 0 if not s else int(s)
 
-# %% ../nbs/00_core.ipynb 18
+# %% ../nbs/00_core.ipynb 20
 def _fix_anno(t):
     "Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"
     origin = get_origin(t)
@@ -87,7 +87,7 @@ def _fix_anno(t):
     if origin in (list,List): res = partial(_mk_list, res)
     return res
 
-# %% ../nbs/00_core.ipynb 23
+# %% ../nbs/00_core.ipynb 25
 def _form_arg(k, v, d):
     "Get type by accessing key `k` from `d`, and use to cast `v`"
     if v is None: return
@@ -96,31 +96,31 @@ def _form_arg(k, v, d):
     if not anno: return v
     return _fix_anno(anno)(v)
 
-# %% ../nbs/00_core.ipynb 27
+# %% ../nbs/00_core.ipynb 29
 @dataclass
 class HttpHeader: k:str;v:str
 
-# %% ../nbs/00_core.ipynb 28
+# %% ../nbs/00_core.ipynb 30
 def _annotations(anno):
     "Same as `get_annotations`, but also works on namedtuples"
     if is_namedtuple(anno): return {o:str for o in anno._fields}
     return get_annotations(anno)
 
-# %% ../nbs/00_core.ipynb 29
+# %% ../nbs/00_core.ipynb 31
 def _is_body(anno): return issubclass(anno, (dict,ns)) or _annotations(anno)
 
-# %% ../nbs/00_core.ipynb 30
+# %% ../nbs/00_core.ipynb 32
 def _formitem(form, k):
     "Return single item `k` from `form` if len 1, otherwise return list"
     o = form.getlist(k)
     return o[0] if len(o) == 1 else o if o else None
 
-# %% ../nbs/00_core.ipynb 31
+# %% ../nbs/00_core.ipynb 33
 def form2dict(form: FormData) -> dict:
     "Convert starlette form data to a dict"
     return {k: _formitem(form, k) for k in form}
 
-# %% ../nbs/00_core.ipynb 33
+# %% ../nbs/00_core.ipynb 35
 async def _from_body(req, p):
     form = await req.form()
     anno = p.annotation
@@ -129,7 +129,7 @@ async def _from_body(req, p):
     cargs = {k:_form_arg(k, v, d) for k,v in form2dict(form).items()}
     return anno(**cargs)
 
-# %% ../nbs/00_core.ipynb 35
+# %% ../nbs/00_core.ipynb 37
 async def _find_p(req, arg:str, p:Parameter):
     "In `req` find param named `arg` of type in `p` (`arg` is ignored for body types)"
     anno = p.annotation
@@ -166,7 +166,7 @@ async def _find_p(req, arg:str, p:Parameter):
 async def _wrap_req(req, params):
     return [await _find_p(req, arg, p) for arg,p in params.items()]
 
-# %% ../nbs/00_core.ipynb 37
+# %% ../nbs/00_core.ipynb 39
 def flat_xt(lst):
     "Flatten lists, except for `XT`s"
     result = []
@@ -175,9 +175,10 @@ def flat_xt(lst):
         else: result.append(item)
     return result
 
-# %% ../nbs/00_core.ipynb 39
+# %% ../nbs/00_core.ipynb 41
 def _xt_resp(req, resp, hdrs, **bodykw):
-    if not isinstance(resp, (tuple,list)): resp = (resp,)
+    if not isinstance(resp, tuple): resp = (resp,)
+    resp = resp + tuple(req.injects)
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
     titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in ('title','meta'))
@@ -186,8 +187,9 @@ def _xt_resp(req, resp, hdrs, **bodykw):
         resp = Html(Head(*titles, *flat_xt(hdrs)), Body(bdy, **bodykw))
     return HTMLResponse(to_xml(resp), headers=http_hdrs)
 
-# %% ../nbs/00_core.ipynb 40
+# %% ../nbs/00_core.ipynb 42
 def _wrap_resp(req, resp, cls, hdrs, **bodykw):
+    if not resp: resp=()
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
@@ -199,12 +201,12 @@ def _wrap_resp(req, resp, cls, hdrs, **bodykw):
         cls = HTMLResponse
     return cls(resp)
 
-# %% ../nbs/00_core.ipynb 41
+# %% ../nbs/00_core.ipynb 43
 class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
 
-# %% ../nbs/00_core.ipynb 42
-def _wrap_ep(f, hdrs, before, **bodykw):
+# %% ../nbs/00_core.ipynb 44
+def _wrap_ep(f, hdrs, before, after, **bodykw):
     if not (isfunction(f) or ismethod(f)): return f
     sig = signature(f)
     params = sig.parameters
@@ -212,6 +214,7 @@ def _wrap_ep(f, hdrs, before, **bodykw):
 
     async def _f(req):
         resp = None
+        req.injects = []
         for b in before:
             if not resp:
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
@@ -224,10 +227,14 @@ def _wrap_ep(f, hdrs, before, **bodykw):
             wreq = await _wrap_req(req, params)
             resp = f(*wreq)
             if is_async_callable(f): resp = await resp
+        for a in after:
+            _,*wreq = await _wrap_req(req, signature(a).parameters)
+            nr = a(resp, *wreq)
+            if nr: resp = nr
         return _wrap_resp(req, resp, cls, hdrs, **bodykw)
     return _f
 
-# %% ../nbs/00_core.ipynb 43
+# %% ../nbs/00_core.ipynb 46
 def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
     "In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"
     anno = p.annotation
@@ -253,7 +260,7 @@ def _wrap_ws(ws, data, params):
     hdrs = data.pop('HEADERS', {})
     return [_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()]
 
-# %% ../nbs/00_core.ipynb 44
+# %% ../nbs/00_core.ipynb 47
 async def _send_ws(ws, resp):
     if not resp: return
     res = to_xml(resp) if isinstance(resp, (list,tuple)) or hasattr(resp, '__xt__') else resp
@@ -280,43 +287,43 @@ def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None, **bodykw):
     cls.on_receive = _recv
     return cls
 
-# %% ../nbs/00_core.ipynb 46
+# %% ../nbs/00_core.ipynb 50
 class WS_RouteX(WebSocketRoute):
     def __init__(self, path:str, recv, conn:callable=None, disconn:callable=None, *,
                  name=None, middleware=None, hdrs=None, before=None, **bodykw):
         super().__init__(path, _ws_endp(recv, conn, disconn, hdrs, before, **bodykw), name=name, middleware=middleware)
 
-# %% ../nbs/00_core.ipynb 47
+# %% ../nbs/00_core.ipynb 51
 class RouteX(Route):
     def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
-                hdrs=None, before=None, **bodykw):
-        super().__init__(path, _wrap_ep(endpoint, hdrs, before, **bodykw), methods=methods, name=name,
-                         include_in_schema=include_in_schema, middleware=middleware)
+                hdrs=None, before=None, after=None, **bodykw):
+        ep = _wrap_ep(endpoint, hdrs, before=before, after=after, **bodykw)
+        super().__init__(path, ep, methods=methods, name=name, include_in_schema=include_in_schema, middleware=middleware)
 
-# %% ../nbs/00_core.ipynb 48
+# %% ../nbs/00_core.ipynb 52
 class RouterX(Router):
     def __init__(self, routes=None, redirect_slashes=True, default=None, on_startup=None, on_shutdown=None,
-                 lifespan=None, *, middleware=None, hdrs=None, before=None, **bodykw):
+                 lifespan=None, *, middleware=None, hdrs=None, before=None, after=None, **bodykw):
         super().__init__(routes, redirect_slashes, default, on_startup, on_shutdown,
                  lifespan=lifespan, middleware=middleware)
-        self.hdrs,self.bodykw,self.before = hdrs or (),bodykw,before or ()
+        self.hdrs,self.bodykw,self.before,self.after = hdrs,bodykw,before,after
 
     def add_route( self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
         route = RouteX(path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema,
-                       hdrs=self.hdrs, before=self.before, **self.bodykw)
+                       hdrs=self.hdrs, before=self.before, after=self.after, **self.bodykw)
         self.routes.append(route)
 
     def add_ws( self, path: str, recv: callable, conn:callable=None, disconn:callable=None, name=None):
         route = WS_RouteX(path, recv=recv, conn=conn, disconn=disconn, name=name, hdrs=self.hdrs, before=self.before, **self.bodykw)
         self.routes.append(route)
 
-# %% ../nbs/00_core.ipynb 49
+# %% ../nbs/00_core.ipynb 53
 htmxscr   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
 htmxwsscr = Script(src="https://unpkg.com/htmx-ext-ws/ws.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/gnat/surreal/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline/script.js")
 
-# %% ../nbs/00_core.ipynb 50
+# %% ../nbs/00_core.ipynb 54
 def get_key(key=None, fname='.sesskey'):
     if key: return key
     fname = Path(fname)
@@ -325,16 +332,16 @@ def get_key(key=None, fname='.sesskey'):
     fname.write_text(key)
     return key
 
-# %% ../nbs/00_core.ipynb 52
-def _list(o): return [] if not o else o if isinstance(o, (tuple,list)) else [o]
+# %% ../nbs/00_core.ipynb 56
+def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) else [o]
 
-# %% ../nbs/00_core.ipynb 53
+# %% ../nbs/00_core.ipynb 57
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
-                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, before=None, default_hdrs=True,
+                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, before=None, after=None, default_hdrs=True,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, ws_hdr=False, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', **bodykw):
-        middleware,before = _list(middleware),_list(before)
+        middleware,before,after = _list(middleware),_list(before),_list(after)
         secret_key = get_key(secret_key, key_fname)
         sess = Middleware(SessionMiddleware, secret_key=secret_key, session_cookie=session_cookie,
                           max_age=max_age, path=sess_path, same_site=same_site,
@@ -345,7 +352,7 @@ class FastHTML(Starlette):
         if default_hdrs: hdrs = [htmxscr,surrsrc,scopesrc] + hdrs
         if ws_hdr: hdrs.append(htmxwsscr)
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, hdrs=hdrs,
-                              before=before, **bodykw)
+                              before=before, after=after, **bodykw)
 
     def route(self, path:str, methods=None, name=None, include_in_schema=True):
         def f(func):
@@ -363,17 +370,17 @@ class FastHTML(Starlette):
 all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
-# %% ../nbs/00_core.ipynb 54
+# %% ../nbs/00_core.ipynb 59
 def reg_re_param(m, s):
     cls = get_class(f'{m}Conv', sup=StringConvertor, regex=s)
     register_url_convertor(m, cls())
 
-# %% ../nbs/00_core.ipynb 55
+# %% ../nbs/00_core.ipynb 60
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
 reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml|html")
 
-# %% ../nbs/00_core.ipynb 56
+# %% ../nbs/00_core.ipynb 61
 class MiddlewareBase:
     async def __call__(self, scope, receive, send) -> None:
         if scope["type"] not in ["http", "websocket"]:
