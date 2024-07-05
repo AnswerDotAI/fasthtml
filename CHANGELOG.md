@@ -2,6 +2,22 @@
 
 <!-- do not remove -->
 
+## 0.1.1
+
+### New Features
+
+- Add `fasthtml.toasts` ([#35](https://github.com/AnswerDotAI/fasthtml/issues/35))
+- 'Afterware' support
+- Add `injects` to request
+- Basic websocket support ([#29](https://github.com/AnswerDotAI/fasthtml/issues/29))
+- Support `meta` tags in returned tuple ([#28](https://github.com/AnswerDotAI/fasthtml/issues/28))
+- Support npm provider in jsdelivr ([#27](https://github.com/AnswerDotAI/fasthtml/issues/27))
+
+### Bugs Squashed
+
+- `Style` does not accept multiple positional args correctly ([#34](https://github.com/AnswerDotAI/fasthtml/issues/34))
+
+
 ## 0.1.0
 
 ### New Features
