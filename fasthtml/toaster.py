@@ -41,7 +41,7 @@ proc_htmx('.toast-container', async function(toast) {
 """
 
 def add_toast(sess, message, typ="info"):
-    assert typ in ("info", "success", "warning", "error")
+    assert typ in ("info", "success", "warning", "error"), '`typ` not in ("info", "success", "warning", "error")'
     sess.setdefault(sk, []).append((message, typ))
 
 def render_toasts(sess):
