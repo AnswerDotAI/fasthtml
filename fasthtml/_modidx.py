@@ -98,4 +98,5 @@ d = { 'settings': { 'branch': 'main',
                                 'fasthtml.xtend.Style': ('xtend.html#style', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.Titled': ('xtend.html#titled', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.jsd': ('xtend.html#jsd', 'fasthtml/xtend.py'),
+                                'fasthtml.xtend.run_js': ('xtend.html#run_js', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.set_pico_cls': ('xtend.html#set_pico_cls', 'fasthtml/xtend.py')}}}

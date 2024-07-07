@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group',
-           'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'Titled', 'jsd']
+           'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'run_js', 'Titled', 'jsd']
 
 # %% ../nbs/02_xtend.ipynb 2
 from dataclasses import dataclass, asdict
@@ -128,12 +128,19 @@ def Style(*c, **kwargs)->XT:
     return xt_html('style', map(NotStr,c), **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 31
+def run_js(js, id=None, **kw):
+    "Run `js` script, auto-generating `id` based on name of caller if needed, and js-escaping any `kw` params"
+    if not id: id = sys._getframe(1).f_code.co_name
+    kw = {k:dumps(v) for k,v in kw.items()}
+    return Script(js.format(**kw), id=id, hx_swap_oob='true')
+
+# %% ../nbs/02_xtend.ipynb 32
 @delegates(xt_hx, keep=True)
 def Titled(title:str="FastHTML app", *args, **kwargs)->XT:
     "An HTML partial containing a `Title`, and `H1`, and any provided children"
     return Title(title), Main(H1(title), *args, cls="container", **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 32
+# %% ../nbs/02_xtend.ipynb 33
 def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **kwargs)->XT:
     "jsdelivr `Script` or CSS `Link` tag, or URL"
     ver = '@'+ver if ver else ''
