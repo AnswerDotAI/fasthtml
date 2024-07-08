@@ -24,7 +24,7 @@ def fast_app(db=None, render=None, hdrs=None, tbls=None, before=None, middleware
                   sess_domain=sess_domain, key_fname=key_fname)
     @app.route("/{fname:path}.{ext:static}")
     async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
-    if not db: return app
+    if not db: return app,app.route
 
     db = database(db)
     if not tbls: tbls={}
@@ -35,7 +35,7 @@ def fast_app(db=None, render=None, hdrs=None, tbls=None, before=None, middleware
             tbls['items'] = kwargs
     dbtbls = [get_tbl(db.t, k, v) for k,v in tbls.items()]
     if len(dbtbls)==1: dbtbls=dbtbls[0]
-    return app,*dbtbls
+    return app,app.route,*dbtbls
 
 def run_uv(fname=None, app='app', host='0.0.0.0', port=None, reload=True):
     glb = inspect.currentframe().f_back.f_globals
