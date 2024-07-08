@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.1.2
+
+### Breaking changes
+
+- `fast_app` returns `app.route` as well as app ([#38](https://github.com/AnswerDotAI/fasthtml/issues/38))
+
+### New Features
+
+- Add viewport and charset to Meta by default ([#36](https://github.com/AnswerDotAI/fasthtml/issues/36))
+- New function `run_js` ([#36](https://github.com/AnswerDotAI/fasthtml/issues/36))
+
+
 ## 0.1.1
 
 ### New Features
