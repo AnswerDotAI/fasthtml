@@ -25,7 +25,7 @@ toast_css = """
 toast_js = """
 export function proc_htmx(sel, func) {
   htmx.onLoad(elt => {
-    const elements = any(sel, elt);
+    const elements = any(sel, elt, false);
     if (elt.matches && elt.matches(sel)) elements.unshift(elt);
     elements.forEach(func);
   });
