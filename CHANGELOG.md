@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.1.4
+
+### New Features
+
+- `ScriptX` and `StyleX` for templated generation from external files ([#42](https://github.com/AnswerDotAI/fasthtml/issues/42))
 
 
 ## 0.1.2
