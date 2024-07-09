@@ -2,12 +2,14 @@
 
 # %% auto 0
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group',
-           'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'run_js', 'Titled', 'jsd']
+           'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces',
+           'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'run_js', 'Titled', 'jsd']
 
 # %% ../nbs/02_xtend.ipynb 2
 from dataclasses import dataclass, asdict
 
 from fastcore.utils import *
+from fastcore.xtras import partial_format
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
 from .components import *
@@ -128,19 +130,58 @@ def Style(*c, **kwargs)->XT:
     return xt_html('style', map(NotStr,c), **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 31
+def double_braces(s):
+    "Convert single braces to double braces if next to special chars or newline"
+    s = re.sub(r'{(?=[\s:;\'"]|$)', '{{', s)
+    return re.sub(r'(^|[\s:;\'"])}', r'\1}}', s)
+
+# %% ../nbs/02_xtend.ipynb 32
+def undouble_braces(s):
+    "Convert double braces to single braces if next to special chars or newline"
+    s = re.sub(r'\{\{(?=[\s:;\'"]|$)', '{', s)
+    return re.sub(r'(^|[\s:;\'"])\}\}', r'\1}', s)
+
+# %% ../nbs/02_xtend.ipynb 33
+def loose_format(s, **kw):
+    "String format `s` using `kw`, without being strict about braces outside of template params"
+    return undouble_braces(partial_format(double_braces(s), **kw)[0])
+
+# %% ../nbs/02_xtend.ipynb 34
+def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin=None, integrity=None, **kw):
+    "Create a Script from the text of a file"
+    attrs = ['src', 'type', 'async', 'defer', 'charset', 'crossorigin', 'integrity', 'nomodule']
+    scr_kw = {k:kw.pop(k) for k in attrs if k in kw}
+    s = loose_format(Path(fname).read_text(), **kw)
+    return Script(s, **scr_kw)
+
+# %% ../nbs/02_xtend.ipynb 35
+def replace_css_vars(css, pre='tpl', **kwargs):
+    def replace_var(m):
+        var_name = m.group(1).replace('-', '_')
+        return kwargs.get(var_name, m.group(0))
+    return re.sub(fr'var\(--{pre}-([\w-]+)\)', replace_var, css)
+
+# %% ../nbs/02_xtend.ipynb 36
+def StyleX(fname, **kw):
+    s = Path(fname).read_text()
+    attrs = ['type', 'media', 'scoped', 'title', 'nonce', 'integrity', 'crossorigin']
+    sty_kw = {k:kw.pop(k) for k in attrs if k in kw}
+    return Style(replace_css_vars(s, **kw), **sty_kw)
+
+# %% ../nbs/02_xtend.ipynb 37
 def run_js(js, id=None, **kw):
     "Run `js` script, auto-generating `id` based on name of caller if needed, and js-escaping any `kw` params"
     if not id: id = sys._getframe(1).f_code.co_name
     kw = {k:dumps(v) for k,v in kw.items()}
     return Script(js.format(**kw), id=id, hx_swap_oob='true')
 
-# %% ../nbs/02_xtend.ipynb 32
+# %% ../nbs/02_xtend.ipynb 38
 @delegates(xt_hx, keep=True)
 def Titled(title:str="FastHTML app", *args, **kwargs)->XT:
     "An HTML partial containing a `Title`, and `H1`, and any provided children"
     return Title(title), Main(H1(title), *args, cls="container", **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 33
+# %% ../nbs/02_xtend.ipynb 39
 def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **kwargs)->XT:
     "jsdelivr `Script` or CSS `Link` tag, or URL"
     ver = '@'+ver if ver else ''
