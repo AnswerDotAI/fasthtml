@@ -1,6 +1,7 @@
-__all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group', 'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'Titled', 'jsd']
+__all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group', 'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'run_js', 'Titled', 'jsd']
 from dataclasses import dataclass, asdict
 from fastcore.utils import *
+from fastcore.xtras import partial_format
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
 from .components import *
@@ -64,8 +65,34 @@ def Script(code: str='', *, id=None, cls=None, title=None, style=None, **kwargs)
     """A Script tag that doesn't escape its code"""
     ...
 
-def Style(css: str='', *, id=None, cls=None, title=None, style=None, **kwargs) -> XT:
+def Style(*c, id=None, cls=None, title=None, style=None, **kwargs) -> XT:
     """A Style tag that doesn't escape its code"""
+    ...
+
+def double_braces(s):
+    """Convert single braces to double braces if next to special chars or newline"""
+    ...
+
+def undouble_braces(s):
+    """Convert double braces to single braces if next to special chars or newline"""
+    ...
+
+def loose_format(s, **kw):
+    """String format `s` using `kw`, without being strict about braces outside of template params"""
+    ...
+
+def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin=None, integrity=None, **kw):
+    """Create a Script from the text of a file"""
+    ...
+
+def replace_css_vars(css, pre='tpl', **kwargs):
+    ...
+
+def StyleX(fname, **kw):
+    ...
+
+def run_js(js, id=None, **kw):
+    """Run `js` script, auto-generating `id` based on name of caller if needed, and js-escaping any `kw` params"""
     ...
 
 def Titled(title: str='FastHTML app', *args, target_id=None, id=None, cls=None, style=None, accesskey=None, contenteditable=None, dir=None, draggable=None, enterkeyhint=None, hidden=None, inert=None, inputmode=None, lang=None, popover=None, spellcheck=None, tabindex=None, translate=None, hx_get=None, hx_post=None, hx_put=None, hx_delete=None, hx_patch=None, hx_trigger=None, hx_target=None, hx_swap=None, hx_include=None, hx_select=None, hx_indicator=None, hx_push_url=None, hx_confirm=None, hx_disable=None, hx_replace_url=None, hx_on=None, **kwargs) -> XT:

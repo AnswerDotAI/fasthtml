@@ -1,3 +1,53 @@
+__all__ = ['voids', 'named', 'html_attrs', 'hx_attrs', 'show', 'xt_html', 'xt_hx', 'fill_form', 'fill_dataclass', 'find_inputs', 'html2xt', 'A', 'Abbr', 'Address', 'Area', 'Article', 'Aside', 'Audio', 'B', 'Base', 'Bdi', 'Bdo', 'Blockquote', 'Body', 'Br', 'Button', 'Canvas', 'Caption', 'Cite', 'Code', 'Col', 'Colgroup', 'Data', 'Datalist', 'Dd', 'Del', 'Details', 'Dfn', 'Dialog', 'Div', 'Dl', 'Dt', 'Em', 'Embed', 'Fencedframe', 'Fieldset', 'Figcaption', 'Figure', 'Footer', 'Form', 'H1', 'Head', 'Header', 'Hgroup', 'Hr', 'Html', 'I', 'Iframe', 'Img', 'Input', 'Ins', 'Kbd', 'Label', 'Legend', 'Li', 'Link', 'Main', 'Map', 'Mark', 'Menu', 'Meta', 'Meter', 'Nav', 'Noscript', 'Object', 'Ol', 'Optgroup', 'Option', 'Output', 'P', 'Picture', 'PortalExperimental', 'Pre', 'Progress', 'Q', 'Rp', 'Rt', 'Ruby', 'S', 'Samp', 'Script', 'Search', 'Section', 'Select', 'Slot', 'Small', 'Source', 'Span', 'Strong', 'Style', 'Sub', 'Summary', 'Sup', 'Table', 'Tbody', 'Td', 'Template', 'Textarea', 'Tfoot', 'Th', 'Thead', 'Time', 'Title', 'Tr', 'Track', 'U', 'Ul', 'Var', 'Video', 'Wbr']
+from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
+from bs4 import BeautifulSoup
+from fastcore.utils import *
+from fastcore.xml import *
+from fastcore.meta import use_kwargs, delegates
+import types
+try:
+    from IPython import display
+except ImportError:
+    display = None
+
+def show(xt, *rest):
+    ...
+voids = set('area base br col command embed hr img input keygen link meta param source track wbr !doctype'.split())
+named = set('a button form frame iframe img input map meta object param select textarea'.split())
+html_attrs = 'id cls title style accesskey contenteditable dir draggable enterkeyhint hidden inert inputmode lang popover spellcheck tabindex translate'.split()
+hx_attrs = 'get post put delete patch trigger target swap include select indicator push_url confirm disable replace_url on'
+hx_attrs = html_attrs + [f'hx_{o}' for o in hx_attrs.split()]
+
+def xt_html(tag: str, *c, id=None, cls=None, title=None, style=None, **kwargs):
+    ...
+
+@use_kwargs(hx_attrs, keep=True)
+def xt_hx(tag: str, *c, target_id=None, **kwargs):
+    ...
+_g = globals()
+_all_ = ['A', 'Abbr', 'Address', 'Area', 'Article', 'Aside', 'Audio', 'B', 'Base', 'Bdi', 'Bdo', 'Blockquote', 'Body', 'Br', 'Button', 'Canvas', 'Caption', 'Cite', 'Code', 'Col', 'Colgroup', 'Data', 'Datalist', 'Dd', 'Del', 'Details', 'Dfn', 'Dialog', 'Div', 'Dl', 'Dt', 'Em', 'Embed', 'Fencedframe', 'Fieldset', 'Figcaption', 'Figure', 'Footer', 'Form', 'H1', 'Head', 'Header', 'Hgroup', 'Hr', 'Html', 'I', 'Iframe', 'Img', 'Input', 'Ins', 'Kbd', 'Label', 'Legend', 'Li', 'Link', 'Main', 'Map', 'Mark', 'Menu', 'Meta', 'Meter', 'Nav', 'Noscript', 'Object', 'Ol', 'Optgroup', 'Option', 'Output', 'P', 'Picture', 'PortalExperimental', 'Pre', 'Progress', 'Q', 'Rp', 'Rt', 'Ruby', 'S', 'Samp', 'Script', 'Search', 'Section', 'Select', 'Slot', 'Small', 'Source', 'Span', 'Strong', 'Style', 'Sub', 'Summary', 'Sup', 'Table', 'Tbody', 'Td', 'Template', 'Textarea', 'Tfoot', 'Th', 'Thead', 'Time', 'Title', 'Tr', 'Track', 'U', 'Ul', 'Var', 'Video', 'Wbr']
+for o in _all_:
+    _g[o] = partial(xt_hx, o.lower())
+
+def _fill_item(item, obj):
+    ...
+
+def fill_form(form: XT, obj) -> XT:
+    """Fills named items in `form` using attributes in `obj`"""
+    ...
+
+def fill_dataclass(src, dest):
+    """Modifies dataclass in-place and returns it"""
+    ...
+
+def find_inputs(e, tags='input', **kw):
+    ...
+
+def __getattr__(tag):
+    ...
+
+def html2xt(html):
+    ...
 def xt_html(tag: str, *c, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, hx_get:str|None=None, hx_post:str|None=None, hx_put:str|None=None, hx_delete:str|None=None, hx_patch:str|None=None, hx_trigger:str|None=None, hx_target:str|None=None, hx_swap:str|None=None, hx_include:str|None=None, hx_select:str|None=None, hx_indicator:str|None=None, hx_push_url:str|None=None, hx_confirm:str|None=None, hx_disable:str|None=None, hx_replace_url:str|None=None, hx_on:str|None=None, **kwargs): ...
 def xt_hx(tag: str, *c, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, hx_get:str|None=None, hx_post:str|None=None, hx_put:str|None=None, hx_delete:str|None=None, hx_patch:str|None=None, hx_trigger:str|None=None, hx_target:str|None=None, hx_swap:str|None=None, hx_include:str|None=None, hx_select:str|None=None, hx_indicator:str|None=None, hx_push_url:str|None=None, hx_confirm:str|None=None, hx_disable:str|None=None, hx_replace_url:str|None=None, hx_on:str|None=None, **kwargs): ...
 def A(*c, name:str|None=None, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, hx_get:str|None=None, hx_post:str|None=None, hx_put:str|None=None, hx_delete:str|None=None, hx_patch:str|None=None, hx_trigger:str|None=None, hx_target:str|None=None, hx_swap:str|None=None, hx_include:str|None=None, hx_select:str|None=None, hx_indicator:str|None=None, hx_push_url:str|None=None, hx_confirm:str|None=None, hx_disable:str|None=None, hx_replace_url:str|None=None, hx_on:str|None=None, **kwargs): ...

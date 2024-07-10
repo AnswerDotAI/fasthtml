@@ -43,7 +43,7 @@ def run_uv(fname=None, app='app', host='0.0.0.0', port=None, reload=True):
         if not fname: fname = Path(glb.get('__file__', '')).stem
         if not port: port=int(os.getenv("PORT", default=5001))
         print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
-        uvicorn.run(f"{fname}:app", host=host, port=port, reload=reload)
+        uvicorn.run(f"{fname}:{app}", host=host, port=port, reload=reload)
 
 def clear(id): return Div(hx_swap_oob='innerHTML', id=id)
 def ContainerX(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
