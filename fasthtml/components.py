@@ -65,7 +65,7 @@ _all_ = [
     'Td', 'Template', 'Textarea', 'Tfoot', 'Th', 'Thead', 'Time', 'Title', 'Tr', 'Track', 'U', 'Ul', 'Var', 'Video', 'Wbr']
 for o in _all_: _g[o] = partial(xt_hx, o.lower())
 
-# %% ../nbs/01_components.ipynb 12
+# %% ../nbs/01_components.ipynb 13
 def _fill_item(item, obj):
     if not isinstance(item,list): return item
     tag,cs,attr = item
@@ -81,19 +81,19 @@ def _fill_item(item, obj):
         if tag=='textarea': cs=(val,)
     return XT(tag,cs,attr)
 
-# %% ../nbs/01_components.ipynb 13
+# %% ../nbs/01_components.ipynb 14
 def fill_form(form:XT, obj)->XT:
     "Fills named items in `form` using attributes in `obj`"
     if not isinstance(obj,dict): obj = asdict(obj)
     return _fill_item(form, obj)
 
-# %% ../nbs/01_components.ipynb 15
+# %% ../nbs/01_components.ipynb 16
 def fill_dataclass(src, dest):
     "Modifies dataclass in-place and returns it"
     for nm,val in asdict(src).items(): setattr(dest, nm, val)
     return dest
 
-# %% ../nbs/01_components.ipynb 17
+# %% ../nbs/01_components.ipynb 18
 def find_inputs(e, tags='input', **kw):
     # Recursively find all elements in `e` with `tags` and attrs matching `kw`
     if not isinstance(e, (list,tuple)): return []
@@ -107,14 +107,14 @@ def find_inputs(e, tags='input', **kw):
     for o in cs: inputs += find_inputs(o, tags, **kw)
     return inputs
 
-# %% ../nbs/01_components.ipynb 21
+# %% ../nbs/01_components.ipynb 22
 def __getattr__(tag):
     if tag.startswith('_') or tag[0].islower(): raise AttributeError
     tag = tag.replace("_", "-")
     def _f(*c, target_id=None, **kwargs): return xt_hx(tag, *c, target_id=target_id, **kwargs)
     return _f
 
-# %% ../nbs/01_components.ipynb 22
+# %% ../nbs/01_components.ipynb 23
 def html2xt(html):
     rev_map = {'class': 'cls', 'for': 'fr'}
     
