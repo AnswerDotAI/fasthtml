@@ -1,0 +1,41 @@
+/*-- scss:defaults --*/
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/Geist-Regular.woff2") format("woff2"),
+       url("fonts/Geist-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Geist";
+  font-weight: bold;
+  src: url("fonts/Geist-Bold.woff2") format("woff2"),
+       url("fonts/Geist-Bold.woff") format("woff");
+}
+
+@font-face {
+  font-family: "GeistMono";
+  src: url("fonts/GeistMono-Regular.woff2") format("woff2"),
+       url("fonts/GeistMono-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "GeistMono";
+  font-weight: bold;
+  src: url("fonts/GeistMono-Bold.woff2") format("woff2"),
+       url("fonts/GeistMono-Bold.woff") format("woff");
+}
+
+$body-bg: #FFFFFF !default;
+$body-color: #000000 !default;
+$link-color: #4040BF !default;
+$font-family-sans-serif: "Geist", sans-serif !default;
+$font-family-monospace: "GeistMono", monospace !default;
+$primary: #E8E8FC !default;
+$font-size-root: 16px !default;
+
+$code-bg: null !default; // Placeholder for default value
+$code-color: null !default; // Placeholder for default value
+
+$navbar-bg: #3CDD8C !default;
+$navbar-fg: #FFFFFF !default;
+$navbar-hl: #000000 !default;
