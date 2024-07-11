@@ -163,7 +163,7 @@ async def _find_p(req, arg:str, p:Parameter):
     if not isinstance(res, (list,str)) or anno is empty: return res
     anno = _fix_anno(anno)
     try: return [anno(o) for o in res] if isinstance(res,list) else anno(res)
-    except ValueError: raise HTTPException(404, request.url.path) from None
+    except ValueError: raise HTTPException(404, req.url.path) from None
 
 async def _wrap_req(req, params):
     return [await _find_p(req, arg, p) for arg,p in params.items()]
