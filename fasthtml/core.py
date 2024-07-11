@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'htmxscr', 'htmxwsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths',
            'is_typeddict', 'is_namedtuple', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
-           'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'RouteX', 'RouterX', 'get_key', 'FastHTML',
+           'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'cookie',
            'reg_re_param', 'MiddlewareBase']
 
 # %% ../nbs/00_core.ipynb 3
@@ -20,7 +20,7 @@ from dataclasses import dataclass,fields,is_dataclass,MISSING,asdict
 from collections import namedtuple
 from inspect import isfunction,ismethod,signature,Parameter,get_annotations
 from functools import wraps, partialmethod
-from copy import deepcopy
+from http import cookies
 
 from .starlette import *
 
@@ -162,7 +162,8 @@ async def _find_p(req, arg:str, p:Parameter):
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
     anno = _fix_anno(anno)
-    return [anno(o) for o in res] if isinstance(res,list) else anno(res)
+    try: return [anno(o) for o in res] if isinstance(res,list) else anno(res)
+    except ValueError: raise HTTPException(404, request.url.path) from None
 
 async def _wrap_req(req, params):
     return [await _find_p(req, arg, p) for arg,p in params.items()]
@@ -194,7 +195,7 @@ def _wrap_resp(req, resp, cls, hdrs, **bodykw):
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
-    if isinstance(resp, (list,tuple)) or hasattr(resp, '__xt__'): return _xt_resp(req, resp, hdrs, **bodykw)
+    if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__xt__'): return _xt_resp(req, resp, hdrs, **bodykw)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:
@@ -374,16 +375,34 @@ all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
 # %% ../nbs/00_core.ipynb 59
+def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):
+    "Create a 'set-cookie' `HttpHeader`"
+    cookie = cookies.SimpleCookie()
+    cookie[key] = value
+    if max_age is not None: cookie[key]["max-age"] = max_age
+    if expires is not None:
+        cookie[key]["expires"] = format_datetime(expires, usegmt=True) if isinstance(expires, datetime) else expires
+    if path is not None: cookie[key]["path"] = path
+    if domain is not None: cookie[key]["domain"] = domain
+    if secure: cookie[key]["secure"] = True
+    if httponly: cookie[key]["httponly"] = True
+    if samesite is not None:
+        assert samesite.lower() in [ "strict", "lax", "none", ], "must be 'strict', 'lax' or 'none'"
+        cookie[key]["samesite"] = samesite
+    cookie_val = cookie.output(header="").strip()
+    return HttpHeader("set-cookie", cookie_val)
+
+# %% ../nbs/00_core.ipynb 60
 def reg_re_param(m, s):
     cls = get_class(f'{m}Conv', sup=StringConvertor, regex=s)
     register_url_convertor(m, cls())
 
-# %% ../nbs/00_core.ipynb 60
+# %% ../nbs/00_core.ipynb 61
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
 reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml|html")
 
-# %% ../nbs/00_core.ipynb 61
+# %% ../nbs/00_core.ipynb 62
 class MiddlewareBase:
     async def __call__(self, scope, receive, send) -> None:
         if scope["type"] not in ["http", "websocket"]:
