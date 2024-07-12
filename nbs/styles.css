@@ -31,7 +31,24 @@
 div.description {
   padding-left: 2px;
   padding-top: 5px;
-  font-style: italic;
-  font-size: 135%;
+  font-size: 1.25rem;
+  color: rgba(0, 0, 0, 0.60);
   opacity: 70%;
+}
+
+
+div.sidebar-item-container .active {
+  background-color: #E8E8FC;
+  color: #000;
+}
+
+div.sidebar-item-container a {
+  color: #000;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.navbar-container {
+  max-width: 1282px;
 }
