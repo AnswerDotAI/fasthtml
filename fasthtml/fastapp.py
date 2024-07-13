@@ -15,7 +15,9 @@ def get_tbl(dt, nm, schema):
 def fast_app(db=None, render=None, hdrs=None, tbls=None, before=None, middleware=None, live=False, debug=False, routes=None, exception_handlers=None,
              on_startup=None, on_shutdown=None, lifespan=None, default_hdrs=True, secret_key=None, session_cookie='session_', max_age=365*24*3600,
              sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', **kwargs):
-    h = (picolink,)
+
+    h = ()
+    if not default_hdrs: h += (picolink, )
     if hdrs: h += tuple(hdrs)
     app_cls = FastHTMLWithLiveReload if live else FastHTML
     app = app_cls(hdrs=h, before=before, middleware=middleware, debug=debug, routes=routes, exception_handlers=exception_handlers,
