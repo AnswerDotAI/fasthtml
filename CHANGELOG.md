@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.1.6
+
+### New Features
+
+- `File` function ([#48](https://github.com/AnswerDotAI/fasthtml/issues/48))
+- Remove picolink in `fast_app` if `default_hdrs` is False ([#47](https://github.com/AnswerDotAI/fasthtml/pull/47)), thanks to [@pydanny](https://github.com/pydanny)
+
+
 ## 0.1.5
 
 ### New Features
