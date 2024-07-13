@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.1.5
+
+### New Features
+
+- Add `Favicon` and `Socials` header creators ([#45](https://github.com/AnswerDotAI/fasthtml/issues/45))
+- `cookie` function ([#43](https://github.com/AnswerDotAI/fasthtml/issues/43))
+
+
 ## 0.1.4
 
 ### New Features
