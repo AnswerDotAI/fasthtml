@@ -1,4 +1,4 @@
-__all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group', 'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'run_js', 'Titled', 'jsd']
+__all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group', 'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'run_js', 'Titled', 'Socials', 'Favicon', 'jsd']
 from dataclasses import dataclass, asdict
 from fastcore.utils import *
 from fastcore.xtras import partial_format
@@ -97,6 +97,14 @@ def run_js(js, id=None, **kw):
 
 def Titled(title: str='FastHTML app', *args, target_id=None, id=None, cls=None, style=None, accesskey=None, contenteditable=None, dir=None, draggable=None, enterkeyhint=None, hidden=None, inert=None, inputmode=None, lang=None, popover=None, spellcheck=None, tabindex=None, translate=None, hx_get=None, hx_post=None, hx_put=None, hx_delete=None, hx_patch=None, hx_trigger=None, hx_target=None, hx_swap=None, hx_include=None, hx_select=None, hx_indicator=None, hx_push_url=None, hx_confirm=None, hx_disable=None, hx_replace_url=None, hx_on=None, **kwargs) -> XT:
     """An HTML partial containing a `Title`, and `H1`, and any provided children"""
+    ...
+
+def Socials(title, site_name, description, image, url, w=1200, h=630, twitter_site=None, creator=None, card='summary'):
+    """OG and Twitter social card headers"""
+    ...
+
+def Favicon(light_icon, dark_icon):
+    """Light and dark favicon headers"""
     ...
 
 def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **kwargs) -> XT:
