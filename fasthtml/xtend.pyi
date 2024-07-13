@@ -82,13 +82,15 @@ def loose_format(s, **kw):
     ...
 
 def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin=None, integrity=None, **kw):
-    """Create a Script from the text of a file"""
+    """A `script` element with contents read from `fname`"""
     ...
 
 def replace_css_vars(css, pre='tpl', **kwargs):
+    """Replace `var(--)` CSS variables with `kwargs` if name prefix matches `pre`"""
     ...
 
 def StyleX(fname, **kw):
+    """A `style` element with contents read from `fname` and variables replaced from `kw`"""
     ...
 
 def run_js(js, id=None, **kw):

@@ -148,7 +148,7 @@ def loose_format(s, **kw):
 
 # %% ../nbs/02_xtend.ipynb 34
 def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin=None, integrity=None, **kw):
-    "Create a Script from the text of a file"
+    "A `script` element with contents read from `fname`"
     attrs = ['src', 'type', 'async', 'defer', 'charset', 'crossorigin', 'integrity', 'nomodule']
     scr_kw = {k:kw.pop(k) for k in attrs if k in kw}
     s = loose_format(Path(fname).read_text(), **kw)
@@ -156,6 +156,7 @@ def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin
 
 # %% ../nbs/02_xtend.ipynb 35
 def replace_css_vars(css, pre='tpl', **kwargs):
+    "Replace `var(--)` CSS variables with `kwargs` if name prefix matches `pre`"
     def replace_var(m):
         var_name = m.group(1).replace('-', '_')
         return kwargs.get(var_name, m.group(0))
@@ -163,6 +164,7 @@ def replace_css_vars(css, pre='tpl', **kwargs):
 
 # %% ../nbs/02_xtend.ipynb 36
 def StyleX(fname, **kw):
+    "A `style` element with contents read from `fname` and variables replaced from `kw`"
     s = Path(fname).read_text()
     attrs = ['type', 'media', 'scoped', 'title', 'nonce', 'integrity', 'crossorigin']
     sty_kw = {k:kw.pop(k) for k in attrs if k in kw}

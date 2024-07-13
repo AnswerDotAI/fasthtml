@@ -17,7 +17,7 @@ def fast_app(db=None, render=None, hdrs=None, tbls=None, before=None, middleware
              sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', **kwargs):
 
     h = ()
-    if not default_hdrs: h += (picolink, )
+    if default_hdrs: h += (picolink, )
     if hdrs: h += tuple(hdrs)
     app_cls = FastHTMLWithLiveReload if live else FastHTML
     app = app_cls(hdrs=h, before=before, middleware=middleware, debug=debug, routes=routes, exception_handlers=exception_handlers,
