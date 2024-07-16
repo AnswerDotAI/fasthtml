@@ -2,6 +2,57 @@
 
 <!-- do not remove -->
 
+## 0.1.6
+
+### New Features
+
+- `File` function ([#48](https://github.com/AnswerDotAI/fasthtml/issues/48))
+- Remove picolink in `fast_app` if `default_hdrs` is False ([#47](https://github.com/AnswerDotAI/fasthtml/pull/47)), thanks to [@pydanny](https://github.com/pydanny)
+
+
+## 0.1.5
+
+### New Features
+
+- Add `Favicon` and `Socials` header creators ([#45](https://github.com/AnswerDotAI/fasthtml/issues/45))
+- `cookie` function ([#43](https://github.com/AnswerDotAI/fasthtml/issues/43))
+
+
+## 0.1.4
+
+### New Features
+
+- `ScriptX` and `StyleX` for templated generation from external files ([#42](https://github.com/AnswerDotAI/fasthtml/issues/42))
+
+
+## 0.1.2
+
+### Breaking changes
+
+- `fast_app` returns `app.route` as well as app ([#38](https://github.com/AnswerDotAI/fasthtml/issues/38))
+
+### New Features
+
+- Add viewport and charset to Meta by default ([#36](https://github.com/AnswerDotAI/fasthtml/issues/36))
+- New function `run_js` ([#36](https://github.com/AnswerDotAI/fasthtml/issues/36))
+
+
+## 0.1.1
+
+### New Features
+
+- Add `fasthtml.toasts` ([#35](https://github.com/AnswerDotAI/fasthtml/issues/35))
+- 'Afterware' support
+- Add `injects` to request
+- Basic websocket support ([#29](https://github.com/AnswerDotAI/fasthtml/issues/29))
+- Support `meta` tags in returned tuple ([#28](https://github.com/AnswerDotAI/fasthtml/issues/28))
+- Support npm provider in jsdelivr ([#27](https://github.com/AnswerDotAI/fasthtml/issues/27))
+
+### Bugs Squashed
+
+- `Style` does not accept multiple positional args correctly ([#34](https://github.com/AnswerDotAI/fasthtml/issues/34))
+
+
 ## 0.1.0
 
 ### New Features

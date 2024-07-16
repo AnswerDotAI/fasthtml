@@ -1,7 +1,6 @@
 from fasthtml.fastapp import *
 
-app,todos,Todo = fast_app('data/todos.db', id=int, title=str, done=bool, pk='id')
-rt = app.route
+app,rt,todos,Todo = fast_app('data/todos.db', id=int, title=str, done=bool, pk='id')
 
 def TodoRow(todo):
     return Li(

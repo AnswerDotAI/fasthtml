@@ -6,8 +6,7 @@ def render(todo):
     dt = ' (done)' if todo.done else ''
     return Li(show, dt, ' | ', edit, id=f'todo-{todo.id}')
 
-app,todos,Todo = fast_app('data/todos.db', render, id=int, title=str, done=bool, pk='id')
-rt = app.route
+app,rt,todos,Todo = fast_app('data/todos.db', render, id=int, title=str, done=bool, pk='id')
 
 @rt("/")
 def get():
@@ -40,4 +39,6 @@ def get(id:int):
 def delete(id:int):
     todos.delete(id)
     return clear('current-todo')
+
+run_uv()
 

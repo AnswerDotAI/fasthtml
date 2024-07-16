@@ -2,12 +2,14 @@
 
 # %% auto 0
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Html', 'A', 'AX', 'Checkbox', 'Card', 'Group',
-           'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'Titled', 'jsd']
+           'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces',
+           'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'run_js', 'Titled', 'Socials', 'Favicon', 'jsd']
 
 # %% ../nbs/02_xtend.ipynb 2
 from dataclasses import dataclass, asdict
 
 from fastcore.utils import *
+from fastcore.xtras import partial_format
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
 from .components import *
@@ -123,17 +125,91 @@ def Script(code:str="", **kwargs)->XT:
 
 # %% ../nbs/02_xtend.ipynb 30
 @delegates(xt_html, keep=True)
-def Style(css:str="", **kwargs)->XT:
+def Style(*c, **kwargs)->XT:
     "A Style tag that doesn't escape its code"
-    return xt_html('style', NotStr(css), **kwargs)
+    return xt_html('style', map(NotStr,c), **kwargs)
 
 # %% ../nbs/02_xtend.ipynb 31
+def double_braces(s):
+    "Convert single braces to double braces if next to special chars or newline"
+    s = re.sub(r'{(?=[\s:;\'"]|$)', '{{', s)
+    return re.sub(r'(^|[\s:;\'"])}', r'\1}}', s)
+
+# %% ../nbs/02_xtend.ipynb 32
+def undouble_braces(s):
+    "Convert double braces to single braces if next to special chars or newline"
+    s = re.sub(r'\{\{(?=[\s:;\'"]|$)', '{', s)
+    return re.sub(r'(^|[\s:;\'"])\}\}', r'\1}', s)
+
+# %% ../nbs/02_xtend.ipynb 33
+def loose_format(s, **kw):
+    "String format `s` using `kw`, without being strict about braces outside of template params"
+    return undouble_braces(partial_format(double_braces(s), **kw)[0])
+
+# %% ../nbs/02_xtend.ipynb 34
+def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin=None, integrity=None, **kw):
+    "A `script` element with contents read from `fname`"
+    attrs = ['src', 'type', 'async', 'defer', 'charset', 'crossorigin', 'integrity', 'nomodule']
+    scr_kw = {k:kw.pop(k) for k in attrs if k in kw}
+    s = loose_format(Path(fname).read_text(), **kw)
+    return Script(s, **scr_kw)
+
+# %% ../nbs/02_xtend.ipynb 35
+def replace_css_vars(css, pre='tpl', **kwargs):
+    "Replace `var(--)` CSS variables with `kwargs` if name prefix matches `pre`"
+    def replace_var(m):
+        var_name = m.group(1).replace('-', '_')
+        return kwargs.get(var_name, m.group(0))
+    return re.sub(fr'var\(--{pre}-([\w-]+)\)', replace_var, css)
+
+# %% ../nbs/02_xtend.ipynb 36
+def StyleX(fname, **kw):
+    "A `style` element with contents read from `fname` and variables replaced from `kw`"
+    s = Path(fname).read_text()
+    attrs = ['type', 'media', 'scoped', 'title', 'nonce', 'integrity', 'crossorigin']
+    sty_kw = {k:kw.pop(k) for k in attrs if k in kw}
+    return Style(replace_css_vars(s, **kw), **sty_kw)
+
+# %% ../nbs/02_xtend.ipynb 37
+def run_js(js, id=None, **kw):
+    "Run `js` script, auto-generating `id` based on name of caller if needed, and js-escaping any `kw` params"
+    if not id: id = sys._getframe(1).f_code.co_name
+    kw = {k:dumps(v) for k,v in kw.items()}
+    return Script(js.format(**kw), id=id, hx_swap_oob='true')
+
+# %% ../nbs/02_xtend.ipynb 38
 @delegates(xt_hx, keep=True)
 def Titled(title:str="FastHTML app", *args, **kwargs)->XT:
     "An HTML partial containing a `Title`, and `H1`, and any provided children"
     return Title(title), Main(H1(title), *args, cls="container", **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 32
+# %% ../nbs/02_xtend.ipynb 39
+def Socials(title, site_name, description, image, url, w=1200, h=630, twitter_site=None, creator=None, card='summary'):
+    "OG and Twitter social card headers"
+    res = [Meta(property='og:image', content=image),
+        Meta(property='og:site_name', content=site_name),
+        Meta(property='og:image:type', content='image/png'),
+        Meta(property='og:image:width', content=w),
+        Meta(property='og:image:height', content=h),
+        Meta(property='og:type', content='website'),
+        Meta(property='og:url', content=url),
+        Meta(property='og:title', content=title),
+        Meta(property='og:description', content=description),
+        Meta(name='twitter:image', content=image),
+        Meta(name='twitter:card', content=card),
+        Meta(name='twitter:title', content=title),
+        Meta(name='twitter:description', content=description)]
+    if twitter_site is not None: res.append(Meta(name='twitter:site',    content=twitter_site))
+    if creator      is not None: res.append(Meta(name='twitter:creator', content=creator))
+    return tuple(res)
+
+# %% ../nbs/02_xtend.ipynb 40
+def Favicon(light_icon, dark_icon):
+    "Light and dark favicon headers"
+    return (Link(rel='icon', type='image/x-ico', href=light_icon, media='(prefers-color-scheme: light)'),
+            Link(rel='icon', type='image/x-ico', href=dark_icon, media='(prefers-color-scheme: dark)'))
+
+# %% ../nbs/02_xtend.ipynb 41
 def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **kwargs)->XT:
     "jsdelivr `Script` or CSS `Link` tag, or URL"
     ver = '@'+ver if ver else ''

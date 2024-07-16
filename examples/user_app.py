@@ -1,11 +1,10 @@
 from fasthtml.common import *
 
 db = database('data/utodos.db')
-todos,users = db.t.todos,db.t.users
-if todos not in db.t:
-    users.create(name=str, pwd=str, pk='name')
-    todos.create(id=int, title=str, done=bool, name=str, details=str, pk='id')
-Todo,User = todos.dataclass(),users.dataclass()
+class User: name:str; pwd:str
+class Todo: id:int; title:str; done:bool; name:str; details:str
+users = db.create(User, pk='name')
+todos = db.create(Todo)
 
 id_curr = 'current-todo'
 def tid(id): return f'todo-{id}'
@@ -43,9 +42,8 @@ async def get(request, auth):
                hx_post="/", target_id='todo-list', hx_swap="beforeend")
     card = Card(Ul(*todos(), id='todo-list'),
                 header=add, footer=Div(id=id_curr)),
-    title = 'Todo list'
-    top = Grid(H1(f"{auth}'s {title}"), Div(A('logout', href=basic_logout(request)), style='text-align: right'))
-    return Titled(title, top, card)
+    top = Grid(Div(A('logout', href=basic_logout(request)), style='text-align: right'))
+    return Titled(f"{auth}'s todo list", top, card)
 
 @rt("/todos/{id}")
 async def delete(id:int):
@@ -73,3 +71,6 @@ async def get(id:int):
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
+
+run_uv()
+
