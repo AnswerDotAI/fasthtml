@@ -132,10 +132,7 @@ def html2xt(html):
         cs = [repr(c.strip()) if isinstance(c, str) else _parse(c, lvl+1)
               for c in cts if str(c).strip()]
         attrs = []
-        elm_attrs = list(elm.attrs.items())
-        cls_idx = next((i for i, item in enumerate(elm_attrs) if item[0] == 'class'), None)
-        if cls_idx is not None: elm_attrs.append(elm_attrs.pop(cls_idx))
-        for key, value in elm_attrs:
+        for key, value in sorted(elm.attrs.items(), key=lambda x: x[0]=='class'):
             if isinstance(value,(tuple,list)): value = " ".join(value)
             attrs.append(f'{rev_map.get(key, key).replace("-", "_")}={value!r}')
         spc = " "*lvl*indent
