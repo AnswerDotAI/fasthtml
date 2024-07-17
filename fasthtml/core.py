@@ -159,6 +159,7 @@ async def _find_p(req, arg:str, p:Parameter):
         res = _formitem(frm, arg)
     # Use default param if needed
     if res is empty or res is None: res = p.default
+    if res is empty or res is None: raise HTTPException(400, f"Missing required field: {arg}")
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
     anno = _fix_anno(anno)
@@ -227,7 +228,7 @@ def _wrap_ep(f, hdrs, before, after, **bodykw):
                     if is_async_callable(bf): resp = await resp
         if not resp:
             wreq = await _wrap_req(req, params)
-            resp = f(*wreq)
+            resp = f(*wreq)                            
             if is_async_callable(f): resp = await resp
         for a in after:
             _,*wreq = await _wrap_req(req, signature(a).parameters)
