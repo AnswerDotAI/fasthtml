@@ -123,7 +123,7 @@ def __getattr__(tag):
 def html2xt(html):
     rev_map = {'class': 'cls', 'for': 'fr'}
     
-    def _parse(elm, lvl=0):
+    def _parse(elm, lvl=0, indent=4):
         if isinstance(elm, str): return repr(elm.strip()) if elm.strip() else ''
         if isinstance(elm, list): return '\n'.join(_parse(o, lvl) for o in elm)
         tag_name = elm.name.capitalize()
@@ -135,11 +135,11 @@ def html2xt(html):
         for key, value in elm.attrs.items():
             if isinstance(value,(tuple,list)): value = " ".join(value)
             attrs.append(f'{rev_map.get(key, key).replace("-", "_")}={value!r}')
-        spc = " "*lvl*2
+        spc = " "*lvl*indent
         onlychild = not cts or (len(cts)==1 and isinstance(cts[0],str))
         j = ', ' if onlychild else f',\n{spc}'
         inner = j.join(filter(None, cs+attrs))
         if onlychild: return f'{tag_name}({inner})'
-        return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*2})'
+        return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*indent})'
 
     return _parse(BeautifulSoup(html.strip(), 'html.parser'), 1)
