@@ -159,7 +159,8 @@ async def _find_p(req, arg:str, p:Parameter):
         res = _formitem(frm, arg)
     # Use default param if needed
     if res is empty or res is None: res = p.default
-    if res is empty or res is None: raise HTTPException(400, f"Missing required field: {arg}")
+    # Raise 400 error if the param is wrong
+    if res is Parameter.empty: raise HTTPException(400, f"Missing required field: {arg}")
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
     anno = _fix_anno(anno)
