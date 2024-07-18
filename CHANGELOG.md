@@ -2,6 +2,15 @@
 
 <!-- do not remove -->
 
+## 0.1.7
+
+### New Features
+
+- Add `indent` to `html2xt` ([#53](https://github.com/AnswerDotAI/fasthtml/issues/53))
+- New `fasthtml.xt` namespace for components ([#50](https://github.com/AnswerDotAI/fasthtml/issues/50))
+- Add `bodykw` in `fast_app` ([#49](https://github.com/AnswerDotAI/fasthtml/issues/49))
+
+
 ## 0.1.6
 
 ### New Features
