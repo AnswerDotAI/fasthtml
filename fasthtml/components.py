@@ -38,21 +38,23 @@ html_attrs = 'id cls title style accesskey contenteditable dir draggable enterke
 hx_attrs = 'get post put delete patch trigger target swap include select indicator push_url confirm disable replace_url on'
 hx_attrs = html_attrs + [f'hx_{o}' for o in hx_attrs.split()]
 
-# %% ../nbs/01_components.ipynb 6
+# %% ../nbs/01_components.ipynb 7
 def xt_html(tag: str, *c, id=None, cls=None, title=None, style=None, **kwargs):
+    """Creates an HTML component with the specified tag, content, and attributes."""
     if len(c)==1 and isinstance(c[0], (types.GeneratorType, map, filter)): c = tuple(c[0])
     kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style
     tag,c,kw = xt(tag, *c, **kwargs)
     if tag in named and 'id' in kw and 'name' not in kw: kw['name'] = kw['id']
     return XT(tag,c,kw, void_=tag in voids)
 
-# %% ../nbs/01_components.ipynb 7
+# %% ../nbs/01_components.ipynb 8
 @use_kwargs(hx_attrs, keep=True)
 def xt_hx(tag: str, *c, target_id=None, **kwargs):
+    """Creates an HTMX component with the specified tag, content, attributes, and optional target_id."""
     if target_id: kwargs['hx_target'] = '#'+target_id
     return xt_html(tag, *c, **kwargs)
 
-# %% ../nbs/01_components.ipynb 8
+# %% ../nbs/01_components.ipynb 9
 _g = globals()
 _all_ = [
     'A', 'Abbr', 'Address', 'Area', 'Article', 'Aside', 'Audio', 'B', 'Base', 'Bdi', 'Bdo', 'Blockquote', 'Body', 'Br',
@@ -65,12 +67,12 @@ _all_ = [
     'Td', 'Template', 'Textarea', 'Tfoot', 'Th', 'Thead', 'Time', 'Title', 'Tr', 'Track', 'U', 'Ul', 'Var', 'Video', 'Wbr']
 for o in _all_: _g[o] = partial(xt_hx, o.lower())
 
-# %% ../nbs/01_components.ipynb 9
+# %% ../nbs/01_components.ipynb 11
 def File(fname):
     "Use the unescaped text in file `fname` directly"
     return NotStr(Path(fname).read_text())
 
-# %% ../nbs/01_components.ipynb 14
+# %% ../nbs/01_components.ipynb 16
 def _fill_item(item, obj):
     if not isinstance(item,list): return item
     tag,cs,attr = item
@@ -86,19 +88,19 @@ def _fill_item(item, obj):
         if tag=='textarea': cs=(val,)
     return XT(tag,cs,attr)
 
-# %% ../nbs/01_components.ipynb 15
+# %% ../nbs/01_components.ipynb 17
 def fill_form(form:XT, obj)->XT:
     "Fills named items in `form` using attributes in `obj`"
     if not isinstance(obj,dict): obj = asdict(obj)
     return _fill_item(form, obj)
 
-# %% ../nbs/01_components.ipynb 17
+# %% ../nbs/01_components.ipynb 19
 def fill_dataclass(src, dest):
     "Modifies dataclass in-place and returns it"
     for nm,val in asdict(src).items(): setattr(dest, nm, val)
     return dest
 
-# %% ../nbs/01_components.ipynb 19
+# %% ../nbs/01_components.ipynb 21
 def find_inputs(e, tags='input', **kw):
     # Recursively find all elements in `e` with `tags` and attrs matching `kw`
     if not isinstance(e, (list,tuple)): return []
@@ -112,14 +114,14 @@ def find_inputs(e, tags='input', **kw):
     for o in cs: inputs += find_inputs(o, tags, **kw)
     return inputs
 
-# %% ../nbs/01_components.ipynb 23
+# %% ../nbs/01_components.ipynb 25
 def __getattr__(tag):
     if tag.startswith('_') or tag[0].islower(): raise AttributeError
     tag = tag.replace("_", "-")
     def _f(*c, target_id=None, **kwargs): return xt_hx(tag, *c, target_id=target_id, **kwargs)
     return _f
 
-# %% ../nbs/01_components.ipynb 24
+# %% ../nbs/01_components.ipynb 26
 def html2xt(html):
     rev_map = {'class': 'cls', 'for': 'fr'}
     
