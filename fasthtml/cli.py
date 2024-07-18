@@ -34,6 +34,7 @@ def railway_deploy(
     name:str, # The project name to deploy
     mount:bool_arg=True # Create a mounted volume at /app/data?
 ):
+    "Deploy the current directory to Railway"
     cp = run("railway status --json".split(), capture_output=True)
     if not cp.returncode: return print("This project is already deployed. Run `railway open`.")
     reqs = Path('requirements.txt')
