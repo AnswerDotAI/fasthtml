@@ -127,7 +127,7 @@ async def _from_body(req, p):
     anno = p.annotation
     # Get the fields and types of type `anno`, if available
     d = _annotations(anno)
-    cargs = {k:_form_arg(k, v, d) for k,v in form2dict(form).items()}
+    cargs = {k:_form_arg(k, v, d) for k,v in form2dict(form).items() if not d or k in d}
     return anno(**cargs)
 
 # %% ../nbs/00_core.ipynb 37
