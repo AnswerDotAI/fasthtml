@@ -150,17 +150,17 @@ async def _find_p(req, arg:str, p:Parameter):
         return None
     # Look through path, cookies, headers, session, query, and body in that order
     res = req.path_params.get(arg, None)
-    if res is empty or res is None: res = req.cookies.get(arg, None)
-    if res is empty or res is None: res = req.headers.get(snake2hyphens(arg), None)
-    if res is empty or res is None: res = nested_idx(req.scope, 'session', arg) or None
-    if res is empty or res is None: res = req.query_params.get(arg, None)
-    if res is empty or res is None:
+    if res in (empty,None): res = req.cookies.get(arg, None)
+    if res in (empty,None): res = req.headers.get(snake2hyphens(arg), None)
+    if res in (empty,None): res = nested_idx(req.scope, 'session', arg) or None
+    if res in (empty,None): res = req.query_params.get(arg, None)
+    if res in (empty,None):
         frm = await req.form()
         res = _formitem(frm, arg)
     # Raise 400 error if the param does not include a default
-    if (res is empty or res is None) and p.default is empty: raise HTTPException(400, f"Missing required field: {arg}")
+    if (res in (empty,None)) and p.default is empty: raise HTTPException(400, f"Missing required field: {arg}")
     # If we have a default, return that if we have no value
-    if res is empty or res is None: res = p.default
+    if res in (empty,None): res = p.default
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
     anno = _fix_anno(anno)
