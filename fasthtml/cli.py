@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['railway_link', 'railway_deploy']
 
-# %% ../nbs/04_cli.ipynb 1
+# %% ../nbs/04_cli.ipynb 2
 from fastcore.utils import *
 from fastcore.script import call_parse, bool_arg
 from subprocess import check_output, run
@@ -34,6 +34,7 @@ def railway_deploy(
     name:str, # The project name to deploy
     mount:bool_arg=True # Create a mounted volume at /app/data?
 ):
+    """Deploy a FastHTML app to Railway"""
     cp = run("railway status --json".split(), capture_output=True)
     if not cp.returncode: return print("This project is already deployed. Run `railway open`.")
     reqs = Path('requirements.txt')
