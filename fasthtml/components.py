@@ -122,6 +122,7 @@ def __getattr__(tag):
     return _f
 
 # %% ../nbs/01_components.ipynb 26
+_re_h2x_attr_key = re.compile(r'^[A-Za-z_-][\w-]*$')
 def html2xt(html):
     rev_map = {'class': 'cls', 'for': 'fr'}
     
@@ -136,7 +137,8 @@ def html2xt(html):
         attrs = []
         for key, value in sorted(elm.attrs.items(), key=lambda x: x[0]=='class'):
             if isinstance(value,(tuple,list)): value = " ".join(value)
-            attrs.append(f'{rev_map.get(key, key).replace("-", "_")}={value!r}')
+            key = rev_map.get(key, key)
+            attrs.append(f'{key.replace("-", "_")}={value!r}' if _re_h2x_attr_key.match(key) else f'**{{{key!r}:{value!r}}}')
         spc = " "*lvl*indent
         onlychild = not cts or (len(cts)==1 and isinstance(cts[0],str))
         j = ', ' if onlychild else f',\n{spc}'
