@@ -49,6 +49,7 @@ def find_inputs(e, tags='input', **kw):
 
 def __getattr__(tag):
     ...
+_re_h2x_attr_key = re.compile('^[A-Za-z_-][\\w-]*$')
 
 def html2xt(html):
     ...

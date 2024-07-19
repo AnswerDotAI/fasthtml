@@ -122,6 +122,7 @@ def __getattr__(tag):
 # %% ../nbs/01_components.ipynb 24
 _re_h2x_attr_key = re.compile(r'^[A-Za-z_-][\w-]*$')
 def html2xt(html):
+    """Convert HTML to an `xt` expression"""
     rev_map = {'class': 'cls', 'for': 'fr'}
     
     def _parse(elm, lvl=0, indent=4):
