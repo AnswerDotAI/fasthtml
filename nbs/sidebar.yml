@@ -2,7 +2,7 @@ website:
   sidebar:
     contents:
       - index.ipynb
-      - section: fh_by_example
+      - section: FastHTML by Example
         contents:
           - fh_by_example/00_intro_part1.ipynb
           - fh_by_example/01_intro_part2.ipynb
@@ -11,7 +11,7 @@ website:
           - fh_by_example/04_ex_chatbot.ipynb
           - fh_by_example/05_ex_multi_game_of_life.ipynb
       - section: Reference
-        contents:          
+        contents:
           - 00_core.ipynb
           - 01_components.ipynb
           - 02_xtend.ipynb
