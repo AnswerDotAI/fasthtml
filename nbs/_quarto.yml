@@ -1,0 +1,24 @@
+project:
+  type: website
+
+format:
+  html:
+    theme:
+      - cosmo
+      - custom.scss
+    css: styles.css
+    toc: true
+
+website:
+  twitter-card: true
+  open-graph: true
+  repo-actions: [issue]
+  navbar:
+    title: false
+    logo: "logo.svg"
+    background: primary
+    search: true
+  sidebar:
+    style: floating
+
+metadata-files: [nbdev.yml, sidebar.yml]
