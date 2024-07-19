@@ -1,0 +1,20 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - section: fh_by_example
+        contents:
+          - fh_by_example/00_intro_part1.ipynb
+          - fh_by_example/01_intro_part2.ipynb
+          - fh_by_example/02_ex_todo.ipynb
+          - fh_by_example/03_ex_image_generation.ipynb
+          - fh_by_example/04_ex_chatbot.ipynb
+          - fh_by_example/05_ex_multi_game_of_life.ipynb
+      - section: Reference
+        contents:          
+          - 00_core.ipynb
+          - 01_components.ipynb
+          - 02_xtend.ipynb
+          - 03_oauth.ipynb
+          - 04_cli.ipynb
+          - 06_explaining_components.ipynb

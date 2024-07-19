@@ -16,8 +16,5 @@ website:
     search: true
   sidebar:
     style: floating
-    contents:
-      - section: FastHTML by Example
-        contents: fh_by_example/*
 
 metadata-files: [nbdev.yml, sidebar.yml]
