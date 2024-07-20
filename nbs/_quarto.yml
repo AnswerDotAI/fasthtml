@@ -20,5 +20,21 @@ website:
     search: true
   sidebar:
     style: floating
+    contents:
+      - index.ipynb
+      - section: Tutorials
+        contents:
+          - 05_by_example.ipynb
+      - section: Explanations
+        contents:
+          - 06_explaining_components.ipynb
+      - section: API
+        contents:
+          - 00_core.ipynb
+          - 01_components.ipynb
+          - 02_xtend.ipynb
+          - 03_oauth.ipynb
+          - 04_cli.ipynb
+      
 
-metadata-files: [nbdev.yml, sidebar.yml]
+metadata-files: [nbdev.yml]
