@@ -142,6 +142,8 @@ def logout(sess):
 # `reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml|html")`
 # In this app, we only actually have one static file, which is `favicon.ico`. But it would also be needed if
 # we were referencing images, CSS/JS files, etc.
+# Note, this function is unnecessary, as the `fast_app()` call already includes this functionality.
+# However, it's included here to show how you can define your own static file handler.
 @rt("/{fname:path}.{ext:static}")
 async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 
