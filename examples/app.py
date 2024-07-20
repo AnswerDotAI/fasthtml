@@ -1,3 +1,4 @@
+# Run with: python app.py
 from fasthtml.common import *
 
 id_curr = 'current-todo'
@@ -17,7 +18,7 @@ TODO_LIST = [TodoItem(id=0, title="Start writing todo list", done=True),
              TodoItem(id=1, title="???", done=False),
              TodoItem(id=2, title="Profit", done=False)]
 
-app = FastHTML(hdrs=(picolink, Link(rel="stylesheet", href="picovars.css")))
+app, rt = fast_app(hdrs=(picolink, Link(rel="stylesheet", href="picovars.css")))
 
 @app.get("/{fname:path}.{ext:static}")
 async def image(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
@@ -67,3 +68,5 @@ async def get_todo(id:int):
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
 
+
+if __name__ == '__main__': run_uv()

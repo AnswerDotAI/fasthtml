@@ -1,3 +1,4 @@
+# Run with: uvicorn db_app:app --reload
 from fasthtml.common import *
 
 db = database('data/todos.db')

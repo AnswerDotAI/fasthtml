@@ -1,3 +1,4 @@
+# Run with: uvicorn image_gen_simple:app --reload
 from sqlite_minutils import Database
 from fastlite import *
 from fastlite.kw import *
@@ -9,9 +10,12 @@ from fastcore.xml import *
 from fasthtml import *
 
 import uuid
-import requests
-import replicate
-from PIL import Image
+try:
+    from PIL import Image
+    import requests
+    import replicate    
+except ImportError:
+    raise ImportError("Please install these dependencies: replicate, pillow, requests")
 
 # Replicate setup (for generating images)
 replicate_api_token = open("replicate_key.txt", "r").read().strip()

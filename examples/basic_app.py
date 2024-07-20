@@ -1,3 +1,4 @@
+# Run with: python basic_app.py
 from fasthtml.fastapp import *
 
 def render(todo):

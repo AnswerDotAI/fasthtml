@@ -1,3 +1,4 @@
+# Run with: python adv_app.py
 # The "idiomatic" fasthtml app includes functionality from fastcore, starlette, fastlite, and fasthtml itself.
 # Importing from `fasthtml.common` brings the key parts of all of these together.
 # For simplicity, you can just `from fasthtml.common import *`, or you can import each symbol explicitly:
@@ -5,7 +6,7 @@ from fasthtml.common import (
     # These are the HTML components we use in this app
     A, AX, Button, Card, Checkbox, Container, Div, Form, Grid, Group, H1, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Titled, Ul,
     # These are FastHTML symbols we'll use
-    Beforeware, FastHTML, SortableJS, fill_form, picolink,
+    Beforeware, fast_app, SortableJS, fill_form, picolink, run_uv,
     # These are from Starlette, Fastlite, fastcore, and the Python stdlib
     FileResponse, NotFoundError, RedirectResponse, database, patch, dataclass
 )
@@ -55,7 +56,7 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/
 # The `FastHTML` class is a subclass of `Starlette`, so you can use any parameters that `Starlette` accepts.
 # In addition, you can add your Beforeware here, and any headers you want included in HTML responses.
 # FastHTML includes the "HTMX" and "Surreal" libraries in headers, unless you pass `default_hdrs=False`.
-app = FastHTML(before=bware,
+app, rt = fast_app(before=bware,
                # PicoCSS is a particularly simple CSS framework, with some basic integration built in to FastHTML.
                # `picolink` is pre-defined with the header for the PicoCSS stylesheet.
                # You can use any CSS framework you want, or none at all.
@@ -273,3 +274,5 @@ async def get(id:int):
     # Therefore this will trigger the JS to parse the markdown in the details field.
     # Because `class` is a reserved keyword in Python, we use `cls` instead, which FastHTML auto-converts.
     return Div(Div(todo.title), Div(todo.details, cls="markdown"), btn)
+
+if __name__ == '__main__': run_uv()
