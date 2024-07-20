@@ -18,10 +18,7 @@ TODO_LIST = [TodoItem(id=0, title="Start writing todo list", done=True),
              TodoItem(id=1, title="???", done=False),
              TodoItem(id=2, title="Profit", done=False)]
 
-app, rt = fast_app(hdrs=(picolink, Link(rel="stylesheet", href="picovars.css")))
-
-@app.get("/{fname:path}.{ext:static}")
-async def image(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
+app, rt = fast_app()
 
 def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
 
