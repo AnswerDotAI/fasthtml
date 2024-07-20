@@ -12,14 +12,14 @@ def get_tbl(dt, nm, schema):
     if render: dc.__xt__ = render
     return tbl,dc
 
-def fast_app(db=None, render=None, hdrs=None, tbls=None, before=None, middleware=None, live=False, debug=False, routes=None, exception_handlers=None,
+def fast_app(db=None, render=None, hdrs=None, ftrs=None, tbls=None, before=None, middleware=None, live=False, debug=False, routes=None, exception_handlers=None,
              on_startup=None, on_shutdown=None, lifespan=None, default_hdrs=True, secret_key=None, session_cookie='session_', max_age=365*24*3600,
              pico=None, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', bodykw=None, **kwargs):
 
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
     app_cls = FastHTMLWithLiveReload if live else FastHTML
-    app = app_cls(hdrs=h, before=before, middleware=middleware, debug=debug, routes=routes, exception_handlers=exception_handlers,
+    app = app_cls(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, debug=debug, routes=routes, exception_handlers=exception_handlers,
                   on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, default_hdrs=default_hdrs, secret_key=secret_key,
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
                   sess_domain=sess_domain, key_fname=key_fname, **(bodykw or {}))
@@ -49,4 +49,3 @@ def run_uv(fname=None, app='app', host='0.0.0.0', port=None, reload=True):
 def clear(id): return Div(hx_swap_oob='innerHTML', id=id)
 def ContainerX(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
 def Page(title, *con): return Title(title), ContainerX(H1(title), *con)
-

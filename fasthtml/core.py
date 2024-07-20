@@ -180,7 +180,7 @@ def flat_xt(lst):
     return result
 
 # %% ../nbs/00_core.ipynb 42
-def _xt_resp(req, resp, hdrs, **bodykw):
+def _xt_resp(req, resp, hdrs, ftrs, **bodykw):
     if not isinstance(resp, tuple): resp = (resp,)
     resp = resp + tuple(req.injects)
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
@@ -188,16 +188,17 @@ def _xt_resp(req, resp, hdrs, **bodykw):
     titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in ('title','meta'))
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
         if not titles: titles = [Title('FastHTML page')]
-        resp = Html(Head(*titles, *flat_xt(hdrs)), Body(bdy, **bodykw))
+        resp = Html(Head(*titles, *flat_xt(hdrs)), Body(bdy, *flat_xt(ftrs), **bodykw))
     return HTMLResponse(to_xml(resp), headers=http_hdrs)
 
 # %% ../nbs/00_core.ipynb 43
-def _wrap_resp(req, resp, cls, hdrs, **bodykw):
+def _wrap_resp(req, resp, cls, hdrs, ftrs, **bodykw):
     if not resp: resp=()
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
-    if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__xt__'): return _xt_resp(req, resp, hdrs, **bodykw)
+    if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__xt__'):
+        return _xt_resp(req, resp, hdrs=hdrs, ftrs=ftrs, **bodykw)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:
@@ -210,7 +211,7 @@ class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
 
 # %% ../nbs/00_core.ipynb 45
-def _wrap_ep(f, hdrs, before, after, **bodykw):
+def _wrap_ep(f, hdrs, ftrs, before, after, **bodykw):
     if not (isfunction(f) or ismethod(f)): return f
     sig = signature(f)
     params = sig.parameters
@@ -235,7 +236,7 @@ def _wrap_ep(f, hdrs, before, after, **bodykw):
             _,*wreq = await _wrap_req(req, signature(a).parameters)
             nr = a(resp, *wreq)
             if nr: resp = nr
-        return _wrap_resp(req, resp, cls, hdrs, **bodykw)
+        return _wrap_resp(req, resp, cls, hdrs=hdrs, ftrs=ftrs, **bodykw)
     return _f
 
 # %% ../nbs/00_core.ipynb 47
@@ -300,21 +301,21 @@ class WS_RouteX(WebSocketRoute):
 # %% ../nbs/00_core.ipynb 52
 class RouteX(Route):
     def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
-                hdrs=None, before=None, after=None, **bodykw):
-        ep = _wrap_ep(endpoint, hdrs, before=before, after=after, **bodykw)
+                hdrs=None, ftrs=None, before=None, after=None, **bodykw):
+        ep = _wrap_ep(endpoint, hdrs, ftrs=ftrs, before=before, after=after, **bodykw)
         super().__init__(path, ep, methods=methods, name=name, include_in_schema=include_in_schema, middleware=middleware)
 
 # %% ../nbs/00_core.ipynb 53
 class RouterX(Router):
     def __init__(self, routes=None, redirect_slashes=True, default=None, on_startup=None, on_shutdown=None,
-                 lifespan=None, *, middleware=None, hdrs=None, before=None, after=None, **bodykw):
+                 lifespan=None, *, middleware=None, hdrs=None, ftrs=None, before=None, after=None, **bodykw):
         super().__init__(routes, redirect_slashes, default, on_startup, on_shutdown,
                  lifespan=lifespan, middleware=middleware)
-        self.hdrs,self.bodykw,self.before,self.after = hdrs,bodykw,before,after
+        self.hdrs,self.ftrs,self.bodykw,self.before,self.after = hdrs,ftrs,bodykw,before,after
 
     def add_route( self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
         route = RouteX(path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema,
-                       hdrs=self.hdrs, before=self.before, after=self.after, **self.bodykw)
+                       hdrs=self.hdrs, ftrs=self.ftrs, before=self.before, after=self.after, **self.bodykw)
         self.routes.append(route)
 
     def add_ws( self, path: str, recv: callable, conn:callable=None, disconn:callable=None, name=None):
@@ -344,7 +345,8 @@ def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) els
 # %% ../nbs/00_core.ipynb 58
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
-                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, before=None, after=None, default_hdrs=True,
+                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
+                 before=None, after=None, default_hdrs=True,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, ws_hdr=False, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', **bodykw):
         middleware,before,after = _list(middleware),_list(before),_list(after)
@@ -355,10 +357,11 @@ class FastHTML(Starlette):
         middleware.append(sess)
         super().__init__(debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan=lifespan)
         hdrs = list([] if hdrs is None else hdrs)
+        ftrs = list([] if ftrs is None else ftrs)
         if default_hdrs: hdrs = [charset, viewport, htmxscr,surrsrc,scopesrc] + hdrs
         if ws_hdr: hdrs.append(htmxwsscr)
-        self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, hdrs=hdrs,
-                              before=before, after=after, **bodykw)
+        self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan,
+                              hdrs=hdrs, ftrs=ftrs, before=before, after=after, **bodykw)
 
     def route(self, path:str, methods=None, name=None, include_in_schema=True):
         def f(func):
