@@ -1,7 +1,14 @@
-# Run with: python adv_app.py
-# The "idiomatic" fasthtml app includes functionality from fastcore, starlette, fastlite, and fasthtml itself.
+###
+# Walkthough of an idiomatic fasthtml app
+###
+
+# This fasthtml app includes functionality from fastcore, starlette, fastlite, and fasthtml itself.
+# Run with: `python adv_app.py`
 # Importing from `fasthtml.common` brings the key parts of all of these together.
-# For simplicity, you can just `from fasthtml.common import *`, or you can import each symbol explicitly:
+# For simplicity, you can just `from fasthtml.common import *`:
+from fasthtml.common import *
+# ...or you can import each symbol explicitly (which we're commenting out here but including for completeness):
+"""
 from fasthtml.common import (
     # These are the HTML components we use in this app
     A, AX, Button, Card, Checkbox, Container, Div, Form, Grid, Group, H1, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Titled, Ul,
@@ -10,6 +17,7 @@ from fasthtml.common import (
     # These are from Starlette, Fastlite, fastcore, and the Python stdlib
     FileResponse, NotFoundError, RedirectResponse, database, patch, dataclass
 )
+"""
 from hmac import compare_digest
 
 # You can use any database you want; it'll be easier if you pick a lib that supports the MiniDataAPI spec.
@@ -277,4 +285,5 @@ async def get(id:int):
     # Because `class` is a reserved keyword in Python, we use `cls` instead, which FastHTML auto-converts.
     return Div(Div(todo.title), Div(todo.details, cls="markdown"), btn)
 
-if __name__ == '__main__': run_uv()
+run_uv()
+
