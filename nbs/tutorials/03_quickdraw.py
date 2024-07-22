@@ -1,18 +1,10 @@
 from fasthtml.common import *
 from datetime import datetime
 
-db = database('data/drawapp.db')
-rooms = db.t.rooms
-if rooms not in db.t:
-    rooms.create(id=int, name=str, created_at=str, pk='id', canvas_data=str)
-Room = rooms.dataclass()
+def render(room):
+    return Li(A(room.name, href=f"/rooms/{room.id}"))
 
-@patch
-def __xt__(self:Room):
-    return Li(A(self.name, href=f"/rooms/{self.id}"))
-
-app = FastHTML(hdrs=(picolink,))
-rt = app.route
+app,rt,rooms,Room = fast_app('data/drawapp.db', hdrs=(picolink,), render=render, id=int, name=str, created_at=str, canvas_data=str, pk='id')
 
 @rt("/")
 def get():
@@ -70,14 +62,12 @@ async def get(id:int):
 
 @rt("/rooms/{id}/save")
 async def post(id:int, canvas_data:str):
-    print(canvas_data)
     rooms.update({'canvas_data': canvas_data}, id)
     return "Canvas saved successfully"
 
 @rt("/rooms/{id}/load")
 async def get(id:int):
     room = rooms[id]
-    print(room.canvas_data)
     return room.canvas_data if room.canvas_data else "{}"
 
-if __name__ == "__main__": run_uv()
+run_uv()

@@ -1,18 +1,10 @@
 from fasthtml.common import *
 from datetime import datetime
 
-db = database('data/drawapp.db')
-rooms = db.t.rooms
-if rooms not in db.t:
-    rooms.create(id=int, name=str, created_at=str, pk='id')
-Room = rooms.dataclass()
+def render(room):
+    return Li(A(room.name, href=f"/rooms/{room.id}"))
 
-@patch
-def __xt__(self:Room):
-    return Li(A(self.name, href=f"/rooms/{self.id}"))
-
-app = FastHTML(hdrs=(picolink,))
-rt = app.route
+app,rt,rooms,Room = fast_app('data/drawapp.db', hdrs=(picolink,), render=render, id=int, name=str, created_at=str, pk='id')
 
 @rt("/")
 def get():
