@@ -15,7 +15,7 @@ __all__ = ['voids', 'named', 'html_attrs', 'hx_attrs', 'show', 'xt_html', 'xt_hx
 
 # %% ../nbs/01_components.ipynb 2
 from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -120,6 +120,15 @@ def __getattr__(tag):
     return _f
 
 # %% ../nbs/01_components.ipynb 24
+def _ht_com2py_com(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    coms = soup.find_all(string=lambda text: isinstance(text, Comment))
+
+    for com in coms:
+        com.replace_with(f"#{com}")#.replace("\n", "\n# "))        
+    return soup
+
+# %% ../nbs/01_components.ipynb 25
 _re_h2x_attr_key = re.compile(r'^[A-Za-z_-][\w-]*$')
 def html2xt(html):
     """Convert HTML to an `xt` expression"""
@@ -144,5 +153,5 @@ def html2xt(html):
         inner = j.join(filter(None, cs+attrs))
         if onlychild: return f'{tag_name}({inner})'
         return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*indent})'
-
-    return _parse(BeautifulSoup(html.strip(), 'html.parser'), 1)
+    
+    return _parse(_ht_com2py_com(html.strip()), 1)
