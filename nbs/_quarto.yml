@@ -24,6 +24,7 @@ website:
       - index.ipynb
       - section: Tutorials
         contents:
+          - 07_quickstart_for_web_devs.ipynb        
           - 05_by_example.ipynb
       - section: Explanations
         contents:
