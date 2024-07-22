@@ -13,7 +13,7 @@ from fastcore.utils import *
 from fastcore.xml import *
 from .xtend import *
 
-from types import UnionType, SimpleNamespace as ns
+from types import UnionType, SimpleNamespace as ns, GenericAlias
 from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List
 from datetime import datetime
 from dataclasses import dataclass,fields,is_dataclass,MISSING,asdict
@@ -77,6 +77,9 @@ def str2int(s)->int:
     if s=='none': return 0
     return 0 if not s else int(s)
 
+# %% ../nbs/00_core.ipynb 19
+def _mk_list(t, v): return [t(o) for o in v]
+
 # %% ../nbs/00_core.ipynb 21
 def _fix_anno(t):
     "Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"
@@ -135,7 +138,9 @@ async def _find_p(req, arg:str, p:Parameter):
     "In `req` find param named `arg` of type in `p` (`arg` is ignored for body types)"
     anno = p.annotation
     # If there's an annotation of special types, return object of that type
-    if isinstance(anno, type):
+    # GenericAlias is a type of typing for iterators like list[int] that is not a class
+    if isinstance(anno, type) and not isinstance(anno, GenericAlias):
+        if issubclass(anno, Request): return req
         if issubclass(anno, Request): return req
         if issubclass(anno, HtmxHeaders): return _get_htmx(req.headers)
         if issubclass(anno, Starlette): return req.scope['app']
