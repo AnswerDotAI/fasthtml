@@ -25,13 +25,13 @@ async def post(room:Room):
 async def get(id:int):
     room = rooms[id]
     canvas = Canvas(id="canvas", width="800", height="600")
-    color_picker = Input(type="color", id="color-picker", value="#000000")
+    color_picker = Input(type="color", id="color-picker", value="#3CDD8C")
     brush_size = Input(type="range", id="brush-size", min="1", max="50", value="10")
     
     js = """
     var canvas = new fabric.Canvas('canvas');
     canvas.isDrawingMode = true;
-    canvas.freeDrawingBrush.color = '#000000';
+    canvas.freeDrawingBrush.color = '#3CDD8C';
     canvas.freeDrawingBrush.width = 10;
     
     document.getElementById('color-picker').onchange = function() {

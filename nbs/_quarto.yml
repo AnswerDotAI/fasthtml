@@ -26,6 +26,7 @@ website:
         contents:
           - 07_quickstart_for_web_devs.ipynb        
           - 05_by_example.ipynb
+          - tutorials/e2e.ipynb
       - section: Explanations
         contents:
           - 06_explaining_components.ipynb
