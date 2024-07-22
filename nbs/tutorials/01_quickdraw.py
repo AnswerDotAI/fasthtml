@@ -33,4 +33,4 @@ async def get(id:int):
     room = rooms[id]
     return Titled(f"Room: {room.name}", H1(f"Welcome to {room.name}"), A(Button("Leave Room"), href="/"))
 
-if __name__ == "__main__": run_uv()
+run_uv()
