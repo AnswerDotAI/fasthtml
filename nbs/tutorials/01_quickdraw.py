@@ -17,7 +17,7 @@ def get():
 @rt("/rooms")
 async def post(room:Room):
     room.created_at = datetime.now().isoformat()
-    new_room = rooms.insert(room)
+    return rooms.insert(room)
     return Li(A(new_room.name, href=f"/rooms/{new_room.id}"))
 
 @rt("/rooms/{id}")
