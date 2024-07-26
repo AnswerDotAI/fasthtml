@@ -31,6 +31,7 @@ website:
         contents:
           - 06_explaining_components.ipynb
           - 09_live_reload.ipynb
+          - 10_routes.ipynb
       - section: API
         contents:
           - 00_core.ipynb
