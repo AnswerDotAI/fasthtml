@@ -215,36 +215,7 @@ def _wrap_resp(req, resp, cls, hdrs, ftrs, htmlkw, **bodykw):
 class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
 
-# %% ../nbs/00_core.ipynb 45
-def _wrap_ep(f, hdrs, ftrs, before, after, htmlkw, **bodykw):
-    if not (isfunction(f) or ismethod(f)): return f
-    sig = signature(f)
-    params = sig.parameters
-    cls = sig.return_annotation
-
-    async def _f(req):
-        resp = None
-        req.injects = []
-        for b in before:
-            if not resp:
-                if isinstance(b, Beforeware): bf,skip = b.f,b.skip
-                else: bf,skip = b,[]
-                if not any(re.match(r, req.url.path) for r in skip):
-                    wreq = await _wrap_req(req, signature(bf).parameters)
-                    resp = bf(*wreq)
-                    if is_async_callable(bf): resp = await resp
-        if not resp:
-            wreq = await _wrap_req(req, params)
-            resp = f(*wreq)
-            if is_async_callable(f): resp = await resp
-        for a in after:
-            _,*wreq = await _wrap_req(req, signature(a).parameters)
-            nr = a(resp, *wreq)
-            if nr: resp = nr
-        return _wrap_resp(req, resp, cls, hdrs=hdrs, ftrs=ftrs, htmlkw=htmlkw, **bodykw)
-    return _f
-
-# %% ../nbs/00_core.ipynb 47
+# %% ../nbs/00_core.ipynb 46
 def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
     "In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"
     anno = p.annotation
@@ -270,7 +241,7 @@ def _wrap_ws(ws, data, params):
     hdrs = data.pop('HEADERS', {})
     return [_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()]
 
-# %% ../nbs/00_core.ipynb 48
+# %% ../nbs/00_core.ipynb 47
 async def _send_ws(ws, resp):
     if not resp: return
     res = to_xml(resp) if isinstance(resp, (list,tuple)) or hasattr(resp, '__xt__') else resp
@@ -297,20 +268,44 @@ def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
     cls.on_receive = _recv
     return cls
 
-# %% ../nbs/00_core.ipynb 51
+# %% ../nbs/00_core.ipynb 50
 class WS_RouteX(WebSocketRoute):
     def __init__(self, path:str, recv, conn:callable=None, disconn:callable=None, *,
                  name=None, middleware=None, hdrs=None, before=None):
         super().__init__(path, _ws_endp(recv, conn, disconn, hdrs, before), name=name, middleware=middleware)
 
-# %% ../nbs/00_core.ipynb 52
+# %% ../nbs/00_core.ipynb 51
 class RouteX(Route):
     def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
                 hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
-        ep = _wrap_ep(endpoint, hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw, **bodykw)
-        super().__init__(path, ep, methods=methods, name=name, include_in_schema=include_in_schema, middleware=middleware)
+        self.sig = signature(endpoint)
+        self.f,self.hdrs,self.ftrs,self.before,self.after,self.htmlkw,self.bodykw = endpoint,hdrs,ftrs,before,after,htmlkw,bodykw
+        super().__init__(path, self._endp, methods=methods, name=name, include_in_schema=include_in_schema, middleware=middleware)
 
-# %% ../nbs/00_core.ipynb 53
+    async def _endp(self, req):
+        params = self.sig.parameters
+        cls = self.sig.return_annotation
+        resp = None
+        req.injects = []
+        for b in self.before:
+            if not resp:
+                if isinstance(b, Beforeware): bf,skip = b.f,b.skip
+                else: bf,skip = b,[]
+                if not any(re.match(r, req.url.path) for r in skip):
+                    wreq = await _wrap_req(req, signature(bf).parameters)
+                    resp = bf(*wreq)
+                    if is_async_callable(bf): resp = await resp
+        if not resp:
+            wreq = await _wrap_req(req, params)
+            resp = self.f(*wreq)
+            if is_async_callable(self.f): resp = await resp
+        for a in self.after:
+            _,*wreq = await _wrap_req(req, signature(a).parameters)
+            nr = a(resp, *wreq)
+            if nr: resp = nr
+        return _wrap_resp(req, resp, cls, hdrs=self.hdrs, ftrs=self.ftrs, htmlkw=self.htmlkw, **self.bodykw)
+
+# %% ../nbs/00_core.ipynb 52
 class RouterX(Router):
     def __init__(self, routes=None, redirect_slashes=True, default=None, on_startup=None, on_shutdown=None,
                  lifespan=None, *, middleware=None, hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
@@ -327,7 +322,7 @@ class RouterX(Router):
         route = WS_RouteX(path, recv=recv, conn=conn, disconn=disconn, name=name, hdrs=self.hdrs, before=self.before)
         self.routes.append(route)
 
-# %% ../nbs/00_core.ipynb 54
+# %% ../nbs/00_core.ipynb 53
 htmxscr   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
 htmxwsscr = Script(src="https://unpkg.com/htmx-ext-ws/ws.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@1.3.0/surreal.js")
@@ -335,7 +330,7 @@ scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/s
 viewport  = Meta(name="viewport", content="width=device-width, initial-scale=1, viewport-fit=cover")
 charset   = Meta(charset="utf-8")
 
-# %% ../nbs/00_core.ipynb 55
+# %% ../nbs/00_core.ipynb 54
 def get_key(key=None, fname='.sesskey'):
     if key: return key
     fname = Path(fname)
@@ -344,10 +339,10 @@ def get_key(key=None, fname='.sesskey'):
     fname.write_text(key)
     return key
 
-# %% ../nbs/00_core.ipynb 57
+# %% ../nbs/00_core.ipynb 56
 def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) else [o]
 
-# %% ../nbs/00_core.ipynb 58
+# %% ../nbs/00_core.ipynb 57
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
@@ -384,7 +379,7 @@ class FastHTML(Starlette):
 all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
-# %% ../nbs/00_core.ipynb 60
+# %% ../nbs/00_core.ipynb 59
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):
     "Create a 'set-cookie' `HttpHeader`"
     cookie = cookies.SimpleCookie()
@@ -402,17 +397,17 @@ def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None
     cookie_val = cookie.output(header="").strip()
     return HttpHeader("set-cookie", cookie_val)
 
-# %% ../nbs/00_core.ipynb 61
+# %% ../nbs/00_core.ipynb 60
 def reg_re_param(m, s):
     cls = get_class(f'{m}Conv', sup=StringConvertor, regex=s)
     register_url_convertor(m, cls())
 
-# %% ../nbs/00_core.ipynb 62
+# %% ../nbs/00_core.ipynb 61
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
 reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml|html")
 
-# %% ../nbs/00_core.ipynb 63
+# %% ../nbs/00_core.ipynb 62
 class MiddlewareBase:
     async def __call__(self, scope, receive, send) -> None:
         if scope["type"] not in ["http", "websocket"]:
