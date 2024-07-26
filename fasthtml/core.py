@@ -185,37 +185,10 @@ def flat_xt(lst):
     return result
 
 # %% ../nbs/00_core.ipynb 42
-def _xt_resp(req, resp, hdrs, ftrs, htmlkw, **bodykw):
-    if not isinstance(resp, tuple): resp = (resp,)
-    resp = resp + tuple(req.injects)
-    http_hdrs,resp = partition(resp, risinstance(HttpHeader))
-    http_hdrs = {o.k:str(o.v) for o in http_hdrs}
-    titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in ('title','meta'))
-    if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
-        if not titles: titles = [Title('FastHTML page')]
-        resp = Html(Head(*titles, *flat_xt(hdrs)), Body(bdy, *flat_xt(ftrs), **bodykw), **htmlkw)
-    return HTMLResponse(to_xml(resp), headers=http_hdrs)
-
-# %% ../nbs/00_core.ipynb 43
-def _wrap_resp(req, resp, cls, hdrs, ftrs, htmlkw, **bodykw):
-    if not resp: resp=()
-    if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
-    if isinstance(resp, Response): return resp
-    if cls is not empty: return cls(resp)
-    if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__xt__'):
-        return _xt_resp(req, resp, hdrs=hdrs, ftrs=ftrs, htmlkw=htmlkw, **bodykw)
-    if isinstance(resp, str): cls = HTMLResponse
-    elif isinstance(resp, Mapping): cls = JSONResponse
-    else:
-        resp = str(resp)
-        cls = HTMLResponse
-    return cls(resp)
-
-# %% ../nbs/00_core.ipynb 44
 class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
 
-# %% ../nbs/00_core.ipynb 46
+# %% ../nbs/00_core.ipynb 44
 def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
     "In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"
     anno = p.annotation
@@ -241,7 +214,7 @@ def _wrap_ws(ws, data, params):
     hdrs = data.pop('HEADERS', {})
     return [_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()]
 
-# %% ../nbs/00_core.ipynb 47
+# %% ../nbs/00_core.ipynb 45
 async def _send_ws(ws, resp):
     if not resp: return
     res = to_xml(resp) if isinstance(resp, (list,tuple)) or hasattr(resp, '__xt__') else resp
@@ -268,13 +241,13 @@ def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
     cls.on_receive = _recv
     return cls
 
-# %% ../nbs/00_core.ipynb 50
+# %% ../nbs/00_core.ipynb 48
 class WS_RouteX(WebSocketRoute):
     def __init__(self, path:str, recv, conn:callable=None, disconn:callable=None, *,
                  name=None, middleware=None, hdrs=None, before=None):
         super().__init__(path, _ws_endp(recv, conn, disconn, hdrs, before), name=name, middleware=middleware)
 
-# %% ../nbs/00_core.ipynb 51
+# %% ../nbs/00_core.ipynb 49
 class RouteX(Route):
     def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
                 hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
@@ -282,9 +255,32 @@ class RouteX(Route):
         self.f,self.hdrs,self.ftrs,self.before,self.after,self.htmlkw,self.bodykw = endpoint,hdrs,ftrs,before,after,htmlkw,bodykw
         super().__init__(path, self._endp, methods=methods, name=name, include_in_schema=include_in_schema, middleware=middleware)
 
-    async def _endp(self, req):
-        params = self.sig.parameters
+    def _xt_resp(self, req, resp):
+        if not isinstance(resp, tuple): resp = (resp,)
+        resp = resp + tuple(req.injects)
+        http_hdrs,resp = partition(resp, risinstance(HttpHeader))
+        http_hdrs = {o.k:str(o.v) for o in http_hdrs}
+        titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in ('title','meta'))
+        if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
+            if not titles: titles = [Title('FastHTML page')]
+            resp = Html(Head(*titles, *flat_xt(self.hdrs)), Body(bdy, *flat_xt(self.ftrs), **self.bodykw), **self.htmlkw)
+        return HTMLResponse(to_xml(resp), headers=http_hdrs)
+
+    def _resp(self, req, resp):
+        if not resp: resp=()
         cls = self.sig.return_annotation
+        if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
+        if isinstance(resp, Response): return resp
+        if cls is not empty: return cls(resp)
+        if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__xt__'): return self._xt_resp(req, resp)
+        if isinstance(resp, str): cls = HTMLResponse
+        elif isinstance(resp, Mapping): cls = JSONResponse
+        else:
+            resp = str(resp)
+            cls = HTMLResponse
+        return cls(resp)
+
+    async def _endp(self, req):
         resp = None
         req.injects = []
         for b in self.before:
@@ -296,16 +292,16 @@ class RouteX(Route):
                     resp = bf(*wreq)
                     if is_async_callable(bf): resp = await resp
         if not resp:
-            wreq = await _wrap_req(req, params)
+            wreq = await _wrap_req(req, self.sig.parameters)
             resp = self.f(*wreq)
             if is_async_callable(self.f): resp = await resp
         for a in self.after:
             _,*wreq = await _wrap_req(req, signature(a).parameters)
             nr = a(resp, *wreq)
             if nr: resp = nr
-        return _wrap_resp(req, resp, cls, hdrs=self.hdrs, ftrs=self.ftrs, htmlkw=self.htmlkw, **self.bodykw)
+        return self._resp(req, resp)
 
-# %% ../nbs/00_core.ipynb 52
+# %% ../nbs/00_core.ipynb 50
 class RouterX(Router):
     def __init__(self, routes=None, redirect_slashes=True, default=None, on_startup=None, on_shutdown=None,
                  lifespan=None, *, middleware=None, hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
@@ -322,7 +318,7 @@ class RouterX(Router):
         route = WS_RouteX(path, recv=recv, conn=conn, disconn=disconn, name=name, hdrs=self.hdrs, before=self.before)
         self.routes.append(route)
 
-# %% ../nbs/00_core.ipynb 53
+# %% ../nbs/00_core.ipynb 51
 htmxscr   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
 htmxwsscr = Script(src="https://unpkg.com/htmx-ext-ws/ws.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@1.3.0/surreal.js")
@@ -330,7 +326,7 @@ scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/s
 viewport  = Meta(name="viewport", content="width=device-width, initial-scale=1, viewport-fit=cover")
 charset   = Meta(charset="utf-8")
 
-# %% ../nbs/00_core.ipynb 54
+# %% ../nbs/00_core.ipynb 52
 def get_key(key=None, fname='.sesskey'):
     if key: return key
     fname = Path(fname)
@@ -339,10 +335,10 @@ def get_key(key=None, fname='.sesskey'):
     fname.write_text(key)
     return key
 
-# %% ../nbs/00_core.ipynb 56
+# %% ../nbs/00_core.ipynb 54
 def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) else [o]
 
-# %% ../nbs/00_core.ipynb 57
+# %% ../nbs/00_core.ipynb 55
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
@@ -379,7 +375,7 @@ class FastHTML(Starlette):
 all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
-# %% ../nbs/00_core.ipynb 59
+# %% ../nbs/00_core.ipynb 57
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):
     "Create a 'set-cookie' `HttpHeader`"
     cookie = cookies.SimpleCookie()
@@ -397,17 +393,17 @@ def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None
     cookie_val = cookie.output(header="").strip()
     return HttpHeader("set-cookie", cookie_val)
 
-# %% ../nbs/00_core.ipynb 60
+# %% ../nbs/00_core.ipynb 58
 def reg_re_param(m, s):
     cls = get_class(f'{m}Conv', sup=StringConvertor, regex=s)
     register_url_convertor(m, cls())
 
-# %% ../nbs/00_core.ipynb 61
+# %% ../nbs/00_core.ipynb 59
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
 reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml|html")
 
-# %% ../nbs/00_core.ipynb 62
+# %% ../nbs/00_core.ipynb 60
 class MiddlewareBase:
     async def __call__(self, scope, receive, send) -> None:
         if scope["type"] not in ["http", "websocket"]:
