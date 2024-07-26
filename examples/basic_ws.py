@@ -8,7 +8,7 @@ def mk_inp(): return Input(id='msg')
 nid = 'notifications'
 
 @rt('/')
-async def get(request):
+async def get():
     cts = Div(
         Div(id=nid),
         Form(mk_inp(), id='form', ws_send=True),

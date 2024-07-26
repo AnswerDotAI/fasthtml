@@ -15,7 +15,7 @@ __all__ = ['voids', 'named', 'html_attrs', 'hx_attrs', 'show', 'xt_html', 'xt_hx
 
 # %% ../nbs/01_components.ipynb 2
 from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -145,4 +145,6 @@ def html2xt(html):
         if onlychild: return f'{tag_name}({inner})'
         return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*indent})'
 
-    return _parse(BeautifulSoup(html.strip(), 'html.parser'), 1)
+    soup = BeautifulSoup(html.strip(), 'html.parser')
+    for c in soup.find_all(string=risinstance(Comment)): c.extract()
+    return _parse(soup, 1)

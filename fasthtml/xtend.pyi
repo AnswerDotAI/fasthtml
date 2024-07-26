@@ -101,7 +101,7 @@ def Titled(title: str='FastHTML app', *args, target_id=None, id=None, cls=None, 
     """An HTML partial containing a `Title`, and `H1`, and any provided children"""
     ...
 
-def Socials(title, site_name, description, image, url, w=1200, h=630, twitter_site=None, creator=None, card='summary'):
+def Socials(title, site_name, description, image, url=None, w=1200, h=630, twitter_site=None, creator=None, card='summary'):
     """OG and Twitter social card headers"""
     ...
 
