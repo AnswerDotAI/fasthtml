@@ -186,7 +186,7 @@ def Titled(title:str="FastHTML app", *args, **kwargs)->XT:
 # %% ../nbs/02_xtend.ipynb 39
 def Socials(title, site_name, description, image, url=None, w=1200, h=630, twitter_site=None, creator=None, card='summary'):
     "OG and Twitter social card headers"
-    if url is None: url=site_name
+    if not url: url=site_name
     if not url.startswith('http'): url = f'https://{url}'
     if not image.startswith('http'): image = f'{url}{image}'
     res = [Meta(property='og:image', content=image),
