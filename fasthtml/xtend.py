@@ -5,7 +5,7 @@ __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls',
            'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces',
            'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'run_js', 'Titled', 'Socials', 'Favicon', 'jsd']
 
-# %% ../nbs/02_xtend.ipynb 2
+# %% ../nbs/02_xtend.ipynb
 from dataclasses import dataclass, asdict
 
 from fastcore.utils import *
@@ -17,7 +17,7 @@ from .components import *
 try: from IPython import display
 except ImportError: display=None
 
-# %% ../nbs/02_xtend.ipynb 4
+# %% ../nbs/02_xtend.ipynb
 picocss = "https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css"
 picolink = (Link(rel="stylesheet", href=picocss),
             Style(":root { --pico-font-size: 100%; }"))
@@ -25,7 +25,7 @@ picocondcss = "https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.condit
 picocondlink = (Link(rel="stylesheet", href=picocondcss),
                 Style(":root { --pico-font-size: 100%; }"))
 
-# %% ../nbs/02_xtend.ipynb 7
+# %% ../nbs/02_xtend.ipynb
 def set_pico_cls():
     js = """var sel = '.cell-output, .output_area';
 document.querySelectorAll(sel).forEach(e => e.classList.add('pico'));
@@ -43,26 +43,26 @@ new MutationObserver(ms => {
 }).observe(document.body, { childList: true, subtree: true });"""
     return display.Javascript(js)
 
-# %% ../nbs/02_xtend.ipynb 10
+# %% ../nbs/02_xtend.ipynb
 def Html(*c, doctype=True, **kwargs)->XT:
     "An HTML tag, optionally preceeded by `!DOCTYPE HTML`"
     res = xt('html', *c, **kwargs)
     if not doctype: return res
     return (xt('!DOCTYPE', html=True), res)
 
-# %% ../nbs/02_xtend.ipynb 11
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def A(*c, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs)->XT:
     "An A tag; `href` defaults to '#' for more concise use with HTMX"
     return xt_hx('a', *c, href=href, hx_get=hx_get, target_id=target_id, hx_swap=hx_swap, **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 13
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def AX(txt, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs)->XT:
     "An A tag with just one text child, allowing hx_get, target_id, and hx_swap to be positional params"
     return xt_hx('a', txt, href=href, hx_get=hx_get, target_id=target_id, hx_swap=hx_swap, **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 15
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def Checkbox(checked:bool=False, label=None, value="1", **kwargs)->XT:
     "A Checkbox optionally inside a Label"
@@ -71,7 +71,7 @@ def Checkbox(checked:bool=False, label=None, value="1", **kwargs)->XT:
     if label: res = Label(res, label)
     return res
 
-# %% ../nbs/02_xtend.ipynb 17
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def Card(*c, header=None, footer=None, **kwargs)->XT:
     "A PicoCSS Card, implemented as an Article with optional Header and Footer"
@@ -79,74 +79,74 @@ def Card(*c, header=None, footer=None, **kwargs)->XT:
     if footer: c += (Footer(footer),)
     return Article(*c, **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 19
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def Group(*c, **kwargs)->XT:
     "A PicoCSS Group, implemented as a Fieldset with role 'group'"
     return Fieldset(*c, role="group", **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 21
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def Search(*c, **kwargs)->XT:
     "A PicoCSS Search, implemented as a Form with role 'search'"
     return Form(*c, role="search", **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 23
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def Grid(*c, cls='grid', **kwargs)->XT:
     "A PicoCSS Grid, implemented as child Divs in a Div with class 'grid'"
     c = tuple(o if isinstance(o,list) else Div(o) for o in c)
     return xt_hx('div', *c, cls=cls, **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 25
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def DialogX(*c, open=None, header=None, footer=None, id=None, **kwargs)->XT:
     "A PicoCSS Dialog, with children inside a Card"
     card = Card(*c, header=header, footer=footer, **kwargs)
     return Dialog(card, open=open, id=id)
 
-# %% ../nbs/02_xtend.ipynb 27
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def Hidden(value:str="", **kwargs)->XT:
     "An Input of type 'hidden'"
     return Input(type="hidden", value=value, **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 28
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def Container(*args, **kwargs)->XT:
     "A PicoCSS Container, implemented as a Main with class 'container'"
     return Main(*args, cls="container", **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 29
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_html, keep=True)
 def Script(code:str="", **kwargs)->XT:
     "A Script tag that doesn't escape its code"
     return xt_html('script', NotStr(code), **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 30
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_html, keep=True)
 def Style(*c, **kwargs)->XT:
     "A Style tag that doesn't escape its code"
     return xt_html('style', map(NotStr,c), **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 31
+# %% ../nbs/02_xtend.ipynb
 def double_braces(s):
     "Convert single braces to double braces if next to special chars or newline"
     s = re.sub(r'{(?=[\s:;\'"]|$)', '{{', s)
     return re.sub(r'(^|[\s:;\'"])}', r'\1}}', s)
 
-# %% ../nbs/02_xtend.ipynb 32
+# %% ../nbs/02_xtend.ipynb
 def undouble_braces(s):
     "Convert double braces to single braces if next to special chars or newline"
     s = re.sub(r'\{\{(?=[\s:;\'"]|$)', '{', s)
     return re.sub(r'(^|[\s:;\'"])\}\}', r'\1}', s)
 
-# %% ../nbs/02_xtend.ipynb 33
+# %% ../nbs/02_xtend.ipynb
 def loose_format(s, **kw):
     "String format `s` using `kw`, without being strict about braces outside of template params"
     return undouble_braces(partial_format(double_braces(s), **kw)[0])
 
-# %% ../nbs/02_xtend.ipynb 34
+# %% ../nbs/02_xtend.ipynb
 def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin=None, integrity=None, **kw):
     "A `script` element with contents read from `fname`"
     attrs = ['src', 'type', 'async', 'defer', 'charset', 'crossorigin', 'integrity', 'nomodule']
@@ -154,7 +154,7 @@ def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin
     s = loose_format(Path(fname).read_text(), **kw)
     return Script(s, **scr_kw)
 
-# %% ../nbs/02_xtend.ipynb 35
+# %% ../nbs/02_xtend.ipynb
 def replace_css_vars(css, pre='tpl', **kwargs):
     "Replace `var(--)` CSS variables with `kwargs` if name prefix matches `pre`"
     def replace_var(m):
@@ -162,7 +162,7 @@ def replace_css_vars(css, pre='tpl', **kwargs):
         return kwargs.get(var_name, m.group(0))
     return re.sub(fr'var\(--{pre}-([\w-]+)\)', replace_var, css)
 
-# %% ../nbs/02_xtend.ipynb 36
+# %% ../nbs/02_xtend.ipynb
 def StyleX(fname, **kw):
     "A `style` element with contents read from `fname` and variables replaced from `kw`"
     s = Path(fname).read_text()
@@ -170,20 +170,20 @@ def StyleX(fname, **kw):
     sty_kw = {k:kw.pop(k) for k in attrs if k in kw}
     return Style(replace_css_vars(s, **kw), **sty_kw)
 
-# %% ../nbs/02_xtend.ipynb 37
+# %% ../nbs/02_xtend.ipynb
 def run_js(js, id=None, **kw):
     "Run `js` script, auto-generating `id` based on name of caller if needed, and js-escaping any `kw` params"
     if not id: id = sys._getframe(1).f_code.co_name
     kw = {k:dumps(v) for k,v in kw.items()}
     return Script(js.format(**kw), id=id, hx_swap_oob='true')
 
-# %% ../nbs/02_xtend.ipynb 38
+# %% ../nbs/02_xtend.ipynb
 @delegates(xt_hx, keep=True)
 def Titled(title:str="FastHTML app", *args, **kwargs)->XT:
     "An HTML partial containing a `Title`, and `H1`, and any provided children"
     return Title(title), Main(H1(title), *args, cls="container", **kwargs)
 
-# %% ../nbs/02_xtend.ipynb 39
+# %% ../nbs/02_xtend.ipynb
 def Socials(title, site_name, description, image, url=None, w=1200, h=630, twitter_site=None, creator=None, card='summary'):
     "OG and Twitter social card headers"
     if not url: url=site_name
@@ -206,13 +206,13 @@ def Socials(title, site_name, description, image, url=None, w=1200, h=630, twitt
     if creator      is not None: res.append(Meta(name='twitter:creator', content=creator))
     return tuple(res)
 
-# %% ../nbs/02_xtend.ipynb 40
+# %% ../nbs/02_xtend.ipynb
 def Favicon(light_icon, dark_icon):
     "Light and dark favicon headers"
     return (Link(rel='icon', type='image/x-ico', href=light_icon, media='(prefers-color-scheme: light)'),
             Link(rel='icon', type='image/x-ico', href=dark_icon, media='(prefers-color-scheme: dark)'))
 
-# %% ../nbs/02_xtend.ipynb 41
+# %% ../nbs/02_xtend.ipynb
 def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **kwargs)->XT:
     "jsdelivr `Script` or CSS `Link` tag, or URL"
     ver = '@'+ver if ver else ''
