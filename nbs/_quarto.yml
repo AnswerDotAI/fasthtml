@@ -30,6 +30,7 @@ website:
       - section: Explanations
         contents:
           - 06_explaining_components.ipynb
+          - 09_live_reload.ipynb
       - section: API
         contents:
           - 00_core.ipynb
