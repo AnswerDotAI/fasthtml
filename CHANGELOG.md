@@ -2,6 +2,20 @@
 
 <!-- do not remove -->
 
+## 0.1.8
+
+### New Features
+
+- Remove comments in html2xt ([#76](https://github.com/AnswerDotAI/fasthtml/issues/76))
+- Handle relative paths in `Social` ([#70](https://github.com/AnswerDotAI/fasthtml/issues/70))
+- Add `ftrs` for scripts etc at end of body element ([#62](https://github.com/AnswerDotAI/fasthtml/issues/62))
+- Updated html2xt to use unpacked dicts when attr keys are not valid python names ([#57](https://github.com/AnswerDotAI/fasthtml/pull/57)), thanks to [@matdmiller](https://github.com/matdmiller)
+
+### Bugs Squashed
+
+- fix social relative urls ([#77](https://github.com/AnswerDotAI/fasthtml/issues/77))
+
+
 ## 0.1.7
 
 ### New Features
