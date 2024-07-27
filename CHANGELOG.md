@@ -3,6 +3,13 @@
 <!-- do not remove -->
 
 
+## 0.1.10
+
+### Dependencies
+
+- Update for fastcore XT to FT name change
+
+
 ## 0.1.9
 
 ### New Features
