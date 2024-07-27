@@ -51,19 +51,19 @@ def Html(*c, doctype=True, **kwargs)->FT:
     return (ft('!DOCTYPE', html=True), res)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def A(*c, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs)->FT:
     "An A tag; `href` defaults to '#' for more concise use with HTMX"
-    return xt_hx('a', *c, href=href, hx_get=hx_get, target_id=target_id, hx_swap=hx_swap, **kwargs)
+    return ft_hx('a', *c, href=href, hx_get=hx_get, target_id=target_id, hx_swap=hx_swap, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def AX(txt, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs)->FT:
     "An A tag with just one text child, allowing hx_get, target_id, and hx_swap to be positional params"
-    return xt_hx('a', txt, href=href, hx_get=hx_get, target_id=target_id, hx_swap=hx_swap, **kwargs)
+    return ft_hx('a', txt, href=href, hx_get=hx_get, target_id=target_id, hx_swap=hx_swap, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def Checkbox(checked:bool=False, label=None, value="1", **kwargs)->FT:
     "A Checkbox optionally inside a Label"
     if not checked: checked=None
@@ -72,7 +72,7 @@ def Checkbox(checked:bool=False, label=None, value="1", **kwargs)->FT:
     return res
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def Card(*c, header=None, footer=None, **kwargs)->FT:
     "A PicoCSS Card, implemented as an Article with optional Header and Footer"
     if header: c = (Header(header),) + c
@@ -80,54 +80,54 @@ def Card(*c, header=None, footer=None, **kwargs)->FT:
     return Article(*c, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def Group(*c, **kwargs)->FT:
     "A PicoCSS Group, implemented as a Fieldset with role 'group'"
     return Fieldset(*c, role="group", **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def Search(*c, **kwargs)->FT:
     "A PicoCSS Search, implemented as a Form with role 'search'"
     return Form(*c, role="search", **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def Grid(*c, cls='grid', **kwargs)->FT:
     "A PicoCSS Grid, implemented as child Divs in a Div with class 'grid'"
     c = tuple(o if isinstance(o,list) else Div(o) for o in c)
-    return xt_hx('div', *c, cls=cls, **kwargs)
+    return ft_hx('div', *c, cls=cls, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def DialogX(*c, open=None, header=None, footer=None, id=None, **kwargs)->FT:
     "A PicoCSS Dialog, with children inside a Card"
     card = Card(*c, header=header, footer=footer, **kwargs)
     return Dialog(card, open=open, id=id)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def Hidden(value:str="", **kwargs)->FT:
     "An Input of type 'hidden'"
     return Input(type="hidden", value=value, **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def Container(*args, **kwargs)->FT:
     "A PicoCSS Container, implemented as a Main with class 'container'"
     return Main(*args, cls="container", **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_html, keep=True)
+@delegates(ft_html, keep=True)
 def Script(code:str="", **kwargs)->FT:
     "A Script tag that doesn't escape its code"
-    return xt_html('script', NotStr(code), **kwargs)
+    return ft_html('script', NotStr(code), **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_html, keep=True)
+@delegates(ft_html, keep=True)
 def Style(*c, **kwargs)->FT:
     "A Style tag that doesn't escape its code"
-    return xt_html('style', map(NotStr,c), **kwargs)
+    return ft_html('style', map(NotStr,c), **kwargs)
 
 # %% ../nbs/02_xtend.ipynb
 def double_braces(s):
@@ -180,7 +180,7 @@ def run_js(js, id=None, **kw):
     return Script(js.format(**kw), id=id, hx_swap_oob='true')
 
 # %% ../nbs/02_xtend.ipynb
-@delegates(xt_hx, keep=True)
+@delegates(ft_hx, keep=True)
 def Titled(title:str="FastHTML app", *args, **kwargs)->FT:
     "An HTML partial containing a `Title`, and `H1`, and any provided children"
     return Title(title), Main(H1(title), *args, cls="container", **kwargs)
