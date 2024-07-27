@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.1.9
+
+### New Features
+
+- Add `htmlkw` param to `FastHTML` ([#78](https://github.com/AnswerDotAI/fasthtml/issues/78))
+
+
+
 ## 0.1.8
 
 ### New Features

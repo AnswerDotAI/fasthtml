@@ -144,6 +144,7 @@ def undouble_braces(s):
 # %% ../nbs/02_xtend.ipynb
 def loose_format(s, **kw):
     "String format `s` using `kw`, without being strict about braces outside of template params"
+    if not kw: return s
     return undouble_braces(partial_format(double_braces(s), **kw)[0])
 
 # %% ../nbs/02_xtend.ipynb
@@ -157,6 +158,7 @@ def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin
 # %% ../nbs/02_xtend.ipynb
 def replace_css_vars(css, pre='tpl', **kwargs):
     "Replace `var(--)` CSS variables with `kwargs` if name prefix matches `pre`"
+    if not kwargs: return css
     def replace_var(m):
         var_name = m.group(1).replace('-', '_')
         return kwargs.get(var_name, m.group(0))
