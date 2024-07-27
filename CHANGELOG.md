@@ -2,12 +2,13 @@
 
 <!-- do not remove -->
 
+
 ## 0.1.9
 
 ### New Features
 
+- Skip redundent formatting in `loose_format` ([#79](https://github.com/AnswerDotAI/fasthtml/issues/79))
 - Add `htmlkw` param to `FastHTML` ([#78](https://github.com/AnswerDotAI/fasthtml/issues/78))
-
 
 
 ## 0.1.8
