@@ -14,7 +14,7 @@ def get_tbl(dt, nm, schema):
 
 def fast_app(db=None, render=None, hdrs=None, ftrs=None, tbls=None, before=None, middleware=None, live=False, debug=False, routes=None, exception_handlers=None,
              on_startup=None, on_shutdown=None, lifespan=None, default_hdrs=True, secret_key=None, session_cookie='session_', max_age=365*24*3600,
-             pico=None, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', bodykw=None, **kwargs):
+             pico=None, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', ws_hdr=False, bodykw=None, **kwargs):
 
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
@@ -22,7 +22,7 @@ def fast_app(db=None, render=None, hdrs=None, ftrs=None, tbls=None, before=None,
     app = app_cls(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, debug=debug, routes=routes, exception_handlers=exception_handlers,
                   on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, default_hdrs=default_hdrs, secret_key=secret_key,
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
-                  sess_domain=sess_domain, key_fname=key_fname, **(bodykw or {}))
+                  sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, **(bodykw or {}))
     @app.route("/{fname:path}.{ext:static}")
     async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
     if not db: return app,app.route
