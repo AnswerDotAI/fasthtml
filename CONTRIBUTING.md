@@ -7,6 +7,17 @@ Before anything else, please install the git hooks that run automatic scripts du
 nbdev_install_hooks
 ```
 
+This is a one-off command that you only have to run when you're first setting up the repo locally.
+
+You will also want to set up a `prep` alias in ~/.zshrc or other shell startup file:
+
+```bash
+# nbdev alias to clean Jupyter notebooks before committing
+alias prep='nbdev_export && nbdev_clean && nbdev_trust'
+```
+
+Run `prep` before each commit.
+
 ## Did you find a bug?
 
 * Ensure the bug was not already reported by searching on GitHub under Issues.
