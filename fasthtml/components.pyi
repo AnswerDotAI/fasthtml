@@ -10,7 +10,7 @@ try:
 except ImportError:
     display = None
 
-def show(xt, *rest):
+def show(ft, *rest):
     ...
 voids = set('area base br col command embed hr img input keygen link meta param source track wbr !doctype'.split())
 named = set('a button form frame iframe img input map meta object param select textarea'.split())
@@ -36,7 +36,7 @@ def File(fname):
 def _fill_item(item, obj):
     ...
 
-def fill_form(form: XT, obj) -> XT:
+def fill_form(form: FT, obj) -> FT:
     """Fills named items in `form` using attributes in `obj`"""
     ...
 
@@ -52,7 +52,7 @@ def __getattr__(tag):
 _re_h2x_attr_key = re.compile('^[A-Za-z_-][\\w-]*$')
 
 def html2xt(html):
-    """Convert HTML to an `xt` expression"""
+    """Convert HTML to an `ft` expression"""
     ...
 def xt_html(tag: str, *c, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, hx_get:str|None=None, hx_post:str|None=None, hx_put:str|None=None, hx_delete:str|None=None, hx_patch:str|None=None, hx_trigger:str|None=None, hx_target:str|None=None, hx_swap:str|None=None, hx_include:str|None=None, hx_select:str|None=None, hx_indicator:str|None=None, hx_push_url:str|None=None, hx_confirm:str|None=None, hx_disable:str|None=None, hx_replace_url:str|None=None, hx_on:str|None=None, **kwargs): ...
 def xt_hx(tag: str, *c, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, id:str|None=None, cls:str|None=None, title:str|None=None, style:str|None=None, accesskey:str|None=None, contenteditable:str|None=None, dir:str|None=None, draggable:str|None=None, enterkeyhint:str|None=None, hidden:str|None=None, inert:str|None=None, inputmode:str|None=None, lang:str|None=None, popover:str|None=None, spellcheck:str|None=None, tabindex:str|None=None, translate:str|None=None, hx_get:str|None=None, hx_post:str|None=None, hx_put:str|None=None, hx_delete:str|None=None, hx_patch:str|None=None, hx_trigger:str|None=None, hx_target:str|None=None, hx_swap:str|None=None, hx_include:str|None=None, hx_select:str|None=None, hx_indicator:str|None=None, hx_push_url:str|None=None, hx_confirm:str|None=None, hx_disable:str|None=None, hx_replace_url:str|None=None, hx_on:str|None=None, **kwargs): ...

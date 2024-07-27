@@ -30,7 +30,7 @@
 ### New Features
 
 - Add `indent` to `html2xt` ([#53](https://github.com/AnswerDotAI/fasthtml/issues/53))
-- New `fasthtml.xt` namespace for components ([#50](https://github.com/AnswerDotAI/fasthtml/issues/50))
+- New `fasthtml.ft` namespace for components ([#50](https://github.com/AnswerDotAI/fasthtml/issues/50))
 - Add `bodykw` in `fast_app` ([#49](https://github.com/AnswerDotAI/fasthtml/issues/49))
 
 

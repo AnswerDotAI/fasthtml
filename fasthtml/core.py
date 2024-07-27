@@ -177,10 +177,10 @@ async def _wrap_req(req, params):
 
 # %% ../nbs/00_core.ipynb
 def flat_xt(lst):
-    "Flatten lists, except for `XT`s"
+    "Flatten lists, except for `FT`s"
     result = []
     for item in lst:
-        if isinstance(item, (list,tuple)) and not isinstance(item, XT): result.extend(item)
+        if isinstance(item, (list,tuple)) and not isinstance(item, FT): result.extend(item)
         else: result.append(item)
     return result
 
@@ -217,7 +217,7 @@ def _wrap_ws(ws, data, params):
 # %% ../nbs/00_core.ipynb
 async def _send_ws(ws, resp):
     if not resp: return
-    res = to_xml(resp) if isinstance(resp, (list,tuple)) or hasattr(resp, '__xt__') else resp
+    res = to_xml(resp) if isinstance(resp, (list,tuple)) or hasattr(resp, '__ft__') else resp
     await ws.send_text(res)
 
 def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
@@ -272,7 +272,7 @@ class RouteX(Route):
         if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
         if isinstance(resp, Response): return resp
         if cls is not empty: return cls(resp)
-        if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__xt__'): return self._xt_resp(req, resp)
+        if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__ft__'): return self._xt_resp(req, resp)
         if isinstance(resp, str): cls = HTMLResponse
         elif isinstance(resp, Mapping): cls = JSONResponse
         else:

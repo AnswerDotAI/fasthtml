@@ -18,7 +18,7 @@ rt = app.route
 async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 
 @patch
-def __xt__(self:Todo):
+def __ft__(self:Todo):
     show = AX(self.title, f'/todos/{self.id}', id_curr)
     edit = AX('edit',     f'/edit/{self.id}' , id_curr)
     dt = ' (done)' if self.done else ''

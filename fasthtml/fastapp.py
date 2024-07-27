@@ -9,7 +9,7 @@ def get_tbl(dt, nm, schema):
     tbl = dt[nm]
     if tbl not in dt: tbl.create(**schema)
     dc = tbl.dataclass()
-    if render: dc.__xt__ = render
+    if render: dc.__ft__ = render
     return tbl,dc
 
 def fast_app(db=None, render=None, hdrs=None, ftrs=None, tbls=None, before=None, middleware=None, live=False, debug=False, routes=None, exception_handlers=None,

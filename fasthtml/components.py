@@ -27,9 +27,9 @@ try: from IPython import display
 except ImportError: display=None
 
 # %% ../nbs/01_components.ipynb
-def show(xt,*rest):
-    if rest: xt = (xt,)+rest
-    return display.HTML(to_xml(xt))
+def show(ft,*rest):
+    if rest: ft = (ft,)+rest
+    return display.HTML(to_xml(ft))
 
 # %% ../nbs/01_components.ipynb
 voids = set('area base br col command embed hr img input keygen link meta param source track wbr !doctype'.split())
@@ -42,9 +42,9 @@ hx_attrs = html_attrs + [f'hx_{o}' for o in hx_attrs.split()]
 def xt_html(tag: str, *c, id=None, cls=None, title=None, style=None, **kwargs):
     if len(c)==1 and isinstance(c[0], (types.GeneratorType, map, filter)): c = tuple(c[0])
     kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style
-    tag,c,kw = xt(tag, *c, **kwargs)
+    tag,c,kw = ft(tag, *c, **kwargs)
     if tag in named and 'id' in kw and 'name' not in kw: kw['name'] = kw['id']
-    return XT(tag,c,kw, void_=tag in voids)
+    return FT(tag,c,kw, void_=tag in voids)
 
 # %% ../nbs/01_components.ipynb
 @use_kwargs(hx_attrs, keep=True)
@@ -84,10 +84,10 @@ def _fill_item(item, obj):
                 else: attr.pop('checked', '')
             else: attr['value'] = val
         if tag=='textarea': cs=(val,)
-    return XT(tag,cs,attr)
+    return FT(tag,cs,attr)
 
 # %% ../nbs/01_components.ipynb
-def fill_form(form:XT, obj)->XT:
+def fill_form(form:FT, obj)->FT:
     "Fills named items in `form` using attributes in `obj`"
     if not isinstance(obj,dict): obj = asdict(obj)
     return _fill_item(form, obj)
@@ -122,7 +122,7 @@ def __getattr__(tag):
 # %% ../nbs/01_components.ipynb
 _re_h2x_attr_key = re.compile(r'^[A-Za-z_-][\w-]*$')
 def html2xt(html):
-    """Convert HTML to an `xt` expression"""
+    """Convert HTML to an `ft` expression"""
     rev_map = {'class': 'cls', 'for': 'fr'}
     
     def _parse(elm, lvl=0, indent=4):
