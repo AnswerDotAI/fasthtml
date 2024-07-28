@@ -2,12 +2,49 @@
 
 <!-- do not remove -->
 
+
+## 0.1.11
+
+### Breaking changes
+
+- Rename `run_uv` to `serve` ([#84](https://github.com/AnswerDotAI/fasthtml/issues/84))
+
+
+## 0.1.10
+
+### Dependencies
+
+- Update for fastcore XT to FT name change
+
+
+## 0.1.9
+
+### New Features
+
+- Skip redundent formatting in `loose_format` ([#79](https://github.com/AnswerDotAI/fasthtml/issues/79))
+- Add `htmlkw` param to `FastHTML` ([#78](https://github.com/AnswerDotAI/fasthtml/issues/78))
+
+
+## 0.1.8
+
+### New Features
+
+- Remove comments in html2xt ([#76](https://github.com/AnswerDotAI/fasthtml/issues/76))
+- Handle relative paths in `Social` ([#70](https://github.com/AnswerDotAI/fasthtml/issues/70))
+- Add `ftrs` for scripts etc at end of body element ([#62](https://github.com/AnswerDotAI/fasthtml/issues/62))
+- Updated html2xt to use unpacked dicts when attr keys are not valid python names ([#57](https://github.com/AnswerDotAI/fasthtml/pull/57)), thanks to [@matdmiller](https://github.com/matdmiller)
+
+### Bugs Squashed
+
+- fix social relative urls ([#77](https://github.com/AnswerDotAI/fasthtml/issues/77))
+
+
 ## 0.1.7
 
 ### New Features
 
 - Add `indent` to `html2xt` ([#53](https://github.com/AnswerDotAI/fasthtml/issues/53))
-- New `fasthtml.xt` namespace for components ([#50](https://github.com/AnswerDotAI/fasthtml/issues/50))
+- New `fasthtml.ft` namespace for components ([#50](https://github.com/AnswerDotAI/fasthtml/issues/50))
 - Add `bodykw` in `fast_app` ([#49](https://github.com/AnswerDotAI/fasthtml/issues/49))
 
 

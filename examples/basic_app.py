@@ -41,5 +41,5 @@ def delete(id:int):
     todos.delete(id)
     return clear('current-todo')
 
-run_uv()
+serve()
 

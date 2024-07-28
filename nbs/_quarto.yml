@@ -30,7 +30,9 @@ website:
           - 08_tutorial_for_web_devs.ipynb
       - section: Explanations
         contents:
-          - 06_explaining_components.ipynb
+          - 06_explaining_xt_components.ipynb
+          - 09_live_reload.ipynb
+          - 10_routes.ipynb
       - section: API
         contents:
           - 00_core.ipynb

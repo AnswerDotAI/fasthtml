@@ -3,14 +3,14 @@
 # %% auto 0
 __all__ = ['railway_link', 'railway_deploy']
 
-# %% ../nbs/04_cli.ipynb 2
+# %% ../nbs/04_cli.ipynb
 from fastcore.utils import *
 from fastcore.script import call_parse, bool_arg
 from subprocess import check_output, run
 
 import json
 
-# %% ../nbs/04_cli.ipynb 3
+# %% ../nbs/04_cli.ipynb
 @call_parse
 def railway_link():
     "Link the current directory to the current project's Railway service"
@@ -23,12 +23,12 @@ def railway_link():
     cmd = f"railway link -e {env} -p {prj} -s {svc}"
     res = check_output(cmd.split())
 
-# %% ../nbs/04_cli.ipynb 4
+# %% ../nbs/04_cli.ipynb
 def _run(a, **kw):
     print('#', ' '.join(a))
     run(a)
 
-# %% ../nbs/04_cli.ipynb 5
+# %% ../nbs/04_cli.ipynb
 @call_parse
 def railway_deploy(
     name:str, # The project name to deploy

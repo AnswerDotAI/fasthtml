@@ -8,7 +8,7 @@ def tid(id): return f'todo-{id}'
 @dataclass
 class TodoItem():
     title: str; id: int = -1; done: bool = False
-    def __xt__(self):
+    def __ft__(self):
         show = AX(self.title, f'/todos/{self.id}', id_curr)
         edit = AX('edit',     f'/edit/{self.id}' , id_curr)
         dt = ' (done)' if self.done else ''
@@ -66,4 +66,4 @@ async def get_todo(id:int):
     return Div(Div(todo.title), btn)
 
 
-if __name__ == '__main__': run_uv()
+if __name__ == '__main__': serve()
