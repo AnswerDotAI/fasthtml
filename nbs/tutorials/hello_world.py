@@ -7,4 +7,4 @@ rt = app.route
 def get():
     return 'Hello, world!'
 
-run_uv()
+serve()
