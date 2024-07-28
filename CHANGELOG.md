@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.1.10
+
+### New Features
+
+- Rename `run_uv` to `serve` ([#84](https://github.com/AnswerDotAI/fasthtml/issues/84))
+
+
+
 
 ## 0.1.10
 
