@@ -66,4 +66,4 @@ async def get_todo(id:int):
     return Div(Div(todo.title), btn)
 
 
-if __name__ == '__main__': run_uv()
+if __name__ == '__main__': serve()

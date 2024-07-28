@@ -13,7 +13,7 @@ from fasthtml.common import (
     # These are the HTML components we use in this app
     A, AX, Button, Card, Checkbox, Container, Div, Form, Grid, Group, H1, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Titled, Ul,
     # These are FastHTML symbols we'll use
-    Beforeware, fast_app, SortableJS, fill_form, picolink, run_uv,
+    Beforeware, fast_app, SortableJS, fill_form, picolink, serve,
     # These are from Starlette, Fastlite, fastcore, and the Python stdlib
     FileResponse, NotFoundError, RedirectResponse, database, patch, dataclass
 )
@@ -285,5 +285,5 @@ async def get(id:int):
     # Because `class` is a reserved keyword in Python, we use `cls` instead, which FastHTML auto-converts.
     return Div(Div(todo.title), Div(todo.details, cls="markdown"), btn)
 
-run_uv()
+serve()
 

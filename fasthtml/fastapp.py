@@ -38,7 +38,7 @@ def fast_app(db=None, render=None, hdrs=None, ftrs=None, tbls=None, before=None,
     if len(dbtbls)==1: dbtbls=dbtbls[0]
     return app,app.route,*dbtbls
 
-def run_uv(fname=None, app='app', host='0.0.0.0', port=None, reload=True):
+def serve(fname=None, app='app', host='0.0.0.0', port=None, reload=True):
     glb = inspect.currentframe().f_back.f_globals
     if glb.get('__name__') == '__main__':
         if not fname: fname = Path(glb.get('__file__', '')).stem

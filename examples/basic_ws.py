@@ -24,4 +24,4 @@ async def ws(msg:str, send):
     await sleep(2)
     return Div('Goodbye ' + msg, id=nid), mk_inp()
 
-run_uv()
+serve()

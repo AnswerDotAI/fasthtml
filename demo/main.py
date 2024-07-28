@@ -24,5 +24,5 @@ async def post(todo:Todo): return todos.insert(todo)
 @rt("/todo/{id}")
 async def delete(id:int): todos.delete(id)
 
-run_uv()
+serve()
 
