@@ -1,14 +1,6 @@
-.cell {
-  margin-bottom: 1rem;
-}
-
-.cell > .sourceCode {
-  margin-bottom: 0;
-}
-
-.cell-output > pre {
-  margin-bottom: 0;
-}
+.cell { margin-bottom: 1rem; }
+.cell > .sourceCode { margin-bottom: 0; }
+.cell-output > pre { margin-bottom: 0; }
 
 .cell-output > pre, .cell-output > .sourceCode > pre, .cell-output-stdout > pre {
   margin-left: 0.8rem;
@@ -19,9 +11,7 @@
   border-top-right-radius: 0;
 }
 
-.cell-output > .sourceCode {
-  border: none;
-}
+.cell-output > .sourceCode { border: none; }
 
 .cell-output > .sourceCode {
   background: none;
@@ -44,11 +34,10 @@ div.sidebar-item-container .active {
 
 div.sidebar-item-container a {
   color: #000;
-  padding: 8px 16px;
+  padding: 4px 8px;
   border-radius: 8px;
   font-size: 1rem;
 }
 
-.navbar-container {
-  max-width: 1282px;
-}
+.navbar-container { max-width: 1282px; }
+
