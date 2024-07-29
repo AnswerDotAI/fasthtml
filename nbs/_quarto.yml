@@ -1,5 +1,8 @@
 project:
   type: website
+  preview:
+    navigate: false
+    port: 3000
 
 format:
   html:
