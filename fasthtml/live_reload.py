@@ -14,9 +14,7 @@ LIVE_RELOAD_SCRIPT = """
             const intervalFn = setInterval(function(){
                 window.location.reload();
                 reloadCount++;
-                if (reloadAttempts === maxReloadAttempts) {
-                    clearInterval(intervalFn);
-                };
+                if (reloadAttempts === maxReloadAttempts) clearInterval(intervalFn);
             }, reloadInterval);
         }
     })();
@@ -49,7 +47,7 @@ class FastHTMLWithLiveReload(FastHTML):
         >>> app = FastHTMLWithLiveReload()
 
         Run:
-            uvicorn main:app --reload
+            run_uv()
     """
     LIVE_RELOAD_HEADER = Script(f'{LIVE_RELOAD_SCRIPT}')
     LIVE_RELOAD_ROUTE = WebSocketRoute("/live-reload", endpoint=live_reload_websocket)

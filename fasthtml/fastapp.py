@@ -12,10 +12,34 @@ def get_tbl(dt, nm, schema):
     if render: dc.__ft__ = render
     return tbl,dc
 
-def fast_app(db=None, render=None, hdrs=None, ftrs=None, tbls=None, before=None, middleware=None, live=False, debug=False, routes=None, exception_handlers=None,
-             on_startup=None, on_shutdown=None, lifespan=None, default_hdrs=True, secret_key=None, session_cookie='session_', max_age=365*24*3600,
-             pico=None, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', ws_hdr=False, bodykw=None, **kwargs):
-
+def fast_app(
+        db:Optional[str]=None, # Database file name, if needed
+        render:Optional[callable]=None, # Function used to render default database class
+        hdrs:Optional[tuple]=None, # Additional FT elements to add to <HEAD>
+        ftrs:Optional[tuple]=None, # Additional FT elements to add to end of <BODY>
+        tbls:Optional[dict]=None, # Mapping from DB table names to dict table definitions
+        before:Optional[tuple]=None, # Functions to call prior to calling handler
+        middleware:Optional[tuple]=None, # Standard Starlette middleware
+        live:Bool=False, # Enable live reloading
+        debug:Bool=False, # Passed to Starlette, indicating if debug tracebacks should be returned on errors
+        routes:Optional[tuple]=None, # Passed to Starlette
+        exception_handlers:Optional[dict]=None, # Passed to Starlette
+        on_startup:Optional[callable]=None, # Passed to Starlette
+        on_shutdown:Optional[callable]=None, # Passed to Starlette
+        lifespan:Optional[callable]=None, # Passed to Starlette
+        default_hdrs=True, # Include default FastHTML headers such as HTMX script?
+        pico:Optional[bool]=None, # Include PicoCSS header?
+        ws_hdr:bool=False, # Include HTMX websocket extension header?
+        secret_key:Optional[str]=None, # Signing key for sessions
+        key_fname:str='.sesskey', # Session cookie signing key file name
+        session_cookie:str='session_', # Session cookie name
+        max_age:int=365*24*3600, # Session cookie expiry time
+        sess_path:str='/', # Session cookie path
+        same_site:str='lax', # Session cookie same site policy
+        sess_https_only:bool=False, # Session cookie HTTPS only?
+        sess_domain:Optional[str]=None, # Session cookie domain
+        bodykw:Optional[dict]=None,
+        **kwargs):
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
     app_cls = FastHTMLWithLiveReload if live else FastHTML
