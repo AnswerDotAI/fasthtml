@@ -18,28 +18,29 @@ website:
     logo: "logo.svg"
     background: primary
     search: true
+    left:
+      - text: "Home"
+        href: https://fastht.ml
+      - text: "Learn"
+        href: https://about.fastht.ml
+    right:
+      - icon: github
+        href: "https://github.com/answerdotai/fasthtml"
+      - icon: twitter
+        href: https://x.com/answerdotai
+        aria-label: Fast.ai Twitter
   sidebar:
     style: floating
     contents:
-      - index.ipynb
+      - text: "Get Started"
+        href: index.ipynb
       - section: Tutorials
-        contents:
-          - 07_quickstart_for_web_devs.ipynb        
-          - 05_by_example.ipynb
-          - tutorials/e2e.ipynb
-          - 08_tutorial_for_web_devs.ipynb
+        contents: tutorials/*
       - section: Explanations
-        contents:
-          - 06_explaining_xt_components.ipynb
-          - 09_live_reload.ipynb
-          - 10_routes.ipynb
-      - section: API
-        contents:
-          - 00_core.ipynb
-          - 01_components.ipynb
-          - 02_xtend.ipynb
-          - 03_oauth.ipynb
-          - 04_cli.ipynb
-      
+        contents: explains/*
+      - section: Reference
+        contents: ref/*
+      - section: Source
+        contents: api/*
 
 metadata-files: [nbdev.yml]
