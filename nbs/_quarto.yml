@@ -27,6 +27,7 @@ website:
           - 07_quickstart_for_web_devs.ipynb        
           - 05_by_example.ipynb
           - 08_tutorial_for_web_devs.ipynb
+          - 11_deployment.ipynb
       - section: Explanations
         contents:
           - 06_explaining_xt_components.ipynb
