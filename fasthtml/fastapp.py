@@ -20,8 +20,8 @@ def fast_app(
         tbls:Optional[dict]=None, # Mapping from DB table names to dict table definitions
         before:Optional[tuple]=None, # Functions to call prior to calling handler
         middleware:Optional[tuple]=None, # Standard Starlette middleware
-        live:Bool=False, # Enable live reloading
-        debug:Bool=False, # Passed to Starlette, indicating if debug tracebacks should be returned on errors
+        live:bool=False, # Enable live reloading
+        debug:bool=False, # Passed to Starlette, indicating if debug tracebacks should be returned on errors
         routes:Optional[tuple]=None, # Passed to Starlette
         exception_handlers:Optional[dict]=None, # Passed to Starlette
         on_startup:Optional[callable]=None, # Passed to Starlette
