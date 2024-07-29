@@ -1,4 +1,3 @@
-# Run with: uvicorn db_app:app --reload
 from fasthtml.common import *
 
 db = database('data/todos.db')
@@ -59,4 +58,6 @@ async def get(id:int):
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
+
+serve()
 
