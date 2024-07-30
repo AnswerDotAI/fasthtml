@@ -39,10 +39,11 @@ For a minimal app, create a file “main.py” as follows:
 ``` python
 from fasthtml.common import *
 
-app,rt = fast_app()
+app, rt = fast_app()
 
 @rt('/')
-def get(): return Div(P('Hello World!'), hx_get="/change")
+def get():
+    return Div(P('Hello World!'), hx_get="/change")
 
 serve()
 ```
@@ -64,7 +65,8 @@ the file to add this function…:
 
 ``` python
 @rt('/change')
-def get(): return P('Nice to be here!')
+def get():
+    return P('Nice to be here!')
 ```
 
 </div>
