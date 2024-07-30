@@ -92,13 +92,17 @@ Start with the official sources to learn more about FastHTML:
   including custom authentication, JS library connections, and database
   use.
 
+We also have a 1-hour intro video:
+
+<https://www.youtube.com/embed/Auqrm7WFc0I>
+
 The capabilities of FastHTML are vast and growing, and not all the
 features and patterns have been documented yet. Be prepared to invest
 time into studying and modifying source code, such as the main FastHTML
 repo’s notebooks and the official FastHTML examples repo:
 
 - [FastHTML Examples Repo on
-  GitHub](https://github.com/AnswerDotAI/fasthtml-example)
+  GitHub](https://github.com/AnswerDotAI/fasthtml-examples)
 - [FastHTML Repo on GitHub](https://github.com/AnswerDotAI/fasthtml)
 
 Then explore the small but growing third-party ecosystem of FastHTML
