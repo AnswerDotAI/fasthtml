@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.2.1
+
+
+### Bugs Squashed
+
+- railway deploy did not connect mount point on first use ([#89](https://github.com/AnswerDotAI/fasthtml/issues/89))
+
+
 ## 0.2.0
 
 - Initial launch version
