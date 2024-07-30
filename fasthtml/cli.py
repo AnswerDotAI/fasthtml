@@ -43,4 +43,5 @@ def railway_deploy(
     _run(f"railway up -c".split())
     _run(f"railway domain".split())
     railway_link.__wrapped__()
-    _run(f"railway volume add -m /app/data".split())    
+    if mount: _run(f"railway volume add -m /app/data".split())
+    _run(f"railway up -c".split())
