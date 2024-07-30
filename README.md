@@ -103,7 +103,7 @@ time into studying and modifying source code, such as the main FastHTML
 repo’s notebooks and the official FastHTML examples repo:
 
 - [FastHTML Examples Repo on
-  GitHub](https://github.com/AnswerDotAI/fasthtml-examples)
+  GitHub](https://github.com/AnswerDotAI/fasthtml-example)
 - [FastHTML Repo on GitHub](https://github.com/AnswerDotAI/fasthtml)
 
 Then explore the small but growing third-party ecosystem of FastHTML
