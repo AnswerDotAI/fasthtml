@@ -51,8 +51,9 @@ serve()
 
 Running the app with `python main.py` prints out a link to your running
 app: `http://localhost:5001/`. Visit that link in your browser and you
-should see a page with the title “FastHTML” and the text “Let’s do
-this!”. Congratulations - you’ve just created your first `fasthtml` app!
+should see a page with the title “FastHTML page” and the text “Hello 
+World!”. Congratulations - you’ve just created your first `fasthtml` 
+app!
 
 Adding interactivity is surprisingly easy, thanks to HTMX. If you modify
 the file to add this function…:
