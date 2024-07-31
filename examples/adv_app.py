@@ -7,6 +7,8 @@
 # Importing from `fasthtml.common` brings the key parts of all of these together.
 # For simplicity, you can just `from fasthtml.common import *`:
 from fasthtml.common import *
+# ...or you can import everything into a namespace:
+# from fasthtml import common as fh
 # ...or you can import each symbol explicitly (which we're commenting out here but including for completeness):
 """
 from fasthtml.common import (
@@ -18,6 +20,7 @@ from fasthtml.common import (
     FileResponse, NotFoundError, RedirectResponse, database, patch, dataclass
 )
 """
+
 from hmac import compare_digest
 
 # You can use any database you want; it'll be easier if you pick a lib that supports the MiniDataAPI spec.
@@ -286,4 +289,3 @@ async def get(id:int):
     return Div(Div(todo.title), Div(todo.details, cls="markdown"), btn)
 
 serve()
-

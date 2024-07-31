@@ -13,12 +13,12 @@ def get_tbl(dt, nm, schema):
     return tbl,dc
 
 def fast_app(
-        db:Optional[str]=None, # Database file name, if needed
+        db_file:Optional[str]=None, # Database file name, if needed
         render:Optional[callable]=None, # Function used to render default database class
         hdrs:Optional[tuple]=None, # Additional FT elements to add to <HEAD>
         ftrs:Optional[tuple]=None, # Additional FT elements to add to end of <BODY>
         tbls:Optional[dict]=None, # Mapping from DB table names to dict table definitions
-        before:Optional[tuple]=None, # Functions to call prior to calling handler
+        before:Optional[tuple]|Beforeware=None, # Functions to call prior to calling handler
         middleware:Optional[tuple]=None, # Standard Starlette middleware
         live:bool=False, # Enable live reloading
         debug:bool=False, # Passed to Starlette, indicating if debug tracebacks should be returned on errors
@@ -39,7 +39,7 @@ def fast_app(
         sess_https_only:bool=False, # Session cookie HTTPS only?
         sess_domain:Optional[str]=None, # Session cookie domain
         bodykw:Optional[dict]=None,
-        **kwargs):
+        **kwargs)->Any:
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
     app_cls = FastHTMLWithLiveReload if live else FastHTML
@@ -49,9 +49,9 @@ def fast_app(
                   sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, **(bodykw or {}))
     @app.route("/{fname:path}.{ext:static}")
     async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
-    if not db: return app,app.route
+    if not db_file: return app,app.route
 
-    db = database(db)
+    db = database(db_file)
     if not tbls: tbls={}
     if kwargs:
         if isinstance(first(kwargs.values()), dict): tbls = kwargs
