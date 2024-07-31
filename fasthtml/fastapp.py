@@ -62,14 +62,19 @@ def fast_app(
     if len(dbtbls)==1: dbtbls=dbtbls[0]
     return app,app.route,*dbtbls
 
-def serve(fname=None, app='app', host='0.0.0.0', port=None, reload=True):
-    glb = inspect.currentframe().f_back.f_globals
-    if glb.get('__name__') == '__main__':
-        if not fname: fname = Path(glb.get('__file__', '')).stem
+def serve(appname=None, app='app', host='0.0.0.0', port=None, reload=True):
+    bk = inspect.currentframe().f_back
+    glb = bk.f_globals
+    code = bk.f_code
+    if not appname:
+        if glb.get('__name__') == '__main__': appname = Path(glb.get('__file__', '')).stem
+        elif code.co_name=='main': appname = inspect.getmodule(bk).__name__
+    if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
         print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
-        uvicorn.run(f"{fname}:{app}", host=host, port=port, reload=reload)
+        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload)
 
 def clear(id): return Div(hx_swap_oob='innerHTML', id=id)
 def ContainerX(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
 def Page(title, *con): return Title(title), ContainerX(H1(title), *con)
+
