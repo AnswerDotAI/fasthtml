@@ -89,7 +89,8 @@ def _fill_item(item, obj):
 # %% ../nbs/api/01_components.ipynb
 def fill_form(form:FT, obj)->FT:
     "Fills named items in `form` using attributes in `obj`"
-    if not isinstance(obj,dict): obj = asdict(obj)
+    if is_dataclass(obj): obj = asdict(obj)
+    elif not isinstance(obj,dict): obj = obj.__dict__
     return _fill_item(form, obj)
 
 # %% ../nbs/api/01_components.ipynb
