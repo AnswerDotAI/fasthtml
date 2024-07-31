@@ -19,7 +19,7 @@ full power of the Python language and ecosystem.
 
 ## Installation
 
-Since `fasthtml` is a Python library, you can install it with:
+Since `fasthtml` is a Python [library](https://pypi.org/project/python-fasthtml/), you can install it with:
 
 ``` sh
 pip install python-fasthtml
