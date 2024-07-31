@@ -13,7 +13,7 @@ from fasthtml.common import *
 """
 from fasthtml.common import (
     # These are the HTML components we use in this app
-    A, AX, Button, Card, Checkbox, Container, Div, Form, Grid, Group, H1, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Titled, Ul,
+    A, AX, Button, Card, Checkbox, Container, Div, Form, Grid, Group, H1, H2, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Titled, Ul,
     # These are FastHTML symbols we'll use
     Beforeware, fast_app, SortableJS, fill_form, picolink, serve,
     # These are from Starlette, Fastlite, fastcore, and the Python stdlib
@@ -286,6 +286,6 @@ async def get(id:int):
     # The "markdown" class is used here because that's the CSS selector we used in the JS earlier.
     # Therefore this will trigger the JS to parse the markdown in the details field.
     # Because `class` is a reserved keyword in Python, we use `cls` instead, which FastHTML auto-converts.
-    return Div(Div(todo.title), Div(todo.details, cls="markdown"), btn)
+    return Div(H2(todo.title), Div(todo.details, cls="markdown"), btn)
 
 serve()
