@@ -14,7 +14,7 @@ from fastcore.xml import *
 from .xtend import *
 
 from types import UnionType, SimpleNamespace as ns, GenericAlias
-from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List
+from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List, Any
 from datetime import datetime
 from dataclasses import dataclass,fields,is_dataclass,MISSING,asdict
 from collections import namedtuple
@@ -269,6 +269,7 @@ class RouteX(Route):
     def _resp(self, req, resp):
         if not resp: resp=()
         cls = self.sig.return_annotation
+        if cls in (Any,FT): cls=empty
         if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
         if isinstance(resp, Response): return resp
         if cls is not empty: return cls(resp)
