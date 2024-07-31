@@ -260,7 +260,8 @@ class RouteX(Route):
         resp = resp + tuple(req.injects)
         http_hdrs,resp = partition(resp, risinstance(HttpHeader))
         http_hdrs = {o.k:str(o.v) for o in http_hdrs}
-        titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in ('title','meta'))
+        hdr_tags = 'title','meta','link','style','base'
+        titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
         if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
             if not titles: titles = [Title('FastHTML page')]
             resp = Html(Head(*titles, *flat_xt(self.hdrs)), Body(bdy, *flat_xt(self.ftrs), **self.bodykw), **self.htmlkw)
