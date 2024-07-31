@@ -2,6 +2,12 @@
 # At signin, enter a user/pw combination and if it doesn't exist, it will be created.
 from fasthtml.common import *
 
+if __name__ == '__main__':
+    # Exiting because SQLAlchemy's processes will otherwise collide
+    # with the uvicorn server's processes. Have to be run externally. 
+    print("Run with: uvicorn user_app_sql_model:app --reload")
+    import sys; sys.exit()
+
 try:
     from sqlmodel import SQLModel, create_engine, Session, select, Field
     from sqlalchemy.exc import NoResultFound
@@ -20,9 +26,6 @@ class Todo(SQLModel, table=True): id:int=Field(default=None, primary_key=True); 
 engine = create_engine(sqlite_url, echo=True)
 
 SQLModel.metadata.create_all(engine)
-
-# users = db.create(User, pk='name')
-# todos = db.create(Todo)
 
 id_curr = 'current-todo'
 def tid(id): return f'todo-{id}'
@@ -75,10 +78,13 @@ async def get(request, auth):
     top = Grid(Div(A('logout', href=basic_logout(request)), style='text-align: right'))
     return Titled(f"{auth}'s todo list", top, card)
 
-# @rt("/todos/{id}")
-# async def delete(id:int):
-#     todos.delete(id)
-#     return clr_details()
+@rt("/todos/{id}")
+async def delete(id:int, auth):
+    with Session(engine) as session:
+        todo = session.exec(select(Todo).where(Todo.name == auth).where(Todo.id == id))
+        session.delete(todo.one())
+        session.commit()
+    return clr_details()
 
 @rt("/")
 async def post(auth, todo:Todo):
@@ -96,16 +102,13 @@ async def get(id:int, auth):
         hx_put="/", target_id=tid(id), id="edit")
     return fill_form(res, todos(auth, id))
 
-# @rt("/")
-# async def put(todo: Todo):
-#     return todos.upsert(todo), clr_details()
+@rt("/")
+async def put(todo: Todo):
+    return todos.upsert(todo), clr_details()
 
-# @rt("/todos/{id}")
-# async def get(id:int):
-#     todo = todos[id]
-#     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
-#                  target_id=tid(todo.id), hx_swap="outerHTML")
-#     return Div(Div(todo.title), btn)
-
-# serve()
-
+@rt("/todos/{id}")
+async def get(id:int, auth):
+    todo = todos(auth, id)
+    btn = Button('delete', hx_delete=f'/todos/{todo.id}',
+                 target_id=tid(todo.id), hx_swap="outerHTML")
+    return Div(Div(todo.title), btn)
