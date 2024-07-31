@@ -18,9 +18,11 @@ except ImportError:
 sqlite_file_name = "data/utodos.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
-# db = database(sqlite_file_name)
+
 class User(SQLModel, table=True): name:str=Field(default=None, primary_key=True); pwd:str
-class Todo(SQLModel, table=True): id:int=Field(default=None, primary_key=True); title:str; done:bool=False; name:str; details:str=''
+class Todo(SQLModel, table=True):
+    id:int=Field(default=None, primary_key=True)
+    title:str; done:bool=False; name:str; details:str=''
 
 
 engine = create_engine(sqlite_url, echo=True)
@@ -103,8 +105,18 @@ async def get(id:int, auth):
     return fill_form(res, todos(auth, id))
 
 @rt("/")
-async def put(todo: Todo):
-    return todos.upsert(todo), clr_details()
+async def put(todo: Todo, auth):
+    print(f"TODO: {todo}")
+    with Session(engine) as session:
+        # TODO: Compress this down
+        _todo = session.exec(select(Todo).where(Todo.name == auth).where(Todo.id == todo.id)).one()
+        _todo.title = todo.title
+        _todo.done = todo.done
+        _todo.name = auth
+        session.add(_todo)
+        session.commit()
+        session.refresh(_todo)
+    return _todo, clr_details()
 
 @rt("/todos/{id}")
 async def get(id:int, auth):
