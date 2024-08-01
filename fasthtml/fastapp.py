@@ -67,8 +67,8 @@ def serve(appname=None, app='app', host='0.0.0.0', port=None, reload=True):
     glb = bk.f_globals
     code = bk.f_code
     if not appname:
-        if glb.get('__name__') == '__main__': appname = Path(glb.get('__file__', '')).stem
-        elif code.co_name=='main': appname = inspect.getmodule(bk).__name__
+        if glb.get('__name__')=='__main__': appname = Path(glb.get('__file__', '')).stem
+        elif code.co_name=='main' and bk.f_back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
     if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
         print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
