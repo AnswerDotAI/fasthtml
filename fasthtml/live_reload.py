@@ -13,7 +13,7 @@ LIVE_RELOAD_SCRIPT = """
             let reloadAttempts = 0;
             const intervalFn = setInterval(function(){
                 window.location.reload();
-                reloadCount++;
+                reloadAttempts++;
                 if (reloadAttempts === maxReloadAttempts) clearInterval(intervalFn);
             }, reloadInterval);
         }
