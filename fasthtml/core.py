@@ -21,6 +21,7 @@ from collections import namedtuple
 from inspect import isfunction,ismethod,signature,Parameter,get_annotations
 from functools import wraps, partialmethod
 from http import cookies
+from copy import copy,deepcopy
 
 from .starlette import *
 
@@ -264,7 +265,7 @@ class RouteX(Route):
         titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
         if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
             if not titles: titles = [Title('FastHTML page')]
-            resp = Html(Head(*titles, *flat_xt(self.hdrs)), Body(bdy, *flat_xt(self.ftrs), **self.bodykw), **self.htmlkw)
+            resp = Html(Head(*titles, *flat_xt(req.hdrs)), Body(bdy, *flat_xt(req.ftrs), **req.bodykw), **req.htmlkw)
         return HTMLResponse(to_xml(resp), headers=http_hdrs)
 
     def _resp(self, req, resp):
@@ -285,6 +286,7 @@ class RouteX(Route):
     async def _endp(self, req):
         resp = None
         req.injects = []
+        req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (self.hdrs,self.ftrs,self.htmlkw,self.bodykw))
         for b in self.before:
             if not resp:
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
@@ -403,7 +405,7 @@ def reg_re_param(m, s):
 # %% ../nbs/api/00_core.ipynb
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
-reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml|html")
+reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|html")
 
 # %% ../nbs/api/00_core.ipynb
 class MiddlewareBase:

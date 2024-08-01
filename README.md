@@ -15,11 +15,16 @@ applications with minimal, compact code. It’s designed to be:
   easy to build complex apps quickly.
 
 FastHTML apps are just Python code, so you can use FastHTML with the
-full power of the Python language and ecosystem.
+full power of the Python language and ecosystem. FastHTML’s
+functionality maps 1:1 directly to HTML and HTTP, but allows them to be
+encapsulated using good software engineering practices—so you’ll need to
+understand these foundations to use this library fully. To understand
+how and why this works, please read this first:
+[about.fastht.ml](https://about.fastht.ml/).
 
 ## Installation
 
-Since `fasthtml` is a Python [library](https://pypi.org/project/python-fasthtml/), you can install it with:
+Since `fasthtml` is a Python library, you can install it with:
 
 ``` sh
 pip install python-fasthtml
@@ -50,13 +55,12 @@ serve()
 </div>
 
 Running the app with `python main.py` prints out a link to your running
-app: `http://localhost:5001/`. Visit that link in your browser and you
-should see a page with the title “FastHTML page” and the text “Hello 
-World!”. Congratulations - you’ve just created your first `fasthtml` 
-app!
+app: `http://localhost:5001`. Visit that link in your browser and you
+should see a page with the text “Hello World!”. Congratulations, you’ve
+just created your first FastHTML app!
 
-Adding interactivity is surprisingly easy, thanks to HTMX. If you modify
-the file to add this function…:
+Adding interactivity is surprisingly easy, thanks to HTMX. Modify the
+file to add this function:
 
 <div class="code-with-filename">
 
@@ -69,9 +73,9 @@ def get(): return P('Nice to be here!')
 
 </div>
 
-…you’ll now have a page with a clickable element that changes the text
-when clicked. When clicking on this link, the server will respond with
-an “HTML partial”—that is, just a snippet of HTML which will be inserted
+You now have a page with a clickable element that changes the text when
+clicked. When clicking on this link, the server will respond with an
+“HTML partial”—that is, just a snippet of HTML which will be inserted
 into the existing page. In this case, the returned element will replace
 the original P element (since that’s the default behavior of HTMX) with
 the new version returned by the second route.
