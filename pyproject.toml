@@ -1,5 +1,5 @@
 [project]
-name = "fasthtml"
+name = "python-fasthtml"
 version = "0.2.2"
 description = "The fastest way to create an HTML app"
 authors = [{ name = "Jeremy Howard", email = "github@jhoward.fastmail.fm" }]
