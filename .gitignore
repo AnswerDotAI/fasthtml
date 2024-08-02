@@ -149,3 +149,6 @@ checklink/cookies.txt
 .gitconfig
 
 _docs
+
+# UV lockfile
+uv.lock

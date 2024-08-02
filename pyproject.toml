@@ -1,0 +1,57 @@
+[project]
+name = "fasthtml"
+version = "0.2.2"
+description = "The fastest way to create an HTML app"
+authors = [{ name = "Jeremy Howard", email = "github@jhoward.fastmail.fm" }]
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Natural Language :: English",
+]
+
+dependencies = [
+    "fastlite",
+    "fastcore>=1.6.0",
+    "starlette>=0.33",
+    "python-dateutil",
+    "oauthlib",
+    "itsdangerous",
+    "uvicorn[standard]>=0.30",
+    "httpx",
+    "python-multipart",
+    "beautifulsoup4",
+]
+
+keywords = ["nbdev", "jupyter", "notebook", "python"]
+
+[tool.uv]
+dev-dependencies = ["ipython", "lxml", "build"]
+
+[project.urls]
+Repository = "https://github.com/AnswerDotAI/fasthtml"
+Documentation = "https://docs.fastht.ml/"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["fasthtml"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "fasthtml/",
+    "setting.ini",
+    "LICENSE",
+    "CONTRIBUTING.md",
+    "README.md",
+]
