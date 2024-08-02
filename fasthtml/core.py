@@ -142,7 +142,6 @@ async def _find_p(req, arg:str, p:Parameter):
     # GenericAlias is a type of typing for iterators like list[int] that is not a class
     if isinstance(anno, type) and not isinstance(anno, GenericAlias):
         if issubclass(anno, Request): return req
-        if issubclass(anno, Request): return req
         if issubclass(anno, HtmxHeaders): return _get_htmx(req.headers)
         if issubclass(anno, Starlette): return req.scope['app']
         if _is_body(anno): return await _from_body(req, p)
@@ -153,6 +152,7 @@ async def _find_p(req, arg:str, p:Parameter):
         if arg.lower()=='auth': return req.scope.get('auth', None)
         if arg.lower()=='htmx': return _get_htmx(req.headers)
         if arg.lower()=='app': return req.scope['app']
+        if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(req, arg.lower())
         return None
     # Look through path, cookies, headers, session, query, and body in that order
     res = req.path_params.get(arg, None)
@@ -287,6 +287,7 @@ class RouteX(Route):
         resp = None
         req.injects = []
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (self.hdrs,self.ftrs,self.htmlkw,self.bodykw))
+        req.hdrs,req.ftrs = list(req.hdrs),list(req.ftrs)
         for b in self.before:
             if not resp:
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
@@ -346,10 +347,11 @@ def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) els
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
-                 before=None, after=None, default_hdrs=True,
-                 secret_key=None, session_cookie='session_', max_age=365*24*3600, ws_hdr=False, sess_path='/',
-                 same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', htmlkw=None, **bodykw):
-        middleware,before,after = _list(middleware),_list(before),_list(after)
+                 before=None, after=None, default_hdrs=True, ws_hdr=False,
+                 secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
+                 same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
+                 htmlkw=None, **bodykw):
+        middleware,before,after = map(_list, (middleware,before,after))
         secret_key = get_key(secret_key, key_fname)
         sess = Middleware(SessionMiddleware, secret_key=secret_key, session_cookie=session_cookie,
                           max_age=max_age, path=sess_path, same_site=same_site,
