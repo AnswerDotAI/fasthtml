@@ -90,5 +90,5 @@ def retr_info(self:_AppClient, code):
 # %% ../nbs/incomplete/oauth.ipynb
 @patch
 def retr_id(self:_AppClient, code):
-    "Call `retr_info` and then return id/subcriber value"
+    "Call `retr_info` and then return id/subscriber value"
     return self.retr_info()[self.id_key]
