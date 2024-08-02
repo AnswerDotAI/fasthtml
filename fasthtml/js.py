@@ -7,8 +7,14 @@ def  dark_media(css): return Style('@media (prefers-color-scheme:  dark) {%s}' %
 def MarkdownJS(sel='.marked'):
     src = """
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
-import { proc_htmx} from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
-proc_htmx('%s', e => e.innerHTML = marked.parse(e.textContent));
+import { proc_htmx } from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
+import katex from "https://cdn.jsdelivr.net/npm/katex/dist/katex.mjs";
+
+const renderMath = tex => katex.renderToString(tex, {throwOnError: false, displayMode: false});
+
+proc_htmx('%s', e => {
+  e.innerHTML = marked.parse(e.textContent).replace(/\${1,2}\\n*(.+?)\\n*\${1,2}/g, (_, tex) => renderMath(tex));
+});
 """ % sel
     return Script(src, type='module')
 
@@ -38,4 +44,3 @@ import {proc_htmx} from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fas
 proc_htmx('%s', Sortable.create);
 """ % sel
     return Script(src, type='module')
-
