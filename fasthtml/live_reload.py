@@ -32,10 +32,10 @@ class FastHTMLWithLiveReload(FastHTML):
     trigger a reload of both the server and browser window.
 
     How does it work?
-      - a websocket is creaetd at `/live-reload`
+      - a websocket is created at `/live-reload`
       - a small js snippet `LIVE_RELOAD_SCRIPT` is injected into each webpage
       - this snippet connects to the websocket at `/live-reload` and listens for an `onclose` event
-      - when the onclose event is detected the browser is reloaded
+      - when the `onclose` event is detected the browser is reloaded
 
     Why do we listen for an `onclose` event?
       When code changes are saved the server automatically reloads if the --reload flag is set.
