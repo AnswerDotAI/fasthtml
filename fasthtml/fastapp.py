@@ -38,6 +38,7 @@ def fast_app(
         same_site:str='lax', # Session cookie same site policy
         sess_https_only:bool=False, # Session cookie HTTPS only?
         sess_domain:Optional[str]=None, # Session cookie domain
+        htmlkw:Optional[dict]=None, 
         bodykw:Optional[dict]=None,
         **kwargs)->Any:
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
@@ -46,7 +47,7 @@ def fast_app(
     app = app_cls(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, debug=debug, routes=routes, exception_handlers=exception_handlers,
                   on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, default_hdrs=default_hdrs, secret_key=secret_key,
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
-                  sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, **(bodykw or {}))
+                  sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, htmlkw=htmlkw, **(bodykw or {}))
     @app.route("/{fname:path}.{ext:static}")
     async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
     if not db_file: return app,app.route
