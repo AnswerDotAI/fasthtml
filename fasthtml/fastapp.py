@@ -55,8 +55,8 @@ def fast_app(
         sess_domain:Optional[str]=None, # Session cookie domain
         htmlkw:Optional[dict]=None, 
         bodykw:Optional[dict]=None,
-        reload_attempts:int=1, # Number of reload attempts when live reloading
-        reload_interval:int=1000, # Time between reload attempts in ms
+        reload_attempts:Optional[int]=1, # Number of reload attempts when live reloading
+        reload_interval:Optional[int]=1000, # Time between reload attempts in ms
         **kwargs)->Any:
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
