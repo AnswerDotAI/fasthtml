@@ -46,7 +46,6 @@ bware = fh.Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css',
 app, rt = fh.fast_app(before=bware, hdrs=(fh.SortableJS('.sortable'), fh.MarkdownJS()))
 
 
-# This function handles GET requests to the `/login` path.
 @app.get("/login")
 def login():
     # This creates a form with two input fields, and a submit button.
@@ -68,7 +67,7 @@ class Login:
 
 
 # This handler is called when a POST request is made to the `/login` path.
-@app.get("/login")
+@app.post("/login")
 def login_post(login: Login, sess):
     if not login.name or not login.pwd: return login_redir
     # Indexing into a MiniDataAPI table queries by primary key, which is `name` here.
@@ -161,12 +160,12 @@ async def edit(id: int):
     return fh.fill_form(res, todos[id])
 
 
-@app.get("/")
+@app.put("/")
 async def put(todo: Todo):
     return todos.upsert(todo), clr_details()
 
 
-@app.get("/")
+@app.post("/")
 async def post(todo: Todo):
     # This is used to clear the input field after adding the new todo.
     new_inp = fh.Input(id="new-title", name="title", placeholder="New Todo", hx_swap_oob='true')
@@ -183,4 +182,4 @@ async def get_todo(id: int):
     return fh.Div(fh.H2(todo.title), fh.Div(todo.details, cls="markdown"), btn)
 
 
-fh.serve()
+fh.serve(port=8000)
