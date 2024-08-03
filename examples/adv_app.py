@@ -67,7 +67,7 @@ bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/
 # The `FastHTML` class is a subclass of `Starlette`, so you can use any parameters that `Starlette` accepts.
 # In addition, you can add your Beforeware here, and any headers you want included in HTML responses.
 # FastHTML includes the "HTMX" and "Surreal" libraries in headers, unless you pass `default_hdrs=False`.
-app, rt = fast_app(before=bware,
+app = FastHTML(before=bware,
                # PicoCSS is a particularly simple CSS framework, with some basic integration built in to FastHTML.
                # `picolink` is pre-defined with the header for the PicoCSS stylesheet.
                # You can use any CSS framework you want, or none at all.
