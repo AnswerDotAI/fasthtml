@@ -8,6 +8,7 @@ __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls',
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
+from typing import Any
 
 from fastcore.utils import *
 from fastcore.xtras import partial_format
@@ -46,7 +47,7 @@ new MutationObserver(ms => {
 
 # %% ../nbs/api/02_xtend.ipynb
 def Html(*c, doctype=True, **kwargs)->FT:
-    "An HTML tag, optionally preceeded by `!DOCTYPE HTML`"
+    "An HTML tag, optionally preceded by `!DOCTYPE HTML`"
     res = ft('html', *c, **kwargs)
     if not doctype: return res
     return (ft('!DOCTYPE', html=True), res)
@@ -114,7 +115,7 @@ def DialogX(*c, open=None, header=None, footer=None, id=None, **kwargs)->FT:
 
 # %% ../nbs/api/02_xtend.ipynb
 @delegates(ft_hx, keep=True)
-def Hidden(value:str="", **kwargs)->FT:
+def Hidden(value:Any="", **kwargs)->FT:
     "An Input of type 'hidden'"
     return Input(type="hidden", value=value, **kwargs)
 

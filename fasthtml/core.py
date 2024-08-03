@@ -35,7 +35,7 @@ def is_typeddict(cls:type)->bool:
 
 # %% ../nbs/api/00_core.ipynb
 def is_namedtuple(cls):
-    "`True` is `cls` is a namedtuple type"
+    "`True` if `cls` is a namedtuple type"
     return issubclass(cls, tuple) and hasattr(cls, '_fields')
 
 # %% ../nbs/api/00_core.ipynb

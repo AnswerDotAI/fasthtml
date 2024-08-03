@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect,uvicorn
 from fastcore.utils import *
 from fastlite import *
@@ -11,6 +13,19 @@ def get_tbl(dt, nm, schema):
     dc = tbl.dataclass()
     if render: dc.__ft__ = render
     return tbl,dc
+
+def app_factory(*args, **kwargs) -> FastHTML | FastHTMLWithLiveReload: 
+    """Creates a FastHTML or FastHTMLWithLiveReload app instance.
+    The type of app created is determined by the "live" key in kwargs.
+
+    Returns:
+        FastHTML | FastHTMLWithLiveReload: The app instance.
+    """
+    if kwargs.pop('live', False):
+        return FastHTMLWithLiveReload(*args, **kwargs)
+    kwargs.pop('reload_attempts', None)
+    kwargs.pop('reload_interval', None)
+    return FastHTML(*args, **kwargs)
 
 def fast_app(
         db_file:Optional[str]=None, # Database file name, if needed
@@ -40,14 +55,17 @@ def fast_app(
         sess_domain:Optional[str]=None, # Session cookie domain
         htmlkw:Optional[dict]=None, 
         bodykw:Optional[dict]=None,
+        reload_attempts:Optional[int]=1, # Number of reload attempts when live reloading
+        reload_interval:Optional[int]=1000, # Time between reload attempts in ms
         **kwargs)->Any:
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
-    app_cls = FastHTMLWithLiveReload if live else FastHTML
-    app = app_cls(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, debug=debug, routes=routes, exception_handlers=exception_handlers,
+    
+    app = app_factory(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, live=live, debug=debug, routes=routes, exception_handlers=exception_handlers,
                   on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, default_hdrs=default_hdrs, secret_key=secret_key,
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
-                  sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, htmlkw=htmlkw, **(bodykw or {}))
+                  sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, htmlkw=htmlkw, reload_attempts=reload_attempts, reload_interval=reload_interval, **(bodykw or {}))
+    
     @app.route("/{fname:path}.{ext:static}")
     async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
     if not db_file: return app,app.route
