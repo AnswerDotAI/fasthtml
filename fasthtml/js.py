@@ -4,18 +4,25 @@ from fasthtml.xtend import Script,jsd,Style
 def light_media(css): return Style('@media (prefers-color-scheme: light) {%s}' %css)
 def  dark_media(css): return Style('@media (prefers-color-scheme:  dark) {%s}' %css)
 
-def MarkdownJS(sel='.marked'):
-    src = """
-import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
-import { proc_htmx } from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
-import katex from "https://cdn.jsdelivr.net/npm/katex/dist/katex.mjs";
+def MarkdownJS(sel='.marked', katex=False):
+    if katex:
+        src = """
+        import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+        import { proc_htmx } from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
+        import katex from "https://cdn.jsdelivr.net/npm/katex/dist/katex.mjs";
 
-const renderMath = tex => katex.renderToString(tex, {throwOnError: false, displayMode: false});
+        const renderMath = tex => katex.renderToString(tex, {throwOnError: false, displayMode: false});
 
-proc_htmx('%s', e => {
-  e.innerHTML = marked.parse(e.textContent).replace(/\${1,2}\\n*(.+?)\\n*\${1,2}/g, (_, tex) => renderMath(tex));
-});
-""" % sel
+        proc_htmx('%s', e => {
+        e.innerHTML = marked.parse(e.textContent).replace(/\${1,2}\\n*(.+?)\\n*\${1,2}/g, (_, tex) => renderMath(tex));
+        });
+        """ % sel
+    else:
+        src = """
+        import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+        import { proc_htmx} from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
+        proc_htmx('%s', e => e.innerHTML = marked.parse(e.textContent));
+        """ % sel
     return Script(src, type='module')
 
 
