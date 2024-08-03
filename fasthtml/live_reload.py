@@ -5,19 +5,19 @@ __all__ = ["FastHTMLWithLiveReload"]
 
 
 LIVE_RELOAD_SCRIPT = """
-    (function() {
-        var socket = new WebSocket(`ws://${window.location.host}/live-reload`);
-        var maxReloadAttempts = 20;
-        var reloadInterval = 250; // time between reload attempts in ms
-        socket.onclose = function() {
+    (function() {{
+        var socket = new WebSocket(`ws://${{window.location.host}}/live-reload`);
+        var maxReloadAttempts = {reload_attempts};
+        var reloadInterval = {reload_interval}; // time between reload attempts in ms
+        socket.onclose = function() {{
             let reloadAttempts = 0;
-            const intervalFn = setInterval(function(){
+            const intervalFn = setInterval(function(){{
                 window.location.reload();
                 reloadAttempts++;
                 if (reloadAttempts === maxReloadAttempts) clearInterval(intervalFn);
-            }, reloadInterval);
-        }
-    })();
+            }}, reloadInterval);
+        }}
+    }})();
 """
 
 
@@ -49,10 +49,17 @@ class FastHTMLWithLiveReload(FastHTML):
         Run:
             run_uv()
     """
-    LIVE_RELOAD_HEADER = Script(f'{LIVE_RELOAD_SCRIPT}')
     LIVE_RELOAD_ROUTE = WebSocketRoute("/live-reload", endpoint=live_reload_websocket)
 
     def __init__(self, *args, **kwargs):
+        # Create the live reload script to be injected into the webpage
+        self.LIVE_RELOAD_HEADER = Script(
+            LIVE_RELOAD_SCRIPT.format(
+                reload_attempts=kwargs.get("reload_attempts", 1),
+                reload_interval=kwargs.get("reload_interval", 1000),
+            )
+        )
+        
         # "hdrs" and "routes" can be missing, None, a list or a tuple.
         kwargs["hdrs"] = [*(kwargs.get("hdrs") or []), self.LIVE_RELOAD_HEADER]
         kwargs["routes"] = [*(kwargs.get("routes") or []), self.LIVE_RELOAD_ROUTE]
