@@ -46,7 +46,7 @@ new MutationObserver(ms => {
 
 # %% ../nbs/api/02_xtend.ipynb
 def Html(*c, doctype=True, **kwargs)->FT:
-    "An HTML tag, optionally preceeded by `!DOCTYPE HTML`"
+    "An HTML tag, optionally preceded by `!DOCTYPE HTML`"
     res = ft('html', *c, **kwargs)
     if not doctype: return res
     return (ft('!DOCTYPE', html=True), res)

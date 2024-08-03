@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+        - id: prep
+          name: clean Jupyter notebooks before committing
+          entry: bash -c "nbdev_export && nbdev_clean && nbdev_trust"
+          language: system
+          pass_filenames: false
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+        - id: trailing-whitespace
+        - id: debug-statements
+        - id: name-tests-test
+        - id: check-json
+        - id: check-merge-conflict
+        - id: check-yaml

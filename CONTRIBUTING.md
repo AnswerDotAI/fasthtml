@@ -4,6 +4,16 @@ This project uses nbdev for development. Before beginning, make sure that nbdev 
 
 ## How to get started
 
+To install requirements:
+```bash
+python3 setup.py install
+```
+
+To install dev-requirements:
+```bash
+pip install -e .[dev]
+```
+
 Before anything else, please install the git hooks that run automatic scripts during each commit and merge to strip the notebooks of superfluous metadata (and avoid merge conflicts). After cloning the repository, run the following command inside it:
 ```
 nbdev_install_hooks
@@ -19,6 +29,15 @@ alias prep='nbdev_export && nbdev_clean && nbdev_trust'
 ```
 
 Run `prep` before each commit.
+
+
+To enable pre-commit hooks:
+```bash
+# Currently pre-commit is configured to run for changed files only.
+pre-commit install
+```
+
+**Note:** If you install pre-commit in that case no need to run prep command manually or even set its alias. `pre-commit` will automatically run this command on commit.
 
 ## Did you find a bug?
 
