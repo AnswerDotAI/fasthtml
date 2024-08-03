@@ -6,13 +6,7 @@ def  dark_media(css): return Style('@media (prefers-color-scheme:  dark) {%s}' %
 
 def MarkdownJS(sel='.marked', katex=False, katex_tags='$'):
     if katex:
-        def add_escape_characters(input_string):
-            escaped_string = ""
-            for char in input_string:
-                escaped_string += "\\" + char
-            return escaped_string
-
-        katex_escaped_left_tags = add_escape_characters(katex_tags)
+        katex_escaped_left_tags = "\\" + katex_tags
         if katex_tags == '$':
             katex_escaped_right_tags = '\\$'
         if katex_tags == '[':
