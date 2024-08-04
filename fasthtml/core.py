@@ -180,6 +180,7 @@ async def _wrap_req(req, params):
 def flat_xt(lst):
     "Flatten lists, except for `FT`s"
     result = []
+    if isinstance(lst,(FT,str)): lst=[lst]
     for item in lst:
         if isinstance(item, (list,tuple)) and not isinstance(item, FT): result.extend(item)
         else: result.append(item)
