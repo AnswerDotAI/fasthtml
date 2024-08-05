@@ -250,39 +250,46 @@ class WS_RouteX(WebSocketRoute):
         super().__init__(path, _ws_endp(recv, conn, disconn, hdrs, before), name=name, middleware=middleware)
 
 # %% ../nbs/api/00_core.ipynb
+def _xt_resp(req, resp):
+    if not isinstance(resp, tuple): resp = (resp,)
+    resp = resp + tuple(getattr(req, 'injects', ()))
+    http_hdrs,resp = partition(resp, risinstance(HttpHeader))
+    http_hdrs = {o.k:str(o.v) for o in http_hdrs}
+    hdr_tags = 'title','meta','link','style','base'
+    titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
+    if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
+        if not titles: titles = [Title('FastHTML page')]
+        resp = Html(Head(*titles, *flat_xt(req.hdrs)), Body(bdy, *flat_xt(req.ftrs), **req.bodykw), **req.htmlkw)
+    return HTMLResponse(to_xml(resp), headers=http_hdrs)
+
+# %% ../nbs/api/00_core.ipynb
+def _resp(req, resp, cls=empty):
+    if not resp: resp=()
+    if cls in (Any,FT): cls=empty
+    if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
+    if isinstance(resp, Response): return resp
+    if cls is not empty: return cls(resp)
+    if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__ft__'): return _xt_resp(req, resp)
+    if isinstance(resp, str): cls = HTMLResponse
+    elif isinstance(resp, Mapping): cls = JSONResponse
+    else:
+        resp = str(resp)
+        cls = HTMLResponse
+    return cls(resp)
+
+# %% ../nbs/api/00_core.ipynb
+async def _wrap_call(f, req, params):
+    wreq = await _wrap_req(req, params)
+    resp = f(*wreq)
+    return (await resp) if is_async_callable(f) else resp
+
+# %% ../nbs/api/00_core.ipynb
 class RouteX(Route):
     def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
                 hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
         self.sig = signature(endpoint)
         self.f,self.hdrs,self.ftrs,self.before,self.after,self.htmlkw,self.bodykw = endpoint,hdrs,ftrs,before,after,htmlkw,bodykw
         super().__init__(path, self._endp, methods=methods, name=name, include_in_schema=include_in_schema, middleware=middleware)
-
-    def _xt_resp(self, req, resp):
-        if not isinstance(resp, tuple): resp = (resp,)
-        resp = resp + tuple(req.injects)
-        http_hdrs,resp = partition(resp, risinstance(HttpHeader))
-        http_hdrs = {o.k:str(o.v) for o in http_hdrs}
-        hdr_tags = 'title','meta','link','style','base'
-        titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
-        if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
-            if not titles: titles = [Title('FastHTML page')]
-            resp = Html(Head(*titles, *flat_xt(req.hdrs)), Body(bdy, *flat_xt(req.ftrs), **req.bodykw), **req.htmlkw)
-        return HTMLResponse(to_xml(resp), headers=http_hdrs)
-
-    def _resp(self, req, resp):
-        if not resp: resp=()
-        cls = self.sig.return_annotation
-        if cls in (Any,FT): cls=empty
-        if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
-        if isinstance(resp, Response): return resp
-        if cls is not empty: return cls(resp)
-        if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__ft__'): return self._xt_resp(req, resp)
-        if isinstance(resp, str): cls = HTMLResponse
-        elif isinstance(resp, Mapping): cls = JSONResponse
-        else:
-            resp = str(resp)
-            cls = HTMLResponse
-        return cls(resp)
 
     async def _endp(self, req):
         resp = None
@@ -294,18 +301,13 @@ class RouteX(Route):
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
                 else: bf,skip = b,[]
                 if not any(re.match(r, req.url.path) for r in skip):
-                    wreq = await _wrap_req(req, signature(bf).parameters)
-                    resp = bf(*wreq)
-                    if is_async_callable(bf): resp = await resp
-        if not resp:
-            wreq = await _wrap_req(req, self.sig.parameters)
-            resp = self.f(*wreq)
-            if is_async_callable(self.f): resp = await resp
+                    resp = await _wrap_call(bf, req, signature(bf).parameters)
+        if not resp: resp = await _wrap_call(self.f, req, self.sig.parameters)
         for a in self.after:
             _,*wreq = await _wrap_req(req, signature(a).parameters)
             nr = a(resp, *wreq)
             if nr: resp = nr
-        return self._resp(req, resp)
+        return _resp(req, resp, self.sig.return_annotation)
 
 # %% ../nbs/api/00_core.ipynb
 class RouterX(Router):
@@ -345,6 +347,14 @@ def get_key(key=None, fname='.sesskey'):
 def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) else [o]
 
 # %% ../nbs/api/00_core.ipynb
+def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
+    async def _f(req, exc):
+        req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (hdrs, ftrs, htmlkw, bodykw))
+        res = f(req, exc)
+        return _resp(req, (await res) if is_async_callable(f) else res)
+    return _f
+
+# %% ../nbs/api/00_core.ipynb
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
@@ -358,13 +368,15 @@ class FastHTML(Starlette):
                           max_age=max_age, path=sess_path, same_site=same_site,
                           https_only=sess_https_only, domain=sess_domain)
         middleware.append(sess)
-        super().__init__(debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan=lifespan)
         hdrs = list([] if hdrs is None else hdrs)
         ftrs = list([] if ftrs is None else ftrs)
+        htmlkw = htmlkw or {}
         if default_hdrs: hdrs = [charset, viewport, htmxscr,surrsrc,scopesrc] + hdrs
         if ws_hdr: hdrs.append(htmxwsscr)
+        excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in (exception_handlers or {}).items()}
+        super().__init__(debug, routes, middleware, excs, on_startup, on_shutdown, lifespan=lifespan)
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan,
-                              hdrs=hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw or {}, **bodykw)
+                              hdrs=hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw, **bodykw)
 
     def route(self, path:str, methods=None, name=None, include_in_schema=True):
         def f(func):

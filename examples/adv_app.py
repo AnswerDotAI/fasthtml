@@ -62,12 +62,17 @@ import { proc_htmx} from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fa
 proc_htmx('.markdown', e => e.innerHTML = marked.parse(e.textContent));
 """
 
+# We will use this in our `exception_handlers` dict
+def _not_found(req, exc): return Titled('Oh no!', Div('We could not find that page :('))
+
 # To create a Beforeware object, we pass the function itself, and optionally a list of regexes to skip.
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login'])
 # The `FastHTML` class is a subclass of `Starlette`, so you can use any parameters that `Starlette` accepts.
 # In addition, you can add your Beforeware here, and any headers you want included in HTML responses.
 # FastHTML includes the "HTMX" and "Surreal" libraries in headers, unless you pass `default_hdrs=False`.
 app = FastHTML(before=bware,
+               # These are the same as Starlette exception_handlers, except they also support `FT` results
+               exception_handlers={404: _not_found},
                # PicoCSS is a particularly simple CSS framework, with some basic integration built in to FastHTML.
                # `picolink` is pre-defined with the header for the PicoCSS stylesheet.
                # You can use any CSS framework you want, or none at all.
