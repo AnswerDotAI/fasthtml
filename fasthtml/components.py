@@ -82,6 +82,10 @@ def _fill_item(item, obj):
                 else: attr.pop('checked', '')
             else: attr['value'] = val
         if tag=='textarea': cs=(val,)
+        if tag=='select':
+            for o in cs:
+                if o[0]=='option':
+                    if o[2].get('value', '')==val: o[2]['selected'] = '1'
     return FT(tag,cs,attr)
 
 # %% ../nbs/api/01_components.ipynb
