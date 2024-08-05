@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.2.3
+
+### New Features
+
+- Add `attrs1st` formatting to html2ft ([#193](https://github.com/AnswerDotAI/fasthtml/pull/193)), thanks to [@AndrewRPerkins](https://github.com/AndrewRPerkins)
+
+
 ## 0.2.2
 
 ### New Features
