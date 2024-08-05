@@ -4,7 +4,7 @@ from datetime import datetime
 def render(room):
     return Li(A(room.name, href=f"/rooms/{room.id}"))
 
-app,rt,rooms,Room = fast_app('data/drawapp.db', render=render, id=int, name=str, created_at=str, canvas_data=str, pk='id')
+app,rt,rooms,Room = fast_app('data/drawapp.db', render=render, id=int, name=str, created_at=str, canvas_data=str, pk='id', overwrite=True)
 
 @rt("/")
 def get():

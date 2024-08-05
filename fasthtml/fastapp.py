@@ -6,11 +6,20 @@ from fastlite import *
 from fasthtml import *
 from fasthtml.live_reload import FastHTMLWithLiveReload
 
-def get_tbl(dt, nm, schema):
+def get_tbl(dt, nm, schema, overwrite=False):
     render = schema.pop('render', None)
     tbl = dt[nm]
     if tbl not in dt: tbl.create(**schema)
     dc = tbl.dataclass()
+    try:
+        # remove pk from schema dict
+        schema.pop('pk', None)
+        dc(**schema)
+    except Exception:
+        if overwrite:
+            tbl.drop()
+            tbl.create(**schema)
+        else: raise ValueError(f"Schema mismatch for table {nm}. Expected {tbl.schema}, got {schema}. If you wish to change the schema, you must drop the table first or use the overwrite flag.")
     if render: dc.__ft__ = render
     return tbl,dc
 
@@ -30,6 +39,7 @@ def app_factory(*args, **kwargs) -> FastHTML | FastHTMLWithLiveReload:
 def fast_app(
         db_file:Optional[str]=None, # Database file name, if needed
         render:Optional[callable]=None, # Function used to render default database class
+        overwrite:bool=False, # Overwrite existing table schema if it exists
         hdrs:Optional[tuple]=None, # Additional FT elements to add to <HEAD>
         ftrs:Optional[tuple]=None, # Additional FT elements to add to end of <BODY>
         tbls:Optional[dict]=None, # Mapping from DB table names to dict table definitions
@@ -77,7 +87,7 @@ def fast_app(
         else:
             kwargs['render'] = render
             tbls['items'] = kwargs
-    dbtbls = [get_tbl(db.t, k, v) for k,v in tbls.items()]
+    dbtbls = [get_tbl(db.t, k, v, overwrite=overwrite) for k,v in tbls.items()]
     if len(dbtbls)==1: dbtbls=dbtbls[0]
     return app,app.route,*dbtbls
 
