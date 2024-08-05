@@ -120,7 +120,7 @@ def __getattr__(tag):
 
 # %% ../nbs/api/01_components.ipynb
 _re_h2x_attr_key = re.compile(r'^[A-Za-z_-][\w-]*$')
-def html2ft(html):
+def html2ft(html, style=None):
     """Convert HTML to an `ft` expression"""
     rev_map = {'class': 'cls', 'for': 'fr'}
     
@@ -142,7 +142,10 @@ def html2ft(html):
         j = ', ' if onlychild else f',\n{spc}'
         inner = j.join(filter(None, cs+attrs))
         if onlychild: return f'{tag_name}({inner})'
-        return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*indent})'
+        if style is None or not attrs: return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*indent})' 
+        inner_cs = j.join(filter(None, cs))
+        inner_attrs = ', '.join(filter(None, attrs))
+        return f'{tag_name}({inner_attrs})(\n{spc}{inner_cs}\n{" "*(lvl-1)*indent})'
 
     soup = BeautifulSoup(html.strip(), 'html.parser')
     for c in soup.find_all(string=risinstance(Comment)): c.extract()
