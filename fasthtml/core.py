@@ -18,7 +18,7 @@ from typing import Optional, get_type_hints, get_args, get_origin, Union, Mappin
 from datetime import datetime
 from dataclasses import dataclass,fields,is_dataclass,MISSING,asdict
 from collections import namedtuple
-from inspect import isfunction,ismethod,signature,Parameter,get_annotations
+from inspect import isfunction,ismethod,Parameter,get_annotations
 from functools import wraps, partialmethod
 from http import cookies
 from copy import copy,deepcopy
@@ -26,6 +26,9 @@ from copy import copy,deepcopy
 from .starlette import *
 
 empty = Parameter.empty
+
+# %% ../nbs/api/00_core.ipynb
+def _sig(f): return signature_ex(f, True)
 
 # %% ../nbs/api/00_core.ipynb
 def is_typeddict(cls:type)->bool:
@@ -226,7 +229,7 @@ def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
     cls = type('WS_Endp', (WebSocketEndpoint,), {"encoding":"text"})
     
     async def _generic_handler(handler, ws, data=None):
-        wd = _wrap_ws(ws, loads(data) if data else {}, signature(handler).parameters)
+        wd = _wrap_ws(ws, loads(data) if data else {}, _sig(handler).parameters)
         resp = handler(*wd)
         if resp:
             if is_async_callable(handler): resp = await resp
@@ -287,7 +290,7 @@ async def _wrap_call(f, req, params):
 class RouteX(Route):
     def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
                 hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
-        self.sig = signature(endpoint)
+        self.sig = _sig(endpoint)
         self.f,self.hdrs,self.ftrs,self.before,self.after,self.htmlkw,self.bodykw = endpoint,hdrs,ftrs,before,after,htmlkw,bodykw
         super().__init__(path, self._endp, methods=methods, name=name, include_in_schema=include_in_schema, middleware=middleware)
 
@@ -301,10 +304,10 @@ class RouteX(Route):
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
                 else: bf,skip = b,[]
                 if not any(re.match(r, req.url.path) for r in skip):
-                    resp = await _wrap_call(bf, req, signature(bf).parameters)
+                    resp = await _wrap_call(bf, req, _sig(bf).parameters)
         if not resp: resp = await _wrap_call(self.f, req, self.sig.parameters)
         for a in self.after:
-            _,*wreq = await _wrap_req(req, signature(a).parameters)
+            _,*wreq = await _wrap_req(req, _sig(a).parameters)
             nr = a(resp, *wreq)
             if nr: resp = nr
         return _resp(req, resp, self.sig.return_annotation)
