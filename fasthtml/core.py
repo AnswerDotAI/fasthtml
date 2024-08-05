@@ -382,6 +382,7 @@ class FastHTML(Starlette):
                               hdrs=hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw, **bodykw)
 
     def route(self, path:str, methods=None, name=None, include_in_schema=True):
+        "Add a route at `path`; the function name is the default method"
         def f(func):
             m = [methods] if isinstance(methods,str) else [func.__name__] if not methods else methods
             self.router.add_route(path, func, methods=m, name=name, include_in_schema=include_in_schema)
