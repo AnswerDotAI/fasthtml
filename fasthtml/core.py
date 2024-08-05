@@ -22,6 +22,7 @@ from inspect import isfunction,ismethod,Parameter,get_annotations
 from functools import wraps, partialmethod
 from http import cookies
 from copy import copy,deepcopy
+from warnings import warn
 
 from .starlette import *
 
@@ -156,6 +157,7 @@ async def _find_p(req, arg:str, p:Parameter):
         if arg.lower()=='htmx': return _get_htmx(req.headers)
         if arg.lower()=='app': return req.scope['app']
         if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(req, arg.lower())
+        warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")
         return None
     # Look through path, cookies, headers, session, query, and body in that order
     res = req.path_params.get(arg, None)
