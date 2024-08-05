@@ -35,6 +35,9 @@ def railway_deploy(
     mount:bool_arg=True # Create a mounted volume at /app/data?
 ):
     """Deploy a FastHTML app to Railway"""
+    nm,ver = check_output("railway --version".split()).decode().split()
+    assert nm=='railwayapp', f'Unexpected railway version string: {nm}'
+    if ver2tuple(ver)<(3,8): return print("Please update your railway CLI version to 3.8 or higher")
     cp = run("railway status --json".split(), capture_output=True)
     if not cp.returncode: return print("This project is already deployed. Run `railway open`.")
     reqs = Path('requirements.txt')
