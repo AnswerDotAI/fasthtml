@@ -82,7 +82,7 @@ def _fill_item(item, obj):
                 else: attr.pop('checked', '')
             else: attr['value'] = val
         if tag=='textarea': cs=(val,)
-    return FT(tag,cs,attr)
+    return FT(tag,cs,attr,void_=item.void_)
 
 # %% ../nbs/api/01_components.ipynb
 def fill_form(form:FT, obj)->FT:
@@ -120,7 +120,7 @@ def __getattr__(tag):
 
 # %% ../nbs/api/01_components.ipynb
 _re_h2x_attr_key = re.compile(r'^[A-Za-z_-][\w-]*$')
-def html2ft(html, style=None):
+def html2ft(html, attr1st=False):
     """Convert HTML to an `ft` expression"""
     rev_map = {'class': 'cls', 'for': 'fr'}
     
@@ -136,13 +136,14 @@ def html2ft(html, style=None):
         for key, value in sorted(elm.attrs.items(), key=lambda x: x[0]=='class'):
             if isinstance(value,(tuple,list)): value = " ".join(value)
             key = rev_map.get(key, key)
-            attrs.append(f'{key.replace("-", "_")}={value!r}' if _re_h2x_attr_key.match(key) else f'**{{{key!r}:{value!r}}}')
+            attrs.append(f'{key.replace("-", "_")}={value!r}'
+                         if _re_h2x_attr_key.match(key) else f'**{{{key!r}:{value!r}}}')
         spc = " "*lvl*indent
         onlychild = not cts or (len(cts)==1 and isinstance(cts[0],str))
         j = ', ' if onlychild else f',\n{spc}'
         inner = j.join(filter(None, cs+attrs))
         if onlychild: return f'{tag_name}({inner})'
-        if style is None or not attrs: return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*indent})' 
+        if not attr1st or not attrs: return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*indent})' 
         inner_cs = j.join(filter(None, cs))
         inner_attrs = ', '.join(filter(None, attrs))
         return f'{tag_name}({inner_attrs})(\n{spc}{inner_cs}\n{" "*(lvl-1)*indent})'
