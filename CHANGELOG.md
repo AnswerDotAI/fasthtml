@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.2.4
+
+### Bugs Squashed
+
+- Signature may not resolve types from str ([#198](https://github.com/AnswerDotAI/fasthtml/issues/198))
+
+
 ## 0.2.3
 
 ### New Features
@@ -19,7 +26,7 @@
 - Add `pep8_app.py` ([#163](https://github.com/AnswerDotAI/fasthtml/issues/163))
 - Add support for LaTeX formula rendering when rendering markdown ([#158](https://github.com/AnswerDotAI/fasthtml/pull/158)), thanks to [@yym68686](https://github.com/yym68686)
 - Add to request: `req.hdrs,req.ftrs,req.htmlkw,req.bodykw` ([#152](https://github.com/AnswerDotAI/fasthtml/issues/152))
-- Add htmlkw to fast_app ([#145](https://github.com/AnswerDotAI/fasthtml/pull/145)), thanks to [@ranzuh](https://github.com/ranzuh)
+- Add htmlkw to `fast_app` ([#145](https://github.com/AnswerDotAI/fasthtml/pull/145)), thanks to [@ranzuh](https://github.com/ranzuh)
 - Add `Form` for multipart form data; initial poetry compatibility for `serve` ([#137](https://github.com/AnswerDotAI/fasthtml/issues/137))
 - changes toast names to avoid conflict with bootstrap ([#133](https://github.com/AnswerDotAI/fasthtml/pull/133)), thanks to [@vacmar01](https://github.com/vacmar01)
 - Automatically move ('title','meta','link','style','base') into head ([#122](https://github.com/AnswerDotAI/fasthtml/issues/122))
