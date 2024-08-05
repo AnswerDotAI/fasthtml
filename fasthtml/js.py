@@ -16,12 +16,15 @@ def KatexMarkdownJS(sel='.marked', katex_tags='$'):
     right_tags = '\\$' if katex_tags=='$' else '\\]'
     src = """
     import katex from "https://cdn.jsdelivr.net/npm/katex/dist/katex.mjs";
-    const renderMath = tex => katex.renderToString(tex, {throwOnError: false, displayMode: false});
+    const renderInlineMath = tex => katex.renderToString(tex, {throwOnError: false, displayMode: false});
+    const renderBlockMath = tex => katex.renderToString(tex, {throwOnError: false, displayMode: true});
 
     proc_htmx('%s', e => {
-    e.innerHTML = marked.parse(e.textContent).replace(/%s{1,2}\\n*(.+?)\\n*%s{1,2}/g, (_, tex) => renderMath(tex));
+    e.innerHTML = marked.parse(e.textContent)
+    .replace(/%s{2}\\n*(.+?)\\n*%s{2}/g, (_, tex) => renderBlockMath(tex))
+    .replace(/%s{1}\\n*(.+?)\\n*%s{1}/g, (_, tex) => renderInlineMath(tex))
     });
-    """ % (sel, "\\"+katex_tags, right_tags)
+    """ % (sel, "\\"+katex_tags, right_tags, "\\"+katex_tags, right_tags)
     return (Script(marked_imp+src, type='module'),
             Link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"))
 
