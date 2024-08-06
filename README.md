@@ -91,14 +91,19 @@ When using these attributes in Python code, they are written in snake_case (e.g.
 ### Commonly used hx attributes
 For the full list of available attributes in HTMX, please refer to the official [HTMX documentation](https://htmx.org/reference/#attributes).
 
-| Attribute      | Description                                                                                     | Example                               |
-|----------------|-------------------------------------------------------------------------------------------------|---------------------------------------|
-| `hx_get`       | Specifies a URL to fetch HTML content from when an event occurs (e.g., click).                | `hx-get="/change"`                   |
-| `hx_post`      | Sends data to the server when an event occurs, typically used for form submissions.            | `hx-post="/submit"`                  |
-| `hx_target`    | Defines the element that will be updated with the response from the server.                    | `hx-target="#result"`                |
-| `hx_swap`      | Determines how the response will be inserted into the target element (e.g., innerHTML, outerHTML). | `hx-swap="innerHTML"`                |
-| `hx_trigger`   | Specifies the event that will trigger the request (e.g., click, load).                         | `hx-trigger="click"`                 |
-| `hx_include`   | Allows you to include additional data from other elements when making a request.               | `hx-include="#formData"`             |
+| Attribute      | Description                                                                                     | 
+|----------------|-------------------------------------------------------------------------------------------------| 
+| `hx_get`       | Specifies a URL to fetch HTML content from when an event occurs (e.g., click).  <br> Example: `Button('Click Me', hx_get="/change")`  |
+|                |                                                                                                 | 
+| `hx_post`      | Sends data to the server when an event occurs, typically used for form submissions. <br> Example: `Form([Input(name="data"), Button('Submit')], hx_post="/submit")`  |
+|                |                                                                                                 | 
+| `hx_target`    | Defines the element that will be updated with the response from the server. <br> Example: `Div(id="result", hx_get="/data", hx_target="#result", "Load Data")`  |
+|                |                                                                                                 | 
+| `hx_swap`      | Determines how the response will be inserted into the target element (e.g., innerHTML, outerHTML). <br> Example: `Div(id="content", hx_get="/update", hx_swap="innerHTML", "Update Content")`  |
+|                |                                                                                                 | 
+| `hx_trigger`   | Specifies the event that will trigger the request (e.g., click, load). <br> Example: `Input(type="text", hx_trigger="keyup", hx_get="/search", hx_target="#results")`  |
+|                |                                                                                                 | 
+| `hx_include`   | Allows you to include additional data from other elements when making a request. <br> Example: `Button('Submit', hx_get="/submit", hx_include="#formData")`  |
 
 ## Next Steps
 
