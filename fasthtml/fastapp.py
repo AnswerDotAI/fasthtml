@@ -10,6 +10,7 @@ def get_tbl(dt, nm, schema):
     render = schema.pop('render', None)
     tbl = dt[nm]
     if tbl not in dt: tbl.create(**schema)
+    else: tbl.create(**schema, transform=True)
     dc = tbl.dataclass()
     if render: dc.__ft__ = render
     return tbl,dc
