@@ -83,6 +83,20 @@ the new version returned by the second route.
 This “hypermedia-based” approach to web development is a powerful way to
 build web applications.
 
+## FastHTML HTMx attributes
+
+This section provides an overview of the commonly used `hx_` attributes in FastHTML, which facilitate dynamic interactions and enhance the interactivity of web applications. These attributes are essential for making asynchronous requests and updating the DOM without full page reloads.
+When using these attributes in Python code, they are written in snake_case (e.g., hx_get), while in HTML, they are represented in kebab-case (e.g., hx-get). Understanding these attributes will help you leverage the full power of FastHTML in your projects.
+
+| Attribute      | Description                                                                                     | Example                               |
+|----------------|-------------------------------------------------------------------------------------------------|---------------------------------------|
+| `hx_get`       | Specifies a URL to fetch HTML content from when an event occurs (e.g., click).                | `hx-get="/change"`                   |
+| `hx_post`      | Sends data to the server when an event occurs, typically used for form submissions.            | `hx-post="/submit"`                  |
+| `hx_target`    | Defines the element that will be updated with the response from the server.                    | `hx-target="#result"`                |
+| `hx_swap`      | Determines how the response will be inserted into the target element (e.g., innerHTML, outerHTML). | `hx-swap="innerHTML"`                |
+| `hx_trigger`   | Specifies the event that will trigger the request (e.g., click, load).                         | `hx-trigger="click"`                 |
+| `hx_include`   | Allows you to include additional data from other elements when making a request.               | `hx-include="#formData"`             |
+
 ## Next Steps
 
 Start with the official sources to learn more about FastHTML:
