@@ -26,7 +26,7 @@ def KatexMarkdownJS(sel='.marked', katex_tags='$'):
             Link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"))
 
 
-def HighlightJS(sel='pre code', langs='python', light='atom-one-light', dark='atom-one-dark'):
+def HighlightJS(sel='pre code', langs:str|list|tuple='python', light='atom-one-light', dark='atom-one-dark'):
     src = """
 hljs.addPlugin(new CopyButtonPlugin());
 hljs.configure({'cssSelector': '%s'});

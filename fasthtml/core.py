@@ -7,7 +7,7 @@ __all__ = ['empty', 'htmx_hdrs', 'htmxscr', 'htmxwsscr', 'surrsrc', 'scopesrc', 
            'reg_re_param', 'MiddlewareBase']
 
 # %% ../nbs/api/00_core.ipynb
-import json,dateutil,uuid,inspect,types
+import json,uuid,inspect,types
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -23,6 +23,7 @@ from functools import wraps, partialmethod
 from http import cookies
 from copy import copy,deepcopy
 from warnings import warn
+from dateutil import parser as dtparse
 
 from .starlette import *
 
@@ -45,7 +46,7 @@ def is_namedtuple(cls):
 # %% ../nbs/api/00_core.ipynb
 def date(s:str):
     "Convert `s` to a datetime"
-    return dateutil.parser.parse(s)
+    return dtparse.parse(s)
 
 # %% ../nbs/api/00_core.ipynb
 def snake2hyphens(s:str):
@@ -373,8 +374,7 @@ class FastHTML(Starlette):
                           max_age=max_age, path=sess_path, same_site=same_site,
                           https_only=sess_https_only, domain=sess_domain)
         middleware.append(sess)
-        hdrs = list([] if hdrs is None else hdrs)
-        ftrs = list([] if ftrs is None else ftrs)
+        hdrs,ftrs = listify(hdrs),listify(ftrs)
         htmlkw = htmlkw or {}
         if default_hdrs: hdrs = [charset, viewport, htmxscr,surrsrc,scopesrc] + hdrs
         if ws_hdr: hdrs.append(htmxwsscr)
