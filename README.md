@@ -88,6 +88,9 @@ build web applications.
 This section provides an overview of the commonly used `hx_` attributes in FastHTML, which facilitate dynamic interactions and enhance the interactivity of web applications. These attributes are essential for making asynchronous requests and updating the DOM without full page reloads.
 When using these attributes in Python code, they are written in snake_case (e.g., hx_get), while in HTML, they are represented in kebab-case (e.g., hx-get). Understanding these attributes will help you leverage the full power of FastHTML in your projects.
 
+### Commonly used hx attributes
+For the full list of available attributes in HTMX, please refer to the official [HTMX documentation](https://htmx.org/reference/#attributes).
+
 | Attribute      | Description                                                                                     | Example                               |
 |----------------|-------------------------------------------------------------------------------------------------|---------------------------------------|
 | `hx_get`       | Specifies a URL to fetch HTML content from when an event occurs (e.g., click).                | `hx-get="/change"`                   |
