@@ -306,7 +306,7 @@ class RouteX(Route):
             if not resp:
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
                 else: bf,skip = b,[]
-                if not any(re.match(r, req.url.path) for r in skip):
+                if not any(re.fullmatch(r, req.url.path) for r in skip):
                     resp = await _wrap_call(bf, req, _sig(bf).parameters)
         if not resp: resp = await _wrap_call(self.f, req, self.sig.parameters)
         for a in self.after:
