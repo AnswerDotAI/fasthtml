@@ -268,10 +268,10 @@ async def get(id:int):
 
 @rt("/")
 async def put(todo: Todo):
-    # `upsert` and `update` are both part of the MiniDataAPI spec, updating or inserting an item.
-    # Note that the updated/inserted todo is returned. By returning the updated todo, we can update the list directly.
+    # `update` is part of the MiniDataAPI spec.
+    # Note that the updated todo is returned. By returning the updated todo, we can update the list directly.
     # Because we return a tuple with `clr_details()`, the details view is also cleared.
-    return todos.upsert(todo), clr_details()
+    return todos.update(todo), clr_details()
 
 @rt("/")
 async def post(todo:Todo):

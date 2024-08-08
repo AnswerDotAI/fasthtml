@@ -362,7 +362,7 @@ def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
 
 # %% ../nbs/api/00_core.ipynb
 class _SessionMiddleware(SessionMiddleware):
-    """Wraps Starlette's session in an AttrDict"""
+    "Same as Starlette's `SessionMiddleware`, but wraps `session` in an AttrDict"
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] not in ("http", "websocket"):
             await self.app(scope, receive, send)
@@ -376,6 +376,7 @@ class _SessionMiddleware(SessionMiddleware):
 
         await super().__call__(scope, receive_wrapper, send)
 
+# %% ../nbs/api/00_core.ipynb
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
