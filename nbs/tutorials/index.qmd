@@ -8,5 +8,5 @@ listing:
   filter-ui: false
 ---
 
-Click through to any of these tutorials to get started with nbdev's features.
+Click through to any of these tutorials to get started with FastHTML's features.
 
