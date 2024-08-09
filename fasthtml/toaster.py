@@ -40,19 +40,19 @@ proc_htmx('.fh-toast-container', async function(toast) {
 });
 """
 
-def add_toast(sess, message, typ="info"):
+def add_toast(sess, message, typ="info")->None:
     assert typ in ("info", "success", "warning", "error"), '`typ` not in ("info", "success", "warning", "error")'
     sess.setdefault(sk, []).append((message, typ))
 
-def render_toasts(sess):
+def render_toasts(sess)->Div:
     toasts = [Div(msg, cls=f"fh-toast fh-toast-{typ}") for msg,typ in sess.pop(sk, [])]
     return Div(Div(*toasts, cls="fh-toast-container"),
                hx_swap_oob="afterbegin:body")
 
-def toast_after(resp, req, sess):
+def toast_after(resp, req, sess)->None:
     if sk in sess: req.injects.append(render_toasts(sess))
 
-def setup_toasts(app):
+def setup_toasts(app)->None:
     app.router.hdrs += (Style(toast_css), Script(toast_js, type="module"))
     app.router.after.append(toast_after)
 

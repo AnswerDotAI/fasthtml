@@ -1,4 +1,5 @@
 from fastcore.utils import *
+from fastcore.xml import FT
 from fasthtml.xtend import Script,jsd,Style,Link
 
 def light_media(css): return Style('@media (prefers-color-scheme: light) {%s}' %css)
@@ -8,11 +9,11 @@ marked_imp = """import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/
     import { proc_htmx } from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
 """
 
-def MarkdownJS(sel='.marked'):
+def MarkdownJS(sel='.marked')->Script:
     src = "proc_htmx('%s', e => e.innerHTML = marked.parse(e.textContent));" % sel
     return Script(marked_imp+src, type='module')
 
-def KatexMarkdownJS(sel='.marked', katex_tags='$'):
+def KatexMarkdownJS(sel='.marked', katex_tags='$')->tuple[Script,Link]:
     right_tags = '\\$' if katex_tags=='$' else '\\]'
     src = """
     import katex from "https://cdn.jsdelivr.net/npm/katex/dist/katex.mjs";
@@ -26,7 +27,7 @@ def KatexMarkdownJS(sel='.marked', katex_tags='$'):
             Link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"))
 
 
-def HighlightJS(sel='pre code', langs:str|list|tuple='python', light='atom-one-light', dark='atom-one-dark'):
+def HighlightJS(sel='pre code', langs:str|list|tuple='python', light='atom-one-light', dark='atom-one-dark')->list[FT]:
     src = """
 hljs.addPlugin(new CopyButtonPlugin());
 hljs.configure({'cssSelector': '%s'});
@@ -44,7 +45,7 @@ htmx.onLoad(hljs.highlightAll);""" % sel
             *langjs, Script(src, type='module')]
 
 
-def SortableJS(sel='.sortable', ghost_class='blue-background-class'):
+def SortableJS(sel='.sortable', ghost_class='blue-background-class')->Script:
     src = """
 import {Sortable} from 'https://cdn.jsdelivr.net/npm/sortablejs/+esm';
 import {proc_htmx} from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
