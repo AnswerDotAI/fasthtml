@@ -107,7 +107,7 @@ def fill_dataclass(src, dest):
 
 # %% ../nbs/api/01_components.ipynb
 def find_inputs(e, tags='input', **kw):
-    # Recursively find all elements in `e` with `tags` and attrs matching `kw`
+    "Recursively find all elements in `e` with `tags` and attrs matching `kw`"
     if not isinstance(e, (list,tuple)): return []
     inputs = []
     if isinstance(tags,str): tags = [tags]
