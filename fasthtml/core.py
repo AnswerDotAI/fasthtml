@@ -101,6 +101,7 @@ def _fix_anno(t):
 def _form_arg(k, v, d):
     "Get type by accessing key `k` from `d`, and use to cast `v`"
     if v is None: return
+    if not isinstance(v, str): return v
     # This is the type we want to cast `v` to
     anno = d.get(k, None)
     if not anno: return v
@@ -135,21 +136,9 @@ async def _from_body(req, p):
     anno = p.annotation
     # Get the fields and types of type `anno`, if available
     d = _annotations(anno)
-
-    if req.headers.get('content-type') == 'application/json':
-        data = await req.json()
-        process_value = lambda k, v: v
-    else:
-        form = await req.form()
-        data = form2dict(form)
-        process_value = lambda k, v: _form_arg(k, v, d)
-
-    cargs = {
-        k: process_value(k, v)
-        for k, v in data.items()
-        if not d or k in d
-    }
-    
+    if req.headers.get('content-type', None)=='application/json': data = await req.json()
+    else: data = form2dict(await req.form())
+    cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
 
 # %% ../nbs/api/00_core.ipynb
