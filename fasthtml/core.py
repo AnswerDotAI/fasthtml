@@ -224,7 +224,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
         if arg.lower()=='send': return partial(_send_ws, ws)
         return None
     res = data.get(arg, None)
-    if res is empty or res is None: res = headers.get(snake2hyphens(arg), None)
+    if res is empty or res is None: res = hdrs.get(snake2hyphens(arg), None)
     if res is empty or res is None: res = p.default
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
