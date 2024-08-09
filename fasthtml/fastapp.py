@@ -15,7 +15,7 @@ def get_tbl(dt, nm, schema):
     if render: dc.__ft__ = render
     return tbl,dc
 
-def app_factory(*args, **kwargs) -> FastHTML | FastHTMLWithLiveReload: 
+def app_factory(*args, **kwargs)->FastHTML | FastHTMLWithLiveReload: 
     """Creates a FastHTML or FastHTMLWithLiveReload app instance.
     The type of app created is determined by the "live" key in kwargs.
 
@@ -94,7 +94,7 @@ def serve(appname=None, app='app', host='0.0.0.0', port=None, reload=True):
         print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
         uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload)
 
-def clear(id): return Div(hx_swap_oob='innerHTML', id=id)
-def ContainerX(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
-def Page(title, *con): return Title(title), ContainerX(H1(title), *con)
+def clear(id)->Div: return Div(hx_swap_oob='innerHTML', id=id)
+def ContainerX(*cs, **kwargs)->Main: return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
+def Page(title, *con)->tuple[Title,ContainerX]: return Title(title), ContainerX(H1(title), *con)
 

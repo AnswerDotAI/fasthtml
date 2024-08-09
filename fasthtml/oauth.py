@@ -5,7 +5,7 @@ __all__ = ['GoogleAppClient', 'GitHubAppClient', 'retr_code']
 
 # %% ../nbs/incomplete/oauth.ipynb
 import json, uuid
-from httpx import get,post
+from httpx import get,post,Response
 
 from fastcore.utils import *
 from fastcore.net import recv_once
@@ -52,13 +52,13 @@ class GitHubAppClient(_AppClient):
 
 # %% ../nbs/incomplete/oauth.ipynb
 @patch
-def login_link(self:WebApplicationClient, scope=None):
+def login_link(self:WebApplicationClient, scope=None)->str:
     "Get a login link for this client"
     if not scope: scope=self.scope
     return self.prepare_request_uri(self.base_url, self.redirect_uri, scope)
 
 # %% ../nbs/incomplete/oauth.ipynb
-def retr_code(ret):
+def retr_code(ret)->str:
     "Parse a request to get the code -- mainly used for testing"
     url = ret.decode()
     if url.startswith('GET'): url = url.split(' ')[1]
@@ -67,7 +67,7 @@ def retr_code(ret):
 
 # %% ../nbs/incomplete/oauth.ipynb
 @patch
-def parse_response(self:_AppClient, code):
+def parse_response(self:_AppClient, code)->None:
     "Get the token from the oauth2 server response"
     payload = dict(code=code, redirect_uri=self.redirect_uri, client_id=self.client_id,
                    client_secret=self.client_secret, grant_type='authorization_code')
@@ -75,20 +75,20 @@ def parse_response(self:_AppClient, code):
 
 # %% ../nbs/incomplete/oauth.ipynb
 @patch
-def get_info(self:_AppClient):
+def get_info(self:_AppClient)->Response:
     "Get the info for authenticated user"
     headers = {'Authorization': f'Bearer {self.token["access_token"]}'}
     return get(self.info_url, headers=headers).json()
 
 # %% ../nbs/incomplete/oauth.ipynb
 @patch
-def retr_info(self:_AppClient, code):
+def retr_info(self:_AppClient, code)->Response:
     "Combines `parse_response` and `get_info`"
     self.parse_response(code)
     return self.get_info()
 
 # %% ../nbs/incomplete/oauth.ipynb
 @patch
-def retr_id(self:_AppClient, code):
+def retr_id(self:_AppClient, code)->Response:
     "Call `retr_info` and then return id/subscriber value"
     return self.retr_info()[self.id_key]

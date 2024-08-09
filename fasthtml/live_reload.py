@@ -1,3 +1,6 @@
+from socket import socket
+from typing import Any
+
 from starlette.routing import WebSocketRoute
 from fasthtml import FastHTML, Script
 
@@ -21,7 +24,7 @@ LIVE_RELOAD_SCRIPT = """
 """
 
 
-async def live_reload_websocket(websocket):
+async def live_reload_websocket(websocket)->tuple[socket,Any]:
     await websocket.accept()
 
 

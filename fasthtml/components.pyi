@@ -36,7 +36,7 @@ def File(fname):
 def _fill_item(item, obj):
     ...
 
-def fill_form(form: FT, obj) -> FT:
+def fill_form(form: FT, obj)->FT:
     """Fills named items in `form` using attributes in `obj`"""
     ...
 
