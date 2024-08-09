@@ -132,11 +132,24 @@ def form2dict(form: FormData) -> dict:
 
 # %% ../nbs/api/00_core.ipynb
 async def _from_body(req, p):
-    form = await req.form()
     anno = p.annotation
     # Get the fields and types of type `anno`, if available
     d = _annotations(anno)
-    cargs = {k:_form_arg(k, v, d) for k,v in form2dict(form).items() if not d or k in d}
+
+    if req.headers.get('content-type') == 'application/json':
+        data = await req.json()
+        process_value = lambda k, v: v
+    else:
+        form = await req.form()
+        data = form2dict(form)
+        process_value = lambda k, v: _form_arg(k, v, d)
+
+    cargs = {
+        k: process_value(k, v)
+        for k, v in data.items()
+        if not d or k in d
+    }
+    
     return anno(**cargs)
 
 # %% ../nbs/api/00_core.ipynb
