@@ -234,9 +234,6 @@ def post(id:list[int]):
     return tuple(todos(order_by='priority'))
 
 # Refactoring components in FastHTML is as simple as creating Python functions.
-# `clr_details` creates a div to clear the details of the current Todo.
-def clr_details(): return Div(hx_swap_oob='innerHTML', id='current-todo')
-
 # The `clr_details` function creates a Div with specific HTMX attributes.
 # `hx_swap_oob='innerHTML'` tells HTMX to swap the inner HTML of the target element out-of-band,
 # meaning it will update this element regardless of where the HTMX request originated from.
