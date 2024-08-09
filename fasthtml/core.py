@@ -162,11 +162,10 @@ async def _find_p(req, arg:str, p:Parameter):
         if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(req, arg.lower())
         warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")
         return None
-    # Look through path, cookies, headers, session, query, and body in that order
+    # Look through path, cookies, headers, query, and body in that order
     res = req.path_params.get(arg, None)
     if res in (empty,None): res = req.cookies.get(arg, None)
     if res in (empty,None): res = req.headers.get(snake2hyphens(arg), None)
-    if res in (empty,None): res = nested_idx(req.scope, 'session', arg) or None
     if res in (empty,None): res = req.query_params.get(arg, None)
     if res in (empty,None):
         frm = await req.form()
