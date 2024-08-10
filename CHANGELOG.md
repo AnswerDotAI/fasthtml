@@ -2,6 +2,26 @@
 
 <!-- do not remove -->
 
+## 0.3.0
+
+### Breaking changes
+
+- Do not make session vars available as direct params ([#237](https://github.com/AnswerDotAI/fasthtml/issues/237))
+
+### New Features
+
+- Add surreal.js helpers `Me`, `Any`, `On` ([#238](https://github.com/AnswerDotAI/fasthtml/issues/238))
+- Alpine support ([#238](https://github.com/AnswerDotAI/fasthtml/issues/238))
+- Add support for application/json in POST requests ([#234](https://github.com/AnswerDotAI/fasthtml/pull/234)), thanks to [@khoaHyh](https://github.com/khoaHyh)
+- Wrap Starlette's session in an AttrDict ([#213](https://github.com/AnswerDotAI/fasthtml/pull/213)), thanks to [@jbellis](https://github.com/jbellis)
+- Handle mismatches between existing db and schema ([#202](https://github.com/AnswerDotAI/fasthtml/pull/202)), thanks to [@ncoop57](https://github.com/ncoop57)
+- Raise warning if type is not passed ([#195](https://github.com/AnswerDotAI/fasthtml/issues/195))
+
+### Bugs Squashed
+
+- railway deploy doesn't check for project name ([#230](https://github.com/AnswerDotAI/fasthtml/pull/230)), thanks to [@gautam-e](https://github.com/gautam-e)
+
+
 ## 0.2.4
 
 ### Bugs Squashed
