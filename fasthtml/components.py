@@ -28,6 +28,7 @@ except ImportError: display=None
 
 # %% ../nbs/api/01_components.ipynb
 def show(ft,*rest):
+    "Renders FT Components into HTML within a Jupyter notebook."
     if rest: ft = (ft,)+rest
     return display.HTML(to_xml(ft))
 
