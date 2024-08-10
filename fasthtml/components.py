@@ -2,12 +2,12 @@
 
 # %% auto 0
 __all__ = ['named', 'html_attrs', 'hx_attrs', 'show', 'attrmap_x', 'ft_html', 'ft_hx', 'File', 'fill_form', 'fill_dataclass',
-           'find_inputs', 'html2ft', 'A', 'Abbr', 'Address', 'Area', 'Article', 'Aside', 'Audio', 'B', 'Base', 'Bdi',
-           'Bdo', 'Blockquote', 'Body', 'Br', 'Button', 'Canvas', 'Caption', 'Cite', 'Code', 'Col', 'Colgroup', 'Data',
-           'Datalist', 'Dd', 'Del', 'Details', 'Dfn', 'Dialog', 'Div', 'Dl', 'Dt', 'Em', 'Embed', 'Fencedframe',
-           'Fieldset', 'Figcaption', 'Figure', 'Footer', 'Form', 'H1', 'Head', 'Header', 'Hgroup', 'Hr', 'Html', 'I',
-           'Iframe', 'Img', 'Input', 'Ins', 'Kbd', 'Label', 'Legend', 'Li', 'Link', 'Main', 'Map', 'Mark', 'Menu',
-           'Meta', 'Meter', 'Nav', 'Noscript', 'Object', 'Ol', 'Optgroup', 'Option', 'Output', 'P', 'Picture',
+           'find_inputs', 'html2ft', 'to_html', 'A', 'Abbr', 'Address', 'Area', 'Article', 'Aside', 'Audio', 'B',
+           'Base', 'Bdi', 'Bdo', 'Blockquote', 'Body', 'Br', 'Button', 'Canvas', 'Caption', 'Cite', 'Code', 'Col',
+           'Colgroup', 'Data', 'Datalist', 'Dd', 'Del', 'Details', 'Dfn', 'Dialog', 'Div', 'Dl', 'Dt', 'Em', 'Embed',
+           'Fencedframe', 'Fieldset', 'Figcaption', 'Figure', 'Footer', 'Form', 'H1', 'Head', 'Header', 'Hgroup', 'Hr',
+           'Html', 'I', 'Iframe', 'Img', 'Input', 'Ins', 'Kbd', 'Label', 'Legend', 'Li', 'Link', 'Main', 'Map', 'Mark',
+           'Menu', 'Meta', 'Meter', 'Nav', 'Noscript', 'Object', 'Ol', 'Optgroup', 'Option', 'Output', 'P', 'Picture',
            'PortalExperimental', 'Pre', 'Progress', 'Q', 'Rp', 'Rt', 'Ruby', 'S', 'Samp', 'Script', 'Search', 'Section',
            'Select', 'Slot', 'Small', 'Source', 'Span', 'Strong', 'Style', 'Sub', 'Summary', 'Sup', 'Table', 'Tbody',
            'Td', 'Template', 'Textarea', 'Tfoot', 'Th', 'Thead', 'Time', 'Title', 'Tr', 'Track', 'U', 'Ul', 'Var',
@@ -160,3 +160,8 @@ def html2ft(html, attr1st=False):
     soup = BeautifulSoup(html.strip(), 'html.parser')
     for c in soup.find_all(string=risinstance(Comment)): c.extract()
     return _parse(soup, 1)
+
+# %% ../nbs/api/01_components.ipynb
+def to_html(*args, **kwargs):
+    "Converts FT Components to XML. Proxy of fastcore.xml.to_xml"
+    return to_xml(*args, **kwargs)
