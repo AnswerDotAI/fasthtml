@@ -41,7 +41,7 @@ hx_attrs = html_attrs + [f'hx_{o}' for o in hx_attrs.split()]
 _alpine_re = re.compile(r'^x_(\w+)_')
 
 def attrmap_x(o):
-    if o.startswith('_at_'): o = '@'+o[4:]
+    if o.startswith('_at_'): o = '@'+re.sub('_dot_', '.', o[4:])
     o = _alpine_re.sub(r'x-\1:', o, 1)
     return attrmap(o)
 
