@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.3.1
+
+### Bugs Squashed
+
+- Alpine regex not constrained to attr start ([#242](https://github.com/AnswerDotAI/fasthtml/issues/242))
 
 
 ## 0.3.0
