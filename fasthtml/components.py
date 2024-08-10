@@ -38,7 +38,7 @@ hx_attrs = 'get post put delete patch trigger target swap include select indicat
 hx_attrs = html_attrs + [f'hx_{o}' for o in hx_attrs.split()]
 
 # %% ../nbs/api/01_components.ipynb
-_alpine_re = re.compile(r'x_(\w+)_')
+_alpine_re = re.compile(r'^x_(\w+)_')
 
 def attrmap_x(o):
     if o.startswith('_at_'): o = '@'+o[4:]
