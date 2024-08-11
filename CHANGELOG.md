@@ -3,6 +3,14 @@
 <!-- do not remove -->
 
 
+## 0.3.3
+
+### New Features
+
+- Default route name to function name if method provided ([#263](https://github.com/AnswerDotAI/fasthtml/issues/263))
+- `surreal` and `htmx` bool params for `FastHTML` and `fast_app` ([#258](https://github.com/AnswerDotAI/fasthtml/issues/258))
+
+
 ## 0.3.2
 
 ### New Features
