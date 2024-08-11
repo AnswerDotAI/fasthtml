@@ -20,6 +20,7 @@ from bs4 import BeautifulSoup, Comment
 from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
+from .core import fh_cfg
 
 import types
 
@@ -39,17 +40,20 @@ hx_attrs = 'get post put delete patch trigger target swap include select indicat
 hx_attrs = html_attrs + [f'hx_{o}' for o in hx_attrs.split()]
 
 # %% ../nbs/api/01_components.ipynb
-_alpine_re = re.compile(r'^x_(\w+)_')
-
 def attrmap_x(o):
-    if o.startswith('_at_'): o = '@'+re.sub('_dot_', '.', o[4:])
-    o = _alpine_re.sub(r'x-\1:', o, 1)
+    if o.startswith('_at_'): o = '@'+o[4:]
     return attrmap(o)
 
 # %% ../nbs/api/01_components.ipynb
-def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=attrmap, **kwargs):
+fh_cfg['attrmap']=attrmap_x
+fh_cfg['valmap' ]=valmap
+
+# %% ../nbs/api/01_components.ipynb
+def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, **kwargs):
+    if attrmap is None: attrmap=fh_cfg.attrmap
+    if valmap  is None: valmap =fh_cfg.valmap
     kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style
-    tag,c,kw = ft(tag, *c, attrmap=attrmap_x, **kwargs)
+    tag,c,kw = ft(tag, *c, attrmap=attrmap, valmap=valmap, **kwargs)
     if tag in named and 'id' in kw and 'name' not in kw: kw['name'] = kw['id']
     return FT(tag,c,kw, void_=tag in voids)
 
