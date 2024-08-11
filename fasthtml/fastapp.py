@@ -45,8 +45,8 @@ def fast_app(
         lifespan:Optional[callable]=None, # Passed to Starlette
         default_hdrs=True, # Include default FastHTML headers such as HTMX script?
         pico:Optional[bool]=None, # Include PicoCSS header?
-        surreal:Optional[bool]=None, # Include surreal.js/scope headers?
-        htmx:Optional[bool]=None, # Include HTMX header?
+        surreal:Optional[bool]=True, # Include surreal.js/scope headers?
+        htmx:Optional[bool]=True, # Include HTMX header?
         ws_hdr:bool=False, # Include HTMX websocket extension header?
         secret_key:Optional[str]=None, # Signing key for sessions
         key_fname:str='.sesskey', # Session cookie signing key file name
