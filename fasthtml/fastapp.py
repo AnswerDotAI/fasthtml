@@ -15,7 +15,7 @@ def get_tbl(dt, nm, schema):
     if render: dc.__ft__ = render
     return tbl,dc
 
-def app_factory(*args, **kwargs) -> FastHTML | FastHTMLWithLiveReload: 
+def app_factory(*args, **kwargs) -> FastHTML | FastHTMLWithLiveReload:
     """Creates a FastHTML or FastHTMLWithLiveReload app instance.
     The type of app created is determined by the "live" key in kwargs.
 
@@ -45,6 +45,8 @@ def fast_app(
         lifespan:Optional[callable]=None, # Passed to Starlette
         default_hdrs=True, # Include default FastHTML headers such as HTMX script?
         pico:Optional[bool]=None, # Include PicoCSS header?
+        surreal:Optional[bool]=None, # Include surreal.js/scope headers?
+        htmx:Optional[bool]=None, # Include HTMX header?
         ws_hdr:bool=False, # Include HTMX websocket extension header?
         secret_key:Optional[str]=None, # Signing key for sessions
         key_fname:str='.sesskey', # Session cookie signing key file name
@@ -54,8 +56,8 @@ def fast_app(
         same_site:str='lax', # Session cookie same site policy
         sess_https_only:bool=False, # Session cookie HTTPS only?
         sess_domain:Optional[str]=None, # Session cookie domain
-        htmlkw:Optional[dict]=None, 
-        bodykw:Optional[dict]=None,
+        htmlkw:Optional[dict]=None, # Attrs to add to the HTML tag
+        bodykw:Optional[dict]=None, # Attrs to add to the Body tag
         reload_attempts:Optional[int]=1, # Number of reload attempts when live reloading
         reload_interval:Optional[int]=1000, # Time between reload attempts in ms
         **kwargs)->Any:
@@ -65,7 +67,8 @@ def fast_app(
     app = app_factory(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, live=live, debug=debug, routes=routes, exception_handlers=exception_handlers,
                   on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, default_hdrs=default_hdrs, secret_key=secret_key,
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
-                  sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, htmlkw=htmlkw, reload_attempts=reload_attempts, reload_interval=reload_interval, **(bodykw or {}))
+                  sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, surreal=surreal, htmx=htmx, htmlkw=htmlkw,
+                  reload_attempts=reload_attempts, reload_interval=reload_interval, **(bodykw or {}))
 
     @app.route("/{fname:path}.{ext:static}")
     async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')

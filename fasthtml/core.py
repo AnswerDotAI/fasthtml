@@ -383,7 +383,8 @@ class _SessionMiddleware(SessionMiddleware):
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
-                 before=None, after=None, default_hdrs=True, ws_hdr=False,
+                 before=None, after=None, ws_hdr=False,
+                 surreal=True, htmx=True, default_hdrs=True,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
                  htmlkw=None, **bodykw):
@@ -395,8 +396,11 @@ class FastHTML(Starlette):
         middleware.append(sess)
         hdrs,ftrs = listify(hdrs),listify(ftrs)
         htmlkw = htmlkw or {}
-        if default_hdrs: hdrs = [charset, viewport, htmxscr,surrsrc,scopesrc] + hdrs
-        if ws_hdr: hdrs.append(htmxwsscr)
+        if default_hdrs:
+            if surreal: hdrs = [surrsrc,scopesrc] + hdrs
+            if htmx: hdrs = [htmxscr] + hdrs
+            if ws_hdr: hdrs = [htmxwsscr] + hdrs
+            hdrs = [charset, viewport] + hdrs
         excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in (exception_handlers or {}).items()}
         super().__init__(debug, routes, middleware, excs, on_startup, on_shutdown, lifespan=lifespan)
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan,
