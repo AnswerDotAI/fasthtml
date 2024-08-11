@@ -179,7 +179,7 @@ async def _find_p(req, arg:str, p:Parameter):
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
     anno = _fix_anno(anno)
-    try: return [anno(o) for o in res] if isinstance(res,list) else anno(res)
+    try: return anno(res)
     except ValueError: raise HTTPException(404, req.url.path) from None
 
 async def _wrap_req(req, params):

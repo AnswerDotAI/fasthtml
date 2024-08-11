@@ -3,8 +3,8 @@
 # %% auto 0
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'A', 'Form', 'AX', 'Checkbox', 'Card', 'Group',
            'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces',
-           'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Me', 'Any', 'run_js', 'Titled', 'Socials',
-           'Favicon', 'jsd']
+           'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Me', 'Prev', 'Any', 'run_js', 'Titled',
+           'Socials', 'Favicon', 'jsd']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
@@ -184,6 +184,11 @@ def Me(code:str, sel:str=''):
     "An async surreal.js script block on selector `me(sel)`"
     if sel: sel=f'"{sel}"'
     return Script(f'(async (ee = me({sel})) => {{\nlet e = me(ee);\n{code}\n}})()\n')
+
+# %% ../nbs/api/02_xtend.ipynb
+def Prev(code:str):
+    "An async surreal.js script block on selector `me('-')`"
+    return Me(code, '-')
 
 # %% ../nbs/api/02_xtend.ipynb
 def Any(code:str, sel:str):
