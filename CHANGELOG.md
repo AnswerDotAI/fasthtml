@@ -2,11 +2,18 @@
 
 <!-- do not remove -->
 
-## 0.3.1
+## 0.3.2
+
+### New Features
+
+- generic list annotated params double-wrapped ([#253](https://github.com/AnswerDotAI/fasthtml/issues/253))
+- Add `Prev()` ([#253](https://github.com/AnswerDotAI/fasthtml/issues/253))
+- `ft_cfg` config defaults ([#251](https://github.com/AnswerDotAI/fasthtml/issues/251))
+- Make `fill_form` set selected option ([#185](https://github.com/AnswerDotAI/fasthtml/pull/185)), thanks to [@ostwilkens](https://github.com/ostwilkens)
 
 ### Bugs Squashed
 
-- Alpine regex not constrained to attr start ([#242](https://github.com/AnswerDotAI/fasthtml/issues/242))
+- Use re.fullmatch for Beforeware ([#221](https://github.com/AnswerDotAI/fasthtml/pull/221)), thanks to [@justbur](https://github.com/justbur)
 
 
 ## 0.3.0
@@ -18,7 +25,6 @@
 ### New Features
 
 - Add surreal.js helpers `Me`, `Any`, `On` ([#238](https://github.com/AnswerDotAI/fasthtml/issues/238))
-- Alpine support ([#238](https://github.com/AnswerDotAI/fasthtml/issues/238))
 - Add support for application/json in POST requests ([#234](https://github.com/AnswerDotAI/fasthtml/pull/234)), thanks to [@khoaHyh](https://github.com/khoaHyh)
 - Wrap Starlette's session in an AttrDict ([#213](https://github.com/AnswerDotAI/fasthtml/pull/213)), thanks to [@jbellis](https://github.com/jbellis)
 - Handle mismatches between existing db and schema ([#202](https://github.com/AnswerDotAI/fasthtml/pull/202)), thanks to [@ncoop57](https://github.com/ncoop57)
