@@ -19,8 +19,7 @@ def KatexMarkdownJS(sel='.marked', inline_delim='$', display_delim='$$', math_en
 
     src = r"""
     import katex from "https://cdn.jsdelivr.net/npm/katex/dist/katex.mjs";
-    const renderMath = (tex, displayMode) => {
-        return katex.renderToString(tex, {
+    const renderMath = (tex, displayMode) => { return katex.renderToString(tex, {
             throwOnError: false,
             displayMode: displayMode,
             output: 'html',
