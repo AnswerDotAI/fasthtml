@@ -1,3 +1,4 @@
+import re
 from fastcore.utils import *
 from fasthtml.xtend import Script,jsd,Style,Link
 
@@ -12,16 +13,41 @@ def MarkdownJS(sel='.marked'):
     src = "proc_htmx('%s', e => e.innerHTML = marked.parse(e.textContent));" % sel
     return Script(marked_imp+src, type='module')
 
-def KatexMarkdownJS(sel='.marked', katex_tags='$'):
-    right_tags = '\\$' if katex_tags=='$' else '\\]'
+def KatexMarkdownJS(sel='.marked', inline_delim='$', display_delim='$$', math_envs=None):
+    math_envs = math_envs or ['equation', 'align', 'gather', 'multline']
+    env_list = ','.join(f"'{env}'" for env in math_envs)
+
     src = """
     import katex from "https://cdn.jsdelivr.net/npm/katex/dist/katex.mjs";
-    const renderMath = tex => katex.renderToString(tex, {throwOnError: false, displayMode: false});
-
+    const renderMath = (tex, displayMode) => {
+        return katex.renderToString(tex, {
+            throwOnError: false,
+            displayMode: displayMode,
+            output: 'html',
+            trust: true
+        });
+    };
+    const processLatexEnvironments = (content) => {
+        return content.replace(/\\\\begin{(\\w+)}([\\s\\S]*?)\\\\end{\\1}/g, (match, env, innerContent) => {
+            if ([%s].includes(env)) {
+                return `%s${match}%s`;
+            }
+            return match;
+        });
+    };
     proc_htmx('%s', e => {
-    e.innerHTML = marked.parse(e.textContent).replace(/%s{1,2}\\n*(.+?)\\n*%s{1,2}/g, (_, tex) => renderMath(tex));
+        let content = processLatexEnvironments(e.textContent);
+        // Handle display math (including environments)
+        content = content.replace(/%s([\\s\\S]+?)%s/gm, (_, tex) => renderMath(tex.trim(), true));
+        // Handle inline math
+        content = content.replace(/(?<!\\w)%s([^%s\\s](?:[^%s]*[^%s\\s])?)%s(?!\\w)/g, (_, tex) => renderMath(tex.trim(), false));
+        e.innerHTML = marked.parse(content);
     });
-    """ % (sel, "\\"+katex_tags, right_tags)
+    """ % (env_list, re.escape(display_delim), re.escape(display_delim),
+           sel, re.escape(display_delim), re.escape(display_delim),
+           re.escape(inline_delim), re.escape(inline_delim), re.escape(inline_delim),
+           re.escape(inline_delim), re.escape(inline_delim))
+
     return (Script(marked_imp+src, type='module'),
             Link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"))
 
