@@ -3,6 +3,19 @@
 <!-- do not remove -->
 
 
+## 0.3.4
+
+### New Features
+
+- Experimental new named-based HTMX routing system ([#267](https://github.com/AnswerDotAI/fasthtml/issues/267))
+  - `uri` function to constract `url_for` path params
+  - patch `HTTPConnection.url_path_for`
+  - replace HTTP verb FT attr names with `hx-` prefixed versions, and look up values in route names (with `link` used for `href` attrs)
+  - Default route paths to `/{func.__name__}`
+  - Default route method to `post` if func name isn't an http verb
+  - Support skipping `()` in route decorators
+
+
 ## 0.3.3
 
 ### New Features
