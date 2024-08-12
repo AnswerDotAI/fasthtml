@@ -4,11 +4,13 @@
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'A', 'Form', 'AX', 'Checkbox', 'Card', 'Group',
            'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces',
            'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Me', 'Prev', 'Any', 'run_js', 'Titled',
-           'Socials', 'Favicon', 'jsd']
+           'cache_file', 'FStyle', 'Socials', 'Favicon', 'jsd']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
 from typing import Any
+from functools import lru_cache
+import os
 
 from fastcore.utils import *
 from fastcore.xtras import partial_format
@@ -207,6 +209,17 @@ def run_js(js, id=None, **kw):
 def Titled(title:str="FastHTML app", *args, **kwargs)->FT:
     "An HTML partial containing a `Title`, and `H1`, and any provided children"
     return Title(title), Main(H1(title), *args, cls="container", **kwargs)
+
+# %% ../nbs/api/02_xtend.ipynb
+@lru_cache(maxsize=None)
+def cache_file(file_path, last_modified):
+    with open(file_path) as file:
+        content = file.read()
+    return content
+
+def FStyle(file_path):
+    last_modified = os.path.getmtime(file_path)
+    return Style(cache_file(file_path, last_modified))
 
 # %% ../nbs/api/02_xtend.ipynb
 def Socials(title, site_name, description, image, url=None, w=1200, h=630, twitter_site=None, creator=None, card='summary'):
