@@ -17,7 +17,7 @@ def KatexMarkdownJS(sel='.marked', inline_delim='$', display_delim='$$', math_en
     math_envs = math_envs or ['equation', 'align', 'gather', 'multline']
     env_list = ','.join(f"'{env}'" for env in math_envs)
 
-    src = """
+    src = r"""
     import katex from "https://cdn.jsdelivr.net/npm/katex/dist/katex.mjs";
     const renderMath = (tex, displayMode) => {
         return katex.renderToString(tex, {
@@ -28,7 +28,7 @@ def KatexMarkdownJS(sel='.marked', inline_delim='$', display_delim='$$', math_en
         });
     };
     const processLatexEnvironments = (content) => {
-        return content.replace(/\\\\begin{(\\w+)}([\\s\\S]*?)\\\\end{\\1}/g, (match, env, innerContent) => {
+        return content.replace(/\\begin{(\w+)}([\s\S]*?)\\end{\1}/g, (match, env, innerContent) => {
             if ([%s].includes(env)) {
                 return `%s${match}%s`;
             }
@@ -38,9 +38,9 @@ def KatexMarkdownJS(sel='.marked', inline_delim='$', display_delim='$$', math_en
     proc_htmx('%s', e => {
         let content = processLatexEnvironments(e.textContent);
         // Handle display math (including environments)
-        content = content.replace(/%s([\\s\\S]+?)%s/gm, (_, tex) => renderMath(tex.trim(), true));
+        content = content.replace(/%s([\s\S]+?)%s/gm, (_, tex) => renderMath(tex.trim(), true));
         // Handle inline math
-        content = content.replace(/(?<!\\w)%s([^%s\\s](?:[^%s]*[^%s\\s])?)%s(?!\\w)/g, (_, tex) => renderMath(tex.trim(), false));
+        content = content.replace(/(?<!\w)%s([^%s\s](?:[^%s]*[^%s\s])?)%s(?!\w)/g, (_, tex) => renderMath(tex.trim(), false));
         e.innerHTML = marked.parse(content);
     });
     """ % (env_list, re.escape(display_delim), re.escape(display_delim),
