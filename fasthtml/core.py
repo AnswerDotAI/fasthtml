@@ -202,6 +202,10 @@ class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
 
 # %% ../nbs/api/00_core.ipynb
+async def _handle(f, args, **kwargs):
+    return (await f(*args, **kwargs)) if is_async_callable(f) else await run_in_threadpool(f, *args, **kwargs)
+
+# %% ../nbs/api/00_core.ipynb
 def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
     "In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"
     anno = p.annotation
@@ -238,14 +242,13 @@ def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
     
     async def _generic_handler(handler, ws, data=None):
         wd = _wrap_ws(ws, loads(data) if data else {}, _sig(handler).parameters)
-        resp = handler(*wd)
-        if resp:
-            if is_async_callable(handler): resp = await resp
-            await _send_ws(ws, resp)
+        resp = await _handle(handler, wd)
+        if resp: await _send_ws(ws, resp)
 
     async def _connect(self, ws):
         await ws.accept()
         await _generic_handler(conn, ws)
+
     async def _disconnect(self, ws, close_code): await _generic_handler(disconn, ws)
     async def _recv(self, ws, data): await _generic_handler(recv, ws, data)
 
@@ -342,8 +345,7 @@ def _resp(req, resp, cls=empty):
 # %% ../nbs/api/00_core.ipynb
 async def _wrap_call(f, req, params):
     wreq = await _wrap_req(req, params)
-    resp = f(*wreq)
-    return (await resp) if is_async_callable(f) else resp
+    return await _handle(f, wreq)
 
 # %% ../nbs/api/00_core.ipynb
 class RouteX(Route):
@@ -412,8 +414,8 @@ def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) els
 def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
     async def _f(req, exc):
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (hdrs, ftrs, htmlkw, bodykw))
-        res = f(req, exc)
-        return _resp(req, (await res) if is_async_callable(f) else res)
+        res = await _handle(f, (req, exc))
+        return _resp(req, res)
     return _f
 
 # %% ../nbs/api/00_core.ipynb
@@ -451,8 +453,8 @@ class FastHTML(Starlette):
         htmlkw = htmlkw or {}
         if default_hdrs:
             if surreal: hdrs = [surrsrc,scopesrc] + hdrs
-            if htmx: hdrs = [htmxscr] + hdrs
             if ws_hdr: hdrs = [htmxwsscr] + hdrs
+            if htmx: hdrs = [htmxscr] + hdrs
             hdrs = [charset, viewport] + hdrs
         excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in (exception_handlers or {}).items()}
         super().__init__(debug, routes, middleware, excs, on_startup, on_shutdown, lifespan=lifespan)
