@@ -28,9 +28,7 @@ def KatexMarkdownJS(sel='.marked', inline_delim='$', display_delim='$$', math_en
     };
     const processLatexEnvironments = (content) => {
         return content.replace(/\\begin{(\w+)}([\s\S]*?)\\end{\1}/g, (match, env, innerContent) => {
-            if ([%s].includes(env)) {
-                return `%s${match}%s`;
-            }
+            if ([%s].includes(env)) { return `%s${match}%s`; }
             return match;
         });
     };
