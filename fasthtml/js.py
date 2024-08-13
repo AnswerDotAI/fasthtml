@@ -6,6 +6,9 @@ __all__ = ['marked_imp', 'light_media', 'dark_media', 'MarkdownJS', 'KatexMarkdo
 # %% ../nbs/api/03_js.ipynb
 import re
 from fastcore.utils import *
+from fastcore.xml import to_xml
+from fasthtml.components import show
+from fasthtml.ft import Div
 from fasthtml.xtend import Script,jsd,Style,Link
 
 # %% ../nbs/api/03_js.ipynb
