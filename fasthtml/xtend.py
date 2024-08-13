@@ -4,7 +4,7 @@
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'A', 'Form', 'AX', 'Checkbox', 'Card', 'Group',
            'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces',
            'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'AnyOn', 'Prev', 'Me', 'Any', 'run_js',
-           'Titled', 'Socials', 'Favicon', 'jsd']
+           'Titled', 'Socials', 'Favicon', 'jsd', 'clear']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
@@ -250,3 +250,6 @@ def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **k
     s = f'https://cdn.jsdelivr.net/{prov}/{org}/{repo}{ver}/{root}/{path}'
     if esm: s += '/+esm'
     return Script(src=s, **kwargs) if typ=='script' else Link(rel='stylesheet', href=s, **kwargs) if typ=='css' else s
+
+# %% ../nbs/api/02_xtend.ipynb
+def clear(id): return Div(hx_swap_oob='innerHTML', id=id)

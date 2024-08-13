@@ -4,10 +4,10 @@
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxscr', 'htmxwsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths',
            'is_typeddict', 'is_namedtuple', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
            'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'RouteX', 'RouterX', 'get_key',
-           'FastHTML', 'cookie', 'reg_re_param', 'MiddlewareBase']
+           'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
 
 # %% ../nbs/api/00_core.ipynb
-import json,uuid,inspect,types
+import json,uuid,inspect,types,uvicorn
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -310,7 +310,14 @@ def _find_targets(req, resp):
             t = resp.attrs.pop(k, None)
             if t: resp.attrs[v] = _url_for(req, t)
 
+def _apply_ft(o):
+    if isinstance(o, tuple): o = tuple(_apply_ft(c) for c in o)
+    if hasattr(o, '__ft__'): o = o.__ft__()
+    if isinstance(o, FT): o[1] = [_apply_ft(c) for c in o[1]]
+    return o
+
 def _to_xml(req, resp, indent):
+    resp = _apply_ft(resp)
     _find_targets(req, resp)
     return to_xml(resp, indent)
 
@@ -439,16 +446,17 @@ class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
                  before=None, after=None, ws_hdr=False,
-                 surreal=True, htmx=True, default_hdrs=True,
+                 surreal=True, htmx=True, default_hdrs=True, sess_cls=_SessionMiddleware,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
                  htmlkw=None, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
         secret_key = get_key(secret_key, key_fname)
-        sess = Middleware(_SessionMiddleware, secret_key=secret_key,session_cookie=session_cookie,
-                          max_age=max_age, path=sess_path, same_site=same_site,
-                          https_only=sess_https_only, domain=sess_domain)
-        middleware.append(sess)
+        if sess_cls:
+            sess = Middleware(sess_cls, secret_key=secret_key,session_cookie=session_cookie,
+                              max_age=max_age, path=sess_path, same_site=same_site,
+                              https_only=sess_https_only, domain=sess_domain)
+            middleware.append(sess)
         hdrs,ftrs = listify(hdrs),listify(ftrs)
         htmlkw = htmlkw or {}
         if default_hdrs:
@@ -466,6 +474,7 @@ class FastHTML(Starlette):
         pathstr = None if callable(path) else path
         def f(func):
             n,fn,p = name,func.__name__,pathstr
+            assert path or (fn not in _verbs), "Must provide a path when using http verb-based function name"
             if methods: m = [methods] if isinstance(methods,str) else methods
             else: m = [fn] if fn in _verbs else ['get'] if fn=='index' else ['post']
             if not n: n = fn
@@ -483,6 +492,25 @@ class FastHTML(Starlette):
 
 all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
+
+# %% ../nbs/api/00_core.ipynb
+def serve(
+        appname=None, # Name of the module
+        app='app', # App instance to be served
+        host='0.0.0.0', # If host is 0.0.0.0 will convert to localhost
+        port=None, # If port is None it will default to 5001 or the PORT environment variable
+        reload=True): # Default is to reload the app upon code changes
+    "Run the app in an async server, with live reload set as the default."
+    bk = inspect.currentframe().f_back
+    glb = bk.f_globals
+    code = bk.f_code
+    if not appname:
+        if glb.get('__name__')=='__main__': appname = Path(glb.get('__file__', '')).stem
+        elif code.co_name=='main' and bk.f_back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
+    if appname:
+        if not port: port=int(os.getenv("PORT", default=5001))
+        print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
+        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload)
 
 # %% ../nbs/api/00_core.ipynb
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):

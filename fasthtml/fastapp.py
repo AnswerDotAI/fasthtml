@@ -6,11 +6,11 @@ from __future__ import annotations
 import inspect,uvicorn
 from fastcore.utils import *
 from fastlite import *
-from fasthtml import *
-from fasthtml.live_reload import FastHTMLWithLiveReload
+from . import *
+from .live_reload import FastHTMLWithLiveReload
 
 # %% auto 0
-__all__ = ['fast_app', 'serve']
+__all__ = ['fast_app', 'ContainerX', 'PageX']
 
 # %% ../nbs/api/10_fastapp.ipynb
 def _get_tbl(dt, nm, schema):
@@ -90,25 +90,5 @@ def fast_app(
     return app,app.route,*dbtbls
 
 # %% ../nbs/api/10_fastapp.ipynb
-def serve(
-        appname=None, # Name of the module
-        app='app', # App instance to be served
-        host='0.0.0.0', # If host is 0.0.0.0 will convert to localhost
-        port=None, # If port is None it will default to 5001 or the PORT environment variable
-        reload=True): # Default is to reload the app upon code changes
-    "Run the app in an async server, with live reload set as the default."
-    bk = inspect.currentframe().f_back
-    glb = bk.f_globals
-    code = bk.f_code
-    if not appname:
-        if glb.get('__name__')=='__main__': appname = Path(glb.get('__file__', '')).stem
-        elif code.co_name=='main' and bk.f_back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
-    if appname:
-        if not port: port=int(os.getenv("PORT", default=5001))
-        print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
-        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload)
-
-# %% ../nbs/api/10_fastapp.ipynb
-def clear(id): return Div(hx_swap_oob='innerHTML', id=id)
 def ContainerX(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
-def Page(title, *con): return Title(title), ContainerX(H1(title), *con)
+def PageX(title, *con): return Title(title), ContainerX(H1(title), *con)
