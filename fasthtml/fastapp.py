@@ -99,9 +99,9 @@ def fast_app(
 def serve(
         appname=None, # Name of the module
         app='app', # App instance to be served
-        host='0.0.0.0', # Host
-        port=None, # Port
-        reload=True): # Reload
+        host='0.0.0.0', # If host is 0.0.0.0 will convert to localhost
+        port=None, # If port is None it will default to 5001 or the PORT environment variable
+        reload=True): # Default is to reload the app upon code changes
     "Run the app in an async server, with live reload set as the default."
     bk = inspect.currentframe().f_back
     glb = bk.f_globals
