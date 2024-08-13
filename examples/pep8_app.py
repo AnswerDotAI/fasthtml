@@ -1,5 +1,5 @@
 ###
-# Walkthough of an idiomatic fasthtml app, made PEP-8 et al friendly
+# Walkthrough of an idiomatic fasthtml app, made PEP-8 et al friendly
 ###
 
 # This fasthtml app includes functionality from fastcore, starlette, fastlite, and fasthtml itself.

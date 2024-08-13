@@ -8,7 +8,7 @@
 ### New Features
 
 - Experimental new named-based HTMX routing system ([#267](https://github.com/AnswerDotAI/fasthtml/issues/267))
-  - `uri` function to constract `url_for` path params
+  - `uri` function to construct `url_for` path params
   - patch `HTTPConnection.url_path_for`
   - replace HTTP verb FT attr names with `hx-` prefixed versions, and look up values in route names (with `link` used for `href` attrs)
   - Default route paths to `/{func.__name__}`
@@ -119,7 +119,7 @@
 
 ### New Features
 
-- Skip redundent formatting in `loose_format` ([#79](https://github.com/AnswerDotAI/fasthtml/issues/79))
+- Skip redundant formatting in `loose_format` ([#79](https://github.com/AnswerDotAI/fasthtml/issues/79))
 - Add `htmlkw` param to `FastHTML` ([#78](https://github.com/AnswerDotAI/fasthtml/issues/78))
 
 

@@ -1,5 +1,5 @@
 ###
-# Walkthough of an idiomatic fasthtml app
+# Walkthrough of an idiomatic fasthtml app
 ###
 
 # This fasthtml app includes functionality from fastcore, starlette, fastlite, and fasthtml itself.
