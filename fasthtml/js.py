@@ -6,10 +6,13 @@ __all__ = ['marked_imp', 'light_media', 'dark_media', 'MarkdownJS', 'KatexMarkdo
 # %% ../nbs/api/03_js.ipynb
 import re
 from fastcore.utils import *
+from fastcore.xml import to_xml
 from fasthtml.xtend import Script,jsd,Style,Link
 
 # %% ../nbs/api/03_js.ipynb
-def light_media(css): return Style('@media (prefers-color-scheme: light) {%s}' %css)
+def light_media(css):
+    "Render light media for day mode views"
+    return Style('@media (prefers-color-scheme: light) {%s}' %css)
 
 # %% ../nbs/api/03_js.ipynb
 def  dark_media(css): return Style('@media (prefers-color-scheme:  dark) {%s}' %css)
