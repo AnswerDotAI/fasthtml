@@ -1,5 +1,5 @@
 # Run with: uvicorn first_app:app --reload
-from fasthtml.fastapp import *
+from fasthtml.common import *
 
 app,rt,todos,Todo = fast_app('data/todos.db', id=int, title=str, done=bool, pk='id')
 
