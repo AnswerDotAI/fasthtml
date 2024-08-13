@@ -42,7 +42,7 @@ def fast_app(
         render:Optional[callable]=None, # Function used to render default database class
         hdrs:Optional[tuple]=None, # Additional FT elements to add to <HEAD>
         ftrs:Optional[tuple]=None, # Additional FT elements to add to end of <BODY>
-        tbls:Optional[dict]=None, # Mapping from DB table names to dict table definitions
+        tbls:Optional[dict]=None, # Experimental mapping from DB table names to dict table definitions
         before:Optional[tuple]|Beforeware=None, # Functions to call prior to calling handler
         middleware:Optional[tuple]=None, # Standard Starlette middleware
         live:bool=False, # Enable live reloading
