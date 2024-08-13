@@ -3,8 +3,8 @@
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxscr', 'htmxwsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths',
            'is_typeddict', 'is_namedtuple', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
-           'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'cookie',
-           'reg_re_param', 'MiddlewareBase']
+           'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'RouteX', 'RouterX', 'get_key',
+           'FastHTML', 'cookie', 'reg_re_param', 'MiddlewareBase']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types
@@ -20,9 +20,11 @@ from collections import namedtuple
 from inspect import isfunction,ismethod,Parameter,get_annotations
 from functools import wraps, partialmethod
 from http import cookies
+from urllib.parse import urlencode, parse_qs, quote, unquote
 from copy import copy,deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
+from starlette.requests import HTTPConnection
 
 from .starlette import *
 
@@ -103,7 +105,7 @@ def _fix_anno(t):
 def _form_arg(k, v, d):
     "Get type by accessing key `k` from `d`, and use to cast `v`"
     if v is None: return
-    if not isinstance(v, str): return v
+    if not isinstance(v, (str,list,tuple)): return v
     # This is the type we want to cast `v` to
     anno = d.get(k, None)
     if not anno: return v
@@ -200,6 +202,10 @@ class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
 
 # %% ../nbs/api/00_core.ipynb
+async def _handle(f, args, **kwargs):
+    return (await f(*args, **kwargs)) if is_async_callable(f) else await run_in_threadpool(f, *args, **kwargs)
+
+# %% ../nbs/api/00_core.ipynb
 def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
     "In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"
     anno = p.annotation
@@ -236,14 +242,13 @@ def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
     
     async def _generic_handler(handler, ws, data=None):
         wd = _wrap_ws(ws, loads(data) if data else {}, _sig(handler).parameters)
-        resp = handler(*wd)
-        if resp:
-            if is_async_callable(handler): resp = await resp
-            await _send_ws(ws, resp)
+        resp = await _handle(handler, wd)
+        if resp: await _send_ws(ws, resp)
 
     async def _connect(self, ws):
         await ws.accept()
         await _generic_handler(conn, ws)
+
     async def _disconnect(self, ws, close_code): await _generic_handler(disconn, ws)
     async def _recv(self, ws, data): await _generic_handler(recv, ws, data)
 
@@ -259,6 +264,57 @@ class WS_RouteX(WebSocketRoute):
         super().__init__(path, _ws_endp(recv, conn, disconn, hdrs, before), name=name, middleware=middleware)
 
 # %% ../nbs/api/00_core.ipynb
+def uri(_arg, **kwargs):
+    return f"{quote(_arg)}/{urlencode(kwargs, doseq=True)}"
+
+# %% ../nbs/api/00_core.ipynb
+def decode_uri(s): 
+    arg,_,kw = s.partition('/')
+    return unquote(arg), {k:v[0] for k,v in parse_qs(kw).items()}
+
+# %% ../nbs/api/00_core.ipynb
+from starlette.convertors import StringConvertor
+
+# %% ../nbs/api/00_core.ipynb
+StringConvertor.regex = "[^/]*"  # `+` replaced with `*`
+
+@patch
+def to_string(self:StringConvertor, value: str) -> str:
+    value = str(value)
+    assert "/" not in value, "May not contain path separators"
+    # assert value, "Must not be empty"  # line removed due to errors
+    return value
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def url_path_for(self:HTTPConnection, name: str, **path_params):
+    router: Router = self.scope["router"]
+    return router.url_path_for(name, **path_params)
+
+# %% ../nbs/api/00_core.ipynb
+_verbs = dict(get='hx-get', post='hx-post', put='hx-post', delete='hx-delete', patch='hx-patch', link='href')
+
+def _url_for(req, t):
+    if callable(t): t = t.__routename__
+    kw = {}
+    if t.find('/')>-1 and (t.find('?')<0 or t.find('/')<t.find('?')): t,kw = decode_uri(t)
+    t,m,q = t.partition('?')    
+    return f"{req.url_path_for(t, **kw)}{m}{q}"
+
+def _find_targets(req, resp):
+    if isinstance(resp, tuple):
+        for o in resp: _find_targets(req, o)
+    if isinstance(resp, FT):
+        for o in resp.children: _find_targets(req, o)
+        for k,v in _verbs.items():
+            t = resp.attrs.pop(k, None)
+            if t: resp.attrs[v] = _url_for(req, t)
+
+def _to_xml(req, resp, indent):
+    _find_targets(req, resp)
+    return to_xml(resp, indent)
+
+# %% ../nbs/api/00_core.ipynb
 def _xt_resp(req, resp):
     if not isinstance(resp, tuple): resp = (resp,)
     resp = resp + tuple(getattr(req, 'injects', ()))
@@ -269,7 +325,7 @@ def _xt_resp(req, resp):
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
         if not titles: titles = [Title('FastHTML page')]
         resp = Html(Head(*titles, *flat_xt(req.hdrs)), Body(bdy, *flat_xt(req.ftrs), **req.bodykw), **req.htmlkw)
-    return HTMLResponse(to_xml(resp, indent=fh_cfg.indent), headers=http_hdrs)
+    return HTMLResponse(_to_xml(req, resp, indent=fh_cfg.indent), headers=http_hdrs)
 
 # %% ../nbs/api/00_core.ipynb
 def _resp(req, resp, cls=empty):
@@ -289,8 +345,7 @@ def _resp(req, resp, cls=empty):
 # %% ../nbs/api/00_core.ipynb
 async def _wrap_call(f, req, params):
     wreq = await _wrap_req(req, params)
-    resp = f(*wreq)
-    return (await resp) if is_async_callable(f) else resp
+    return await _handle(f, wreq)
 
 # %% ../nbs/api/00_core.ipynb
 class RouteX(Route):
@@ -338,7 +393,7 @@ class RouterX(Router):
 # %% ../nbs/api/00_core.ipynb
 htmxscr   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
 htmxwsscr = Script(src="https://unpkg.com/htmx-ext-ws/ws.js")
-surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@1.3.0/surreal.js")
+surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
 viewport  = Meta(name="viewport", content="width=device-width, initial-scale=1, viewport-fit=cover")
 charset   = Meta(charset="utf-8")
@@ -359,8 +414,8 @@ def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) els
 def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
     async def _f(req, exc):
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (hdrs, ftrs, htmlkw, bodykw))
-        res = f(req, exc)
-        return _resp(req, (await res) if is_async_callable(f) else res)
+        res = await _handle(f, (req, exc))
+        return _resp(req, res)
     return _f
 
 # %% ../nbs/api/00_core.ipynb
@@ -398,21 +453,27 @@ class FastHTML(Starlette):
         htmlkw = htmlkw or {}
         if default_hdrs:
             if surreal: hdrs = [surrsrc,scopesrc] + hdrs
-            if htmx: hdrs = [htmxscr] + hdrs
             if ws_hdr: hdrs = [htmxwsscr] + hdrs
+            if htmx: hdrs = [htmxscr] + hdrs
             hdrs = [charset, viewport] + hdrs
         excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in (exception_handlers or {}).items()}
         super().__init__(debug, routes, middleware, excs, on_startup, on_shutdown, lifespan=lifespan)
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan,
                               hdrs=hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw, **bodykw)
 
-    def route(self, path:str, methods=None, name=None, include_in_schema=True):
+    def route(self, path:str=None, methods=None, name=None, include_in_schema=True):
         "Add a route at `path`; the function name is the default method"
+        pathstr = None if callable(path) else path
         def f(func):
-            m = [methods] if isinstance(methods,str) else [func.__name__] if not methods else methods
-            self.router.add_route(path, func, methods=m, name=name, include_in_schema=include_in_schema)
+            n,fn,p = name,func.__name__,pathstr
+            if methods: m = [methods] if isinstance(methods,str) else methods
+            else: m = [fn] if fn in _verbs else ['get'] if fn=='index' else ['post']
+            if not n: n = fn
+            if not p: p = '/'+('' if fn=='index' else fn)
+            self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema)
+            func.__routename__ = n
             return func
-        return f
+        return f(path) if callable(path) else f
 
     def ws(self, path:str, conn=None, disconn=None, name=None):
         def f(func):

@@ -25,3 +25,4 @@ async def ws(msg:str, send):
     return Div('Goodbye ' + msg, id=nid), mk_inp()
 
 serve()
+

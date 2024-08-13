@@ -3,8 +3,8 @@
 # %% auto 0
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'A', 'Form', 'AX', 'Checkbox', 'Card', 'Group',
            'Search', 'Grid', 'DialogX', 'Hidden', 'Container', 'Script', 'Style', 'double_braces', 'undouble_braces',
-           'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Me', 'Prev', 'Any', 'run_js', 'Titled',
-           'Socials', 'Favicon', 'jsd']
+           'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'AnyOn', 'Prev', 'Me', 'Any', 'run_js',
+           'Titled', 'Socials', 'Favicon', 'jsd']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
@@ -174,10 +174,21 @@ def StyleX(fname, **kw):
     return Style(replace_css_vars(s, **kw), **sty_kw)
 
 # %% ../nbs/api/02_xtend.ipynb
-def On(code:str, event:str='click', sel:str=''):
+def On(code:str, event:str='click', sel:str='', me=True):
     "An async surreal.js script block event handler for `event` on selector `sel`"
+    func = 'me' if me else 'any'
     if sel: sel=f'"{sel}"'
-    return Script(f'me({sel}).on("{event}", async ev=>{{\nlet e = me(ev);\n{code}\n}});\n')
+    return Script(f'{func}({sel}).on("{event}", async ev=>{{\nlet e = me(ev);\n{code}\n}});\n')
+
+# %% ../nbs/api/02_xtend.ipynb
+def AnyOn(sel:str, code:str, event:str='click'):
+    "An `any` async surreal.js script block event handler for `event` on selector `sel`"
+    return On(code, event, sel=sel, me=False)
+
+# %% ../nbs/api/02_xtend.ipynb
+def Prev(code:str, event:str='click'):
+    "An async surreal.js script block event handler for `event` on previous sibling"
+    return On(code, event=event, sel='-')
 
 # %% ../nbs/api/02_xtend.ipynb
 def Me(code:str, sel:str=''):
@@ -186,12 +197,7 @@ def Me(code:str, sel:str=''):
     return Script(f'(async (ee = me({sel})) => {{\nlet e = me(ee);\n{code}\n}})()\n')
 
 # %% ../nbs/api/02_xtend.ipynb
-def Prev(code:str):
-    "An async surreal.js script block on selector `me('-')`"
-    return Me(code, '-')
-
-# %% ../nbs/api/02_xtend.ipynb
-def Any(code:str, sel:str):
+def Any(sel:str, code:str):
     "An async surreal.js script block on selector `any(sel)`"
     return Script(f'(async (e = any("{sel}")) => {{\n{code}\n}})()\n')
 
