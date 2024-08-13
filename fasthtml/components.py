@@ -22,7 +22,7 @@ from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
 from .core import fh_cfg
 
-import types
+import types, json
 
 try: from IPython import display
 except ImportError: display=None
@@ -59,7 +59,8 @@ def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=Non
 
 # %% ../nbs/api/01_components.ipynb
 @use_kwargs(hx_attrs, keep=True)
-def ft_hx(tag: str, *c, target_id=None, **kwargs):
+def ft_hx(tag: str, *c, target_id=None, hx_vals=None, **kwargs):
+    if hx_vals: kwargs['hx_vals'] = json.dumps(hx_vals) if isinstance (hx_vals,dict) else hx_vals
     if target_id: kwargs['hx_target'] = '#'+target_id
     return ft_html(tag, *c, **kwargs)
 
