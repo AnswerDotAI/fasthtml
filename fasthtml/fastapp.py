@@ -13,7 +13,7 @@ from fasthtml.live_reload import FastHTMLWithLiveReload
 __all__ = ['fast_app', 'serve']
 
 # %% ../nbs/api/10_fastapp.ipynb
-def get_tbl(dt, nm, schema):
+def _get_tbl(dt, nm, schema):
     render = schema.pop('render', None)
     tbl = dt[nm]
     if tbl not in dt: tbl.create(**schema)
@@ -23,15 +23,9 @@ def get_tbl(dt, nm, schema):
     return tbl,dc
 
 # %% ../nbs/api/10_fastapp.ipynb
-def app_factory(*args, **kwargs) -> FastHTML | FastHTMLWithLiveReload:
-    """Creates a FastHTML or FastHTMLWithLiveReload app instance.
-    The type of app created is determined by the "live" key in kwargs.
-
-    Returns:
-        FastHTML | FastHTMLWithLiveReload: The app instance.
-    """
-    if kwargs.pop('live', False):
-        return FastHTMLWithLiveReload(*args, **kwargs)
+def _app_factory(*args, **kwargs) -> FastHTML | FastHTMLWithLiveReload:
+    "Creates a FastHTML or FastHTMLWithLiveReload app instance"
+    if kwargs.pop('live', False): return FastHTMLWithLiveReload(*args, **kwargs)
     kwargs.pop('reload_attempts', None)
     kwargs.pop('reload_interval', None)
     return FastHTML(*args, **kwargs)
@@ -74,7 +68,7 @@ def fast_app(
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
 
-    app = app_factory(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, live=live, debug=debug, routes=routes, exception_handlers=exception_handlers,
+    app = _app_factory(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, live=live, debug=debug, routes=routes, exception_handlers=exception_handlers,
                   on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, default_hdrs=default_hdrs, secret_key=secret_key,
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
                   sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, surreal=surreal, htmx=htmx, htmlkw=htmlkw,
@@ -91,7 +85,7 @@ def fast_app(
         else:
             kwargs['render'] = render
             tbls['items'] = kwargs
-    dbtbls = [get_tbl(db.t, k, v) for k,v in tbls.items()]
+    dbtbls = [_get_tbl(db.t, k, v) for k,v in tbls.items()]
     if len(dbtbls)==1: dbtbls=dbtbls[0]
     return app,app.route,*dbtbls
 

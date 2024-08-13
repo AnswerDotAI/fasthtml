@@ -393,7 +393,7 @@ class RouterX(Router):
 # %% ../nbs/api/00_core.ipynb
 htmxscr   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
 htmxwsscr = Script(src="https://unpkg.com/htmx-ext-ws/ws.js")
-surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@1.3.0/surreal.js")
+surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
 viewport  = Meta(name="viewport", content="width=device-width, initial-scale=1, viewport-fit=cover")
 charset   = Meta(charset="utf-8")
@@ -467,9 +467,9 @@ class FastHTML(Starlette):
         def f(func):
             n,fn,p = name,func.__name__,pathstr
             if methods: m = [methods] if isinstance(methods,str) else methods
-            else: m = [fn] if fn in _verbs else ['post']
+            else: m = [fn] if fn in _verbs else ['get'] if fn=='index' else ['post']
             if not n: n = fn
-            if not p: p = '/'+fn
+            if not p: p = '/'+('' if fn=='index' else fn)
             self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema)
             func.__routename__ = n
             return func
