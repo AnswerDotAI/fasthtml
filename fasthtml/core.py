@@ -386,11 +386,11 @@ class RouterX(Router):
                  lifespan=None, *, middleware=None, hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
         super().__init__(routes, redirect_slashes, default, on_startup, on_shutdown,
                  lifespan=lifespan, middleware=middleware)
-        self.hdrs,self.ftrs,self.bodykw,self.htmlkw,self.before,self.after = hdrs,ftrs,bodykw,htmlkw or {},before,after
+        self.hdrs,self.ftrs,self.bodykw,self.htmlkw,self.before,self.after = hdrs,ftrs,bodykw,htmlkw or {},before or [],after
 
-    def add_route( self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
+    def add_route(self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True, before=None):
         route = RouteX(path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema,
-                       hdrs=self.hdrs, ftrs=self.ftrs, before=self.before, after=self.after, htmlkw=self.htmlkw, **self.bodykw)
+                       hdrs=self.hdrs, ftrs=self.ftrs, before=self.before + (before or []), after=self.after, htmlkw=self.htmlkw, **self.bodykw)
         self.routes.append(route)
 
     def add_ws( self, path: str, recv: callable, conn:callable=None, disconn:callable=None, name=None):
@@ -469,7 +469,7 @@ class FastHTML(Starlette):
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan,
                               hdrs=hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw, **bodykw)
 
-    def route(self, path:str=None, methods=None, name=None, include_in_schema=True):
+    def route(self, path:str=None, methods=None, name=None, include_in_schema=True, before=None):
         "Add a route at `path`; the function name is the default method"
         pathstr = None if callable(path) else path
         def f(func):
@@ -479,7 +479,7 @@ class FastHTML(Starlette):
             else: m = [fn] if fn in _verbs else ['get'] if fn=='index' else ['post']
             if not n: n = fn
             if not p: p = '/'+('' if fn=='index' else fn)
-            self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema)
+            self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema, before=before)
             func.__routename__ = n
             return func
         return f(path) if callable(path) else f
