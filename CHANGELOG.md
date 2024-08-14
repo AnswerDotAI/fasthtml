@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+
+## 0.3.6
+
+### Bugs Squashed
+
+- postrelease fix markdown js ([#290](https://github.com/AnswerDotAI/fasthtml/issues/290))
+
+
 ## 0.3.5
 
 ### New Features
