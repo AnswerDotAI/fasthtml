@@ -499,7 +499,10 @@ def serve(
         app='app', # App instance to be served
         host='0.0.0.0', # If host is 0.0.0.0 will convert to localhost
         port=None, # If port is None it will default to 5001 or the PORT environment variable
-        reload=True): # Default is to reload the app upon code changes
+        reload=True, # Default is to reload the app upon code changes
+        reload_includes:list[str]|str|None=None, # Additional files to watch for changes
+        reload_excludes:list[str]|str|None=None # Files to ignore for changes
+        ): 
     "Run the app in an async server, with live reload set as the default."
     bk = inspect.currentframe().f_back
     glb = bk.f_globals
@@ -510,7 +513,7 @@ def serve(
     if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
         print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
-        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload)
+        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload, reload_includes=reload_includes, reload_excludes=reload_excludes)
 
 # %% ../nbs/api/00_core.ipynb
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):
