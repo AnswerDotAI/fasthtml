@@ -2,6 +2,20 @@
 
 <!-- do not remove -->
 
+## 0.3.5
+
+### New Features
+
+- Support `dict` value in `hx_vals` ([#288](https://github.com/AnswerDotAI/fasthtml/issues/288))
+- Add `sess_cls` param to `FastHTML` ([#284](https://github.com/AnswerDotAI/fasthtml/issues/284))
+- Make `index` a special handler name for path "/" get request ([#274](https://github.com/AnswerDotAI/fasthtml/issues/274))
+- Use `run_in_threadpool` for non-async handlers ([#270](https://github.com/AnswerDotAI/fasthtml/issues/270))
+- Enhance LaTeX rendering in Markdown with support for environments ([#269](https://github.com/AnswerDotAI/fasthtml/pull/269)), thanks to [@rian-dolphin](https://github.com/rian-dolphin)
+
+### Bugs Squashed
+
+- Duplicate parameters in components.pyi ([#255](https://github.com/AnswerDotAI/fasthtml/issues/255))
+
 
 ## 0.3.4
 
