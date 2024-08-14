@@ -2,6 +2,16 @@
 
 <!-- do not remove -->
 
+## 0.3.7
+
+### New Features
+
+- Add `reload_includes` and `reload_excludes` options to serve ([#291](https://github.com/AnswerDotAI/fasthtml/pull/291)), thanks to [@pydanny](https://github.com/pydanny)
+
+### Bugs Squashed
+
+- katex.js missing ([#305](https://github.com/AnswerDotAI/fasthtml/issues/305))
+
 
 ## 0.3.6
 
