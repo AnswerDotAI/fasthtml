@@ -1,4 +1,4 @@
-__version__ = "0.3.7"
+__version__ = "0.3.8"
 from .core import *
 from .authmw import *
 from .components import *
