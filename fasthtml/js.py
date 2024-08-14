@@ -79,7 +79,7 @@ htmx.onLoad(hljs.highlightAll);""" % sel
 # %% ../nbs/api/03_js.ipynb
 def SortableJS(
         sel='.sortable',  # CSS selector for sortable elements
-        ghost_class='blue-background-class'  # When an element is being dragged, this is the class used to distingish it from the rest
+        ghost_class='blue-background-class'  # When an element is being dragged, this is the class used to distinguish it from the rest
     ):
     src = """
 import {Sortable} from 'https://cdn.jsdelivr.net/npm/sortablejs/+esm';
