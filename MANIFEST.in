@@ -1,5 +1,5 @@
-include *.pyi
-include *.js
+include fasthtml/*.pyi
+include fasthtml/*.js
 include settings.ini
 include LICENSE
 include CONTRIBUTING.md
