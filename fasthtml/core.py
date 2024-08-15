@@ -415,27 +415,11 @@ def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
     return _f
 
 # %% ../nbs/api/00_core.ipynb
-class _SessionMiddleware(SessionMiddleware):
-    "Same as Starlette's `SessionMiddleware`, but wraps `session` in an AttrDict"
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] not in ("http", "websocket"):
-            await self.app(scope, receive, send)
-            return
-
-        async def receive_wrapper():
-            message = await receive()
-            if "session" in scope and not isinstance(scope["session"], AttrDict):
-                scope["session"] = AttrDict(scope["session"])
-            return message
-
-        await super().__call__(scope, receive_wrapper, send)
-
-# %% ../nbs/api/00_core.ipynb
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
                  before=None, after=None, ws_hdr=False,
-                 surreal=True, htmx=True, default_hdrs=True, sess_cls=_SessionMiddleware,
+                 surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
                  htmlkw=None, **bodykw):
