@@ -189,11 +189,11 @@ async def _wrap_req(req, params):
 
 # %% ../nbs/api/00_core.ipynb
 def flat_xt(lst):
-    "Flatten lists, except for `FT`s"
+    "Flatten lists"
     result = []
     if isinstance(lst,(FT,str)): lst=[lst]
     for item in lst:
-        if isinstance(item, (list,tuple)) and not isinstance(item, FT): result.extend(item)
+        if isinstance(item, (list,tuple)): result.extend(item)
         else: result.append(item)
     return result
 
@@ -234,7 +234,7 @@ def _wrap_ws(ws, data, params):
 # %% ../nbs/api/00_core.ipynb
 async def _send_ws(ws, resp):
     if not resp: return
-    res = to_xml(resp, indent=fh_cfg.indent) if isinstance(resp, (list,tuple)) or hasattr(resp, '__ft__') else resp
+    res = to_xml(resp, indent=fh_cfg.indent) if isinstance(resp, (list,tuple,FT)) or hasattr(resp, '__ft__') else resp
     await ws.send_text(res)
 
 def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
@@ -313,7 +313,7 @@ def _find_targets(req, resp):
 def _apply_ft(o):
     if isinstance(o, tuple): o = tuple(_apply_ft(c) for c in o)
     if hasattr(o, '__ft__'): o = o.__ft__()
-    if isinstance(o, FT): o[1] = [_apply_ft(c) for c in o[1]]
+    if isinstance(o, FT): o.children = [_apply_ft(c) for c in o.children]
     return o
 
 def _to_xml(req, resp, indent):
@@ -341,7 +341,7 @@ def _resp(req, resp, cls=empty):
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
-    if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__ft__'): return _xt_resp(req, resp)
+    if isinstance(resp, (list,tuple,HttpHeader,FT)) or hasattr(resp, '__ft__'): return _xt_resp(req, resp)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:

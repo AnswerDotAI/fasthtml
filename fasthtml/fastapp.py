@@ -6,7 +6,8 @@ from __future__ import annotations
 import inspect,uvicorn
 from fastcore.utils import *
 from fastlite import *
-from . import *
+from .basics import *
+from .starlette import *
 from .live_reload import FastHTMLWithLiveReload
 
 # %% auto 0

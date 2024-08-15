@@ -1,5 +1,5 @@
 from starlette.routing import WebSocketRoute
-from fasthtml import FastHTML, Script
+from fasthtml.basics import FastHTML, Script
 
 __all__ = ["FastHTMLWithLiveReload"]
 

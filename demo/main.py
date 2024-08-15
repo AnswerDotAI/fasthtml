@@ -12,8 +12,12 @@ app,rt,todos,Todo = fast_app(
 
 @rt("/")
 async def get(request):
-    new_frm = Form(Group(Input(name='title', placeholder='Title'),
-                         Button('Add')), hx_post='/', target_id='todo-list', hx_swap='beforeend')
+    new_frm = Form(hx_post='/', target_id='todo-list', hx_swap='beforeend')(
+        Group(
+            Input(name='title', placeholder='Title'),
+            Button('Add')
+        )
+    )
     items = Ul(*todos(), id='todo-list')
     logout = A('logout', href=basic_logout(request))
     return Titled('Todo list', new_frm, items, logout)
@@ -25,4 +29,3 @@ async def post(todo:Todo): return todos.insert(todo)
 async def delete(id:int): todos.delete(id)
 
 serve()
-
