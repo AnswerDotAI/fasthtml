@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+
+## 0.4.1
+
+### Bugs Squashed
+
+- post release fix for `fill_form` ([#309](https://github.com/AnswerDotAI/fasthtml/issues/309))
+
+
 ## 0.4.0
 
 ### Breaking changes
