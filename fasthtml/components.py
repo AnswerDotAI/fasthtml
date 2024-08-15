@@ -85,7 +85,7 @@ def File(fname):
 
 # %% ../nbs/api/01_components.ipynb
 def _fill_item(item, obj):
-    if not isinstance(item,list): return item
+    if not isinstance(item,FT): return item
     tag,cs,attr = item.list
     if isinstance(cs,tuple): cs = tuple(_fill_item(o, obj) for o in cs)
     name = attr.get('name', None)

@@ -18,7 +18,7 @@ from datetime import datetime
 from dataclasses import dataclass,fields,is_dataclass,MISSING,asdict
 from collections import namedtuple
 from inspect import isfunction,ismethod,Parameter,get_annotations
-from functools import wraps, partialmethod
+from functools import wraps, partialmethod, update_wrapper
 from http import cookies
 from urllib.parse import urlencode, parse_qs, quote, unquote
 from copy import copy,deepcopy
@@ -469,26 +469,37 @@ class FastHTML(Starlette):
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan,
                               hdrs=hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw, **bodykw)
 
-    def route(self, path:str=None, methods=None, name=None, include_in_schema=True):
-        "Add a route at `path`; the function name is the default method"
-        pathstr = None if callable(path) else path
-        def f(func):
-            n,fn,p = name,func.__name__,pathstr
-            assert path or (fn not in _verbs), "Must provide a path when using http verb-based function name"
-            if methods: m = [methods] if isinstance(methods,str) else methods
-            else: m = [fn] if fn in _verbs else ['get'] if fn=='index' else ['post']
-            if not n: n = fn
-            if not p: p = '/'+('' if fn=='index' else fn)
-            self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema)
-            func.__routename__ = n
-            return func
-        return f(path) if callable(path) else f
-
     def ws(self, path:str, conn=None, disconn=None, name=None):
         def f(func):
             self.router.add_ws(path, func, conn=conn, disconn=disconn, name=name)
             return func
         return f
+
+# %% ../nbs/api/00_core.ipynb
+def _mk_locfunc(f,p):
+    class _lf:
+        def __init__(self): update_wrapper(self, f)
+        def __call__(self, **kw): return p + (f'?{urlencode(kw)}' if kw else '')
+        def __str__(self): return p
+    return _lf()
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True):
+    "Add a route at `path`; the function name is the default method"
+    pathstr = None if callable(path) else path
+    def f(func):
+        n,fn,p = name,func.__name__,pathstr
+        assert path or (fn not in _verbs), "Must provide a path when using http verb-based function name"
+        if methods: m = [methods] if isinstance(methods,str) else methods
+        else: m = [fn] if fn in _verbs else ['get'] if fn=='index' else ['post']
+        if not n: n = fn
+        if not p: p = '/'+('' if fn=='index' else fn)
+        self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema)
+        lf = _mk_locfunc(func, p)
+        lf.__routename__ = n
+        return lf
+    return f(path) if callable(path) else f
 
 all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
