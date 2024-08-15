@@ -2,6 +2,15 @@
 
 <!-- do not remove -->
 
+
+
+## 0.3.8
+
+### New Features
+
+- Fastcore 1.7 compatibility ([#307](https://github.com/AnswerDotAI/fasthtml/issues/307))
+
+
 ## 0.3.7
 
 ### New Features
