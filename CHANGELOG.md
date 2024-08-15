@@ -2,13 +2,16 @@
 
 <!-- do not remove -->
 
+## 0.4.0
 
+### Breaking changes
 
-## 0.3.8
+- `__init.py__` now only contains `fasthtml.core`
 
 ### New Features
 
 - Fastcore 1.7 compatibility ([#307](https://github.com/AnswerDotAI/fasthtml/issues/307))
+- Add `fasthtml.basics` for importing the main fasthtml modules
 
 
 ## 0.3.7
