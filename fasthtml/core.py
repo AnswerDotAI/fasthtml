@@ -18,7 +18,7 @@ from datetime import datetime
 from dataclasses import dataclass,fields,is_dataclass,MISSING,asdict
 from collections import namedtuple
 from inspect import isfunction,ismethod,Parameter,get_annotations
-from functools import wraps, partialmethod
+from functools import wraps, partialmethod, update_wrapper
 from http import cookies
 from urllib.parse import urlencode, parse_qs, quote, unquote
 from copy import copy,deepcopy
@@ -189,11 +189,11 @@ async def _wrap_req(req, params):
 
 # %% ../nbs/api/00_core.ipynb
 def flat_xt(lst):
-    "Flatten lists, except for `FT`s"
+    "Flatten lists"
     result = []
     if isinstance(lst,(FT,str)): lst=[lst]
     for item in lst:
-        if isinstance(item, (list,tuple)) and not isinstance(item, FT): result.extend(item)
+        if isinstance(item, (list,tuple)): result.extend(item)
         else: result.append(item)
     return result
 
@@ -234,7 +234,7 @@ def _wrap_ws(ws, data, params):
 # %% ../nbs/api/00_core.ipynb
 async def _send_ws(ws, resp):
     if not resp: return
-    res = to_xml(resp, indent=fh_cfg.indent) if isinstance(resp, (list,tuple)) or hasattr(resp, '__ft__') else resp
+    res = to_xml(resp, indent=fh_cfg.indent) if isinstance(resp, (list,tuple,FT)) or hasattr(resp, '__ft__') else resp
     await ws.send_text(res)
 
 def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
@@ -313,7 +313,7 @@ def _find_targets(req, resp):
 def _apply_ft(o):
     if isinstance(o, tuple): o = tuple(_apply_ft(c) for c in o)
     if hasattr(o, '__ft__'): o = o.__ft__()
-    if isinstance(o, FT): o[1] = [_apply_ft(c) for c in o[1]]
+    if isinstance(o, FT): o.children = [_apply_ft(c) for c in o.children]
     return o
 
 def _to_xml(req, resp, indent):
@@ -341,7 +341,7 @@ def _resp(req, resp, cls=empty):
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
-    if isinstance(resp, (list,tuple,HttpHeader)) or hasattr(resp, '__ft__'): return _xt_resp(req, resp)
+    if isinstance(resp, (list,tuple,HttpHeader,FT)) or hasattr(resp, '__ft__'): return _xt_resp(req, resp)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:
@@ -469,26 +469,37 @@ class FastHTML(Starlette):
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan,
                               hdrs=hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw, **bodykw)
 
-    def route(self, path:str=None, methods=None, name=None, include_in_schema=True, before=None):
-        "Add a route at `path`; the function name is the default method"
-        pathstr = None if callable(path) else path
-        def f(func):
-            n,fn,p = name,func.__name__,pathstr
-            assert path or (fn not in _verbs), "Must provide a path when using http verb-based function name"
-            if methods: m = [methods] if isinstance(methods,str) else methods
-            else: m = [fn] if fn in _verbs else ['get'] if fn=='index' else ['post']
-            if not n: n = fn
-            if not p: p = '/'+('' if fn=='index' else fn)
-            self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema, before=before)
-            func.__routename__ = n
-            return func
-        return f(path) if callable(path) else f
-
     def ws(self, path:str, conn=None, disconn=None, name=None):
         def f(func):
             self.router.add_ws(path, func, conn=conn, disconn=disconn, name=name)
             return func
         return f
+
+# %% ../nbs/api/00_core.ipynb
+def _mk_locfunc(f,p):
+    class _lf:
+        def __init__(self): update_wrapper(self, f)
+        def __call__(self, **kw): return p + (f'?{urlencode(kw)}' if kw else '')
+        def __str__(self): return p
+    return _lf()
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, before=None):
+    "Add a route at `path`; the function name is the default method"
+    pathstr = None if callable(path) else path
+    def f(func):
+        n,fn,p = name,func.__name__,pathstr
+        assert path or (fn not in _verbs), "Must provide a path when using http verb-based function name"
+        if methods: m = [methods] if isinstance(methods,str) else methods
+        else: m = [fn] if fn in _verbs else ['get'] if fn=='index' else ['post']
+        if not n: n = fn
+        if not p: p = '/'+('' if fn=='index' else fn)
+        self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema, before=before)
+        lf = _mk_locfunc(func, p)
+        lf.__routename__ = n
+        return lf
+    return f(path) if callable(path) else f
 
 all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
@@ -499,7 +510,10 @@ def serve(
         app='app', # App instance to be served
         host='0.0.0.0', # If host is 0.0.0.0 will convert to localhost
         port=None, # If port is None it will default to 5001 or the PORT environment variable
-        reload=True): # Default is to reload the app upon code changes
+        reload=True, # Default is to reload the app upon code changes
+        reload_includes:list[str]|str|None=None, # Additional files to watch for changes
+        reload_excludes:list[str]|str|None=None # Files to ignore for changes
+        ): 
     "Run the app in an async server, with live reload set as the default."
     bk = inspect.currentframe().f_back
     glb = bk.f_globals
@@ -510,7 +524,7 @@ def serve(
     if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
         print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
-        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload)
+        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload, reload_includes=reload_includes, reload_excludes=reload_excludes)
 
 # %% ../nbs/api/00_core.ipynb
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):

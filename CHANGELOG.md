@@ -3,12 +3,64 @@
 <!-- do not remove -->
 
 
+## 0.4.1
+
+### Bugs Squashed
+
+- post release fix for `fill_form` ([#309](https://github.com/AnswerDotAI/fasthtml/issues/309))
+
+
+## 0.4.0
+
+### Breaking changes
+
+- `__init.py__` now only contains `fasthtml.core`
+
+### New Features
+
+- Fastcore 1.7 compatibility ([#307](https://github.com/AnswerDotAI/fasthtml/issues/307))
+- Add `fasthtml.basics` for importing the main fasthtml modules
+
+
+## 0.3.7
+
+### New Features
+
+- Add `reload_includes` and `reload_excludes` options to serve ([#291](https://github.com/AnswerDotAI/fasthtml/pull/291)), thanks to [@pydanny](https://github.com/pydanny)
+
+### Bugs Squashed
+
+- katex.js missing ([#305](https://github.com/AnswerDotAI/fasthtml/issues/305))
+
+
+## 0.3.6
+
+### Bugs Squashed
+
+- postrelease fix markdown js ([#290](https://github.com/AnswerDotAI/fasthtml/issues/290))
+
+
+## 0.3.5
+
+### New Features
+
+- Support `dict` value in `hx_vals` ([#288](https://github.com/AnswerDotAI/fasthtml/issues/288))
+- Add `sess_cls` param to `FastHTML` ([#284](https://github.com/AnswerDotAI/fasthtml/issues/284))
+- Make `index` a special handler name for path "/" get request ([#274](https://github.com/AnswerDotAI/fasthtml/issues/274))
+- Use `run_in_threadpool` for non-async handlers ([#270](https://github.com/AnswerDotAI/fasthtml/issues/270))
+- Enhance LaTeX rendering in Markdown with support for environments ([#269](https://github.com/AnswerDotAI/fasthtml/pull/269)), thanks to [@rian-dolphin](https://github.com/rian-dolphin)
+
+### Bugs Squashed
+
+- Duplicate parameters in components.pyi ([#255](https://github.com/AnswerDotAI/fasthtml/issues/255))
+
+
 ## 0.3.4
 
 ### New Features
 
 - Experimental new named-based HTMX routing system ([#267](https://github.com/AnswerDotAI/fasthtml/issues/267))
-  - `uri` function to constract `url_for` path params
+  - `uri` function to construct `url_for` path params
   - patch `HTTPConnection.url_path_for`
   - replace HTTP verb FT attr names with `hx-` prefixed versions, and look up values in route names (with `link` used for `href` attrs)
   - Default route paths to `/{func.__name__}`
@@ -119,7 +171,7 @@
 
 ### New Features
 
-- Skip redundent formatting in `loose_format` ([#79](https://github.com/AnswerDotAI/fasthtml/issues/79))
+- Skip redundant formatting in `loose_format` ([#79](https://github.com/AnswerDotAI/fasthtml/issues/79))
 - Add `htmlkw` param to `FastHTML` ([#78](https://github.com/AnswerDotAI/fasthtml/issues/78))
 
 

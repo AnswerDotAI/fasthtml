@@ -149,12 +149,12 @@ def loose_format(s, **kw):
     return undouble_braces(partial_format(double_braces(s), **kw)[0])
 
 # %% ../nbs/api/02_xtend.ipynb
-def ScriptX(fname, type=None, _async=None, defer=None, charset=None, crossorigin=None, integrity=None, **kw):
+def ScriptX(fname, src=None, nomodule=None, type=None, _async=None, defer=None,
+            charset=None, crossorigin=None, integrity=None, **kw):
     "A `script` element with contents read from `fname`"
-    attrs = ['src', 'type', 'async', 'defer', 'charset', 'crossorigin', 'integrity', 'nomodule']
-    scr_kw = {k:kw.pop(k) for k in attrs if k in kw}
     s = loose_format(Path(fname).read_text(), **kw)
-    return Script(s, **scr_kw)
+    return Script(s, src=src, nomodule=nomodule, type=type, _async=_async, defer=defer,
+                  charset=charset, crossorigin=crossorigin, integrity=integrity)
 
 # %% ../nbs/api/02_xtend.ipynb
 def replace_css_vars(css, pre='tpl', **kwargs):

@@ -1,5 +1,5 @@
 ###
-# Walkthough of an idiomatic fasthtml app, made PEP-8 et al friendly
+# Walkthrough of an idiomatic fasthtml app, made PEP-8 et al friendly
 ###
 
 # This fasthtml app includes functionality from fastcore, starlette, fastlite, and fasthtml itself.
@@ -43,7 +43,7 @@ def before(req, sess):
 
 bware = fh.Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login'])
 # The `FastHTML` class is a subclass of `Starlette`, so you can use any parameters that `Starlette` accepts.
-app, rt = fh.fast_app(before=bware, hdrs=(fh.SortableJS('.sortable'), fh.MarkdownJS()))
+app, rt = fh.fast_app(before=bware, hdrs=(fh.SortableJS('.sortable'), fh.KatexMarkdownJS(sel='.markdown')))
 
 
 @app.get("/login")

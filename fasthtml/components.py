@@ -20,6 +20,7 @@ from bs4 import BeautifulSoup, Comment
 from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
+from fastcore.test import *
 from .core import fh_cfg
 
 import types, json
@@ -53,7 +54,7 @@ def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=Non
     if attrmap is None: attrmap=fh_cfg.attrmap
     if valmap  is None: valmap =fh_cfg.valmap
     kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style
-    tag,c,kw = ft(tag, *c, attrmap=attrmap, valmap=valmap, **kwargs)
+    tag,c,kw = ft(tag, *c, attrmap=attrmap, valmap=valmap, **kwargs).list
     if tag in named and 'id' in kw and 'name' not in kw: kw['name'] = kw['id']
     return FT(tag,c,kw, void_=tag in voids)
 
@@ -84,8 +85,8 @@ def File(fname):
 
 # %% ../nbs/api/01_components.ipynb
 def _fill_item(item, obj):
-    if not isinstance(item,list): return item
-    tag,cs,attr = item
+    if not isinstance(item,FT): return item
+    tag,cs,attr = item.list
     if isinstance(cs,tuple): cs = tuple(_fill_item(o, obj) for o in cs)
     name = attr.get('name', None)
     val = None if name is None else obj.get(name, None)
@@ -117,14 +118,14 @@ def fill_dataclass(src, dest):
 # %% ../nbs/api/01_components.ipynb
 def find_inputs(e, tags='input', **kw):
     "Recursively find all elements in `e` with `tags` and attrs matching `kw`"
-    if not isinstance(e, (list,tuple)): return []
+    if not isinstance(e, (list,tuple,FT)): return []
     inputs = []
     if isinstance(tags,str): tags = [tags]
     elif tags is None: tags = []
     cs = e
-    if isinstance(e, list):
-        tag,cs,attr = e
-        if e[0] in tags and kw.items()<=e[2].items(): inputs.append(e)
+    if isinstance(e, FT):
+        tag,cs,attr = e.list
+        if tag in tags and kw.items()<=attr.items(): inputs.append(e)
     for o in cs: inputs += find_inputs(o, tags, **kw)
     return inputs
 

@@ -1,19 +1,20 @@
 # How to contribute
 
-This project uses nbdev for development. Before beginning, make sure that nbdev and a jupyter-compatible client such as jupyterlab or nbclassic are installed. To make changes, update the notebooks in the `nbs` folder, not the .py files directly. Then, run `nbdev_export`. For more details, have a look at the [nbdev tutorial](https://nbdev.fast.ai/tutorials/tutorial.html).
+This project uses [nbdev](https://nbdev.fast.ai/getting_started.html) for development. Before beginning, make sure that nbdev and a jupyter-compatible client such as jupyterlab or nbclassic are installed. To make changes, update the notebooks in the `nbs` folder, not the .py files directly. Then, run `nbdev_export`. For more details, have a look at the [nbdev tutorial](https://nbdev.fast.ai/tutorials/tutorial.html).
 
 ## How to get started
 
 Before anything else, please install the git hooks that run automatic scripts during each commit and merge to strip the notebooks of superfluous metadata (and avoid merge conflicts). After cloning the repository, run the following command inside it:
-```
+
+```sh
 nbdev_install_hooks
 ```
 
 This is a one-off command that you only have to run when you're first setting up the repo locally.
 
-You will also want to set up a `prep` alias in ~/.zshrc or other shell startup file:
+You will also want to set up a `prep` alias in `~/.zshrc` or other shell startup file:
 
-```bash
+```sh
 # nbdev alias to clean Jupyter notebooks before committing
 alias prep='nbdev_export && nbdev_clean && nbdev_trust'
 ```
@@ -26,7 +27,7 @@ Run `prep` before each commit.
 * If you're unable to find an open issue addressing the problem, open a new one. Be sure to include a title and clear description, as much relevant information as possible, and a code sample or an executable test case demonstrating the expected behavior that is not occurring.
 * Be sure to add the complete error messages.
 
-#### Did you write a patch that fixes a bug?
+### Did you write a patch that fixes a bug?
 
 * Open a new GitHub pull request with the patch.
 * Ensure that your PR includes a test that fails without your patch, and pass with it.
