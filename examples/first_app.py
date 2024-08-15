@@ -51,7 +51,7 @@ def get(id:int):
                 Button("Save")
             ),
             Hidden(id="id"),
-            Checkbox(id="done", label='Done'),
+            CheckboxX(id="done", label='Done'),
             Button('Back', hx_get='/'),
             hx_put="/", id="edit"
         )

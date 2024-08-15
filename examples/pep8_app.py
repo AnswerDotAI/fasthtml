@@ -150,7 +150,7 @@ async def edit(id: int):
     res = fh.Form(
         fh.Group(fh.Input(id="title"), fh.Button("Save")),
         fh.Hidden(id="id"),
-        fh.Checkbox(id="done", label='Done'),
+        fh.CheckboxX(id="done", label='Done'),
         fh.Textarea(id="details", name="details", rows=10),
         hx_put="/",
         target_id=f'todo-{id}',

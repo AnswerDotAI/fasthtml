@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.4.2
+
+### New Features
+
+- Rename `Checkbox` to `CheckboxX` ([#314](https://github.com/AnswerDotAI/fasthtml/issues/314))
+  - CheckboxX also adds a hidden field before the checkbox
+- Automatically choose last field in form data if list provided by non-list parameter
+
 
 ## 0.4.1
 

@@ -43,7 +43,7 @@ def find_todo(id): return next(o for o in TODO_LIST if o.id==id)
 async def edit_item(id:int):
     todo = find_todo(id)
     res = Form(Group(Input(id="title"), Button("Save")),
-        Hidden(id="id"), Checkbox(id="done", label='Done'),
+        Hidden(id="id"), CheckboxX(id="done", label='Done'),
         hx_put="/", target_id=tid(id), id="edit")
     fill_form(res, todo)
     return res

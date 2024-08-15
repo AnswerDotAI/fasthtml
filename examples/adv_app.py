@@ -13,7 +13,7 @@ from fasthtml.common import *
 """
 from fasthtml.common import (
     # These are the HTML components we use in this app
-    A, AX, Button, Card, Checkbox, Container, Div, Form, Grid, Group, H1, H2, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Titled, Ul,
+    A, AX, Button, Card, CheckboxX, Container, Div, Form, Grid, Group, H1, H2, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Titled, Ul,
     # These are FastHTML symbols we'll use
     Beforeware, fast_app, SortableJS, fill_form, picolink, serve,
     # These are from Starlette, Fastlite, fastcore, and the Python stdlib
@@ -255,7 +255,7 @@ async def get(id:int):
     # The `hx_put` attribute tells HTMX to send a PUT request when the form is submitted.
     # `target_id` specifies which element will be updated with the server's response.
     res = Form(Group(Input(id="title"), Button("Save")),
-        Hidden(id="id"), Checkbox(id="done", label='Done'),
+        Hidden(id="id"), CheckboxX(id="done", label='Done'),
         Textarea(id="details", name="details", rows=10),
         hx_put="/", target_id=f'todo-{id}', id="edit")
     # `fill_form` populates the form with existing todo data, and returns the result.
