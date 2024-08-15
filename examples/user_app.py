@@ -59,7 +59,7 @@ async def post(todo:Todo):
 @rt("/edit/{id}")
 async def get(id:int):
     res = Form(Group(Input(id="title"), Button("Save")),
-        Hidden(id="id"), Checkbox(id="done", label='Done'),
+        Hidden(id="id"), CheckboxX(id="done", label='Done'),
         hx_put="/", target_id=tid(id), id="edit")
     return fill_form(res, todos[id])
 

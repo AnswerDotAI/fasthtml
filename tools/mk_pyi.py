@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from fasthtml.common import *
 from fasthtml.components import _all_
 from fastcore.py2pyi import create_pyi

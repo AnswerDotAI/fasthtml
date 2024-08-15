@@ -2,9 +2,9 @@
 
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxscr', 'htmxwsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths',
-           'is_typeddict', 'is_namedtuple', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
-           'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'RouteX', 'RouterX', 'get_key',
-           'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
+           'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware',
+           'WS_RouteX', 'uri', 'decode_uri', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie',
+           'reg_re_param', 'MiddlewareBase']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn
@@ -15,7 +15,7 @@ from fastcore.xml import *
 from types import UnionType, SimpleNamespace as ns, GenericAlias
 from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List, Any
 from datetime import datetime
-from dataclasses import dataclass,fields,is_dataclass,MISSING,asdict
+from dataclasses import dataclass,fields
 from collections import namedtuple
 from inspect import isfunction,ismethod,Parameter,get_annotations
 from functools import wraps, partialmethod, update_wrapper
@@ -32,17 +32,6 @@ empty = Parameter.empty
 
 # %% ../nbs/api/00_core.ipynb
 def _sig(f): return signature_ex(f, True)
-
-# %% ../nbs/api/00_core.ipynb
-def is_typeddict(cls:type)->bool:
-    "Check if `cls` is a `TypedDict`"
-    attrs = 'annotations', 'required_keys', 'optional_keys'
-    return isinstance(cls, type) and all(hasattr(cls, f'__{attr}__') for attr in attrs)
-
-# %% ../nbs/api/00_core.ipynb
-def is_namedtuple(cls):
-    "`True` if `cls` is a namedtuple type"
-    return issubclass(cls, tuple) and hasattr(cls, '_fields')
 
 # %% ../nbs/api/00_core.ipynb
 def date(s:str):
@@ -98,8 +87,8 @@ def _fix_anno(t):
         t = first(o for o in get_args(t) if o!=type(None))
     d = {bool: str2bool, int: str2int}
     res = d.get(t, t)
-    if origin in (list,List): res = partial(_mk_list, res)
-    return res
+    if origin in (list,List): return partial(_mk_list, res)
+    return lambda o: res(o[-1]) if isinstance(o,(list,tuple)) else res(o)
 
 # %% ../nbs/api/00_core.ipynb
 def _form_arg(k, v, d):
