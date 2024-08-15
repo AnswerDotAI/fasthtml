@@ -148,7 +148,7 @@ async def _from_body(req, p):
 # %% ../nbs/api/00_core.ipynb
 async def _find_p(req, arg:str, p:Parameter):
     "In `req` find param named `arg` of type in `p` (`arg` is ignored for body types)"
-    anno = p.annotation
+    anno = p.annotation     
     # If there's an annotation of special types, return object of that type
     # GenericAlias is a type of typing for iterators like list[int] that is not a class
     if isinstance(anno, type) and not isinstance(anno, GenericAlias):
@@ -159,7 +159,7 @@ async def _find_p(req, arg:str, p:Parameter):
     # If there's no annotation, check for special names
     if anno is empty:
         if 'request'.startswith(arg.lower()): return req
-        if 'session'.startswith(arg.lower()): return req.scope.get('session', {})
+        if 'session'.startswith(arg.lower()): return req.scope.get('session', {})            
         if arg.lower()=='auth': return req.scope.get('auth', None)
         if arg.lower()=='htmx': return _get_htmx(req.headers)
         if arg.lower()=='app': return req.scope['app']
