@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.4.3
+
+### New Features
+
+- Fastlite 0.0.9 dep
+
+
 ## 0.4.2
 
 ### New Features
