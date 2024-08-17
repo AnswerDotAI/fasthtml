@@ -7,6 +7,7 @@ import inspect,uvicorn
 from fastcore.utils import *
 from fastlite import *
 from .basics import *
+from .pico import *
 from .starlette import *
 from .live_reload import FastHTMLWithLiveReload
 
