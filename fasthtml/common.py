@@ -7,6 +7,7 @@ from fastcore.xml import *
 from sqlite_minutils import Database
 from fastlite import *
 from .basics import *
+from .pico import *
 from .authmw import *
 from .live_reload import *
 from .toaster import *
