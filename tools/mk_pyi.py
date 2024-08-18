@@ -3,6 +3,7 @@ from fasthtml.common import *
 from fasthtml.components import _all_
 from fastcore.py2pyi import create_pyi
 
+create_pyi('fasthtml/core.py', 'fasthtml')
 create_pyi('fasthtml/components.py', 'fasthtml')
 create_pyi('fasthtml/xtend.py', 'fasthtml')
 with open('fasthtml/components.pyi', 'a') as f:
