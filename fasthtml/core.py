@@ -459,6 +459,9 @@ class FastHTML(Starlette):
             if htmx: hdrs = [htmxscr] + hdrs
             hdrs = [charset, viewport] + hdrs
         excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in (exception_handlers or {}).items()}
+        if 404 not in excs: 
+            def _not_found(req, exc): return '404 Not Found'
+            excs[404] = _wrap_ex(_not_found, hdrs, ftrs, htmlkw, bodykw)
         super().__init__(debug, routes, middleware, excs, on_startup, on_shutdown, lifespan=lifespan)
         self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan,
                               hdrs=hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw, **bodykw)
