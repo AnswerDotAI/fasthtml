@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.4.4
+
+### New Features
+
+- Replace `__call__` with `rt` in handler functions ([#334](https://github.com/AnswerDotAI/fasthtml/issues/334))
+- Add `flat_tuple` and use it to allow nested tuples in route responses
+- Add `body` parameter for decoded body
+- Move pico-specific components to separate module ([#327](https://github.com/AnswerDotAI/fasthtml/issues/327))
+- Add "get" and "post" as default methods on routes ([#317](https://github.com/AnswerDotAI/fasthtml/issues/317))
+- Support Reverse URL lookups by exposing `url_for` ([#189](https://github.com/AnswerDotAI/fasthtml/issues/189))
+
+
 ## 0.4.3
 
 ### New Features
