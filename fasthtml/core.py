@@ -3,8 +3,8 @@
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxscr', 'htmxwsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths',
            'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware',
-           'WS_RouteX', 'uri', 'decode_uri', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie',
-           'reg_re_param', 'MiddlewareBase']
+           'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve',
+           'cookie', 'reg_re_param', 'MiddlewareBase']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn
@@ -152,6 +152,7 @@ async def _find_p(req, arg:str, p:Parameter):
         if arg.lower()=='auth': return req.scope.get('auth', None)
         if arg.lower()=='htmx': return _get_htmx(req.headers)
         if arg.lower()=='app': return req.scope['app']
+        if arg.lower()=='body': return (await req.body()).decode()
         if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(req, arg.lower())
         warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")
         return None
@@ -311,8 +312,19 @@ def _to_xml(req, resp, indent):
     return to_xml(resp, indent)
 
 # %% ../nbs/api/00_core.ipynb
+def flat_tuple(o):
+    "Flatten lists"
+    result = []
+    if not isinstance(o,(tuple,list)): o=[o]
+    o = list(o)
+    for item in o:
+        if isinstance(item, (list,tuple)): result.extend(item)
+        else: result.append(item)
+    return tuple(result)
+
+# %% ../nbs/api/00_core.ipynb
 def _xt_resp(req, resp):
-    if not isinstance(resp, tuple): resp = (resp,)
+    resp = flat_tuple(resp)
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
@@ -418,7 +430,8 @@ def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
 def _mk_locfunc(f,p):
     class _lf:
         def __init__(self): update_wrapper(self, f)
-        def __call__(self, **kw): return p + (f'?{urlencode(kw)}' if kw else '')
+        def __call__(self, *args, **kw): return f(*args, **kw)
+        def rt(self, **kw): return p + (f'?{urlencode(kw)}' if kw else '')
         def __str__(self): return p
     return _lf()
 
