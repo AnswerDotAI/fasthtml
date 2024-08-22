@@ -2,6 +2,19 @@
 
 <!-- do not remove -->
 
+## 0.4.5
+
+### New Features
+
+- Support for web components in html2ft ([#354](https://github.com/AnswerDotAI/fasthtml/issues/354))
+- Support `options` http verb as function name ([#350](https://github.com/AnswerDotAI/fasthtml/issues/350))
+
+### Bugs Squashed
+
+- railway deployment not checking deployed projects correctly ([#340](https://github.com/AnswerDotAI/fasthtml/issues/340))
+- Socials tag only appears in head tag when added via FastHTML.hdrs ([#324](https://github.com/AnswerDotAI/fasthtml/issues/324))
+
+
 ## 0.4.4
 
 ### New Features
