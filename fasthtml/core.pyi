@@ -1,4 +1,4 @@
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxscr', 'htmxwsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxscr', 'htmxwsscr', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
 import json, uuid, inspect, types, uvicorn
 from fastcore.utils import *
 from fastcore.xml import *
@@ -152,6 +152,10 @@ def _apply_ft(o):
 def _to_xml(req, resp, indent):
     ...
 
+def flat_tuple(o):
+    """Flatten lists"""
+    ...
+
 def _xt_resp(req, resp):
     ...
 
@@ -181,6 +185,7 @@ class RouterX(Router):
         ...
 htmxscr = Script(src='https://unpkg.com/htmx.org@next/dist/htmx.min.js')
 htmxwsscr = Script(src='https://unpkg.com/htmx-ext-ws/ws.js')
+fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@main/fasthtml.js')
 surrsrc = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js')
 scopesrc = Script(src='https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js')
 viewport = Meta(name='viewport', content='width=device-width, initial-scale=1, viewport-fit=cover')
@@ -195,21 +200,21 @@ def _list(o):
 def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
     ...
 
+def _mk_locfunc(f, p):
+    ...
+
 class FastHTML(Starlette):
 
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, before=None, after=None, ws_hdr=False, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', htmlkw=None, **bodykw):
         ...
 
     def ws(self, path: str, conn=None, disconn=None, name=None):
+        """Add a websocket route at `path`"""
         ...
 
-def _mk_locfunc(f, p):
-    ...
-
-@patch
-def route(self: FastHTML, path: str=None, methods=None, name=None, include_in_schema=True):
-    """Add a route at `path`; the function name is the default method"""
-    ...
+    def route(self, path: str=None, methods=None, name=None, include_in_schema=True):
+        """Add a route at `path`"""
+        ...
 all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths:
     setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))

@@ -39,9 +39,10 @@ def railway_deploy(
     assert nm=='railwayapp', f'Unexpected railway version string: {nm}'
     if ver2tuple(ver)<(3,8): return print("Please update your railway CLI version to 3.8 or higher")
     cp = run("railway status --json".split(), capture_output=True)
-    if not cp.returncode: print("Checking deployed projects...")
-    project_name = json.loads(cp.stdout.decode()).get('name')
-    if project_name == name: return print("This project is already deployed. Run `railway open`.")
+    if not cp.returncode:
+        print("Checking deployed projects...")
+        project_name = json.loads(cp.stdout.decode()).get('name')
+        if project_name == name: return print("This project is already deployed. Run `railway open`.")
     reqs = Path('requirements.txt')
     if not reqs.exists(): reqs.write_text('python-fasthtml')
     _run(f"railway init -n {name}".split())
