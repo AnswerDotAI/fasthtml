@@ -146,7 +146,7 @@ def html2ft(html, attr1st=False):
     def _parse(elm, lvl=0, indent=4):
         if isinstance(elm, str): return repr(elm.strip()) if elm.strip() else ''
         if isinstance(elm, list): return '\n'.join(_parse(o, lvl) for o in elm)
-        tag_name = elm.name.capitalize()
+        tag_name = elm.name.capitalize().replace("-", "_")
         if tag_name=='[document]': return _parse(list(elm.children), lvl)
         cts = elm.contents
         cs = [repr(c.strip()) if isinstance(c, str) else _parse(c, lvl+1)
