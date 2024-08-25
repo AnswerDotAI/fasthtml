@@ -8,6 +8,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'h
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn
+from starlette.datastructures import URLPath
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -278,8 +279,8 @@ def to_string(self:StringConvertor, value: str) -> str:
 # %% ../nbs/api/00_core.ipynb
 @patch
 def url_path_for(self:HTTPConnection, name: str, **path_params):
-    router: Router = self.scope["router"]
-    return router.url_path_for(name, **path_params)
+    lp = self.scope['app'].url_path_for(name, **path_params)
+    return URLPath(f"{self.scope['root_path']}{lp}", lp.protocol, lp.host)
 
 # %% ../nbs/api/00_core.ipynb
 _verbs = dict(get='hx-get', post='hx-post', put='hx-post', delete='hx-delete', patch='hx-patch', link='href')
