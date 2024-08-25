@@ -37,7 +37,7 @@ def show(ft,*rest):
 # %% ../nbs/api/01_components.ipynb
 named = set('a button form frame iframe img input map meta object param select textarea'.split())
 html_attrs = 'id cls title style accesskey contenteditable dir draggable enterkeyhint hidden inert inputmode lang popover spellcheck tabindex translate'.split()
-hx_attrs = 'get post put delete patch trigger target swap include select indicator push_url confirm disable replace_url on'
+hx_attrs = 'get post put delete patch trigger target swap swap_oob include select select_oob indicator push_url confirm disable replace_url vals disabled_elt ext headers history history_elt indicator inherit params preserve prompt replace_url request sync validate'
 hx_attrs = html_attrs + [f'hx_{o}' for o in hx_attrs.split()]
 
 # %% ../nbs/api/01_components.ipynb
