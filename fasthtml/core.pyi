@@ -1,4 +1,4 @@
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxscr', 'htmxwsscr', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
 import json, uuid, inspect, types, uvicorn
 from fastcore.utils import *
 from fastcore.xml import *
@@ -183,9 +183,10 @@ class RouterX(Router):
 
     def add_ws(self, path: str, recv: callable, conn: callable=None, disconn: callable=None, name=None):
         ...
-htmxscr = Script(src='https://unpkg.com/htmx.org@next/dist/htmx.min.js')
-htmxwsscr = Script(src='https://unpkg.com/htmx-ext-ws/ws.js')
+htmxsrc = Script(src='https://unpkg.com/htmx.org@next/dist/htmx.min.js')
+htmxwssrc = Script(src='https://unpkg.com/htmx-ext-ws/ws.js')
 fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@main/fasthtml.js')
+htmxctsrc = Script(src='https://unpkg.com/htmx-ext-transfer-encoding-chunked/transfer-encoding-chunked.js')
 surrsrc = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js')
 scopesrc = Script(src='https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js')
 viewport = Meta(name='viewport', content='width=device-width, initial-scale=1, viewport-fit=cover')
@@ -205,7 +206,7 @@ def _mk_locfunc(f, p):
 
 class FastHTML(Starlette):
 
-    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, before=None, after=None, ws_hdr=False, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', htmlkw=None, **bodykw):
+    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, before=None, after=None, ws_hdr=False, ct_hdr=False, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', htmlkw=None, **bodykw):
         ...
 
     def ws(self, path: str, conn=None, disconn=None, name=None):
@@ -230,7 +231,7 @@ def cookie(key: str, value='', max_age=None, expires=None, path='/', domain=None
 def reg_re_param(m, s):
     ...
 reg_re_param('path', '.*?')
-reg_re_param('static', 'ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|html')
+reg_re_param('static', 'ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|html|map')
 
 class MiddlewareBase:
 
