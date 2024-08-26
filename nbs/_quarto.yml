@@ -1,5 +1,7 @@
 project:
   type: website
+  resources: 
+    - "*.txt"
   preview:
     navigate: false
     port: 3000
