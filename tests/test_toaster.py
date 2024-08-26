@@ -21,13 +21,17 @@ def get(session):
 
 def test_get_toaster():
     cli.get('/set-toast-get', follow_redirects=False)
-    res = cli.get('/see-toast')     
+    res = cli.get('/see-toast')
     assert 'Toast get' in res.text
 
-    res = cli.get('/set-toast-get', follow_redirects=True)   
-    assert 'Toast get' in res.text    
+    res = cli.get('/set-toast-get', follow_redirects=True)
+    assert 'Toast get' in res.text
 
 def test_post_toaster():
     cli.post('/set-toast-post', follow_redirects=False)
-    res = cli.get('/see-toast')     
+    res = cli.get('/see-toast')
     assert 'Toast post' in res.text
+
+test_get_toaster()
+test_post_toaster()
+
