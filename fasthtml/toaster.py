@@ -1,3 +1,4 @@
+from fastcore.xml import FT
 from fasthtml.core import *
 from fasthtml.components import *
 from fasthtml.xtend import *
@@ -50,9 +51,8 @@ def render_toasts(sess):
                hx_swap_oob="afterbegin:body")
 
 def toast_after(resp, req, sess):
-    if sk in sess: req.injects.append(render_toasts(sess))
+    if sk in sess and isinstance(resp, FT): req.injects.append(render_toasts(sess))
 
 def setup_toasts(app):
     app.router.hdrs += (Style(toast_css), Script(toast_js, type="module"))
     app.router.after.append(toast_after)
-
