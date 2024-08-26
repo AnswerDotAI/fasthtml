@@ -1,593 +1,5 @@
 <project title="FastHTML" summary='FastHTML is a python library which brings together Starlette, Uvicorn, HTMX, and fastcore&#39;s `FT` "FastTags" into a library for creating server-rendered hypermedia applications. The `FastHTML` class itself inherits from `Starlette`, and adds decorator-based routing with many additions, Beforeware, automatic `FT` to HTML rendering, and much more. Although parts of its API are inspired by FastAPI, it is *not* compatible with FastAPI syntax and is not targeted at creating API services. FastHTML includes support for Pico CSS and the fastlite sqlite library, although using both are optional; sqlite can be used directly or via the fastsql library, and any CSS framework can be used. FastHTML is compatible with web components and any vanilla JS library, but not with React, Vue, or Svelte. Support for the Surreal and css-scope-inline libraries are also included, but both are optional.'>
   <docs>
-    <doc title="Surreal" info="Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions"># 🗿 Surreal
-### Tiny jQuery alternative for plain Javascript with inline [Locality of Behavior](https://htmx.org/essays/locality-of-behaviour/)!
-
-![cover](https://user-images.githubusercontent.com/24665/171092805-b41286b2-be4a-4aab-9ee6-d604699cc507.png)
-(Art by [shahabalizadeh](https://www.deviantart.com/shahabalizadeh))
-&lt;!--
-&lt;a href=&quot;https://github.com/gnat/surreal/archive/refs/heads/main.zip&quot;&gt;&lt;img src=&quot;https://img.shields.io/badge/Download%20.zip-ff9800?style=for-the-badge&amp;color=%234400e5&quot; alt=&quot;Download badge&quot; /&gt;&lt;/a&gt;
-
-&lt;a href=&quot;https://github.com/gnat/surreal&quot;&gt;&lt;img src=&quot;https://img.shields.io/github/workflow/status/gnat/surreal/ci?label=ci&amp;style=for-the-badge&amp;color=%237d91ce&quot; alt=&quot;CI build badge&quot; /&gt;&lt;/a&gt;
-&lt;a href=&quot;https://github.com/gnat/surreal/releases&quot;&gt;&lt;img src=&quot;https://img.shields.io/github/workflow/status/gnat/surreal/release?label=Mini&amp;style=for-the-badge&amp;color=%237d91ce&quot; alt=&quot;Mini build badge&quot; /&gt;&lt;/a&gt;
-&lt;a href=&quot;https://github.com/gnat/surreal/blob/main/LICENSE&quot;&gt;&lt;img src=&quot;https://img.shields.io/github/license/gnat/surreal?style=for-the-badge&amp;color=%234400e5&quot; alt=&quot;License badge&quot; /&gt;&lt;/a&gt;--&gt;
-
-## Why does this exist?
-
-For devs who love ergonomics! You may appreciate Surreal if:
-
-* You want to stay as close as possible to Vanilla JS.
-* Hate typing `document.querySelector` over.. and over..
-* Hate typing `addEventListener` over.. and over..
-* Really wish `document.querySelectorAll` had Array functions..
-* Really wish `this` would work in any inline `&lt;script&gt;` tag
-* Enjoyed using jQuery selector syntax.
-* [Animations, timelines, tweens](#-quick-start) with no extra libraries.
-* Only 320 lines. No build step. No dependencies.
-* Pairs well with [htmx](https://htmx.org)
-* Want fewer layers, less complexity. Are aware of the cargo cult. ✈️
-
-## ✨ What does it add to Javascript?
-
-* ⚡️ [Locality of Behavior (LoB)](https://htmx.org/essays/locality-of-behaviour/) Use `me()` inside `&lt;script&gt;`
-  * No **.class** or **#id** needed! Get an element without creating a unique name.
-  * `this` but much more flexible!
-  * Want `me` in your CSS `&lt;style&gt;` tags, too? See our [companion script](https://github.com/gnat/css-scope-inline)
-* 🔗 Call chaining, jQuery style.
-* ♻️ Functions work seamlessly on 1 element or arrays of elements!
-  * All functions can use: `me()`, `any()`, `NodeList`, `HTMLElement` (..or arrays of these!)
-  * Get 1 element: `me()`
-  * ..or many elements: `any()`
-  * `me()` or `any()` can chain with any Surreal function.
-    * `me()` can be used directly as a single element (like `querySelector()` or `$()`)
-    * `any()` can use: `for` / `forEach` / `filter` / `map` (like `querySelectorAll()` or `$()`)
-* 🌗 No forced style. Use: `classAdd` or `class_add` or `addClass` or `add_class`
-  * Use `camelCase` (Javascript) or `snake_case` (Python, Rust, PHP, Ruby, SQL, CSS).
-
-### 🤔 Why use `me()` / `any()` instead of `$()`
-* 💡 Solves the classic jQuery bloat problem: Am I getting 1 element or an array of elements?
-  * `me()` is guaranteed to return 1 element (or first found, or null).
-  * `any()` is guaranteed to return an array (or empty array).
-  * No more checks = write less code. Bonus: Reads more like self-documenting english.
-
-## 👁️ How does it look?
-
-Do surreal things with [Locality of Behavior](https://htmx.org/essays/locality-of-behaviour/) like:
-```html
-&lt;label for=&quot;file-input&quot; &gt;
-  &lt;div class=&quot;uploader&quot;&gt;&lt;/div&gt;
-  &lt;script&gt;
-    me().on(&quot;dragover&quot;, ev =&gt; { halt(ev); me(ev).classAdd(&#x27;.hover&#x27;); console.log(&quot;Files in drop zone.&quot;) })
-    me().on(&quot;dragleave&quot;, ev =&gt; { halt(ev); me(ev).classRemove(&#x27;.hover&#x27;); console.log(&quot;Files left drop zone.&quot;) })
-    me().on(&quot;drop&quot;, ev =&gt; { halt(ev); me(ev).classRemove(&#x27;.hover&#x27;).classAdd(&#x27;.loading&#x27;); me(&#x27;#file-input&#x27;).attribute(&#x27;files&#x27;, ev.dataTransfer.files); me(&#x27;#form&#x27;).send(&#x27;change&#x27;) })
-  &lt;/script&gt;
-&lt;/label&gt;
-```
-
-See the [Live Example](https://gnat.github.io/surreal/example.html)! Then [view source](https://github.com/gnat/surreal/blob/main/example.html).
-
-## 🎁 Install
-
-Surreal is only 320 lines. No build step. No dependencies.
-
-[📥 Download](https://raw.githubusercontent.com/gnat/surreal/main/surreal.js) into your project, and add `&lt;script src=&quot;/surreal.js&quot;&gt;&lt;/script&gt;` in your `&lt;head&gt;`
-
-Or, 🌐 via CDN: `&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/surreal/1.3.2/surreal.js&quot;&gt;&lt;/script&gt;`
-
-## ⚡ Usage
-
-### &lt;a name=&quot;selectors&quot;&gt;&lt;/a&gt;🔍️ DOM Selection
-
-* Select **one** element: `me(...)`
-  * Can be any of:
-    * CSS selector: `&quot;.button&quot;`, `&quot;#header&quot;`, `&quot;h1&quot;`, `&quot;body &gt; .block&quot;`
-    * Variables: `body`, `e`, `some_element`
-    * Events: `event.currentTarget` will be used.
-    * Surreal selectors: `me()`,`any()`
-    * Choose the start location in the DOM with the 2nd arg. (Default: `document`)
-      * 🔥 `any(&#x27;button&#x27;, me(&#x27;#header&#x27;)).classAdd(&#x27;red&#x27;)`
-        * Add `.red` to any `&lt;button&gt;` inside of `#header`
-  * `me()` ⭐ Get parent element of `&lt;script&gt;` without a **.class** or **#id** !
-  * `me(&quot;body&quot;)` Gets `&lt;body&gt;`
-  * `me(&quot;.button&quot;)` Gets the first `&lt;div class=&quot;button&quot;&gt;...&lt;/div&gt;`. To get all of them use `any()`
-* Select **one or more** elements as an array: `any(...)`
-  * Like `me()` but guaranteed to return an array (or empty array). 
-  * `any(&quot;.foo&quot;)` ⭐ Get all matching elements.
-  * Convert between arrays of elements and single elements: `any(me())`, `me(any(&quot;.something&quot;))`
- 
-### 🔥 DOM Functions
-
-* ♻️ All functions work on single elements or arrays of elements.
-* 🔗 Start a chain using `me()` and `any()`
-  * 🟢 Style A `me().classAdd(&#x27;red&#x27;)` ⭐ Chain style. Recommended!
-  * 🟠 Style B: `classAdd(me(), &#x27;red&#x27;)`
-* 🌐 Global conveniences help you write less code.
-  * `globalsAdd()` will automatically warn you of any clobbering issues!
-  * 💀🩸 If you want no conveniences, or are a masochist, delete `globalsAdd()`
-    * 🟢 `me().classAdd(&#x27;red&#x27;)` becomes `surreal.me().classAdd(&#x27;red&#x27;)`
-    * 🟠 `classAdd(me(), &#x27;red&#x27;)` becomes `surreal.classAdd(surreal.me(), &#x27;red&#x27;)`
-
-See: [Quick Start](#quick-start) and [Reference](#reference) and [No Surreal Needed](#no-surreal)
-
-## &lt;a name=&quot;quick-start&quot;&gt;&lt;/a&gt;⚡ Quick Start
-
-* Add a class
-  * `me().classAdd(&#x27;red&#x27;)`
-  * `any(&quot;button&quot;).classAdd(&#x27;red&#x27;)`
-* Events
-  * `me().on(&quot;click&quot;, ev =&gt; me(ev).fadeOut() )`
-  * `any(&#x27;button&#x27;).on(&#x27;click&#x27;, ev =&gt; { me(ev).styles(&#x27;color: red&#x27;) })`
-* Run functions over elements.
-  * `any(&#x27;button&#x27;).run(_ =&gt; { alert(_) })`
-* Styles / CSS
-  * `me().styles(&#x27;color: red&#x27;)`
-  * `me().styles({ &#x27;color&#x27;:&#x27;red&#x27;, &#x27;background&#x27;:&#x27;blue&#x27; })`
-* Attributes
-  * `me().attribute(&#x27;active&#x27;, true)`
-
-&lt;a name=&quot;timelines&quot;&gt;&lt;/a&gt;
-#### Timeline animations without any libraries.
-```html
-&lt;div&gt;I change color every second.
-  &lt;script&gt;
-    // On click, animate something new every second.
-    me().on(&quot;click&quot;, async ev =&gt; {
-      let el = me(ev) // Save target because async will lose it.
-      me(el).styles({ &quot;transition&quot;: &quot;background 1s&quot; })
-      await sleep(1000)
-      me(el).styles({ &quot;background&quot;: &quot;red&quot; })
-      await sleep(1000)
-      me(el).styles({ &quot;background&quot;: &quot;green&quot; })
-      await sleep(1000)
-      me(el).styles({ &quot;background&quot;: &quot;blue&quot; })
-      await sleep(1000)
-      me(el).styles({ &quot;background&quot;: &quot;none&quot; })
-      await sleep(1000)
-      me(el).remove()
-    })
-  &lt;/script&gt;
-&lt;/div&gt;
-```
-```html
-&lt;div&gt;I fade out and remove myself.
-  &lt;script&gt;me().on(&quot;click&quot;, ev =&gt; { me(ev).fadeOut() })&lt;/script&gt;
-&lt;/div&gt;
-```
-```html
-&lt;div&gt;Change color every second.
-  &lt;script&gt;
-    // Run immediately.
-    (async (e = me()) =&gt; {
-      me(e).styles({ &quot;transition&quot;: &quot;background 1s&quot; })
-      await sleep(1000)
-      me(e).styles({ &quot;background&quot;: &quot;red&quot; })
-      await sleep(1000)
-      me(e).styles({ &quot;background&quot;: &quot;green&quot; })
-      await sleep(1000)
-      me(e).styles({ &quot;background&quot;: &quot;blue&quot; })
-      await sleep(1000)
-      me(e).styles({ &quot;background&quot;: &quot;none&quot; })
-      await sleep(1000)
-      me(e).remove()
-    })()
-  &lt;/script&gt;
-&lt;/div&gt;
-```
-```html
-&lt;script&gt;
-  // Run immediately, for every &lt;button&gt; globally!
-  (async () =&gt; {
-    any(&quot;button&quot;).fadeOut()
-  })()
-&lt;/script&gt;
-```
-#### Array methods
-```js
-any(&#x27;button&#x27;)?.forEach(...)
-any(&#x27;button&#x27;)?.map(...)
-```
-
-## &lt;a name=&quot;reference&quot;&gt;&lt;/a&gt;👁️ Functions
-Looking for [DOM Selectors](#selectors)?
-Looking for stuff [we recommend doing in vanilla JS](#no-surreal)?
-### 🧭 Legend
-* 🔗 Chainable off `me()` and `any()`
-* 🌐 Global shortcut.
-* 🔥 Runnable example.
-* 🔌 Built-in Plugin
-### 👁️ At a glance
-
-* 🔗 `run`
-  * It&#x27;s `forEach` but less wordy and works on single elements, too!
-  * 🔥 `me().run(e =&gt; { alert(e) })`
-  * 🔥 `any(&#x27;button&#x27;).run(e =&gt; { alert(e) })`
-* 🔗 `remove`
-  * 🔥 `me().remove()`
-  * 🔥 `any(&#x27;button&#x27;).remove()`
-* 🔗 `classAdd` 🌗 `class_add` 🌗 `addClass` 🌗 `add_class`
-  * 🔥 `me().classAdd(&#x27;active&#x27;)`
-  * Leading `.` is **optional**
-    * Same thing: `me().classAdd(&#x27;active&#x27;)` 🌗 `me().classAdd(&#x27;.active&#x27;)`
-* 🔗 `classRemove` 🌗 `class_remove` 🌗 `removeClass` 🌗 `remove_class`
-  * 🔥 `me().classRemove(&#x27;active&#x27;)`
-* 🔗 `classToggle` 🌗 `class_toggle` 🌗 `toggleClass` 🌗 `toggle_class`
-  * 🔥 `me().classToggle(&#x27;active&#x27;)`
-* 🔗 `styles`
-  * 🔥 `me().styles(&#x27;color: red&#x27;)` Add style.
-  * 🔥 `me().styles({ &#x27;color&#x27;:&#x27;red&#x27;, &#x27;background&#x27;:&#x27;blue&#x27; })` Add multiple styles.
-  * 🔥 `me().styles({ &#x27;background&#x27;:null })` Remove style.
-* 🔗 `attribute` 🌗 `attributes` 🌗 `attr`
-  * Get: 🔥 `me().attribute(&#x27;data-x&#x27;)`
-    * For single elements.
-    * For many elements, wrap it in: `any(...).run(...)` or `any(...).forEach(...)`
-  * Set: 🔥`me().attribute(&#x27;data-x&#x27;, true)`
-  * Set multiple: 🔥 `me().attribute({ &#x27;data-x&#x27;:&#x27;yes&#x27;, &#x27;data-y&#x27;:&#x27;no&#x27; })`
-  * Remove: 🔥 `me().attribute(&#x27;data-x&#x27;, null)`
-  * Remove multiple: 🔥 `me().attribute({ &#x27;data-x&#x27;: null, &#x27;data-y&#x27;:null })`
-* 🔗 `send` 🌗 `trigger`
-  * 🔥 `me().send(&#x27;change&#x27;)`
-  * 🔥 `me().send(&#x27;change&#x27;, {&#x27;data&#x27;:&#x27;thing&#x27;})`
-  * Wraps `dispatchEvent`
-* 🔗 `on`
-  * 🔥 `me().on(&#x27;click&#x27;, ev =&gt; { me(ev).styles(&#x27;background&#x27;, &#x27;red&#x27;) })`
-  * Wraps `addEventListener`
-* 🔗 `off`
-  * 🔥 `me().off(&#x27;click&#x27;, fn)`
-  * Wraps `removeEventListener`
-* 🔗 `offAll`
-  * 🔥 `me().offAll()`
-* 🔗 `disable`
-  * 🔥 `me().disable()`
-  * Easy alternative to `off()`. Disables click, key, submit events.
-* 🔗 `enable`
-  * 🔥 `me().enable()`
-  * Opposite of `disable()`
-* 🌐 `sleep`
-  * 🔥 `await sleep(1000, ev =&gt; { alert(ev) })`
-  * `async` version of `setTimeout`
-  * Wonderful for animation timelines.
-* 🌐 `tick`
-  * 🔥 `await tick()`
-  * `await` version of `rAF` / `requestAnimationFrame`.
-  * Animation tick. Waits 1 frame.
-  * Great if you need to wait for events to propagate.
-* 🌐 `rAF`
-  * 🔥 `rAF(e =&gt; { return e })`
-  * Animation tick.  Fires when 1 frame has passed. Alias of [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)
-  * Great if you need to wait for events to propagate.
-* 🌐 `rIC`
-  * 🔥 `rIC(e =&gt; { return e })`
-  * Great time to compute. Fires function when JS is idle. Alias of [requestIdleCallback](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback)
-* 🌐 `halt`
-  * 🔥 `halt(event)`
-  * Prevent default browser behaviors.
-  * Wrapper for [preventDefault](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault)
-* 🌐 `createElement` 🌗 `create_element`
-  * 🔥 `e_new = createElement(&quot;div&quot;); me().prepend(e_new)`
-  * Alias of vanilla `document.createElement`
-* 🌐 `onloadAdd` 🌗 `onload_add` 🌗 `addOnload` 🌗 `add_onload`
-  * 🔥 `onloadAdd(_ =&gt; { alert(&quot;loaded!&quot;); })`
-  * 🔥 `&lt;script&gt;let e = me(); onloadAdd(_ =&gt; { me(e).on(&quot;click&quot;, ev =&gt; { alert(&quot;clicked&quot;) }) })&lt;/script&gt;`
-  * Execute after the DOM is ready. Similar to jquery `ready()`
-  * Add to `window.onload` while preventing overwrites of `window.onload` and predictable loading!
-  * Alternatives:
-    * Skip missing elements using `?.` example: `me(&quot;video&quot;)?.requestFullscreen()`
-    * Place `&lt;script&gt;` after the loaded element.
-      * See `me(&#x27;-&#x27;)` / `me(&#x27;prev&#x27;)`
-* 🔌 `fadeOut`
-  * See below
-* 🔌 `fadeIn`
-  * See below
-
-### &lt;a name=&quot;plugin-included&quot;&gt;&lt;/a&gt;🔌 Built-in Plugins
-
-### Effects
-Build effects with `me().styles({...})` with timelines using [CSS transitioned `await` or callbacks](#timelines).
-
-Common effects included:
-
-* 🔗 `fadeOut` 🌗 `fade_out`
-  * Fade out and remove element.
-  * Keep element with `remove=false`.
-  * 🔥 `me().fadeOut()`
-  * 🔥 `me().fadeOut(ev =&gt; { alert(&quot;Faded out!&quot;) }, 3000)` Over 3 seconds then call function.
-
-* 🔗 `fadeIn` 🌗 `fade_in`
-  * Fade in existing element which has `opacity: 0`
-  * 🔥 `me().fadeIn()`
-  * 🔥 `me().fadeIn(ev =&gt; { alert(&quot;Faded in!&quot;) }, 3000)` Over 3 seconds then call function.
-
-
-## &lt;a name=&quot;no-surreal&quot;&gt;&lt;/a&gt;⚪ No Surreal Needed
-
-More often than not, Vanilla JS is the easiest way!
-
-Logging
-* 🔥 `console.log()` `console.warn()` `console.error()`
-* Event logging: 🔥 `monitorEvents(me())` See: [Chrome Blog](https://developer.chrome.com/blog/quickly-monitor-events-from-the-console-panel-2/)
-
-Benchmarking / Time It!
-* 🔥 `console.time(&#x27;name&#x27;)`
-* 🔥 `console.timeEnd(&#x27;name&#x27;)`
-
-Text / HTML Content
-* 🔥 `me().textContent = &quot;hello world&quot;`
-  * XSS Safe! See: [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent)
-* 🔥 `me().innerHTML = &quot;&lt;p&gt;hello world&lt;/p&gt;&quot;`
-* 🔥 `me().innerText = &quot;hello world&quot;`
-
-Children
-* 🔥 `me().children`
-* 🔥 `me().children.hidden = true`
-
-Append / Prepend elements.
-* 🔥 `me().prepend(new_element)`
-* 🔥 `me().appendChild(new_element)`
-* 🔥 `me().insertBefore(element, other_element.firstChild)`
-* 🔥 `me().insertAdjacentHTML(&quot;beforebegin&quot;, new_element)`
-
-AJAX (replace jQuery `ajax()`)
-* Use [htmx](https://htmx.org/) or [htmz](https://leanrada.com/htmz/) or [fetch()](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) or [XMLHttpRequest()](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) directly.
-* Using `fetch()`
-```js
-me().on(&quot;click&quot;, async event =&gt; {
-  let e = me(event)
-  // EXAMPLE 1: Hit an endpoint.
-  if((await fetch(&quot;/webhook&quot;)).ok) console.log(&quot;Did the thing.&quot;)
-  // EXAMPLE 2: Get content and replace me()
-  try {
-    let response = await fetch(&#x27;/endpoint&#x27;)
-    if (response.ok) e.innerHTML = await response.text()
-    else console.warn(&#x27;fetch(): Bad response&#x27;)
-  }
-  catch (error) { console.warn(`fetch(): ${error}`) }
-})
-```
-* Using `XMLHttpRequest()`
-```js
-me().on(&quot;click&quot;, async event =&gt; {
-  let e = me(event)
-  // EXAMPLE 1: Hit an endpoint.
-  var xhr = new XMLHttpRequest()
-  xhr.open(&quot;GET&quot;, &quot;/webhook&quot;)
-  xhr.send()
-  // EXAMPLE 2: Get content and replace me()
-  var xhr = new XMLHttpRequest()
-  xhr.open(&quot;GET&quot;, &quot;/endpoint&quot;)
-  xhr.onreadystatechange = () =&gt; {
-    if (xhr.readyState == 4 &amp;&amp; xhr.status &gt;= 200 &amp;&amp; xhr.status &lt; 300) e.innerHTML = xhr.responseText
-  }
-  xhr.send()
-})
-```
-
- ## 💎 Conventions &amp; Tips
-
-* Many ideas can be done in HTML / CSS (ex: dropdowns)
-* `_` = for temporary or unused variables. Keep it short and sweet!
-* `e`, `el`, `elt` = element
-* `e`, `ev`, `evt` = event
-* `f`, `fn` = function
-
-#### Scope functions inside `&lt;script&gt;`
-  * ⭐ On `me()`
-    *  `me().hey = (text) =&gt; { alert(text) }`
-    *  `me().on(&#x27;click&#x27;, (ev) =&gt; { me(ev).hey(&quot;hi&quot;) })`
-  * ⭐ Use a block: `{ function hey(text) { alert(text) }; me().on(&#x27;click&#x27;, ev =&gt; { hey(&quot;hi&quot;) }) }`
-  * ⭐ Use an event: `me().on(&#x27;click&#x27;, ev =&gt; { /* add and call function here */ })`
-  * Use an inline module: `&lt;script type=&quot;module&quot;&gt;`
-    * Note: `me()` will no longer see `parentElement` so explicit selectors are required: `me(&quot;.mybutton&quot;)`
-
-#### Select a void element like `&lt;input type=&quot;text&quot; /&gt;`
-* Use: `me(&#x27;-&#x27;)` or `me(&#x27;prev&#x27;)` or `me(&#x27;previous&#x27;)`
-  * 🔥 `&lt;input type=&quot;text&quot; /&gt; &lt;script&gt;me(&#x27;-&#x27;).value = &quot;hello&quot;&lt;/script&gt;`
-  * Inspired by the CSS &quot;next sibling&quot; combinator `+` but in reverse `-`
-* Or, use a relative start.
-  * 🔥 `&lt;form&gt; &lt;input type=&quot;text&quot; n1 /&gt; &lt;script&gt;me(&#x27;[n1]&#x27;, me()).value = &quot;hello&quot;&lt;/script&gt; &lt;/form&gt;`
-
-#### Ignore call chain when element is missing.
-* 🔥 `me(&quot;#i_dont_exist&quot;)?.classAdd(&#x27;active&#x27;)`
-* No warnings: 🔥 `me(&quot;#i_dont_exist&quot;, document, false)?.classAdd(&#x27;active&#x27;)`
-
-## &lt;a name=&quot;plugins&quot;&gt;&lt;/a&gt;🔌 Your own plugin
-
-Feel free to edit Surreal directly- but if you prefer, you can use plugins to effortlessly merge with new versions.
-
-```javascript
-function pluginHello(e) {
-  function hello(e, name=&quot;World&quot;) {
-    console.log(`Hello ${name} from ${e}`)
-    return e // Make chainable.
-  }
-  // Add sugar
-  e.hello = (name) =&gt; { return hello(e, name) }
-}
-
-surreal.plugins.push(pluginHello)
-```
-
-Now use your function like: `me().hello(&quot;Internet&quot;)`
-
-* See the included `pluginEffects` for a more comprehensive example.
-* Your functions are added globally by `globalsAdd()` If you do not want this, add it to the `restricted` list.
-* Refer to an existing function to see how to make yours work with 1 or many elements.
-
-Make an [issue](https://github.com/gnat/surreal/issues) or [pull request](https://github.com/gnat/surreal/pulls) if you think people would like to use it! If it&#x27;s useful enough we&#x27;ll want it in core.
-
-### ⭐ Awesome Surreal examples, plugins, and resources: [awesome-surreal](https://github.com/gnat/awesome-surreal) !
-
-## 📚️ Inspired by
-
-* [jQuery](https://jquery.com/) for the chainable syntax we all love.
-* [BlingBling.js](https://github.com/argyleink/blingblingjs) for modern minimalism.
-* [Bliss.js](https://blissfuljs.com/) for a focus on single elements and extensibility.
-* [Hyperscript](https://hyperscript.org) for Locality of Behavior and awesome ergonomics.
-* Shout out to [Umbrella](https://umbrellajs.com/), [Cash](https://github.com/fabiospampinato/cash), [Zepto](https://zeptojs.com/)- Not quite as ergonomic. Requires build step to extend.
-
-## 🌘 Future
-* Always more `example.html` goodies!
-* Automated browser testing perhaps with:
-  * [Fava](https://github.com/fabiospampinato/fava). See: https://github.com/avajs/ava/issues/24#issuecomment-885949036
-  * [Ava](https://github.com/avajs/ava/blob/main/docs/recipes/browser-testing.md)
-  * [jsdom](https://github.com/jsdom/jsdom)
-    * [jsdom notes](https://github.com/jsdom/jsdom#executing-scripts)</doc>
-    <doc title="CSS Scope Inline" info="A JS library which allow `me` to be used in CSS selectors, by using a `MutationObserver` to monitor the DOM"># 🌘 CSS Scope Inline
-
-![cover](https://github.com/gnat/css-scope-inline/assets/24665/c4935c1b-34e3-4220-9d42-11f064999a57)
-(Art by [shahabalizadeh](https://www.artstation.com/artwork/zDgdd))
-
-## Why does this exist?
-
-* You want an easy inline vanilla CSS experience without Tailwind CSS.
-* Hate creating unique class names over.. and over.. to use once.
-* You want to co-locate your styles for ⚡️ [Locality of Behavior (LoB)](https://htmx.org/essays/locality-of-behaviour/)
-* You wish `this` would work in `&lt;style&gt;` tags.
-* Want all CSS features: [Nesting](https://caniuse.com/css-nesting), animations. Get scoped [`@keyframes`](https://github.com/gnat/css-scope-inline/blob/main/example.html#L86)!
-* You wish `@media` queries were shorter for [responsive design](https://tailwindcss.com/docs/responsive-design).
-* Only 16 lines. No build step. No dependencies.
-* Pairs well with [htmx](https://htmx.org) and [Surreal](https://github.com/gnat/surreal)
-* Want fewer layers, less complexity. Are aware of the cargo cult. ✈️
-
-✨ Want to also scope your `&lt;script&gt;` tags? See our companion project [Surreal](https://github.com/gnat/surreal)
-
-## 👁️ How does it look?
-```html
-&lt;div&gt;
-    &lt;style&gt;
-        me { background: red; } /* ✨ this &amp; self also work! */
-        me button { background: blue; } /* style child elements inline! */
-    &lt;/style&gt;
-    &lt;button&gt;I&#x27;m blue&lt;/button&gt;
-&lt;/div&gt;
-```
-See the [Live Example](https://gnat.github.io/css-scope-inline/example.html)! Then [view source](https://github.com/gnat/css-scope-inline/blob/main/example.html).
-
-## 🌘 How does it work?
-
-This uses `MutationObserver` to monitor the DOM, and the moment a `&lt;style&gt;` tag is seen, it scopes the styles to whatever the parent element is. No flashing or popping. 
-
-This method also leaves your existing styles untouched, allowing you to mix and match at your leisure.
-
-## 🎁 Install
-
-✂️ copy + 📋 paste the snippet into `&lt;script&gt;` in your `&lt;head&gt;`
-
-Or, [📥 download](https://raw.githubusercontent.com/gnat/css-scope-inline/main/script.js) into your project, and add `&lt;script src=&quot;script.js&quot;&gt;&lt;/script&gt;` in your `&lt;head&gt;`
-
-Or, 🌐 CDN: `&lt;script src=&quot;https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js&quot;&gt;&lt;/script&gt;`
-
-## 🤔 Why consider this over Tailwind CSS?
-
-Use whatever you&#x27;d like, but there&#x27;s a few advantages with this approach over Tailwind, Twind, UnoCSS:
-
-* No more [repeating styles](https://tailwindcss.com/docs/reusing-styles) on child elements (..no [@apply](https://tailwindcss.com/docs/reusing-styles#extracting-classes-with-apply), no `[&amp;&gt;thing]` per style). It&#x27;s just CSS!
-* No endless visual noise on every `&lt;div&gt;`. Use a local `&lt;style&gt;` per group.
-* No high risk of eventually requiring a build step.
-* No chance of [deprecations](https://windicss.org/posts/sunsetting.html). 16 lines is infinitely maintainable.
-* Get the ultra-fast &quot;inspect, play with styles, paste&quot; workflow back.
-* No suffering from FOUC (a flash of unstyled content).
-* Zero friction movement of styles between inline and `.css` files. Just replace `me`
-* No special tooling or plugins to install. Universal vanilla CSS. 
-
-## ⚡ Workflow Tips
-
-* Flat, 1 selector per line can be very short like Tailwind. See the examples.
-* Use just plain CSS variables in your design system.
-* Use the short `@media` queries for responsive design.
-  * Mobile First (flow: **above** breakpoint): **🟢 None** `sm` `md` `lg` `xl` `xx` 🏁
-  * Desktop First (flow: **below** breakpoint): 🏁 `xs-` `sm-` `md-` `lg-` `xl-` **🟢 None**
-  * 🟢 = No breakpoint. Default. See the [Live Example](https://gnat.github.io/css-scope-inline/example.html)!
-  * Based on [Tailwind](https://tailwindcss.com/docs/responsive-design) breakpoints. We use `xx` not `2xl` to not break CSS highlighters.
-  * Unlike Tailwind, you can [nest your @media styles](https://developer.chrome.com/articles/css-nesting/#nesting-media)!
-* Positional selectors may be easier using `div[n1]` for `&lt;div n1&gt;` instead of `div:nth-child(1)`
-* Try tools like- Auto complete styles: [VSCode](https://code.visualstudio.com/) or [Sublime](https://packagecontrol.io/packages/Emmet)
-
-## 👁️ CSS Scope Inline vs Tailwind CSS Showdowns
-### Basics
-Tailwind verbosity goes up with more child elements.
-```html
-&lt;div&gt;
-    &lt;style&gt;
-        me { background: red; }
-        me div { background: green; }
-        me div[n1] { background: yellow; }
-        me div[n2] { background: blue; }
-    &lt;/style&gt;
-    red
-    &lt;div&gt;green&lt;/div&gt;
-    &lt;div&gt;green&lt;/div&gt;
-    &lt;div&gt;green&lt;/div&gt;
-    &lt;div n1&gt;yellow&lt;/div&gt;
-    &lt;div n2&gt;blue&lt;/div&gt;
-    &lt;div&gt;green&lt;/div&gt;
-    &lt;div&gt;green&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;bg-[red]&quot;&gt;
-    red
-    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
-    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
-    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
-    &lt;div class=&quot;bg-[yellow]&quot;&gt;yellow&lt;/div&gt;
-    &lt;div class=&quot;bg-[blue]&quot;&gt;blue&lt;/div&gt;
-    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
-    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
-&lt;/div&gt;
-```
-### CSS variables and child styling
-```html
-&lt;!doctype html&gt;
-&lt;html&gt;
-    &lt;head&gt;
-        &lt;style&gt;
-            :root {
-                --color-1: hsl(0 0% 88%);
-                --color-1-active: hsl(214 20% 70%);
-            }
-        &lt;/style&gt;
-        &lt;script src=&quot;https://cdn.tailwindcss.com&quot;&gt;&lt;/script&gt;
-        &lt;script src=&quot;https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js&quot;&gt;&lt;/script&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-        &lt;!-- CSS Scope Inline --&gt;
-        &lt;div&gt;
-            &lt;style&gt;
-               me { margin:8px 6px; }
-               me div a { display:block; padding:8px 12px; margin:10px 0; background:var(--color-1); border-radius:10px; text-align:center; }
-               me div a:hover { background:var(--color-1-active); color:white; }
-            &lt;/style&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Home&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Team&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Profile&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Settings&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Log Out&lt;/a&gt;&lt;/div&gt;
-        &lt;/div&gt;
-
-        &lt;!-- Tailwind Example 1 --&gt;
-        &lt;div class=&quot;mx-2 my-4&quot;&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Home&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Team&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Profile&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Settings&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Log Out&lt;/a&gt;&lt;/div&gt;
-        &lt;/div&gt;
-
-        &lt;!-- Tailwind Example 2 --&gt;
-        &lt;div class=&quot;mx-2 my-4
-            [&amp;_div_a]:block [&amp;_div_a]:py-2 [&amp;_div_a]:px-3 [&amp;_div_a]:my-2 [&amp;_div_a]:bg-[--color-1] [&amp;_div_a]:rounded-lg [&amp;_div_a]:text-center
-            [&amp;_div_a:hover]:bg-[--color-1-active] [&amp;_div_a:hover]:text-white&quot;&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Home&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Team&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Profile&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Settings&lt;/a&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Log Out&lt;/a&gt;&lt;/div&gt;
-        &lt;/div&gt;
-    &lt;/body&gt;
-&lt;/html&gt;
-```
-## 🔎 Technical FAQ
-* Why do you use `querySelectorAll()` and not just process the `MutationObserver` results directly?
-  * This was indeed the original design; it will work well up until you begin recieving subtrees (ex: DOM swaps with [htmx](https://htmx.org), ajax, jquery, etc.) which requires walking all subtree elements to ensure we do not miss a `&lt;style&gt;`. This unfortunately involves re-scanning thousands of repeated elements. This is why `querySelectorAll()` ends up the performance (and simplicity) winner.</doc>
     <doc title="FastHTML quick start" info="A brief overview of many FastHTML features"># Web Devs Quickstart
 
 
@@ -1325,8 +737,11 @@ Examples toasts might include:
 - “Data submitted”
 - “Request approved”
 
-Toasts take a little configuration plus views that use them require the
-`session` argument.
+Toasts require the use of the `setup_toasts()` function plus every view
+needs these two features:
+
+- The session argument
+- Must return FT components
 
 ``` python
 setup_toasts(app)
@@ -1344,10 +759,13 @@ def get(session):
 
 Line 1  
 `setup_toasts` is a helper function that adds toast dependencies.
-Usually this would be declared right after `fast_app()`.
+Usually this would be declared right after `fast_app()`
 
 Line 4  
-Toasts require sessions.
+Toasts require sessions
+
+Line 11  
+Views with Toasts must return FT components.
 
 ## Authentication and authorization
 
@@ -1390,8 +808,597 @@ app, rt = fast_app(before=beforeware)
 
 ## Unwritten quickstart sections
 
+- Forms
 - Websockets
 - Tables</doc>
+    <doc title="Surreal" info="Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions"># 🗿 Surreal
+### Tiny jQuery alternative for plain Javascript with inline [Locality of Behavior](https://htmx.org/essays/locality-of-behaviour/)!
+
+![cover](https://user-images.githubusercontent.com/24665/171092805-b41286b2-be4a-4aab-9ee6-d604699cc507.png)
+(Art by [shahabalizadeh](https://www.deviantart.com/shahabalizadeh))
+&lt;!--
+&lt;a href=&quot;https://github.com/gnat/surreal/archive/refs/heads/main.zip&quot;&gt;&lt;img src=&quot;https://img.shields.io/badge/Download%20.zip-ff9800?style=for-the-badge&amp;color=%234400e5&quot; alt=&quot;Download badge&quot; /&gt;&lt;/a&gt;
+
+&lt;a href=&quot;https://github.com/gnat/surreal&quot;&gt;&lt;img src=&quot;https://img.shields.io/github/workflow/status/gnat/surreal/ci?label=ci&amp;style=for-the-badge&amp;color=%237d91ce&quot; alt=&quot;CI build badge&quot; /&gt;&lt;/a&gt;
+&lt;a href=&quot;https://github.com/gnat/surreal/releases&quot;&gt;&lt;img src=&quot;https://img.shields.io/github/workflow/status/gnat/surreal/release?label=Mini&amp;style=for-the-badge&amp;color=%237d91ce&quot; alt=&quot;Mini build badge&quot; /&gt;&lt;/a&gt;
+&lt;a href=&quot;https://github.com/gnat/surreal/blob/main/LICENSE&quot;&gt;&lt;img src=&quot;https://img.shields.io/github/license/gnat/surreal?style=for-the-badge&amp;color=%234400e5&quot; alt=&quot;License badge&quot; /&gt;&lt;/a&gt;--&gt;
+
+## Why does this exist?
+
+For devs who love ergonomics! You may appreciate Surreal if:
+
+* You want to stay as close as possible to Vanilla JS.
+* Hate typing `document.querySelector` over.. and over..
+* Hate typing `addEventListener` over.. and over..
+* Really wish `document.querySelectorAll` had Array functions..
+* Really wish `this` would work in any inline `&lt;script&gt;` tag
+* Enjoyed using jQuery selector syntax.
+* [Animations, timelines, tweens](#-quick-start) with no extra libraries.
+* Only 320 lines. No build step. No dependencies.
+* Pairs well with [htmx](https://htmx.org)
+* Want fewer layers, less complexity. Are aware of the cargo cult. ✈️
+
+## ✨ What does it add to Javascript?
+
+* ⚡️ [Locality of Behavior (LoB)](https://htmx.org/essays/locality-of-behaviour/) Use `me()` inside `&lt;script&gt;`
+  * No **.class** or **#id** needed! Get an element without creating a unique name.
+  * `this` but much more flexible!
+  * Want `me` in your CSS `&lt;style&gt;` tags, too? See our [companion script](https://github.com/gnat/css-scope-inline)
+* 🔗 Call chaining, jQuery style.
+* ♻️ Functions work seamlessly on 1 element or arrays of elements!
+  * All functions can use: `me()`, `any()`, `NodeList`, `HTMLElement` (..or arrays of these!)
+  * Get 1 element: `me()`
+  * ..or many elements: `any()`
+  * `me()` or `any()` can chain with any Surreal function.
+    * `me()` can be used directly as a single element (like `querySelector()` or `$()`)
+    * `any()` can use: `for` / `forEach` / `filter` / `map` (like `querySelectorAll()` or `$()`)
+* 🌗 No forced style. Use: `classAdd` or `class_add` or `addClass` or `add_class`
+  * Use `camelCase` (Javascript) or `snake_case` (Python, Rust, PHP, Ruby, SQL, CSS).
+
+### 🤔 Why use `me()` / `any()` instead of `$()`
+* 💡 Solves the classic jQuery bloat problem: Am I getting 1 element or an array of elements?
+  * `me()` is guaranteed to return 1 element (or first found, or null).
+  * `any()` is guaranteed to return an array (or empty array).
+  * No more checks = write less code. Bonus: Reads more like self-documenting english.
+
+## 👁️ How does it look?
+
+Do surreal things with [Locality of Behavior](https://htmx.org/essays/locality-of-behaviour/) like:
+```html
+&lt;label for=&quot;file-input&quot; &gt;
+  &lt;div class=&quot;uploader&quot;&gt;&lt;/div&gt;
+  &lt;script&gt;
+    me().on(&quot;dragover&quot;, ev =&gt; { halt(ev); me(ev).classAdd(&#x27;.hover&#x27;); console.log(&quot;Files in drop zone.&quot;) })
+    me().on(&quot;dragleave&quot;, ev =&gt; { halt(ev); me(ev).classRemove(&#x27;.hover&#x27;); console.log(&quot;Files left drop zone.&quot;) })
+    me().on(&quot;drop&quot;, ev =&gt; { halt(ev); me(ev).classRemove(&#x27;.hover&#x27;).classAdd(&#x27;.loading&#x27;); me(&#x27;#file-input&#x27;).attribute(&#x27;files&#x27;, ev.dataTransfer.files); me(&#x27;#form&#x27;).send(&#x27;change&#x27;) })
+  &lt;/script&gt;
+&lt;/label&gt;
+```
+
+See the [Live Example](https://gnat.github.io/surreal/example.html)! Then [view source](https://github.com/gnat/surreal/blob/main/example.html).
+
+## 🎁 Install
+
+Surreal is only 320 lines. No build step. No dependencies.
+
+[📥 Download](https://raw.githubusercontent.com/gnat/surreal/main/surreal.js) into your project, and add `&lt;script src=&quot;/surreal.js&quot;&gt;&lt;/script&gt;` in your `&lt;head&gt;`
+
+Or, 🌐 via CDN: `&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/surreal/1.3.2/surreal.js&quot;&gt;&lt;/script&gt;`
+
+## ⚡ Usage
+
+### &lt;a name=&quot;selectors&quot;&gt;&lt;/a&gt;🔍️ DOM Selection
+
+* Select **one** element: `me(...)`
+  * Can be any of:
+    * CSS selector: `&quot;.button&quot;`, `&quot;#header&quot;`, `&quot;h1&quot;`, `&quot;body &gt; .block&quot;`
+    * Variables: `body`, `e`, `some_element`
+    * Events: `event.currentTarget` will be used.
+    * Surreal selectors: `me()`,`any()`
+    * Choose the start location in the DOM with the 2nd arg. (Default: `document`)
+      * 🔥 `any(&#x27;button&#x27;, me(&#x27;#header&#x27;)).classAdd(&#x27;red&#x27;)`
+        * Add `.red` to any `&lt;button&gt;` inside of `#header`
+  * `me()` ⭐ Get parent element of `&lt;script&gt;` without a **.class** or **#id** !
+  * `me(&quot;body&quot;)` Gets `&lt;body&gt;`
+  * `me(&quot;.button&quot;)` Gets the first `&lt;div class=&quot;button&quot;&gt;...&lt;/div&gt;`. To get all of them use `any()`
+* Select **one or more** elements as an array: `any(...)`
+  * Like `me()` but guaranteed to return an array (or empty array). 
+  * `any(&quot;.foo&quot;)` ⭐ Get all matching elements.
+  * Convert between arrays of elements and single elements: `any(me())`, `me(any(&quot;.something&quot;))`
+ 
+### 🔥 DOM Functions
+
+* ♻️ All functions work on single elements or arrays of elements.
+* 🔗 Start a chain using `me()` and `any()`
+  * 🟢 Style A `me().classAdd(&#x27;red&#x27;)` ⭐ Chain style. Recommended!
+  * 🟠 Style B: `classAdd(me(), &#x27;red&#x27;)`
+* 🌐 Global conveniences help you write less code.
+  * `globalsAdd()` will automatically warn you of any clobbering issues!
+  * 💀🩸 If you want no conveniences, or are a masochist, delete `globalsAdd()`
+    * 🟢 `me().classAdd(&#x27;red&#x27;)` becomes `surreal.me().classAdd(&#x27;red&#x27;)`
+    * 🟠 `classAdd(me(), &#x27;red&#x27;)` becomes `surreal.classAdd(surreal.me(), &#x27;red&#x27;)`
+
+See: [Quick Start](#quick-start) and [Reference](#reference) and [No Surreal Needed](#no-surreal)
+
+## &lt;a name=&quot;quick-start&quot;&gt;&lt;/a&gt;⚡ Quick Start
+
+* Add a class
+  * `me().classAdd(&#x27;red&#x27;)`
+  * `any(&quot;button&quot;).classAdd(&#x27;red&#x27;)`
+* Events
+  * `me().on(&quot;click&quot;, ev =&gt; me(ev).fadeOut() )`
+  * `any(&#x27;button&#x27;).on(&#x27;click&#x27;, ev =&gt; { me(ev).styles(&#x27;color: red&#x27;) })`
+* Run functions over elements.
+  * `any(&#x27;button&#x27;).run(_ =&gt; { alert(_) })`
+* Styles / CSS
+  * `me().styles(&#x27;color: red&#x27;)`
+  * `me().styles({ &#x27;color&#x27;:&#x27;red&#x27;, &#x27;background&#x27;:&#x27;blue&#x27; })`
+* Attributes
+  * `me().attribute(&#x27;active&#x27;, true)`
+
+&lt;a name=&quot;timelines&quot;&gt;&lt;/a&gt;
+#### Timeline animations without any libraries.
+```html
+&lt;div&gt;I change color every second.
+  &lt;script&gt;
+    // On click, animate something new every second.
+    me().on(&quot;click&quot;, async ev =&gt; {
+      let el = me(ev) // Save target because async will lose it.
+      me(el).styles({ &quot;transition&quot;: &quot;background 1s&quot; })
+      await sleep(1000)
+      me(el).styles({ &quot;background&quot;: &quot;red&quot; })
+      await sleep(1000)
+      me(el).styles({ &quot;background&quot;: &quot;green&quot; })
+      await sleep(1000)
+      me(el).styles({ &quot;background&quot;: &quot;blue&quot; })
+      await sleep(1000)
+      me(el).styles({ &quot;background&quot;: &quot;none&quot; })
+      await sleep(1000)
+      me(el).remove()
+    })
+  &lt;/script&gt;
+&lt;/div&gt;
+```
+```html
+&lt;div&gt;I fade out and remove myself.
+  &lt;script&gt;me().on(&quot;click&quot;, ev =&gt; { me(ev).fadeOut() })&lt;/script&gt;
+&lt;/div&gt;
+```
+```html
+&lt;div&gt;Change color every second.
+  &lt;script&gt;
+    // Run immediately.
+    (async (e = me()) =&gt; {
+      me(e).styles({ &quot;transition&quot;: &quot;background 1s&quot; })
+      await sleep(1000)
+      me(e).styles({ &quot;background&quot;: &quot;red&quot; })
+      await sleep(1000)
+      me(e).styles({ &quot;background&quot;: &quot;green&quot; })
+      await sleep(1000)
+      me(e).styles({ &quot;background&quot;: &quot;blue&quot; })
+      await sleep(1000)
+      me(e).styles({ &quot;background&quot;: &quot;none&quot; })
+      await sleep(1000)
+      me(e).remove()
+    })()
+  &lt;/script&gt;
+&lt;/div&gt;
+```
+```html
+&lt;script&gt;
+  // Run immediately, for every &lt;button&gt; globally!
+  (async () =&gt; {
+    any(&quot;button&quot;).fadeOut()
+  })()
+&lt;/script&gt;
+```
+#### Array methods
+```js
+any(&#x27;button&#x27;)?.forEach(...)
+any(&#x27;button&#x27;)?.map(...)
+```
+
+## &lt;a name=&quot;reference&quot;&gt;&lt;/a&gt;👁️ Functions
+Looking for [DOM Selectors](#selectors)?
+Looking for stuff [we recommend doing in vanilla JS](#no-surreal)?
+### 🧭 Legend
+* 🔗 Chainable off `me()` and `any()`
+* 🌐 Global shortcut.
+* 🔥 Runnable example.
+* 🔌 Built-in Plugin
+### 👁️ At a glance
+
+* 🔗 `run`
+  * It&#x27;s `forEach` but less wordy and works on single elements, too!
+  * 🔥 `me().run(e =&gt; { alert(e) })`
+  * 🔥 `any(&#x27;button&#x27;).run(e =&gt; { alert(e) })`
+* 🔗 `remove`
+  * 🔥 `me().remove()`
+  * 🔥 `any(&#x27;button&#x27;).remove()`
+* 🔗 `classAdd` 🌗 `class_add` 🌗 `addClass` 🌗 `add_class`
+  * 🔥 `me().classAdd(&#x27;active&#x27;)`
+  * Leading `.` is **optional**
+    * Same thing: `me().classAdd(&#x27;active&#x27;)` 🌗 `me().classAdd(&#x27;.active&#x27;)`
+* 🔗 `classRemove` 🌗 `class_remove` 🌗 `removeClass` 🌗 `remove_class`
+  * 🔥 `me().classRemove(&#x27;active&#x27;)`
+* 🔗 `classToggle` 🌗 `class_toggle` 🌗 `toggleClass` 🌗 `toggle_class`
+  * 🔥 `me().classToggle(&#x27;active&#x27;)`
+* 🔗 `styles`
+  * 🔥 `me().styles(&#x27;color: red&#x27;)` Add style.
+  * 🔥 `me().styles({ &#x27;color&#x27;:&#x27;red&#x27;, &#x27;background&#x27;:&#x27;blue&#x27; })` Add multiple styles.
+  * 🔥 `me().styles({ &#x27;background&#x27;:null })` Remove style.
+* 🔗 `attribute` 🌗 `attributes` 🌗 `attr`
+  * Get: 🔥 `me().attribute(&#x27;data-x&#x27;)`
+    * For single elements.
+    * For many elements, wrap it in: `any(...).run(...)` or `any(...).forEach(...)`
+  * Set: 🔥`me().attribute(&#x27;data-x&#x27;, true)`
+  * Set multiple: 🔥 `me().attribute({ &#x27;data-x&#x27;:&#x27;yes&#x27;, &#x27;data-y&#x27;:&#x27;no&#x27; })`
+  * Remove: 🔥 `me().attribute(&#x27;data-x&#x27;, null)`
+  * Remove multiple: 🔥 `me().attribute({ &#x27;data-x&#x27;: null, &#x27;data-y&#x27;:null })`
+* 🔗 `send` 🌗 `trigger`
+  * 🔥 `me().send(&#x27;change&#x27;)`
+  * 🔥 `me().send(&#x27;change&#x27;, {&#x27;data&#x27;:&#x27;thing&#x27;})`
+  * Wraps `dispatchEvent`
+* 🔗 `on`
+  * 🔥 `me().on(&#x27;click&#x27;, ev =&gt; { me(ev).styles(&#x27;background&#x27;, &#x27;red&#x27;) })`
+  * Wraps `addEventListener`
+* 🔗 `off`
+  * 🔥 `me().off(&#x27;click&#x27;, fn)`
+  * Wraps `removeEventListener`
+* 🔗 `offAll`
+  * 🔥 `me().offAll()`
+* 🔗 `disable`
+  * 🔥 `me().disable()`
+  * Easy alternative to `off()`. Disables click, key, submit events.
+* 🔗 `enable`
+  * 🔥 `me().enable()`
+  * Opposite of `disable()`
+* 🌐 `sleep`
+  * 🔥 `await sleep(1000, ev =&gt; { alert(ev) })`
+  * `async` version of `setTimeout`
+  * Wonderful for animation timelines.
+* 🌐 `tick`
+  * 🔥 `await tick()`
+  * `await` version of `rAF` / `requestAnimationFrame`.
+  * Animation tick. Waits 1 frame.
+  * Great if you need to wait for events to propagate.
+* 🌐 `rAF`
+  * 🔥 `rAF(e =&gt; { return e })`
+  * Animation tick.  Fires when 1 frame has passed. Alias of [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)
+  * Great if you need to wait for events to propagate.
+* 🌐 `rIC`
+  * 🔥 `rIC(e =&gt; { return e })`
+  * Great time to compute. Fires function when JS is idle. Alias of [requestIdleCallback](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback)
+* 🌐 `halt`
+  * 🔥 `halt(event)`
+  * Prevent default browser behaviors.
+  * Wrapper for [preventDefault](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault)
+* 🌐 `createElement` 🌗 `create_element`
+  * 🔥 `e_new = createElement(&quot;div&quot;); me().prepend(e_new)`
+  * Alias of vanilla `document.createElement`
+* 🌐 `onloadAdd` 🌗 `onload_add` 🌗 `addOnload` 🌗 `add_onload`
+  * 🔥 `onloadAdd(_ =&gt; { alert(&quot;loaded!&quot;); })`
+  * 🔥 `&lt;script&gt;let e = me(); onloadAdd(_ =&gt; { me(e).on(&quot;click&quot;, ev =&gt; { alert(&quot;clicked&quot;) }) })&lt;/script&gt;`
+  * Execute after the DOM is ready. Similar to jquery `ready()`
+  * Add to `window.onload` while preventing overwrites of `window.onload` and predictable loading!
+  * Alternatives:
+    * Skip missing elements using `?.` example: `me(&quot;video&quot;)?.requestFullscreen()`
+    * Place `&lt;script&gt;` after the loaded element.
+      * See `me(&#x27;-&#x27;)` / `me(&#x27;prev&#x27;)`
+* 🔌 `fadeOut`
+  * See below
+* 🔌 `fadeIn`
+  * See below
+
+### &lt;a name=&quot;plugin-included&quot;&gt;&lt;/a&gt;🔌 Built-in Plugins
+
+### Effects
+Build effects with `me().styles({...})` with timelines using [CSS transitioned `await` or callbacks](#timelines).
+
+Common effects included:
+
+* 🔗 `fadeOut` 🌗 `fade_out`
+  * Fade out and remove element.
+  * Keep element with `remove=false`.
+  * 🔥 `me().fadeOut()`
+  * 🔥 `me().fadeOut(ev =&gt; { alert(&quot;Faded out!&quot;) }, 3000)` Over 3 seconds then call function.
+
+* 🔗 `fadeIn` 🌗 `fade_in`
+  * Fade in existing element which has `opacity: 0`
+  * 🔥 `me().fadeIn()`
+  * 🔥 `me().fadeIn(ev =&gt; { alert(&quot;Faded in!&quot;) }, 3000)` Over 3 seconds then call function.
+
+
+## &lt;a name=&quot;no-surreal&quot;&gt;&lt;/a&gt;⚪ No Surreal Needed
+
+More often than not, Vanilla JS is the easiest way!
+
+Logging
+* 🔥 `console.log()` `console.warn()` `console.error()`
+* Event logging: 🔥 `monitorEvents(me())` See: [Chrome Blog](https://developer.chrome.com/blog/quickly-monitor-events-from-the-console-panel-2/)
+
+Benchmarking / Time It!
+* 🔥 `console.time(&#x27;name&#x27;)`
+* 🔥 `console.timeEnd(&#x27;name&#x27;)`
+
+Text / HTML Content
+* 🔥 `me().textContent = &quot;hello world&quot;`
+  * XSS Safe! See: [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent)
+* 🔥 `me().innerHTML = &quot;&lt;p&gt;hello world&lt;/p&gt;&quot;`
+* 🔥 `me().innerText = &quot;hello world&quot;`
+
+Children
+* 🔥 `me().children`
+* 🔥 `me().children.hidden = true`
+
+Append / Prepend elements.
+* 🔥 `me().prepend(new_element)`
+* 🔥 `me().appendChild(new_element)`
+* 🔥 `me().insertBefore(element, other_element.firstChild)`
+* 🔥 `me().insertAdjacentHTML(&quot;beforebegin&quot;, new_element)`
+
+AJAX (replace jQuery `ajax()`)
+* Use [htmx](https://htmx.org/) or [htmz](https://leanrada.com/htmz/) or [fetch()](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) or [XMLHttpRequest()](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) directly.
+* Using `fetch()`
+```js
+me().on(&quot;click&quot;, async event =&gt; {
+  let e = me(event)
+  // EXAMPLE 1: Hit an endpoint.
+  if((await fetch(&quot;/webhook&quot;)).ok) console.log(&quot;Did the thing.&quot;)
+  // EXAMPLE 2: Get content and replace me()
+  try {
+    let response = await fetch(&#x27;/endpoint&#x27;)
+    if (response.ok) e.innerHTML = await response.text()
+    else console.warn(&#x27;fetch(): Bad response&#x27;)
+  }
+  catch (error) { console.warn(`fetch(): ${error}`) }
+})
+```
+* Using `XMLHttpRequest()`
+```js
+me().on(&quot;click&quot;, async event =&gt; {
+  let e = me(event)
+  // EXAMPLE 1: Hit an endpoint.
+  var xhr = new XMLHttpRequest()
+  xhr.open(&quot;GET&quot;, &quot;/webhook&quot;)
+  xhr.send()
+  // EXAMPLE 2: Get content and replace me()
+  var xhr = new XMLHttpRequest()
+  xhr.open(&quot;GET&quot;, &quot;/endpoint&quot;)
+  xhr.onreadystatechange = () =&gt; {
+    if (xhr.readyState == 4 &amp;&amp; xhr.status &gt;= 200 &amp;&amp; xhr.status &lt; 300) e.innerHTML = xhr.responseText
+  }
+  xhr.send()
+})
+```
+
+ ## 💎 Conventions &amp; Tips
+
+* Many ideas can be done in HTML / CSS (ex: dropdowns)
+* `_` = for temporary or unused variables. Keep it short and sweet!
+* `e`, `el`, `elt` = element
+* `e`, `ev`, `evt` = event
+* `f`, `fn` = function
+
+#### Scope functions inside `&lt;script&gt;`
+  * ⭐ On `me()`
+    *  `me().hey = (text) =&gt; { alert(text) }`
+    *  `me().on(&#x27;click&#x27;, (ev) =&gt; { me(ev).hey(&quot;hi&quot;) })`
+  * ⭐ Use a block: `{ function hey(text) { alert(text) }; me().on(&#x27;click&#x27;, ev =&gt; { hey(&quot;hi&quot;) }) }`
+  * ⭐ Use an event: `me().on(&#x27;click&#x27;, ev =&gt; { /* add and call function here */ })`
+  * Use an inline module: `&lt;script type=&quot;module&quot;&gt;`
+    * Note: `me()` will no longer see `parentElement` so explicit selectors are required: `me(&quot;.mybutton&quot;)`
+
+#### Select a void element like `&lt;input type=&quot;text&quot; /&gt;`
+* Use: `me(&#x27;-&#x27;)` or `me(&#x27;prev&#x27;)` or `me(&#x27;previous&#x27;)`
+  * 🔥 `&lt;input type=&quot;text&quot; /&gt; &lt;script&gt;me(&#x27;-&#x27;).value = &quot;hello&quot;&lt;/script&gt;`
+  * Inspired by the CSS &quot;next sibling&quot; combinator `+` but in reverse `-`
+* Or, use a relative start.
+  * 🔥 `&lt;form&gt; &lt;input type=&quot;text&quot; n1 /&gt; &lt;script&gt;me(&#x27;[n1]&#x27;, me()).value = &quot;hello&quot;&lt;/script&gt; &lt;/form&gt;`
+
+#### Ignore call chain when element is missing.
+* 🔥 `me(&quot;#i_dont_exist&quot;)?.classAdd(&#x27;active&#x27;)`
+* No warnings: 🔥 `me(&quot;#i_dont_exist&quot;, document, false)?.classAdd(&#x27;active&#x27;)`
+
+## &lt;a name=&quot;plugins&quot;&gt;&lt;/a&gt;🔌 Your own plugin
+
+Feel free to edit Surreal directly- but if you prefer, you can use plugins to effortlessly merge with new versions.
+
+```javascript
+function pluginHello(e) {
+  function hello(e, name=&quot;World&quot;) {
+    console.log(`Hello ${name} from ${e}`)
+    return e // Make chainable.
+  }
+  // Add sugar
+  e.hello = (name) =&gt; { return hello(e, name) }
+}
+
+surreal.plugins.push(pluginHello)
+```
+
+Now use your function like: `me().hello(&quot;Internet&quot;)`
+
+* See the included `pluginEffects` for a more comprehensive example.
+* Your functions are added globally by `globalsAdd()` If you do not want this, add it to the `restricted` list.
+* Refer to an existing function to see how to make yours work with 1 or many elements.
+
+Make an [issue](https://github.com/gnat/surreal/issues) or [pull request](https://github.com/gnat/surreal/pulls) if you think people would like to use it! If it&#x27;s useful enough we&#x27;ll want it in core.
+
+### ⭐ Awesome Surreal examples, plugins, and resources: [awesome-surreal](https://github.com/gnat/awesome-surreal) !
+
+## 📚️ Inspired by
+
+* [jQuery](https://jquery.com/) for the chainable syntax we all love.
+* [BlingBling.js](https://github.com/argyleink/blingblingjs) for modern minimalism.
+* [Bliss.js](https://blissfuljs.com/) for a focus on single elements and extensibility.
+* [Hyperscript](https://hyperscript.org) for Locality of Behavior and awesome ergonomics.
+* Shout out to [Umbrella](https://umbrellajs.com/), [Cash](https://github.com/fabiospampinato/cash), [Zepto](https://zeptojs.com/)- Not quite as ergonomic. Requires build step to extend.
+
+## 🌘 Future
+* Always more `example.html` goodies!
+* Automated browser testing perhaps with:
+  * [Fava](https://github.com/fabiospampinato/fava). See: https://github.com/avajs/ava/issues/24#issuecomment-885949036
+  * [Ava](https://github.com/avajs/ava/blob/main/docs/recipes/browser-testing.md)
+  * [jsdom](https://github.com/jsdom/jsdom)
+    * [jsdom notes](https://github.com/jsdom/jsdom#executing-scripts)</doc>
+    <doc title="CSS Scope Inline" info="A JS library which allow `me` to be used in CSS selectors, by using a `MutationObserver` to monitor the DOM"># 🌘 CSS Scope Inline
+
+![cover](https://github.com/gnat/css-scope-inline/assets/24665/c4935c1b-34e3-4220-9d42-11f064999a57)
+(Art by [shahabalizadeh](https://www.artstation.com/artwork/zDgdd))
+
+## Why does this exist?
+
+* You want an easy inline vanilla CSS experience without Tailwind CSS.
+* Hate creating unique class names over.. and over.. to use once.
+* You want to co-locate your styles for ⚡️ [Locality of Behavior (LoB)](https://htmx.org/essays/locality-of-behaviour/)
+* You wish `this` would work in `&lt;style&gt;` tags.
+* Want all CSS features: [Nesting](https://caniuse.com/css-nesting), animations. Get scoped [`@keyframes`](https://github.com/gnat/css-scope-inline/blob/main/example.html#L86)!
+* You wish `@media` queries were shorter for [responsive design](https://tailwindcss.com/docs/responsive-design).
+* Only 16 lines. No build step. No dependencies.
+* Pairs well with [htmx](https://htmx.org) and [Surreal](https://github.com/gnat/surreal)
+* Want fewer layers, less complexity. Are aware of the cargo cult. ✈️
+
+✨ Want to also scope your `&lt;script&gt;` tags? See our companion project [Surreal](https://github.com/gnat/surreal)
+
+## 👁️ How does it look?
+```html
+&lt;div&gt;
+    &lt;style&gt;
+        me { background: red; } /* ✨ this &amp; self also work! */
+        me button { background: blue; } /* style child elements inline! */
+    &lt;/style&gt;
+    &lt;button&gt;I&#x27;m blue&lt;/button&gt;
+&lt;/div&gt;
+```
+See the [Live Example](https://gnat.github.io/css-scope-inline/example.html)! Then [view source](https://github.com/gnat/css-scope-inline/blob/main/example.html).
+
+## 🌘 How does it work?
+
+This uses `MutationObserver` to monitor the DOM, and the moment a `&lt;style&gt;` tag is seen, it scopes the styles to whatever the parent element is. No flashing or popping. 
+
+This method also leaves your existing styles untouched, allowing you to mix and match at your leisure.
+
+## 🎁 Install
+
+✂️ copy + 📋 paste the snippet into `&lt;script&gt;` in your `&lt;head&gt;`
+
+Or, [📥 download](https://raw.githubusercontent.com/gnat/css-scope-inline/main/script.js) into your project, and add `&lt;script src=&quot;script.js&quot;&gt;&lt;/script&gt;` in your `&lt;head&gt;`
+
+Or, 🌐 CDN: `&lt;script src=&quot;https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js&quot;&gt;&lt;/script&gt;`
+
+## 🤔 Why consider this over Tailwind CSS?
+
+Use whatever you&#x27;d like, but there&#x27;s a few advantages with this approach over Tailwind, Twind, UnoCSS:
+
+* No more [repeating styles](https://tailwindcss.com/docs/reusing-styles) on child elements (..no [@apply](https://tailwindcss.com/docs/reusing-styles#extracting-classes-with-apply), no `[&amp;&gt;thing]` per style). It&#x27;s just CSS!
+* No endless visual noise on every `&lt;div&gt;`. Use a local `&lt;style&gt;` per group.
+* No high risk of eventually requiring a build step.
+* No chance of [deprecations](https://windicss.org/posts/sunsetting.html). 16 lines is infinitely maintainable.
+* Get the ultra-fast &quot;inspect, play with styles, paste&quot; workflow back.
+* No suffering from FOUC (a flash of unstyled content).
+* Zero friction movement of styles between inline and `.css` files. Just replace `me`
+* No special tooling or plugins to install. Universal vanilla CSS. 
+
+## ⚡ Workflow Tips
+
+* Flat, 1 selector per line can be very short like Tailwind. See the examples.
+* Use just plain CSS variables in your design system.
+* Use the short `@media` queries for responsive design.
+  * Mobile First (flow: **above** breakpoint): **🟢 None** `sm` `md` `lg` `xl` `xx` 🏁
+  * Desktop First (flow: **below** breakpoint): 🏁 `xs-` `sm-` `md-` `lg-` `xl-` **🟢 None**
+  * 🟢 = No breakpoint. Default. See the [Live Example](https://gnat.github.io/css-scope-inline/example.html)!
+  * Based on [Tailwind](https://tailwindcss.com/docs/responsive-design) breakpoints. We use `xx` not `2xl` to not break CSS highlighters.
+  * Unlike Tailwind, you can [nest your @media styles](https://developer.chrome.com/articles/css-nesting/#nesting-media)!
+* Positional selectors may be easier using `div[n1]` for `&lt;div n1&gt;` instead of `div:nth-child(1)`
+* Try tools like- Auto complete styles: [VSCode](https://code.visualstudio.com/) or [Sublime](https://packagecontrol.io/packages/Emmet)
+
+## 👁️ CSS Scope Inline vs Tailwind CSS Showdowns
+### Basics
+Tailwind verbosity goes up with more child elements.
+```html
+&lt;div&gt;
+    &lt;style&gt;
+        me { background: red; }
+        me div { background: green; }
+        me div[n1] { background: yellow; }
+        me div[n2] { background: blue; }
+    &lt;/style&gt;
+    red
+    &lt;div&gt;green&lt;/div&gt;
+    &lt;div&gt;green&lt;/div&gt;
+    &lt;div&gt;green&lt;/div&gt;
+    &lt;div n1&gt;yellow&lt;/div&gt;
+    &lt;div n2&gt;blue&lt;/div&gt;
+    &lt;div&gt;green&lt;/div&gt;
+    &lt;div&gt;green&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;bg-[red]&quot;&gt;
+    red
+    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
+    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
+    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
+    &lt;div class=&quot;bg-[yellow]&quot;&gt;yellow&lt;/div&gt;
+    &lt;div class=&quot;bg-[blue]&quot;&gt;blue&lt;/div&gt;
+    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
+    &lt;div class=&quot;bg-[green]&quot;&gt;green&lt;/div&gt;
+&lt;/div&gt;
+```
+### CSS variables and child styling
+```html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;style&gt;
+            :root {
+                --color-1: hsl(0 0% 88%);
+                --color-1-active: hsl(214 20% 70%);
+            }
+        &lt;/style&gt;
+        &lt;script src=&quot;https://cdn.tailwindcss.com&quot;&gt;&lt;/script&gt;
+        &lt;script src=&quot;https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js&quot;&gt;&lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;!-- CSS Scope Inline --&gt;
+        &lt;div&gt;
+            &lt;style&gt;
+               me { margin:8px 6px; }
+               me div a { display:block; padding:8px 12px; margin:10px 0; background:var(--color-1); border-radius:10px; text-align:center; }
+               me div a:hover { background:var(--color-1-active); color:white; }
+            &lt;/style&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Home&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Team&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Profile&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Settings&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Log Out&lt;/a&gt;&lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Tailwind Example 1 --&gt;
+        &lt;div class=&quot;mx-2 my-4&quot;&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Home&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Team&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Profile&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Settings&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot; class=&quot;block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white&quot;&gt;Log Out&lt;/a&gt;&lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Tailwind Example 2 --&gt;
+        &lt;div class=&quot;mx-2 my-4
+            [&amp;_div_a]:block [&amp;_div_a]:py-2 [&amp;_div_a]:px-3 [&amp;_div_a]:my-2 [&amp;_div_a]:bg-[--color-1] [&amp;_div_a]:rounded-lg [&amp;_div_a]:text-center
+            [&amp;_div_a:hover]:bg-[--color-1-active] [&amp;_div_a:hover]:text-white&quot;&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Home&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Team&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Profile&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Settings&lt;/a&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Log Out&lt;/a&gt;&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+```
+## 🔎 Technical FAQ
+* Why do you use `querySelectorAll()` and not just process the `MutationObserver` results directly?
+  * This was indeed the original design; it will work well up until you begin recieving subtrees (ex: DOM swaps with [htmx](https://htmx.org), ajax, jquery, etc.) which requires walking all subtree elements to ensure we do not miss a `&lt;style&gt;`. This unfortunately involves re-scanning thousands of repeated elements. This is why `querySelectorAll()` ends up the performance (and simplicity) winner.</doc>
     <doc title="HTMX reference" info="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
 title = &quot;Reference&quot;
 +++
@@ -1654,6 +1661,34 @@ You can set them directly in javascript, or you can use a `meta` tag:
 ```</doc>
   </docs>
   <examples>
+    <doc title="Websockets application">from asyncio import sleep
+from fasthtml.common import *
+
+app = FastHTML(ws_hdr=True)
+rt = app.route
+
+def mk_inp(): return Input(id=&#x27;msg&#x27;)
+nid = &#x27;notifications&#x27;
+
+@rt(&#x27;/&#x27;)
+async def get():
+    cts = Div(
+        Div(id=nid),
+        Form(mk_inp(), id=&#x27;form&#x27;, ws_send=True),
+        hx_ext=&#x27;ws&#x27;, ws_connect=&#x27;/ws&#x27;)
+    return Titled(&#x27;Websocket Test&#x27;, cts)
+
+async def on_connect(send): await send(Div(&#x27;Hello, you have connected&#x27;, id=nid))
+async def on_disconnect( ): print(&#x27;Disconnected!&#x27;)
+
+@app.ws(&#x27;/ws&#x27;, conn=on_connect, disconn=on_disconnect)
+async def ws(msg:str, send):
+    await send(Div(&#x27;Hello &#x27; + msg, id=nid))
+    await sleep(2)
+    return Div(&#x27;Goodbye &#x27; + msg, id=nid), mk_inp()
+
+serve()
+</doc>
     <doc title="Todo list application">###
 # Walkthrough of an idiomatic fasthtml app
 ###
@@ -1947,34 +1982,6 @@ async def get(id:int):
     return Div(H2(todo.title), Div(todo.details, cls=&quot;markdown&quot;), btn)
 
 serve()</doc>
-    <doc title="Websockets application">from asyncio import sleep
-from fasthtml.common import *
-
-app = FastHTML(ws_hdr=True)
-rt = app.route
-
-def mk_inp(): return Input(id=&#x27;msg&#x27;)
-nid = &#x27;notifications&#x27;
-
-@rt(&#x27;/&#x27;)
-async def get():
-    cts = Div(
-        Div(id=nid),
-        Form(mk_inp(), id=&#x27;form&#x27;, ws_send=True),
-        hx_ext=&#x27;ws&#x27;, ws_connect=&#x27;/ws&#x27;)
-    return Titled(&#x27;Websocket Test&#x27;, cts)
-
-async def on_connect(send): await send(Div(&#x27;Hello, you have connected&#x27;, id=nid))
-async def on_disconnect( ): print(&#x27;Disconnected!&#x27;)
-
-@app.ws(&#x27;/ws&#x27;, conn=on_connect, disconn=on_disconnect)
-async def ws(msg:str, send):
-    await send(Div(&#x27;Hello &#x27; + msg, id=nid))
-    await sleep(2)
-    return Div(&#x27;Goodbye &#x27; + msg, id=nid), mk_inp()
-
-serve()
-</doc>
   </examples>
 </project>
 
