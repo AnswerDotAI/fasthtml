@@ -157,7 +157,7 @@ async def _find_p(req, arg:str, p:Parameter):
         if arg.lower()=='app': return req.scope['app']
         if arg.lower()=='body': return (await req.body()).decode()
         if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(req, arg.lower())
-        warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")
+        if arg!='resp': warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")
         return None
     # Look through path, cookies, headers, query, and body in that order
     res = req.path_params.get(arg, None)

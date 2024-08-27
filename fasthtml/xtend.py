@@ -4,8 +4,8 @@
 
 # %% auto 0
 __all__ = ['A', 'Form', 'AX', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format',
-           'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'Titled', 'Socials',
-           'Favicon', 'jsd', 'clear']
+           'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'Titled',
+           'Socials', 'Favicon', 'jsd', 'clear']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
@@ -138,6 +138,12 @@ def run_js(js, id=None, **kw):
     if not id: id = sys._getframe(1).f_code.co_name
     kw = {k:dumps(v) for k,v in kw.items()}
     return Script(js.format(**kw), id=id, hx_swap_oob='true')
+
+# %% ../nbs/api/02_xtend.ipynb
+def HtmxOn(eventname:str, code:str):
+    return Script(f'''document.addEventListener('DOMContentLoaded', function() {{
+document.body.addEventListener("htmx:{eventname}", function(event) {{ {code} }})
+}})''')
 
 # %% ../nbs/api/02_xtend.ipynb
 @delegates(ft_hx, keep=True)
