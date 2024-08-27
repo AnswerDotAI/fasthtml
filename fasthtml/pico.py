@@ -4,7 +4,7 @@
 
 # %% auto 0
 __all__ = ['picocss', 'picolink', 'picocondcss', 'picocondlink', 'set_pico_cls', 'Card', 'Group', 'Search', 'Grid', 'DialogX',
-           'Container']
+           'Container', 'PicoBusy']
 
 # %% ../nbs/api/04_pico.ipynb
 from typing import Any
@@ -83,3 +83,8 @@ def DialogX(*c, open=None, header=None, footer=None, id=None, **kwargs)->FT:
 def Container(*args, **kwargs)->FT:
     "A PicoCSS Container, implemented as a Main with class 'container'"
     return Main(*args, cls="container", **kwargs)
+
+# %% ../nbs/api/04_pico.ipynb
+def PicoBusy():
+    return (HtmxOn('beforeRequest', "event.detail.elt.setAttribute('aria-busy', 'true' )"),
+            HtmxOn('afterRequest',  "event.detail.elt.setAttribute('aria-busy', 'false')"))
