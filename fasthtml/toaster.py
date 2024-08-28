@@ -50,7 +50,7 @@ def render_toasts(sess):
     return Div(Div(*toasts, cls="fh-toast-container"),
                hx_swap_oob="afterbegin:body")
 
-def toast_after(resp, req, sess):
+def toast_after(req, sess):
     if sk in sess and isinstance(resp, FT): req.injects.append(render_toasts(sess))
 
 def setup_toasts(app):
