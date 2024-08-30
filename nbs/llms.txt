@@ -8,7 +8,7 @@
 - [HTMX reference](https://raw.githubusercontent.com/bigskysoftware/htmx/master/www/content/reference.md): Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options
 - [Surreal](https://raw.githubusercontent.com/AnswerDotAI/surreal/main/README.md): Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions
 - [CSS Scope Inline](https://raw.githubusercontent.com/gnat/css-scope-inline/main/README.md): A JS library which allow `me` to be used in CSS selectors, by using a `MutationObserver` to monitor the DOM
-- [Starlette quick guide](https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb): A quick overview of some Starlette features useful to FastHTML devs.
+- [Starlette quick guide](https://gist.githubusercontent.com/jph00/e91192e9bdc1640f5421ce3c904f2efb/raw/61a2774912414029edaf1a55b506f0e283b93c46/starlette-quick.md): A quick overview of some Starlette features useful to FastHTML devs.
 
 ## Examples
 
