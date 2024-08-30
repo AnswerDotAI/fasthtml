@@ -362,7 +362,14 @@ and `Link` are specific to the most common static media use cases in web
 apps: including JavaScript, CSS, and images. But it also works with
 videos and other static media files. The default behavior is to look for
 these files in the root directory - typically we don’t do anything
-special to include them.
+special to include them. We can change the default directory that is
+looked in for files by adding the `static_path` parameter to the
+[`fast_app`](https://AnswerDotAI.github.io/fasthtml/api/fastapp.html#fast_app)
+function.
+
+``` python
+app, rt = fast_app(static_path=&#x27;public&#x27;)
+```
 
 FastHTML also allows us to define a route that uses `FileResponse` to
 serve the file at a specified path. This is useful for serving images,
@@ -1440,14 +1447,15 @@ me().on(&quot;click&quot;, async event =&gt; {
 * `e`, `ev`, `evt` = event
 * `f`, `fn` = function
 
-#### Scope functions inside `&lt;script&gt;`
-  * ⭐ On `me()`
+#### Scope functions and variables inside `&lt;script&gt;`
+  * ⭐ Use a block `{ let note = &quot;hi&quot;; function hey(text) { alert(text) }; me().on(&#x27;click&#x27;, ev =&gt; { hey(note) }) }`
+    * `let` and `function` is scoped within `{ }`
+  * ⭐ Use `me()`
     *  `me().hey = (text) =&gt; { alert(text) }`
     *  `me().on(&#x27;click&#x27;, (ev) =&gt; { me(ev).hey(&quot;hi&quot;) })`
-  * ⭐ Use a block: `{ function hey(text) { alert(text) }; me().on(&#x27;click&#x27;, ev =&gt; { hey(&quot;hi&quot;) }) }`
-  * ⭐ Use an event: `me().on(&#x27;click&#x27;, ev =&gt; { /* add and call function here */ })`
+  * ⭐ Use an event `me().on(&#x27;click&#x27;, ev =&gt; { /* add and call function here */ })`
   * Use an inline module: `&lt;script type=&quot;module&quot;&gt;`
-    * Note: `me()` will no longer see `parentElement` so explicit selectors are required: `me(&quot;.mybutton&quot;)`
+    * Note: `me()` in modules will not see `parentElement`, explicit selectors are required: `me(&quot;.mybutton&quot;)`
 
 #### Select a void element like `&lt;input type=&quot;text&quot; /&gt;`
 * Use: `me(&#x27;-&#x27;)` or `me(&#x27;prev&#x27;)` or `me(&#x27;previous&#x27;)`
@@ -1659,6 +1667,1290 @@ Tailwind verbosity goes up with more child elements.
 ## 🔎 Technical FAQ
 * Why do you use `querySelectorAll()` and not just process the `MutationObserver` results directly?
   * This was indeed the original design; it will work well up until you begin recieving subtrees (ex: DOM swaps with [htmx](https://htmx.org), ajax, jquery, etc.) which requires walking all subtree elements to ensure we do not miss a `&lt;style&gt;`. This unfortunately involves re-scanning thousands of repeated elements. This is why `querySelectorAll()` ends up the performance (and simplicity) winner.</doc>
+    <doc title="Starlette quick guide" info="A quick overview of some Starlette features useful to FastHTML devs.">
+
+
+
+
+
+&lt;!DOCTYPE html&gt;
+&lt;html
+  lang=&quot;en&quot;
+  
+  data-color-mode=&quot;auto&quot; data-light-theme=&quot;light&quot; data-dark-theme=&quot;dark&quot;
+  data-a11y-animated-images=&quot;system&quot; data-a11y-link-underlines=&quot;true&quot;
+  &gt;
+
+
+
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;link rel=&quot;dns-prefetch&quot; href=&quot;https://github.githubassets.com&quot;&gt;
+  &lt;link rel=&quot;dns-prefetch&quot; href=&quot;https://avatars.githubusercontent.com&quot;&gt;
+  &lt;link rel=&quot;dns-prefetch&quot; href=&quot;https://github-cloud.s3.amazonaws.com&quot;&gt;
+  &lt;link rel=&quot;dns-prefetch&quot; href=&quot;https://user-images.githubusercontent.com/&quot;&gt;
+  &lt;link rel=&quot;preconnect&quot; href=&quot;https://github.githubassets.com&quot; crossorigin&gt;
+  &lt;link rel=&quot;preconnect&quot; href=&quot;https://avatars.githubusercontent.com&quot;&gt;
+
+  
+
+  &lt;link crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; href=&quot;https://github.githubassets.com/assets/light-3e154969b9f9.css&quot; /&gt;&lt;link crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; href=&quot;https://github.githubassets.com/assets/dark-9c5b7a476542.css&quot; /&gt;&lt;link data-color-theme=&quot;dark_dimmed&quot; crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; data-href=&quot;https://github.githubassets.com/assets/dark_dimmed-afda8eb0fb33.css&quot; /&gt;&lt;link data-color-theme=&quot;dark_high_contrast&quot; crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; data-href=&quot;https://github.githubassets.com/assets/dark_high_contrast-2494e44ccdc5.css&quot; /&gt;&lt;link data-color-theme=&quot;dark_colorblind&quot; crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; data-href=&quot;https://github.githubassets.com/assets/dark_colorblind-56fff47acadc.css&quot; /&gt;&lt;link data-color-theme=&quot;light_colorblind&quot; crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; data-href=&quot;https://github.githubassets.com/assets/light_colorblind-71cd4cc132ec.css&quot; /&gt;&lt;link data-color-theme=&quot;light_high_contrast&quot; crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; data-href=&quot;https://github.githubassets.com/assets/light_high_contrast-fd5499848985.css&quot; /&gt;&lt;link data-color-theme=&quot;light_tritanopia&quot; crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; data-href=&quot;https://github.githubassets.com/assets/light_tritanopia-31d17ba3e139.css&quot; /&gt;&lt;link data-color-theme=&quot;dark_tritanopia&quot; crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; data-href=&quot;https://github.githubassets.com/assets/dark_tritanopia-68d6b2c79663.css&quot; /&gt;
+    &lt;link crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; href=&quot;https://github.githubassets.com/assets/primer-primitives-fd4f6f126b06.css&quot; /&gt;
+    &lt;link crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; href=&quot;https://github.githubassets.com/assets/primer-3f55af1462e6.css&quot; /&gt;
+    &lt;link crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; href=&quot;https://github.githubassets.com/assets/global-561250c1bd8a.css&quot; /&gt;
+    &lt;link crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; href=&quot;https://github.githubassets.com/assets/github-e4eed26e112b.css&quot; /&gt;
+  
+
+  
+
+
+  &lt;script type=&quot;application/json&quot; id=&quot;client-env&quot;&gt;{&quot;locale&quot;:&quot;en&quot;,&quot;featureFlags&quot;:[&quot;ab_test_homepage_what_is_copilot_video&quot;,&quot;code_vulnerability_scanning&quot;,&quot;copilot_beta_features_opt_in&quot;,&quot;copilot_chat_conversation_intent_knowledge_search_skill&quot;,&quot;copilot_chat_static_thread_suggestions&quot;,&quot;copilot_completion_new_domain&quot;,&quot;copilot_conversational_ux_history_refs&quot;,&quot;copilot_copy_message&quot;,&quot;copilot_followup_to_agent&quot;,&quot;copilot_implicit_context&quot;,&quot;copilot_smell_icebreaker_ux&quot;,&quot;custom_inp&quot;,&quot;experimentation_azure_variant_endpoint&quot;,&quot;failbot_handle_non_errors&quot;,&quot;geojson_azure_maps&quot;,&quot;ghost_pilot_confidence_truncation_25&quot;,&quot;ghost_pilot_stream_handling&quot;,&quot;hovercard_accessibility&quot;,&quot;hovercard_longer_activate_timeout&quot;,&quot;marketing_pages_search_explore_provider&quot;,&quot;remove_child_patch&quot;,&quot;sample_network_conn_type&quot;,&quot;site_metered_billing_update&quot;]}&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/wp-runtime-4ee0d84d5959.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_dompurify_dist_purify_js-89a69c248502.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_oddbird_popover-polyfill_dist_popover_js-56729c905fe2.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_arianotify-polyfill_ariaNotify-polyfill_js-node_modules_github_mi-247092-627b030d3acc.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/environment-924e60bca7d2.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_selector-observer_dist_index_esm_js-f690fd9ae3d5.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_primer_behaviors_dist_esm_focus-zone_js-c9086a4fb62b.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_relative-time-element_dist_index_js-7b95699705bc.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_primer_behaviors_dist_esm_anchored-position_js-node_modules_fzy_js_index-192fd2-a07608c791cf.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_auto-complete-element_dist_index_js-node_modules_github_details-d-ed9a97-841122a1e9d4.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_text-expander-element_dist_index_js-cd48220d74d5.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_mini-throttle_dist_index_js-node_modules_delegated-events_dist_in-3efda3-701acb69193f.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_filter-input-element_dist_index_js-node_modules_github_remote-inp-2e8678-34feeec9c894.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_catalyst_lib_index_js-node_modules_github_clipboard-copy-element_-782ca5-54763cd55b96.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_file-attachment-element_dist_index_js-node_modules_primer_view-co-10eecb-8056ef83b81e.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/ui_packages_onfocus_onfocus_ts-ui_packages_trusted-types-policies_policy_ts-ui_packages_trust-0eb5c4-372296785620.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/github-elements-508a45ca23c6.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/element-registry-5ec355c5ba5e.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_catalyst_lib_index_js-node_modules_github_hydro-analytics-client_-7901e7-dc88587c14ed.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_braintree_browser-detection_dist_browser-detection_js-node_modules_stack-68835d-a18220f1db8d.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_lit-html_lit-html_js-ce7225a304c5.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_mini-throttle_dist_index_js-node_modules_morphdom_dist_morphdom-e-7c534c-f8a5485c982a.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_turbo_dist_turbo_es2017-esm_js-858e043fcf76.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_remote-form_dist_index_js-node_modules_delegated-events_dist_inde-893f9f-6cf3320416b8.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_scroll-anchoring_dist_scroll-anchoring_esm_js-node_modules_github_hotkey-1a1d91-fa9f29a8514b.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_color-convert_index_js-0e07cc183eed.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_session-resume_dist_index_js-node_modules_primer_behaviors_dist_e-ac74c6-5e03381c44b5.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_primer_behaviors_dist_esm_dimensions_js-node_modules_github_jtml_lib_index_js-53b423ede32a.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_quote-selection_dist_index_js-node_modules_github_textarea-autosi-9e0349-ab4976fc78a6.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/ui_packages_updatable-content_updatable-content_ts-a2009221d154.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/app_assets_modules_github_behaviors_task-list_ts-app_assets_modules_github_sso_ts-ui_packages-e1ce06-30f9d5de7ad2.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/app_assets_modules_github_sticky-scroll-into-view_ts-112600808cf9.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/app_assets_modules_github_behaviors_ajax-error_ts-app_assets_modules_github_behaviors_include-467754-8979fbf79bf6.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/app_assets_modules_github_behaviors_commenting_edit_ts-app_assets_modules_github_behaviors_ht-83c235-aeae6fcdf371.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/app_assets_modules_github_blob-anchor_ts-app_assets_modules_github_jump-to_page-views_ts-ui_p-38f236-6918e89ea155.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/behaviors-b43b83716346.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_delegated-events_dist_index_js-node_modules_github_catalyst_lib_index_js-06ff531-bf7e5a3732fd.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/notifications-global-54f34167118d.js&quot;&gt;&lt;/script&gt;
+  
+  &lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_mini-throttle_dist_index_js-node_modules_github_remote-form_dist_-96601c-76dca5845d61.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/app_assets_modules_github_diffs_blob-lines_ts-app_assets_modules_github_diffs_linkable-line-n-e2d8d7-57be3d190df1.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/gist-07a224366347.js&quot;&gt;&lt;/script&gt;
+
+
+  &lt;title&gt;Starlette Quick Manual for FastHTML users · GitHub&lt;/title&gt;
+
+
+
+  &lt;meta name=&quot;route-pattern&quot; content=&quot;/:user_id/:gist_id(.:format)&quot; data-turbo-transient&gt;
+  &lt;meta name=&quot;route-controller&quot; content=&quot;gists_gists&quot; data-turbo-transient&gt;
+  &lt;meta name=&quot;route-action&quot; content=&quot;show&quot; data-turbo-transient&gt;
+
+    
+  &lt;meta name=&quot;current-catalog-service-hash&quot; content=&quot;56253a530ab9027b25719525dcbe6007461a3202218f6f5dfce5a601c121cbcb&quot;&gt;
+
+
+  &lt;meta name=&quot;request-id&quot; content=&quot;D97A:17576A:10D4E:13939:66D236C5&quot; data-pjax-transient=&quot;true&quot;/&gt;&lt;meta name=&quot;html-safe-nonce&quot; content=&quot;f37e55bb5386a90400d5e637dcb6bfc23127989cbbe92c7433743a9cdbcdb00d&quot; data-pjax-transient=&quot;true&quot;/&gt;&lt;meta name=&quot;visitor-payload&quot; content=&quot;eyJyZWZlcnJlciI6IiIsInJlcXVlc3RfaWQiOiJEOTdBOjE3NTc2QToxMEQ0RToxMzkzOTo2NkQyMzZDNSIsInZpc2l0b3JfaWQiOiI0MDYxNDUxNTE0OTc5NDMyMTMzIiwicmVnaW9uX2VkZ2UiOiJhZS0wMSIsInJlZ2lvbl9yZW5kZXIiOiJhdXN0cmFsaWFlYXN0In0=&quot; data-pjax-transient=&quot;true&quot;/&gt;&lt;meta name=&quot;visitor-hmac&quot; content=&quot;d1950506aa2eb31cba39906bd8d76d90907cc9ede2962c25aab6d28478a8ba68&quot; data-pjax-transient=&quot;true&quot;/&gt;
+
+
+
+
+  &lt;meta name=&quot;github-keyboard-shortcuts&quot; content=&quot;copilot&quot; data-turbo-transient=&quot;true&quot; /&gt;
+  
+
+  &lt;meta name=&quot;selected-link&quot; value=&quot;gist_code&quot; data-turbo-transient&gt;
+  &lt;link rel=&quot;assets&quot; href=&quot;https://github.githubassets.com/&quot;&gt;
+
+    &lt;meta name=&quot;google-site-verification&quot; content=&quot;Apib7-x98H0j5cPqHWwSMm6dNU4GmODRoqxLiDzdx9I&quot;&gt;
+
+&lt;meta name=&quot;octolytics-url&quot; content=&quot;https://collector.github.com/github/collect&quot; /&gt;
+
+  &lt;meta name=&quot;analytics-location&quot; content=&quot;/&amp;lt;user-name&amp;gt;/&amp;lt;gist-id&amp;gt;&quot; data-turbo-transient=&quot;true&quot; /&gt;
+
+  
+
+
+
+
+    &lt;meta name=&quot;user-login&quot; content=&quot;&quot;&gt;
+
+  
+
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot;&gt;
+
+    
+
+      &lt;meta name=&quot;description&quot; content=&quot;Starlette Quick Manual for FastHTML users. GitHub Gist: instantly share code, notes, and snippets.&quot;&gt;
+
+      &lt;link rel=&quot;search&quot; type=&quot;application/opensearchdescription+xml&quot; href=&quot;/opensearch-gist.xml&quot; title=&quot;Gist&quot;&gt;
+
+    &lt;link rel=&quot;fluid-icon&quot; href=&quot;https://gist.github.com/fluidicon.png&quot; title=&quot;GitHub&quot;&gt;
+    &lt;meta property=&quot;fb:app_id&quot; content=&quot;1401488693436528&quot;&gt;
+    &lt;meta name=&quot;apple-itunes-app&quot; content=&quot;app-id=1477376905, app-argument=https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&quot; /&gt;
+
+      &lt;meta name=&quot;twitter:image:src&quot; content=&quot;https://github.githubassets.com/assets/gist-og-image-54fd7dc0713e.png&quot; /&gt;&lt;meta name=&quot;twitter:site&quot; content=&quot;@github&quot; /&gt;&lt;meta name=&quot;twitter:card&quot; content=&quot;summary_large_image&quot; /&gt;&lt;meta name=&quot;twitter:title&quot; content=&quot;Starlette Quick Manual for FastHTML users&quot; /&gt;&lt;meta name=&quot;twitter:description&quot; content=&quot;Starlette Quick Manual for FastHTML users. GitHub Gist: instantly share code, notes, and snippets.&quot; /&gt;
+  &lt;meta property=&quot;og:image&quot; content=&quot;https://github.githubassets.com/assets/gist-og-image-54fd7dc0713e.png&quot; /&gt;&lt;meta property=&quot;og:image:alt&quot; content=&quot;Starlette Quick Manual for FastHTML users. GitHub Gist: instantly share code, notes, and snippets.&quot; /&gt;&lt;meta property=&quot;og:site_name&quot; content=&quot;Gist&quot; /&gt;&lt;meta property=&quot;og:type&quot; content=&quot;article&quot; /&gt;&lt;meta property=&quot;og:title&quot; content=&quot;Starlette Quick Manual for FastHTML users&quot; /&gt;&lt;meta property=&quot;og:url&quot; content=&quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&quot; /&gt;&lt;meta property=&quot;og:description&quot; content=&quot;Starlette Quick Manual for FastHTML users. GitHub Gist: instantly share code, notes, and snippets.&quot; /&gt;&lt;meta property=&quot;article:author&quot; content=&quot;262588213843476&quot; /&gt;&lt;meta property=&quot;article:publisher&quot; content=&quot;262588213843476&quot; /&gt;
+  
+
+
+
+
+      &lt;meta name=&quot;hostname&quot; content=&quot;gist.github.com&quot;&gt;
+
+
+
+        &lt;meta name=&quot;expected-hostname&quot; content=&quot;gist.github.com&quot;&gt;
+
+
+  &lt;meta http-equiv=&quot;x-pjax-version&quot; content=&quot;821f06d289bac048e57f6de0e88a94f2863581b622d5ce214d681c12d8cef130&quot; data-turbo-track=&quot;reload&quot;&gt;
+  &lt;meta http-equiv=&quot;x-pjax-csp-version&quot; content=&quot;43bc2a0e2750a1219c17b5bf1ec22aae37041bbc018bc5e27bb7708f80e7ab88&quot; data-turbo-track=&quot;reload&quot;&gt;
+  &lt;meta http-equiv=&quot;x-pjax-css-version&quot; content=&quot;fccf03f5b6a75b525f9275cba7313774f880dbf7bfc1c8feacff07fc90de9ca0&quot; data-turbo-track=&quot;reload&quot;&gt;
+  &lt;meta http-equiv=&quot;x-pjax-js-version&quot; content=&quot;b07c348e1f7f44d9b552bc6579e36c760e6a3d9d912e69237dac1aab5dd40e0c&quot; data-turbo-track=&quot;reload&quot;&gt;
+
+  &lt;meta name=&quot;turbo-cache-control&quot; content=&quot;no-preview&quot; data-turbo-transient=&quot;&quot;&gt;
+
+      &lt;link href=&quot;/jph00.atom&quot; rel=&quot;alternate&quot; title=&quot;atom&quot; type=&quot;application/atom+xml&quot;&gt;
+
+
+  &lt;link crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; href=&quot;https://github.githubassets.com/assets/gist-f76a03f217b0.css&quot; /&gt;
+
+
+
+
+    &lt;meta name=&quot;turbo-body-classes&quot; content=&quot;logged-out env-production page-responsive&quot;&gt;
+
+
+  &lt;meta name=&quot;browser-stats-url&quot; content=&quot;https://api.github.com/_private/browser/stats&quot;&gt;
+
+  &lt;meta name=&quot;browser-errors-url&quot; content=&quot;https://api.github.com/_private/browser/errors&quot;&gt;
+
+  &lt;link rel=&quot;mask-icon&quot; href=&quot;https://github.githubassets.com/assets/pinned-octocat-093da3e6fa40.svg&quot; color=&quot;#000000&quot;&gt;
+  &lt;link rel=&quot;alternate icon&quot; class=&quot;js-site-favicon&quot; type=&quot;image/png&quot; href=&quot;https://github.githubassets.com/favicons/favicon.png&quot;&gt;
+  &lt;link rel=&quot;icon&quot; class=&quot;js-site-favicon&quot; type=&quot;image/svg+xml&quot; href=&quot;https://github.githubassets.com/favicons/favicon.svg&quot;&gt;
+
+&lt;meta name=&quot;theme-color&quot; content=&quot;#1e2327&quot;&gt;
+&lt;meta name=&quot;color-scheme&quot; content=&quot;light dark&quot; /&gt;
+
+
+
+  &lt;/head&gt;
+
+  &lt;body class=&quot;logged-out env-production page-responsive&quot; style=&quot;word-wrap: break-word;&quot;&gt;
+    &lt;div data-turbo-body class=&quot;logged-out env-production page-responsive&quot; style=&quot;word-wrap: break-word;&quot;&gt;
+      
+
+
+    &lt;div class=&quot;position-relative js-header-wrapper &quot;&gt;
+      &lt;a href=&quot;#start-of-content&quot; data-skip-target-assigned=&quot;false&quot; class=&quot;px-2 py-4 color-bg-accent-emphasis color-fg-on-emphasis show-on-focus js-skip-to-content&quot;&gt;Skip to content&lt;/a&gt;
+
+      &lt;span data-view-component=&quot;true&quot; class=&quot;progress-pjax-loader Progress position-fixed width-full&quot;&gt;
+    &lt;span style=&quot;width: 0%;&quot; data-view-component=&quot;true&quot; class=&quot;Progress-item progress-pjax-loader-bar left-0 top-0 color-bg-accent-emphasis&quot;&gt;&lt;/span&gt;
+&lt;/span&gt;      
+      
+      &lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/react-lib-7b7b5264f6c1.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_mini-throttle_dist_index_js-node_modules_primer_octicons-react_di-b40d97-2d816f3aa913.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_primer_react_lib-esm_Box_Box_js-55a9038b54f0.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_primer_react_lib-esm_Button_Button_js-b0edbfb6a9e5.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_primer_react_lib-esm_TooltipV2_Tooltip_js-4d5019830e3c.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_primer_react_node_modules_primer_octicons-react_dist_index_esm_mjs-a5155473fc69.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_primer_react_lib-esm_ActionList_index_js-fd5a7039f225.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_github_hotkey_dist_index_js-node_modules_lodash-es_capitalize_js-1aaea04d3ac5.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/vendors-node_modules_primer_react_lib-esm_Dialog_Dialog_js-node_modules_primer_react_lib-esm_-d42c64-94dad1290f54.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/ui_packages_react-core_create-browser-history_ts-ui_packages_safe-storage_safe-storage_ts-ui_-682c2c-40bb20608465.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/ui_packages_ui-commands_ui-commands_ts-f6ad1a8f539f.js&quot;&gt;&lt;/script&gt;
+&lt;script crossorigin=&quot;anonymous&quot; defer=&quot;defer&quot; type=&quot;application/javascript&quot; src=&quot;https://github.githubassets.com/assets/keyboard-shortcuts-dialog-a84d01efac8c.js&quot;&gt;&lt;/script&gt;
+&lt;link crossorigin=&quot;anonymous&quot; media=&quot;all&quot; rel=&quot;stylesheet&quot; href=&quot;https://github.githubassets.com/assets/primer-react-css.8570b2718b0a9c0c8387.module.css&quot; /&gt;
+
+&lt;react-partial
+  partial-name=&quot;keyboard-shortcuts-dialog&quot;
+  data-ssr=&quot;false&quot;
+&gt;
+  
+  &lt;script type=&quot;application/json&quot; data-target=&quot;react-partial.embeddedData&quot;&gt;{&quot;props&quot;:{&quot;docsUrl&quot;:&quot;https://docs.github.com/get-started/accessibility/keyboard-shortcuts&quot;}}&lt;/script&gt;
+  &lt;div data-target=&quot;react-partial.reactRoot&quot;&gt;&lt;/div&gt;
+&lt;/react-partial&gt;
+
+
+
+
+      
+
+            &lt;div class=&quot;Header js-details-container Details flex-wrap flex-md-nowrap p-responsive&quot; role=&quot;banner&quot; &gt;
+  &lt;div class=&quot;Header-item d-none d-md-flex&quot;&gt;
+    &lt;a class=&quot;Header-link&quot; data-hotkey=&quot;g d&quot; aria-label=&quot;Gist Homepage &quot; href=&quot;/&quot;&gt;
+  &lt;svg aria-hidden=&quot;true&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; version=&quot;1.1&quot; width=&quot;24&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-mark-github v-align-middle d-inline-block d-md-none&quot;&gt;
+    &lt;path d=&quot;M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+  &lt;svg aria-hidden=&quot;true&quot; height=&quot;24&quot; viewBox=&quot;0 0 68 24&quot; version=&quot;1.1&quot; width=&quot;68&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-logo-github v-align-middle d-none d-md-inline-block&quot;&gt;
+    &lt;path d=&quot;M27.8 17.908h-.03c.013 0 .022.014.035.017l.01-.002-.016-.015Zm.005.017c-.14.001-.49.073-.861.073-1.17 0-1.575-.536-1.575-1.234v-4.652h2.385c.135 0 .24-.12.24-.283V9.302c0-.133-.12-.252-.24-.252H25.37V5.913c0-.119-.075-.193-.21-.193h-3.24c-.136 0-.21.074-.21.193V9.14s-1.636.401-1.741.416a.255.255 0 0 0-.195.253v2.021c0 .164.12.282.255.282h1.665v4.876c0 3.627 2.55 3.998 4.29 3.998.796 0 1.756-.252 1.906-.327.09-.03.135-.134.135-.238v-2.23a.264.264 0 0 0-.219-.265Zm35.549-3.272c0-2.69-1.095-3.047-2.25-2.928-.9.06-1.62.505-1.62.505v5.232s.735.506 1.83.536c1.545.044 2.04-.506 2.04-3.345ZM67 14.415c0 5.099-1.665 6.555-4.576 6.555-2.46 0-3.78-1.233-3.78-1.233s-.06.683-.135.773c-.045.089-.12.118-.21.118h-2.22c-.15 0-.286-.119-.286-.252l.03-16.514a.26.26 0 0 1 .255-.252h3.196a.26.26 0 0 1 .255.252v5.604s1.23-.788 3.03-.788l-.015-.03c1.8 0 4.456.67 4.456 5.767ZM53.918 9.05h-3.15c-.165 0-.255.119-.255.282v8.086s-.826.58-1.95.58c-1.126 0-1.456-.506-1.456-1.62v-7.06a.262.262 0 0 0-.255-.254h-3.21a.262.262 0 0 0-.256.253v7.596c0 3.27 1.846 4.087 4.381 4.087 2.085 0 3.78-1.145 3.78-1.145s.076.58.12.67c.03.074.136.133.24.133h2.011a.243.243 0 0 0 .255-.253l.03-11.103c0-.133-.12-.252-.285-.252Zm-35.556-.015h-3.195c-.135 0-.255.134-.255.297v10.91c0 .297.195.401.45.401h2.88c.3 0 .375-.134.375-.401V9.287a.262.262 0 0 0-.255-.252ZM16.787 4.01c-1.155 0-2.07.907-2.07 2.051 0 1.145.915 2.051 2.07 2.051a2.04 2.04 0 0 0 2.04-2.05 2.04 2.04 0 0 0-2.04-2.052Zm24.74-.372H38.36a.262.262 0 0 0-.255.253v6.08H33.14v-6.08a.262.262 0 0 0-.255-.253h-3.196a.262.262 0 0 0-.255.253v16.514c0 .133.135.252.255.252h3.196a.262.262 0 0 0 .255-.253v-7.06h4.966l-.03 7.06c0 .134.12.253.255.253h3.195a.262.262 0 0 0 .255-.253V3.892a.262.262 0 0 0-.255-.253Zm-28.31 7.313v8.532c0 .06-.015.163-.09.193 0 0-1.875 1.323-4.966 1.323C4.426 21 0 19.84 0 12.2S3.87 2.986 7.651 3c3.27 0 4.59.728 4.8.862.06.075.09.134.09.208l-.63 2.646c0 .134-.134.297-.3.253-.54-.164-1.35-.49-3.255-.49-2.205 0-4.575.623-4.575 5.543s2.25 5.5 3.87 5.5c1.38 0 1.875-.164 1.875-.164V13.94H7.321c-.165 0-.285-.12-.285-.253v-2.735c0-.134.12-.252.285-.252h5.61c.166 0 .286.118.286.252Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+  &lt;svg aria-hidden=&quot;true&quot; height=&quot;24&quot; viewBox=&quot;0 0 38 24&quot; version=&quot;1.1&quot; width=&quot;38&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-logo-gist v-align-middle d-none d-md-inline-block&quot;&gt;
+    &lt;path d=&quot;M7.05 13.095v-1.5h5.28v8.535c-1.17.555-2.925.96-5.385.96C1.665 21.09 0 17.055 0 12.045S1.695 3 6.945 3c2.43 0 3.96.495 4.92.99v1.575c-1.83-.75-3-1.095-4.92-1.095-3.855 0-5.22 3.315-5.22 7.59s1.365 7.575 5.205 7.575c1.335 0 2.97-.105 3.795-.51v-6.03H7.05Zm16.47 1.035h.045c3.33.3 4.125 1.425 4.125 3.345 0 1.815-1.14 3.615-4.71 3.615-1.125 0-2.745-.285-3.495-.585v-1.41c.705.255 1.83.54 3.495.54 2.43 0 3.09-1.035 3.09-2.13 0-1.065-.33-1.815-2.655-2.01-3.39-.3-4.095-1.5-4.095-3.12 0-1.665 1.08-3.465 4.38-3.465 1.095 0 2.34.135 3.375.585v1.41c-.915-.3-1.83-.54-3.405-.54-2.325 0-2.82.855-2.82 2.01 0 1.035.42 1.56 2.67 1.755Zm12.87-4.995v1.275h-3.63v7.305c0 1.425.795 2.01 2.25 2.01.3 0 .63 0 .915-.045v1.335c-.255.045-.75.075-1.035.075-1.965 0-3.75-.9-3.75-3.195v-7.5H28.8v-.72l2.34-.66V5.85l1.62-.465v3.75h3.63ZM16.635 9.09v9.615c0 .81.285 1.05 1.005 1.05v1.335c-1.71 0-2.58-.705-2.58-2.58V9.09h1.575Zm.375-3.495c0 .66-.51 1.17-1.17 1.17a1.14 1.14 0 0 1-1.155-1.17c0-.66.48-1.17 1.155-1.17s1.17.51 1.17 1.17Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/a&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;Header-item d-md-none&quot;&gt;
+      &lt;button aria-label=&quot;Toggle navigation&quot; aria-expanded=&quot;false&quot; type=&quot;button&quot; data-view-component=&quot;true&quot; class=&quot;Header-link js-details-target btn-link&quot;&gt;    &lt;svg aria-hidden=&quot;true&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; version=&quot;1.1&quot; width=&quot;24&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-three-bars&quot;&gt;
+    &lt;path d=&quot;M3.75 5.25a.75.75 0 0 0 0 1.5h16.5a.75.75 0 0 0 0-1.5H3.75Zm0 6a.75.75 0 0 0 0 1.5h16.5a.75.75 0 0 0 0-1.5H3.75Zm0 6a.75.75 0 0 0 0 1.5h16.5a.75.75 0 0 0 0-1.5H3.75Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/button&gt;  &lt;/div&gt;
+
+  &lt;div class=&quot;Header-item Header-item--full js-site-search flex-column flex-md-row width-full flex-order-2 flex-md-order-none mr-0 mr-md-3 mt-3 mt-md-0 Details-content--hidden-not-important d-md-flex&quot;&gt;
+      &lt;div class=&quot;header-search flex-self-stretch flex-md-self-auto mr-0 mr-md-3 mb-3 mb-md-0&quot;&gt;
+    &lt;!-- &#x27;&quot;` --&gt;&lt;!-- &lt;/textarea&gt;&lt;/xmp&gt; --&gt;&lt;/option&gt;&lt;/form&gt;&lt;form class=&quot;position-relative js-quicksearch-form&quot; role=&quot;search&quot; aria-label=&quot;Site&quot; data-turbo=&quot;false&quot; action=&quot;/search&quot; accept-charset=&quot;UTF-8&quot; method=&quot;get&quot;&gt;
+      &lt;div class=&quot;header-search-wrapper form-control input-sm js-chromeless-input-container&quot;&gt;
+        &lt;input type=&quot;text&quot;
+          class=&quot;form-control input-sm js-site-search-focus header-search-input&quot;
+          data-hotkey=&quot;s,/&quot;
+          name=&quot;q&quot;
+          aria-label=&quot;Search&quot;
+          placeholder=&quot;Search…&quot;
+          autocorrect=&quot;off&quot;
+          autocomplete=&quot;off&quot;
+          autocapitalize=&quot;off&quot;&gt;
+      &lt;/div&gt;
+
+&lt;/form&gt;&lt;/div&gt;
+
+
+    &lt;nav aria-label=&quot;Global&quot; class=&quot;d-flex flex-column flex-md-row flex-self-stretch flex-md-self-auto&quot;&gt;
+  &lt;a class=&quot;Header-link mr-0 mr-md-3 py-2 py-md-0 border-top border-md-top-0 border-white-fade&quot; data-ga-click=&quot;Header, go to all gists, text:all gists&quot; href=&quot;/discover&quot;&gt;All gists&lt;/a&gt;
+
+  &lt;a class=&quot;Header-link mr-0 mr-md-3 py-2 py-md-0 border-top border-md-top-0 border-white-fade&quot; data-ga-click=&quot;Header, go to GitHub, text:Back to GitHub&quot; href=&quot;https://github.com&quot;&gt;Back to GitHub&lt;/a&gt;
+
+    &lt;a class=&quot;Header-link d-block d-md-none mr-0 mr-md-3 py-2 py-md-0 border-top border-md-top-0 border-white-fade&quot; data-ga-click=&quot;Header, sign in&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;authentication.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;location_in_page&amp;quot;:&amp;quot;gist header&amp;quot;,&amp;quot;repository_id&amp;quot;:null,&amp;quot;auth_type&amp;quot;:&amp;quot;LOG_IN&amp;quot;,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;7d7703b02fc0e522680294f98bac57e26410b50cad0baa1028a65d9c8aba1be2&quot; href=&quot;https://gist.github.com/auth/github?return_to=https%3A%2F%2Fgist.github.com%2Fjph00%2Fe91192e9bdc1640f5421ce3c904f2efb&quot;&gt;
+      Sign in
+&lt;/a&gt;
+      &lt;a class=&quot;Header-link d-block d-md-none mr-0 mr-md-3 py-2 py-md-0 border-top border-md-top-0 border-white-fade&quot; data-ga-click=&quot;Header, sign up&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;authentication.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;location_in_page&amp;quot;:&amp;quot;gist header&amp;quot;,&amp;quot;repository_id&amp;quot;:null,&amp;quot;auth_type&amp;quot;:&amp;quot;SIGN_UP&amp;quot;,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;cfbb6ac37e6b72d0915fc5a26a53f70cd4248c3b17419fd1dc7be84c2a75044f&quot; href=&quot;/join?return_to=https%3A%2F%2Fgist.github.com%2Fjph00%2Fe91192e9bdc1640f5421ce3c904f2efb&amp;amp;source=header-gist&quot;&gt;
+        Sign up
+&lt;/a&gt;&lt;/nav&gt;
+
+  &lt;/div&gt;
+
+  &lt;div class=&quot;Header-item Header-item--full flex-justify-center d-md-none position-relative&quot;&gt;
+    &lt;a class=&quot;Header-link&quot; data-hotkey=&quot;g d&quot; aria-label=&quot;Gist Homepage &quot; href=&quot;/&quot;&gt;
+  &lt;svg aria-hidden=&quot;true&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; version=&quot;1.1&quot; width=&quot;24&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-mark-github v-align-middle d-inline-block d-md-none&quot;&gt;
+    &lt;path d=&quot;M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+  &lt;svg aria-hidden=&quot;true&quot; height=&quot;24&quot; viewBox=&quot;0 0 68 24&quot; version=&quot;1.1&quot; width=&quot;68&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-logo-github v-align-middle d-none d-md-inline-block&quot;&gt;
+    &lt;path d=&quot;M27.8 17.908h-.03c.013 0 .022.014.035.017l.01-.002-.016-.015Zm.005.017c-.14.001-.49.073-.861.073-1.17 0-1.575-.536-1.575-1.234v-4.652h2.385c.135 0 .24-.12.24-.283V9.302c0-.133-.12-.252-.24-.252H25.37V5.913c0-.119-.075-.193-.21-.193h-3.24c-.136 0-.21.074-.21.193V9.14s-1.636.401-1.741.416a.255.255 0 0 0-.195.253v2.021c0 .164.12.282.255.282h1.665v4.876c0 3.627 2.55 3.998 4.29 3.998.796 0 1.756-.252 1.906-.327.09-.03.135-.134.135-.238v-2.23a.264.264 0 0 0-.219-.265Zm35.549-3.272c0-2.69-1.095-3.047-2.25-2.928-.9.06-1.62.505-1.62.505v5.232s.735.506 1.83.536c1.545.044 2.04-.506 2.04-3.345ZM67 14.415c0 5.099-1.665 6.555-4.576 6.555-2.46 0-3.78-1.233-3.78-1.233s-.06.683-.135.773c-.045.089-.12.118-.21.118h-2.22c-.15 0-.286-.119-.286-.252l.03-16.514a.26.26 0 0 1 .255-.252h3.196a.26.26 0 0 1 .255.252v5.604s1.23-.788 3.03-.788l-.015-.03c1.8 0 4.456.67 4.456 5.767ZM53.918 9.05h-3.15c-.165 0-.255.119-.255.282v8.086s-.826.58-1.95.58c-1.126 0-1.456-.506-1.456-1.62v-7.06a.262.262 0 0 0-.255-.254h-3.21a.262.262 0 0 0-.256.253v7.596c0 3.27 1.846 4.087 4.381 4.087 2.085 0 3.78-1.145 3.78-1.145s.076.58.12.67c.03.074.136.133.24.133h2.011a.243.243 0 0 0 .255-.253l.03-11.103c0-.133-.12-.252-.285-.252Zm-35.556-.015h-3.195c-.135 0-.255.134-.255.297v10.91c0 .297.195.401.45.401h2.88c.3 0 .375-.134.375-.401V9.287a.262.262 0 0 0-.255-.252ZM16.787 4.01c-1.155 0-2.07.907-2.07 2.051 0 1.145.915 2.051 2.07 2.051a2.04 2.04 0 0 0 2.04-2.05 2.04 2.04 0 0 0-2.04-2.052Zm24.74-.372H38.36a.262.262 0 0 0-.255.253v6.08H33.14v-6.08a.262.262 0 0 0-.255-.253h-3.196a.262.262 0 0 0-.255.253v16.514c0 .133.135.252.255.252h3.196a.262.262 0 0 0 .255-.253v-7.06h4.966l-.03 7.06c0 .134.12.253.255.253h3.195a.262.262 0 0 0 .255-.253V3.892a.262.262 0 0 0-.255-.253Zm-28.31 7.313v8.532c0 .06-.015.163-.09.193 0 0-1.875 1.323-4.966 1.323C4.426 21 0 19.84 0 12.2S3.87 2.986 7.651 3c3.27 0 4.59.728 4.8.862.06.075.09.134.09.208l-.63 2.646c0 .134-.134.297-.3.253-.54-.164-1.35-.49-3.255-.49-2.205 0-4.575.623-4.575 5.543s2.25 5.5 3.87 5.5c1.38 0 1.875-.164 1.875-.164V13.94H7.321c-.165 0-.285-.12-.285-.253v-2.735c0-.134.12-.252.285-.252h5.61c.166 0 .286.118.286.252Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+  &lt;svg aria-hidden=&quot;true&quot; height=&quot;24&quot; viewBox=&quot;0 0 38 24&quot; version=&quot;1.1&quot; width=&quot;38&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-logo-gist v-align-middle d-none d-md-inline-block&quot;&gt;
+    &lt;path d=&quot;M7.05 13.095v-1.5h5.28v8.535c-1.17.555-2.925.96-5.385.96C1.665 21.09 0 17.055 0 12.045S1.695 3 6.945 3c2.43 0 3.96.495 4.92.99v1.575c-1.83-.75-3-1.095-4.92-1.095-3.855 0-5.22 3.315-5.22 7.59s1.365 7.575 5.205 7.575c1.335 0 2.97-.105 3.795-.51v-6.03H7.05Zm16.47 1.035h.045c3.33.3 4.125 1.425 4.125 3.345 0 1.815-1.14 3.615-4.71 3.615-1.125 0-2.745-.285-3.495-.585v-1.41c.705.255 1.83.54 3.495.54 2.43 0 3.09-1.035 3.09-2.13 0-1.065-.33-1.815-2.655-2.01-3.39-.3-4.095-1.5-4.095-3.12 0-1.665 1.08-3.465 4.38-3.465 1.095 0 2.34.135 3.375.585v1.41c-.915-.3-1.83-.54-3.405-.54-2.325 0-2.82.855-2.82 2.01 0 1.035.42 1.56 2.67 1.755Zm12.87-4.995v1.275h-3.63v7.305c0 1.425.795 2.01 2.25 2.01.3 0 .63 0 .915-.045v1.335c-.255.045-.75.075-1.035.075-1.965 0-3.75-.9-3.75-3.195v-7.5H28.8v-.72l2.34-.66V5.85l1.62-.465v3.75h3.63ZM16.635 9.09v9.615c0 .81.285 1.05 1.005 1.05v1.335c-1.71 0-2.58-.705-2.58-2.58V9.09h1.575Zm.375-3.495c0 .66-.51 1.17-1.17 1.17a1.14 1.14 0 0 1-1.155-1.17c0-.66.48-1.17 1.155-1.17s1.17.51 1.17 1.17Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/a&gt;
+  &lt;/div&gt;
+
+    &lt;div class=&quot;Header-item f4 mr-0&quot; role=&quot;navigation&quot; aria-label=&quot;Sign in or sign up&quot;&gt;
+      &lt;a class=&quot;Header-link no-underline mr-3&quot; data-ga-click=&quot;Header, sign in&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;authentication.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;location_in_page&amp;quot;:&amp;quot;gist header&amp;quot;,&amp;quot;repository_id&amp;quot;:null,&amp;quot;auth_type&amp;quot;:&amp;quot;LOG_IN&amp;quot;,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;7d7703b02fc0e522680294f98bac57e26410b50cad0baa1028a65d9c8aba1be2&quot; href=&quot;https://gist.github.com/auth/github?return_to=https%3A%2F%2Fgist.github.com%2Fjph00%2Fe91192e9bdc1640f5421ce3c904f2efb&quot;&gt;
+        Sign&amp;nbsp;in
+&lt;/a&gt;        &lt;a class=&quot;Header-link d-inline-block no-underline border color-border-default rounded px-2 py-1&quot; data-ga-click=&quot;Header, sign up&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;authentication.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;location_in_page&amp;quot;:&amp;quot;gist header&amp;quot;,&amp;quot;repository_id&amp;quot;:null,&amp;quot;auth_type&amp;quot;:&amp;quot;SIGN_UP&amp;quot;,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;cfbb6ac37e6b72d0915fc5a26a53f70cd4248c3b17419fd1dc7be84c2a75044f&quot; href=&quot;/join?return_to=https%3A%2F%2Fgist.github.com%2Fjph00%2Fe91192e9bdc1640f5421ce3c904f2efb&amp;amp;source=header-gist&quot;&gt;
+          Sign&amp;nbsp;up
+&lt;/a&gt;    &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+      &lt;div hidden=&quot;hidden&quot; data-view-component=&quot;true&quot; class=&quot;js-stale-session-flash stale-session-flash flash flash-warn flash-full&quot;&gt;
+  
+        &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-alert&quot;&gt;
+    &lt;path d=&quot;M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;span class=&quot;js-stale-session-flash-signed-in&quot; hidden&gt;You signed in with another tab or window. &lt;a class=&quot;Link--inTextBlock&quot; href=&quot;&quot;&gt;Reload&lt;/a&gt; to refresh your session.&lt;/span&gt;
+        &lt;span class=&quot;js-stale-session-flash-signed-out&quot; hidden&gt;You signed out in another tab or window. &lt;a class=&quot;Link--inTextBlock&quot; href=&quot;&quot;&gt;Reload&lt;/a&gt; to refresh your session.&lt;/span&gt;
+        &lt;span class=&quot;js-stale-session-flash-switched&quot; hidden&gt;You switched accounts on another tab or window. &lt;a class=&quot;Link--inTextBlock&quot; href=&quot;&quot;&gt;Reload&lt;/a&gt; to refresh your session.&lt;/span&gt;
+
+    &lt;button id=&quot;icon-button-0e27e3ea-360c-4cac-a171-ddac133d5488&quot; aria-labelledby=&quot;tooltip-00a6de24-a19f-4761-84b7-8fb4659a15d7&quot; type=&quot;button&quot; data-view-component=&quot;true&quot; class=&quot;Button Button--iconOnly Button--invisible Button--medium flash-close js-flash-close&quot;&gt;  &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-x Button-visual&quot;&gt;
+    &lt;path d=&quot;M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/button&gt;&lt;tool-tip id=&quot;tooltip-00a6de24-a19f-4761-84b7-8fb4659a15d7&quot; for=&quot;icon-button-0e27e3ea-360c-4cac-a171-ddac133d5488&quot; popover=&quot;manual&quot; data-direction=&quot;s&quot; data-type=&quot;label&quot; data-view-component=&quot;true&quot; class=&quot;sr-only position-absolute&quot;&gt;Dismiss alert&lt;/tool-tip&gt;
+
+
+  
+&lt;/div&gt;
+    &lt;/div&gt;
+
+  &lt;div id=&quot;start-of-content&quot; class=&quot;show-on-focus&quot;&gt;&lt;/div&gt;
+
+
+
+
+
+
+
+
+    &lt;div id=&quot;js-flash-container&quot; class=&quot;flash-container&quot; data-turbo-replace&gt;
+
+
+
+
+  &lt;template class=&quot;js-flash-template&quot;&gt;
+    
+&lt;div class=&quot;flash flash-full   {{ className }}&quot;&gt;
+  &lt;div &gt;
+    &lt;button autofocus class=&quot;flash-close js-flash-close&quot; type=&quot;button&quot; aria-label=&quot;Dismiss this message&quot;&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-x&quot;&gt;
+    &lt;path d=&quot;M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;div aria-atomic=&quot;true&quot; role=&quot;alert&quot; class=&quot;js-flash-alert&quot;&gt;
+      
+      &lt;div&gt;{{ message }}&lt;/div&gt;
+
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+  &lt;/template&gt;
+&lt;/div&gt;
+
+
+    
+    &lt;include-fragment class=&quot;js-notification-shelf-include-fragment&quot; data-base-src=&quot;https://github.com/notifications/beta/shelf&quot;&gt;&lt;/include-fragment&gt;
+
+
+
+
+
+  &lt;div
+    class=&quot;application-main &quot;
+    data-commit-hovercards-enabled
+    data-discussion-hovercards-enabled
+    data-issue-and-pr-hovercards-enabled
+  &gt;
+        &lt;div itemscope itemtype=&quot;http://schema.org/Code&quot;&gt;
+    &lt;main id=&quot;gist-pjax-container&quot;&gt;
+      
+
+  &lt;div class=&quot;gist-detail-intro gist-banner pb-3&quot;&gt;
+    &lt;div class=&quot;text-center container-lg px-3&quot;&gt;
+      &lt;p class=&quot;lead&quot;&gt;
+        Instantly share code, notes, and snippets.
+      &lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+
+&lt;div class=&quot;gisthead pagehead pb-0 pt-3 mb-4&quot;&gt;
+  &lt;div class=&quot;px-0&quot;&gt;
+    
+  
+&lt;div class=&quot;mb-3 d-flex px-3 px-md-3 px-lg-5&quot;&gt;
+  &lt;div class=&quot;flex-auto min-width-0 width-fit mr-3&quot;&gt;
+    &lt;div class=&quot;d-flex&quot;&gt;
+      &lt;div class=&quot;d-none d-md-block&quot;&gt;
+        &lt;a class=&quot;mr-2 flex-shrink-0&quot; data-hovercard-type=&quot;user&quot; data-hovercard-url=&quot;/users/jph00/hovercard&quot; data-octo-click=&quot;hovercard-link-click&quot; data-octo-dimensions=&quot;link_type:self&quot; href=&quot;/jph00&quot;&gt;&lt;img class=&quot;avatar avatar-user&quot; src=&quot;https://avatars.githubusercontent.com/u/346999?s=64&amp;amp;v=4&quot; width=&quot;32&quot; height=&quot;32&quot; alt=&quot;@jph00&quot; /&gt;&lt;/a&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;d-flex flex-column width-full&quot;&gt;
+        &lt;div class=&quot;d-flex flex-row width-full&quot;&gt;
+          &lt;h1 class=&quot;wb-break-word f3 text-normal mb-md-0 mb-1&quot;&gt;
+            &lt;span class=&quot;author&quot;&gt;&lt;a data-hovercard-type=&quot;user&quot; data-hovercard-url=&quot;/users/jph00/hovercard&quot; data-octo-click=&quot;hovercard-link-click&quot; data-octo-dimensions=&quot;link_type:self&quot; href=&quot;/jph00&quot;&gt;jph00&lt;/a&gt;&lt;/span&gt;&lt;!--
+                --&gt;&lt;span class=&quot;mx-1 color-fg-muted&quot;&gt;/&lt;/span&gt;&lt;!--
+                --&gt;&lt;strong itemprop=&quot;name&quot; class=&quot;css-truncate-target mr-1&quot; style=&quot;max-width: 410px&quot;&gt;&lt;a href=&quot;/jph00/e91192e9bdc1640f5421ce3c904f2efb&quot;&gt;starlette-quick.md&lt;/a&gt;&lt;/strong&gt;
+          &lt;/h1&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;note m-0&quot;&gt;
+          Last active
+          &lt;relative-time tense=&quot;past&quot; datetime=&quot;2024-08-30T21:11:26Z&quot; data-view-component=&quot;true&quot;&gt;August 30, 2024 21:11&lt;/relative-time&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;ul class=&quot;d-md-flex pagehead-actions float-none mr-2&quot;&gt;
+  &lt;/ul&gt;
+  &lt;div class=&quot;d-inline-block d-md-none ml-auto&quot;&gt;
+    &lt;action-menu data-select-variant=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;flex-self-start ml-auto d-inline-block&quot;&gt;
+  &lt;focus-group direction=&quot;vertical&quot; mnemonics retain&gt;
+    &lt;button id=&quot;gist_options-button&quot; popovertarget=&quot;gist_options-overlay&quot; aria-controls=&quot;gist_options-list&quot; aria-haspopup=&quot;true&quot; aria-labelledby=&quot;tooltip-af012ee1-b77f-40bf-955d-758c2a19bff6&quot; type=&quot;button&quot; data-view-component=&quot;true&quot; class=&quot;Button Button--iconOnly Button--secondary Button--small&quot;&gt;  &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-kebab-horizontal Button-visual&quot;&gt;
+    &lt;path d=&quot;M8 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM1.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm13 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/button&gt;&lt;tool-tip id=&quot;tooltip-af012ee1-b77f-40bf-955d-758c2a19bff6&quot; for=&quot;gist_options-button&quot; popover=&quot;manual&quot; data-direction=&quot;s&quot; data-type=&quot;label&quot; data-view-component=&quot;true&quot; class=&quot;sr-only position-absolute&quot;&gt;Show Gist options&lt;/tool-tip&gt;
+
+
+&lt;anchored-position id=&quot;gist_options-overlay&quot; anchor=&quot;gist_options-button&quot; align=&quot;start&quot; side=&quot;outside-bottom&quot; anchor-offset=&quot;normal&quot; popover=&quot;auto&quot; data-view-component=&quot;true&quot;&gt;
+  &lt;div data-view-component=&quot;true&quot; class=&quot;Overlay Overlay--size-auto&quot;&gt;
+    
+      &lt;div data-view-component=&quot;true&quot; class=&quot;Overlay-body Overlay-body--paddingNone&quot;&gt;          &lt;action-list&gt;
+  &lt;div data-view-component=&quot;true&quot;&gt;
+    &lt;ul aria-labelledby=&quot;gist_options-button&quot; id=&quot;gist_options-list&quot; role=&quot;menu&quot; data-view-component=&quot;true&quot; class=&quot;ActionListWrap--inset ActionListWrap&quot;&gt;
+        &lt;li rel=&quot;nofollow&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;DOWNLOAD_ZIP&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;23b8186d8b255945ec2d3ac98fd67b2a0832a93cb86867801afc2a2a13bba295&quot; data-ga-click=&quot;Gist, download zip, location:gist overview&quot; data-targets=&quot;action-list.items&quot; data-item-id=&quot;download_from_gist_options&quot; role=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;ActionListItem&quot;&gt;
+    
+    
+    &lt;a tabindex=&quot;-1&quot; id=&quot;item-9746d7d2-158b-49f6-85c6-a44e6749fd54&quot; href=&quot;/jph00/e91192e9bdc1640f5421ce3c904f2efb/archive/61a2774912414029edaf1a55b506f0e283b93c46.zip&quot; role=&quot;menuitem&quot; data-view-component=&quot;true&quot; class=&quot;ActionListContent&quot;&gt;
+      
+        &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-label&quot;&gt;
+          Download ZIP
+&lt;/span&gt;      
+&lt;/a&gt;
+  
+&lt;/li&gt;
+&lt;/ul&gt;    
+&lt;/div&gt;&lt;/action-list&gt;
+
+
+&lt;/div&gt;
+      
+&lt;/div&gt;&lt;/anchored-position&gt;  &lt;/focus-group&gt;
+&lt;/action-menu&gt;  &lt;/div&gt;
+  &lt;ul class=&quot;d-md-flex d-none pagehead-actions float-none&quot;&gt;
+
+
+      &lt;li&gt;
+          &lt;a id=&quot;gist-star-button&quot; href=&quot;/login?return_to=https%3A%2F%2Fgist.github.com%2Fjph00%2Fe91192e9bdc1640f5421ce3c904f2efb&quot; rel=&quot;nofollow&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;authentication.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;location_in_page&amp;quot;:&amp;quot;gist star button&amp;quot;,&amp;quot;repository_id&amp;quot;:null,&amp;quot;auth_type&amp;quot;:&amp;quot;LOG_IN&amp;quot;,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;f00d3c7b4f2352072f5623478ea033f12b897c7e2c9955d054b3ecdf529a5a9d&quot; aria-label=&quot;You must be signed in to star a gist&quot; data-view-component=&quot;true&quot; class=&quot;btn-with-count Button--secondary Button--small Button&quot;&gt;  &lt;span class=&quot;Button-content&quot;&gt;
+      &lt;span class=&quot;Button-visual Button-leadingVisual&quot;&gt;
+        &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-star&quot;&gt;
+    &lt;path d=&quot;M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Zm0 2.445L6.615 5.5a.75.75 0 0 1-.564.41l-3.097.45 2.24 2.184a.75.75 0 0 1 .216.664l-.528 3.084 2.769-1.456a.75.75 0 0 1 .698 0l2.77 1.456-.53-3.084a.75.75 0 0 1 .216-.664l2.24-2.183-3.096-.45a.75.75 0 0 1-.564-.41L8 2.694Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+      &lt;/span&gt;
+    &lt;span class=&quot;Button-label&quot;&gt;Star&lt;/span&gt;
+      &lt;span class=&quot;Button-visual Button-trailingVisual&quot;&gt;
+          &lt;span class=&quot;sr-only&quot;&gt;(&lt;span aria-hidden=&quot;true&quot; title=&quot;0&quot; data-view-component=&quot;true&quot; class=&quot;Counter&quot;&gt;0&lt;/span&gt;)&lt;/span&gt;
+          &lt;span aria-hidden=&quot;true&quot; title=&quot;0&quot; data-view-component=&quot;true&quot; class=&quot;Counter&quot;&gt;0&lt;/span&gt;
+      &lt;/span&gt;
+  &lt;/span&gt;
+&lt;/a&gt;&lt;tool-tip id=&quot;tooltip-57e0864a-7f26-456e-bcd3-ecdbf9411eff&quot; for=&quot;gist-star-button&quot; popover=&quot;manual&quot; data-direction=&quot;n&quot; data-type=&quot;description&quot; data-view-component=&quot;true&quot; class=&quot;sr-only position-absolute&quot;&gt;You must be signed in to star a gist&lt;/tool-tip&gt;
+
+      &lt;/li&gt;
+        &lt;li&gt;
+            &lt;a id=&quot;gist-fork-button&quot; href=&quot;/login?return_to=https%3A%2F%2Fgist.github.com%2Fjph00%2Fe91192e9bdc1640f5421ce3c904f2efb&quot; rel=&quot;nofollow&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;authentication.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;location_in_page&amp;quot;:&amp;quot;gist fork button&amp;quot;,&amp;quot;repository_id&amp;quot;:null,&amp;quot;auth_type&amp;quot;:&amp;quot;LOG_IN&amp;quot;,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;0ec0fbfd2f08e41ca660035c149cd21b0892d1f2967cb5993534890f94b29516&quot; aria-label=&quot;You must be signed in to fork a gist&quot; data-view-component=&quot;true&quot; class=&quot;btn-with-count Button--secondary Button--small Button&quot;&gt;  &lt;span class=&quot;Button-content&quot;&gt;
+      &lt;span class=&quot;Button-visual Button-leadingVisual&quot;&gt;
+        &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-repo-forked&quot;&gt;
+    &lt;path d=&quot;M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+      &lt;/span&gt;
+    &lt;span class=&quot;Button-label&quot;&gt;Fork&lt;/span&gt;
+      &lt;span class=&quot;Button-visual Button-trailingVisual&quot;&gt;
+          &lt;span class=&quot;sr-only&quot;&gt;(&lt;span aria-hidden=&quot;true&quot; title=&quot;0&quot; data-view-component=&quot;true&quot; class=&quot;Counter&quot;&gt;0&lt;/span&gt;)&lt;/span&gt;
+          &lt;span aria-hidden=&quot;true&quot; title=&quot;0&quot; data-view-component=&quot;true&quot; class=&quot;Counter&quot;&gt;0&lt;/span&gt;
+      &lt;/span&gt;
+  &lt;/span&gt;
+&lt;/a&gt;&lt;tool-tip id=&quot;tooltip-3eeaa1f4-8ef4-4720-a2b9-df7506374189&quot; for=&quot;gist-fork-button&quot; popover=&quot;manual&quot; data-direction=&quot;n&quot; data-type=&quot;description&quot; data-view-component=&quot;true&quot; class=&quot;sr-only position-absolute&quot;&gt;You must be signed in to fork a gist&lt;/tool-tip&gt;
+
+        &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+
+  &lt;ul class=&quot;d-flex d-md-none px-3 mb-2 pagehead-actions float-none&quot; &gt;
+    &lt;li&gt;
+      
+&lt;div data-view-component=&quot;true&quot; class=&quot;flex-items-center d-inline-flex&quot;&gt;
+  &lt;action-menu data-menu-input=&quot;gist-share-url-sized-down&quot; data-select-variant=&quot;single&quot; data-dynamic-label=&quot;&quot; data-view-component=&quot;true&quot; class=&quot;flex-shrink-0&quot;&gt;
+  &lt;focus-group direction=&quot;vertical&quot; mnemonics retain&gt;
+    &lt;button id=&quot;action-menu-754c2c73-05d5-4fed-9ae7-9182c85037a9-button&quot; popovertarget=&quot;action-menu-754c2c73-05d5-4fed-9ae7-9182c85037a9-overlay&quot; aria-controls=&quot;action-menu-754c2c73-05d5-4fed-9ae7-9182c85037a9-list&quot; aria-haspopup=&quot;true&quot; type=&quot;button&quot; data-view-component=&quot;true&quot; class=&quot;rounded-right-0 border-right-0 Button--secondary Button--small Button&quot;&gt;  &lt;span class=&quot;Button-content&quot;&gt;
+    &lt;span class=&quot;Button-label&quot;&gt;Embed&lt;/span&gt;
+  &lt;/span&gt;
+    &lt;span class=&quot;Button-visual Button-trailingAction&quot;&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-triangle-down&quot;&gt;
+    &lt;path d=&quot;m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+    &lt;/span&gt;
+&lt;/button&gt;
+
+
+&lt;anchored-position id=&quot;action-menu-754c2c73-05d5-4fed-9ae7-9182c85037a9-overlay&quot; anchor=&quot;action-menu-754c2c73-05d5-4fed-9ae7-9182c85037a9-button&quot; align=&quot;start&quot; side=&quot;outside-bottom&quot; anchor-offset=&quot;normal&quot; popover=&quot;auto&quot; data-view-component=&quot;true&quot;&gt;
+  &lt;div data-view-component=&quot;true&quot; class=&quot;Overlay Overlay--size-auto&quot;&gt;
+    
+      &lt;div data-view-component=&quot;true&quot; class=&quot;Overlay-body Overlay-body--paddingNone&quot;&gt;          &lt;action-list&gt;
+  &lt;div data-view-component=&quot;true&quot;&gt;
+    &lt;ul aria-labelledby=&quot;action-menu-754c2c73-05d5-4fed-9ae7-9182c85037a9-button&quot; id=&quot;action-menu-754c2c73-05d5-4fed-9ae7-9182c85037a9-list&quot; role=&quot;menu&quot; data-view-component=&quot;true&quot; class=&quot;ActionListWrap--inset ActionListWrap&quot;&gt;
+        &lt;li data-targets=&quot;action-list.items&quot; role=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;ActionListItem&quot;&gt;
+    
+    
+    &lt;button value=&quot;&amp;lt;script src=&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;&quot; tabindex=&quot;-1&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;EMBED&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;f68725cbbedd0b3b8c91f571871f88aa81ab29724b2e8611ddbfee4e7c824315&quot; id=&quot;item-47d0cb4b-05c7-43c1-bdf7-acfcfed6e40e&quot; type=&quot;button&quot; role=&quot;menuitemradio&quot; aria-checked=&quot;true&quot; data-view-component=&quot;true&quot; class=&quot;ActionListContent&quot;&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-action--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check ActionListItem-singleSelectCheckmark&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-descriptionWrap&quot;&gt;
+        &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-label&quot;&gt;
+           Embed
+&lt;/span&gt;      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-description&quot;&gt;Embed this gist in your website.&lt;/span&gt;
+&lt;/span&gt;&lt;/button&gt;
+  
+&lt;/li&gt;
+        &lt;li data-targets=&quot;action-list.items&quot; role=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;ActionListItem&quot;&gt;
+    
+    
+    &lt;button value=&quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&quot; tabindex=&quot;-1&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;SHARE&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;a8a9f2e222013d9a467127d1c242f435eee27e3a022b92000cb18d9802e8a6d7&quot; id=&quot;item-bf225192-22dd-4d3a-b666-c0e698145cef&quot; type=&quot;button&quot; role=&quot;menuitemradio&quot; aria-checked=&quot;false&quot; data-view-component=&quot;true&quot; class=&quot;ActionListContent&quot;&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-action--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check ActionListItem-singleSelectCheckmark&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-descriptionWrap&quot;&gt;
+        &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-label&quot;&gt;
+           Share
+&lt;/span&gt;      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-description&quot;&gt;Copy sharable link for this gist.&lt;/span&gt;
+&lt;/span&gt;&lt;/button&gt;
+  
+&lt;/li&gt;
+        &lt;li data-targets=&quot;action-list.items&quot; role=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;ActionListItem&quot;&gt;
+    
+    
+    &lt;button value=&quot;https://gist.github.com/e91192e9bdc1640f5421ce3c904f2efb.git&quot; tabindex=&quot;-1&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;USE_HTTPS&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;a64854719e5676fd756e45e1430fedb8555dbf1e2e3d35299e1b74d2018d61e8&quot; id=&quot;item-07ba3f12-101f-40a3-852b-be223cc30362&quot; type=&quot;button&quot; role=&quot;menuitemradio&quot; aria-checked=&quot;false&quot; data-view-component=&quot;true&quot; class=&quot;ActionListContent&quot;&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-action--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check ActionListItem-singleSelectCheckmark&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-descriptionWrap&quot;&gt;
+        &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-label&quot;&gt;
+          Clone via HTTPS
+&lt;/span&gt;      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-description&quot;&gt;Clone using the web URL.&lt;/span&gt;
+&lt;/span&gt;&lt;/button&gt;
+  
+&lt;/li&gt;
+        &lt;li role=&quot;presentation&quot; aria-hidden=&quot;true&quot; data-view-component=&quot;true&quot; class=&quot;ActionList-sectionDivider&quot;&gt;&lt;/li&gt;
+        &lt;li target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot; data-targets=&quot;action-list.items&quot; role=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;ActionListItem&quot;&gt;
+    
+    
+    &lt;a tabindex=&quot;-1&quot; id=&quot;item-15fe0ffc-ae7d-4dc7-8217-94e0c51e96f1&quot; href=&quot;https://docs.github.com/articles/which-remote-url-should-i-use&quot; role=&quot;menuitemradio&quot; aria-checked=&quot;false&quot; data-view-component=&quot;true&quot; class=&quot;ActionListContent ActionListContent--visual16&quot;&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-action--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check ActionListItem-singleSelectCheckmark&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-visual--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-question&quot;&gt;
+    &lt;path d=&quot;M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.92 6.085h.001a.749.749 0 1 1-1.342-.67c.169-.339.436-.701.849-.977C6.845 4.16 7.369 4 8 4a2.756 2.756 0 0 1 1.637.525c.503.377.863.965.863 1.725 0 .448-.115.83-.329 1.15-.205.307-.47.513-.692.662-.109.072-.22.138-.313.195l-.006.004a6.24 6.24 0 0 0-.26.16.952.952 0 0 0-.276.245.75.75 0 0 1-1.248-.832c.184-.264.42-.489.692-.661.103-.067.207-.132.313-.195l.007-.004c.1-.061.182-.11.258-.161a.969.969 0 0 0 .277-.245C8.96 6.514 9 6.427 9 6.25a.612.612 0 0 0-.262-.525A1.27 1.27 0 0 0 8 5.5c-.369 0-.595.09-.74.187a1.01 1.01 0 0 0-.34.398ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+      
+        &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-label&quot;&gt;
+                Learn more about clone URLs
+
+&lt;/span&gt;      
+&lt;/a&gt;
+  
+&lt;/li&gt;
+&lt;/ul&gt;    
+&lt;/div&gt;&lt;/action-list&gt;
+
+
+&lt;/div&gt;
+      
+&lt;/div&gt;&lt;/anchored-position&gt;  &lt;/focus-group&gt;
+&lt;/action-menu&gt;    &lt;primer-text-field class=&quot;FormControl width-full FormControl--fullWidth&quot;&gt;
+      &lt;label for=&quot;gist-share-url-sized-down&quot; class=&quot;sr-only FormControl-label&quot;&gt;
+        Clone this repository at &amp;amp;lt;script src=&amp;amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb.js&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;/script&amp;amp;gt;
+&lt;/label&gt;    
+  &lt;div class=&quot;FormControl-input-wrap FormControl-input-wrap--small&quot;&gt;
+    
+      &lt;input id=&quot;gist-share-url-sized-down&quot; aria-label=&quot;Clone this repository at &amp;amp;lt;script src=&amp;amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb.js&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;/script&amp;amp;gt;&quot; value=&quot;&amp;lt;script src=&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;&quot; readonly=&quot;readonly&quot; data-autoselect=&quot;true&quot; data-target=&quot;primer-text-field.inputElement &quot; aria-describedby=&quot;validation-45e847c2-f802-4ef4-961e-7d8852c7bf6f&quot; class=&quot;form-control FormControl-monospace FormControl-input FormControl-small rounded-left-0 rounded-right-0 border-right-0&quot; type=&quot;text&quot; name=&quot;gist-share-url-sized-down&quot; /&gt;
+&lt;/div&gt;
+      &lt;div class=&quot;FormControl-inlineValidation&quot; id=&quot;validation-45e847c2-f802-4ef4-961e-7d8852c7bf6f&quot; hidden=&quot;hidden&quot;&gt;
+  &lt;span class=&quot;FormControl-inlineValidation--visual&quot; data-target=&quot;primer-text-field.validationSuccessIcon&quot; hidden&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;12&quot; viewBox=&quot;0 0 12 12&quot; version=&quot;1.1&quot; width=&quot;12&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check-circle-fill&quot;&gt;
+    &lt;path d=&quot;M6 0a6 6 0 1 1 0 12A6 6 0 0 1 6 0Zm-.705 8.737L9.63 4.403 8.392 3.166 5.295 6.263l-1.7-1.702L2.356 5.8l2.938 2.938Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;&lt;/span&gt;
+  &lt;span class=&quot; FormControl-inlineValidation--visual&quot; data-target=&quot;primer-text-field.validationErrorIcon&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;12&quot; viewBox=&quot;0 0 12 12&quot; version=&quot;1.1&quot; width=&quot;12&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-alert-fill&quot;&gt;
+    &lt;path d=&quot;M4.855.708c.5-.896 1.79-.896 2.29 0l4.675 8.351a1.312 1.312 0 0 1-1.146 1.954H1.33A1.313 1.313 0 0 1 .183 9.058ZM7 7V3H5v4Zm-1 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;&lt;/span&gt;
+  &lt;span&gt;&lt;/span&gt;
+&lt;/div&gt;
+    
+&lt;/primer-text-field&gt;
+  &lt;span data-view-component=&quot;true&quot;&gt;
+  &lt;clipboard-copy id=&quot;clipboard-button&quot; aria-label=&quot;Copy&quot; for=&quot;gist-share-url-sized-down&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;COPY_URL&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;50a66e3d6d0e2aae5e28f828c766eaafe47cd5afc4260a3680d60e31532efa68&quot; type=&quot;button&quot; data-view-component=&quot;true&quot; class=&quot;rounded-left-0 Button--secondary Button--small Button&quot;&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-copy&quot;&gt;
+    &lt;path d=&quot;M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+      &lt;svg style=&quot;display: none;&quot; aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check color-fg-success&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/clipboard-copy&gt;  &lt;div aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot; class=&quot;sr-only&quot; data-clipboard-copy-feedback&gt;&lt;/div&gt;
+&lt;/span&gt;
+
+&lt;/div&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;button href=&quot;https://desktop.github.com&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;OPEN_IN_DESKTOP&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;affbbf7453f2764a7e7c2bfb8d96451cf8176ac91e234c9e1f3b283cec4c4aaa&quot; data-platforms=&quot;windows,mac&quot; id=&quot;icon-button-1de66a01-2da5-4583-a88e-7f2818f31e80&quot; aria-labelledby=&quot;tooltip-1ab8dee7-b98b-4644-b2f2-3c41753b4796&quot; type=&quot;button&quot; data-view-component=&quot;true&quot; class=&quot;Button Button--iconOnly Button--secondary Button--small js-remove-unless-platform&quot;&gt;  &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-desktop-download Button-visual&quot;&gt;
+    &lt;path d=&quot;m4.927 5.427 2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 5H8.75V.75a.75.75 0 1 0-1.5 0V5H5.104a.25.25 0 0 0-.177.427Z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M1.573 2.573a.25.25 0 0 0-.073.177v7.5a.25.25 0 0 0 .25.25h12.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25h-3a.75.75 0 1 1 0-1.5h3A1.75 1.75 0 0 1 16 2.75v7.5A1.75 1.75 0 0 1 14.25 12h-3.727c.099 1.041.52 1.872 1.292 2.757A.75.75 0 0 1 11.25 16h-6.5a.75.75 0 0 1-.565-1.243c.772-.885 1.192-1.716 1.292-2.757H1.75A1.75 1.75 0 0 1 0 10.25v-7.5A1.75 1.75 0 0 1 1.75 1h3a.75.75 0 0 1 0 1.5h-3a.25.25 0 0 0-.177.073ZM6.982 12a5.72 5.72 0 0 1-.765 2.5h3.566a5.72 5.72 0 0 1-.765-2.5H6.982Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/button&gt;&lt;tool-tip id=&quot;tooltip-1ab8dee7-b98b-4644-b2f2-3c41753b4796&quot; for=&quot;icon-button-1de66a01-2da5-4583-a88e-7f2818f31e80&quot; popover=&quot;manual&quot; data-direction=&quot;s&quot; data-type=&quot;label&quot; data-view-component=&quot;true&quot; class=&quot;sr-only position-absolute&quot;&gt;Save jph00/e91192e9bdc1640f5421ce3c904f2efb to your computer and use it in GitHub Desktop.&lt;/tool-tip&gt;
+
+
+    &lt;/li&gt;
+  &lt;/ul&gt;
+
+&lt;div class=&quot;d-flex flex-md-row flex-column px-0 pr-md-3 px-lg-5&quot;&gt;
+  &lt;div class=&quot;flex-md-order-1 flex-order-2 flex-auto&quot;&gt;
+    &lt;nav class=&quot;UnderlineNav box-shadow-none px-3 px-lg-0&quot;
+     aria-label=&quot;Gist&quot;
+     data-pjax=&quot;#gist-pjax-container&quot;&gt;
+
+  &lt;div class=&quot;UnderlineNav-body&quot;&gt;
+    &lt;a class=&quot;js-selected-navigation-item selected UnderlineNav-item&quot; data-pjax=&quot;true&quot; data-hotkey=&quot;g c&quot; aria-current=&quot;page&quot; data-selected-links=&quot;gist_code /jph00/e91192e9bdc1640f5421ce3c904f2efb&quot; href=&quot;/jph00/e91192e9bdc1640f5421ce3c904f2efb&quot;&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-code UnderlineNav-octicon&quot;&gt;
+    &lt;path d=&quot;m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+      Code
+&lt;/a&gt;
+      &lt;a class=&quot;js-selected-navigation-item UnderlineNav-item&quot; data-pjax=&quot;true&quot; data-hotkey=&quot;g r&quot; data-selected-links=&quot;gist_revisions /jph00/e91192e9bdc1640f5421ce3c904f2efb/revisions&quot; href=&quot;/jph00/e91192e9bdc1640f5421ce3c904f2efb/revisions&quot;&gt;
+        &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-git-commit UnderlineNav-octicon&quot;&gt;
+    &lt;path d=&quot;M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        Revisions
+        &lt;span title=&quot;3&quot; data-view-component=&quot;true&quot; class=&quot;Counter&quot;&gt;3&lt;/span&gt;
+&lt;/a&gt;
+
+  &lt;/div&gt;
+&lt;/nav&gt;
+
+  &lt;/div&gt;
+
+  &lt;div class=&quot;d-md-flex d-none flex-items-center flex-md-order-2 flex-order-1&quot; data-multiple&gt;
+    
+&lt;div data-view-component=&quot;true&quot; class=&quot;flex-items-center d-inline-flex&quot;&gt;
+  &lt;action-menu data-menu-input=&quot;gist-share-url-original&quot; data-select-variant=&quot;single&quot; data-dynamic-label=&quot;&quot; data-view-component=&quot;true&quot; class=&quot;flex-shrink-0&quot;&gt;
+  &lt;focus-group direction=&quot;vertical&quot; mnemonics retain&gt;
+    &lt;button id=&quot;action-menu-3894b1a7-9fe6-4493-b210-b58653dd7b1e-button&quot; popovertarget=&quot;action-menu-3894b1a7-9fe6-4493-b210-b58653dd7b1e-overlay&quot; aria-controls=&quot;action-menu-3894b1a7-9fe6-4493-b210-b58653dd7b1e-list&quot; aria-haspopup=&quot;true&quot; type=&quot;button&quot; data-view-component=&quot;true&quot; class=&quot;rounded-right-0 border-right-0 Button--secondary Button--small Button&quot;&gt;  &lt;span class=&quot;Button-content&quot;&gt;
+    &lt;span class=&quot;Button-label&quot;&gt;Embed&lt;/span&gt;
+  &lt;/span&gt;
+    &lt;span class=&quot;Button-visual Button-trailingAction&quot;&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-triangle-down&quot;&gt;
+    &lt;path d=&quot;m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+    &lt;/span&gt;
+&lt;/button&gt;
+
+
+&lt;anchored-position id=&quot;action-menu-3894b1a7-9fe6-4493-b210-b58653dd7b1e-overlay&quot; anchor=&quot;action-menu-3894b1a7-9fe6-4493-b210-b58653dd7b1e-button&quot; align=&quot;start&quot; side=&quot;outside-bottom&quot; anchor-offset=&quot;normal&quot; popover=&quot;auto&quot; data-view-component=&quot;true&quot;&gt;
+  &lt;div data-view-component=&quot;true&quot; class=&quot;Overlay Overlay--size-auto&quot;&gt;
+    
+      &lt;div data-view-component=&quot;true&quot; class=&quot;Overlay-body Overlay-body--paddingNone&quot;&gt;          &lt;action-list&gt;
+  &lt;div data-view-component=&quot;true&quot;&gt;
+    &lt;ul aria-labelledby=&quot;action-menu-3894b1a7-9fe6-4493-b210-b58653dd7b1e-button&quot; id=&quot;action-menu-3894b1a7-9fe6-4493-b210-b58653dd7b1e-list&quot; role=&quot;menu&quot; data-view-component=&quot;true&quot; class=&quot;ActionListWrap--inset ActionListWrap&quot;&gt;
+        &lt;li data-targets=&quot;action-list.items&quot; role=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;ActionListItem&quot;&gt;
+    
+    
+    &lt;button value=&quot;&amp;lt;script src=&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;&quot; tabindex=&quot;-1&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;EMBED&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;f68725cbbedd0b3b8c91f571871f88aa81ab29724b2e8611ddbfee4e7c824315&quot; id=&quot;item-14d21f2c-888e-4586-99a6-92dff1a4008c&quot; type=&quot;button&quot; role=&quot;menuitemradio&quot; aria-checked=&quot;true&quot; data-view-component=&quot;true&quot; class=&quot;ActionListContent&quot;&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-action--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check ActionListItem-singleSelectCheckmark&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-descriptionWrap&quot;&gt;
+        &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-label&quot;&gt;
+           Embed
+&lt;/span&gt;      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-description&quot;&gt;Embed this gist in your website.&lt;/span&gt;
+&lt;/span&gt;&lt;/button&gt;
+  
+&lt;/li&gt;
+        &lt;li data-targets=&quot;action-list.items&quot; role=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;ActionListItem&quot;&gt;
+    
+    
+    &lt;button value=&quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&quot; tabindex=&quot;-1&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;SHARE&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;a8a9f2e222013d9a467127d1c242f435eee27e3a022b92000cb18d9802e8a6d7&quot; id=&quot;item-57fc1f2f-73fa-47f5-a05d-cbd6d25dc109&quot; type=&quot;button&quot; role=&quot;menuitemradio&quot; aria-checked=&quot;false&quot; data-view-component=&quot;true&quot; class=&quot;ActionListContent&quot;&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-action--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check ActionListItem-singleSelectCheckmark&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-descriptionWrap&quot;&gt;
+        &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-label&quot;&gt;
+           Share
+&lt;/span&gt;      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-description&quot;&gt;Copy sharable link for this gist.&lt;/span&gt;
+&lt;/span&gt;&lt;/button&gt;
+  
+&lt;/li&gt;
+        &lt;li data-targets=&quot;action-list.items&quot; role=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;ActionListItem&quot;&gt;
+    
+    
+    &lt;button value=&quot;https://gist.github.com/e91192e9bdc1640f5421ce3c904f2efb.git&quot; tabindex=&quot;-1&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;USE_HTTPS&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;a64854719e5676fd756e45e1430fedb8555dbf1e2e3d35299e1b74d2018d61e8&quot; id=&quot;item-e7660ffc-767a-4e9e-af0b-20157d9ad4c9&quot; type=&quot;button&quot; role=&quot;menuitemradio&quot; aria-checked=&quot;false&quot; data-view-component=&quot;true&quot; class=&quot;ActionListContent&quot;&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-action--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check ActionListItem-singleSelectCheckmark&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-descriptionWrap&quot;&gt;
+        &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-label&quot;&gt;
+          Clone via HTTPS
+&lt;/span&gt;      &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-description&quot;&gt;Clone using the web URL.&lt;/span&gt;
+&lt;/span&gt;&lt;/button&gt;
+  
+&lt;/li&gt;
+        &lt;li role=&quot;presentation&quot; aria-hidden=&quot;true&quot; data-view-component=&quot;true&quot; class=&quot;ActionList-sectionDivider&quot;&gt;&lt;/li&gt;
+        &lt;li target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot; data-targets=&quot;action-list.items&quot; role=&quot;none&quot; data-view-component=&quot;true&quot; class=&quot;ActionListItem&quot;&gt;
+    
+    
+    &lt;a tabindex=&quot;-1&quot; id=&quot;item-1ef79663-d128-4700-a9ac-04d01209286c&quot; href=&quot;https://docs.github.com/articles/which-remote-url-should-i-use&quot; role=&quot;menuitemradio&quot; aria-checked=&quot;false&quot; data-view-component=&quot;true&quot; class=&quot;ActionListContent ActionListContent--visual16&quot;&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-action--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check ActionListItem-singleSelectCheckmark&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+        &lt;span class=&quot;ActionListItem-visual ActionListItem-visual--leading&quot;&gt;
+          &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-question&quot;&gt;
+    &lt;path d=&quot;M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.92 6.085h.001a.749.749 0 1 1-1.342-.67c.169-.339.436-.701.849-.977C6.845 4.16 7.369 4 8 4a2.756 2.756 0 0 1 1.637.525c.503.377.863.965.863 1.725 0 .448-.115.83-.329 1.15-.205.307-.47.513-.692.662-.109.072-.22.138-.313.195l-.006.004a6.24 6.24 0 0 0-.26.16.952.952 0 0 0-.276.245.75.75 0 0 1-1.248-.832c.184-.264.42-.489.692-.661.103-.067.207-.132.313-.195l.007-.004c.1-.061.182-.11.258-.161a.969.969 0 0 0 .277-.245C8.96 6.514 9 6.427 9 6.25a.612.612 0 0 0-.262-.525A1.27 1.27 0 0 0 8 5.5c-.369 0-.595.09-.74.187a1.01 1.01 0 0 0-.34.398ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+        &lt;/span&gt;
+      
+        &lt;span data-view-component=&quot;true&quot; class=&quot;ActionListItem-label&quot;&gt;
+                Learn more about clone URLs
+
+&lt;/span&gt;      
+&lt;/a&gt;
+  
+&lt;/li&gt;
+&lt;/ul&gt;    
+&lt;/div&gt;&lt;/action-list&gt;
+
+
+&lt;/div&gt;
+      
+&lt;/div&gt;&lt;/anchored-position&gt;  &lt;/focus-group&gt;
+&lt;/action-menu&gt;    &lt;primer-text-field class=&quot;FormControl width-full FormControl--fullWidth&quot;&gt;
+      &lt;label for=&quot;gist-share-url-original&quot; class=&quot;sr-only FormControl-label&quot;&gt;
+        Clone this repository at &amp;amp;lt;script src=&amp;amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb.js&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;/script&amp;amp;gt;
+&lt;/label&gt;    
+  &lt;div class=&quot;FormControl-input-wrap FormControl-input-wrap--small&quot;&gt;
+    
+      &lt;input id=&quot;gist-share-url-original&quot; aria-label=&quot;Clone this repository at &amp;amp;lt;script src=&amp;amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb.js&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;/script&amp;amp;gt;&quot; value=&quot;&amp;lt;script src=&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;&quot; readonly=&quot;readonly&quot; data-autoselect=&quot;true&quot; data-target=&quot;primer-text-field.inputElement &quot; aria-describedby=&quot;validation-cca183e0-1e2b-425f-b044-8975a75ec852&quot; class=&quot;form-control FormControl-monospace FormControl-input FormControl-small rounded-left-0 rounded-right-0 border-right-0&quot; type=&quot;text&quot; name=&quot;gist-share-url-original&quot; /&gt;
+&lt;/div&gt;
+      &lt;div class=&quot;FormControl-inlineValidation&quot; id=&quot;validation-cca183e0-1e2b-425f-b044-8975a75ec852&quot; hidden=&quot;hidden&quot;&gt;
+  &lt;span class=&quot;FormControl-inlineValidation--visual&quot; data-target=&quot;primer-text-field.validationSuccessIcon&quot; hidden&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;12&quot; viewBox=&quot;0 0 12 12&quot; version=&quot;1.1&quot; width=&quot;12&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check-circle-fill&quot;&gt;
+    &lt;path d=&quot;M6 0a6 6 0 1 1 0 12A6 6 0 0 1 6 0Zm-.705 8.737L9.63 4.403 8.392 3.166 5.295 6.263l-1.7-1.702L2.356 5.8l2.938 2.938Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;&lt;/span&gt;
+  &lt;span class=&quot; FormControl-inlineValidation--visual&quot; data-target=&quot;primer-text-field.validationErrorIcon&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;12&quot; viewBox=&quot;0 0 12 12&quot; version=&quot;1.1&quot; width=&quot;12&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-alert-fill&quot;&gt;
+    &lt;path d=&quot;M4.855.708c.5-.896 1.79-.896 2.29 0l4.675 8.351a1.312 1.312 0 0 1-1.146 1.954H1.33A1.313 1.313 0 0 1 .183 9.058ZM7 7V3H5v4Zm-1 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;&lt;/span&gt;
+  &lt;span&gt;&lt;/span&gt;
+&lt;/div&gt;
+    
+&lt;/primer-text-field&gt;
+  &lt;span data-view-component=&quot;true&quot;&gt;
+  &lt;clipboard-copy id=&quot;clipboard-button&quot; aria-label=&quot;Copy&quot; for=&quot;gist-share-url-original&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;COPY_URL&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;50a66e3d6d0e2aae5e28f828c766eaafe47cd5afc4260a3680d60e31532efa68&quot; type=&quot;button&quot; data-view-component=&quot;true&quot; class=&quot;rounded-left-0 Button--secondary Button--small Button&quot;&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-copy&quot;&gt;
+    &lt;path d=&quot;M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+      &lt;svg style=&quot;display: none;&quot; aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check color-fg-success&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/clipboard-copy&gt;  &lt;div aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot; class=&quot;sr-only&quot; data-clipboard-copy-feedback&gt;&lt;/div&gt;
+&lt;/span&gt;
+
+&lt;/div&gt;
+
+    &lt;div class=&quot;ml-2&quot;&gt;
+        &lt;button href=&quot;https://desktop.github.com&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;OPEN_IN_DESKTOP&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;affbbf7453f2764a7e7c2bfb8d96451cf8176ac91e234c9e1f3b283cec4c4aaa&quot; data-platforms=&quot;windows,mac&quot; id=&quot;icon-button-d21910c6-fc02-4783-9189-7851709bfea3&quot; aria-labelledby=&quot;tooltip-63f8b39f-c31a-4787-9c52-61f10e673365&quot; type=&quot;button&quot; data-view-component=&quot;true&quot; class=&quot;Button Button--iconOnly Button--secondary Button--small js-remove-unless-platform&quot;&gt;  &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-desktop-download Button-visual&quot;&gt;
+    &lt;path d=&quot;m4.927 5.427 2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 5H8.75V.75a.75.75 0 1 0-1.5 0V5H5.104a.25.25 0 0 0-.177.427Z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M1.573 2.573a.25.25 0 0 0-.073.177v7.5a.25.25 0 0 0 .25.25h12.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25h-3a.75.75 0 1 1 0-1.5h3A1.75 1.75 0 0 1 16 2.75v7.5A1.75 1.75 0 0 1 14.25 12h-3.727c.099 1.041.52 1.872 1.292 2.757A.75.75 0 0 1 11.25 16h-6.5a.75.75 0 0 1-.565-1.243c.772-.885 1.192-1.716 1.292-2.757H1.75A1.75 1.75 0 0 1 0 10.25v-7.5A1.75 1.75 0 0 1 1.75 1h3a.75.75 0 0 1 0 1.5h-3a.25.25 0 0 0-.177.073ZM6.982 12a5.72 5.72 0 0 1-.765 2.5h3.566a5.72 5.72 0 0 1-.765-2.5H6.982Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/button&gt;&lt;tool-tip id=&quot;tooltip-63f8b39f-c31a-4787-9c52-61f10e673365&quot; for=&quot;icon-button-d21910c6-fc02-4783-9189-7851709bfea3&quot; popover=&quot;manual&quot; data-direction=&quot;s&quot; data-type=&quot;label&quot; data-view-component=&quot;true&quot; class=&quot;sr-only position-absolute&quot;&gt;Save jph00/e91192e9bdc1640f5421ce3c904f2efb to your computer and use it in GitHub Desktop.&lt;/tool-tip&gt;
+
+
+    &lt;/div&gt;
+
+    &lt;div class=&quot;ml-2&quot;&gt;
+      &lt;a class=&quot;btn btn-sm&quot; rel=&quot;nofollow&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;clone_or_download.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;feature_clicked&amp;quot;:&amp;quot;DOWNLOAD_ZIP&amp;quot;,&amp;quot;git_repository_type&amp;quot;:&amp;quot;GIST&amp;quot;,&amp;quot;gist_id&amp;quot;:132365404,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;23b8186d8b255945ec2d3ac98fd67b2a0832a93cb86867801afc2a2a13bba295&quot; data-ga-click=&quot;Gist, download zip, location:gist overview&quot; href=&quot;/jph00/e91192e9bdc1640f5421ce3c904f2efb/archive/61a2774912414029edaf1a55b506f0e283b93c46.zip&quot;&gt;Download ZIP&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;container-lg px-3&quot;&gt;
+  &lt;div class=&quot;repository-content gist-content&quot; &gt;
+    
+  &lt;div&gt;
+      &lt;div itemprop=&quot;about&quot;&gt;
+    Starlette Quick Manual for FastHTML users
+  &lt;/div&gt;
+
+        &lt;div class=&quot;js-gist-file-update-container js-task-list-container&quot;&gt;
+  &lt;div id=&quot;file-starlette-quick-md&quot; class=&quot;file my-2&quot;&gt;
+      &lt;div class=&quot;file-header d-flex flex-md-items-center flex-items-start&quot;&gt;
+        &lt;div class=&quot;file-actions flex-order-2 pt-0&quot;&gt;
+          &lt;a href=&quot;/jph00/e91192e9bdc1640f5421ce3c904f2efb/raw/61a2774912414029edaf1a55b506f0e283b93c46/starlette-quick.md&quot; data-view-component=&quot;true&quot; class=&quot;Button--secondary Button--small Button&quot;&gt;  &lt;span class=&quot;Button-content&quot;&gt;
+    &lt;span class=&quot;Button-label&quot;&gt;Raw&lt;/span&gt;
+  &lt;/span&gt;
+&lt;/a&gt;
+
+        &lt;/div&gt;
+        &lt;div class=&quot;file-info pr-4 d-flex flex-md-items-center flex-items-start flex-order-1 flex-auto&quot;&gt;
+          &lt;span class=&quot;mr-1&quot;&gt;
+            &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-code-square color-fg-muted&quot;&gt;
+    &lt;path d=&quot;M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Zm7.47 3.97a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L10.69 8 9.22 6.53a.75.75 0 0 1 0-1.06ZM6.78 6.53 5.31 8l1.47 1.47a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-2-2a.75.75 0 0 1 0-1.06l2-2a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+          &lt;/span&gt;
+          &lt;a class=&quot;wb-break-all&quot; href=&quot;#file-starlette-quick-md&quot;&gt;
+            &lt;strong class=&quot;user-select-contain gist-blob-name css-truncate-target&quot;&gt;
+              starlette-quick.md
+            &lt;/strong&gt;
+          &lt;/a&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div id=&quot;file-starlette-quick-md-readme&quot; class=&quot;Box-body readme blob js-code-block-container p-5 p-xl-6 gist-border-0&quot;&gt;
+    &lt;article class=&quot;markdown-body entry-content container-lg&quot; itemprop=&quot;text&quot;&gt;&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h1 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;🌟 Starlette Quick Manual&lt;/h1&gt;&lt;a id=&quot;user-content--starlette-quick-manual&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: 🌟 Starlette Quick Manual&quot; href=&quot;#-starlette-quick-manual&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p dir=&quot;auto&quot;&gt;2020-02-09&lt;/p&gt;
+&lt;p dir=&quot;auto&quot;&gt;Starlette is the ASGI web framework used as the foundation of FastHTML. Listed here are some Starlette features FastHTML developers can use directly, since the &lt;code&gt;FastHTML&lt;/code&gt; class inherits from the &lt;code&gt;Starlette&lt;/code&gt; class (but note that FastHTML has its own customised &lt;code&gt;RouteX&lt;/code&gt; and &lt;code&gt;RouterX&lt;/code&gt; classes for routing, to handle FT element trees etc).&lt;/p&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h2 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Get uploaded file content&lt;/h2&gt;&lt;a id=&quot;user-content-get-uploaded-file-content&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Get uploaded file content&quot; href=&quot;#get-uploaded-file-content&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;async def handler(request):
+    inp = await request.form()
+    uploaded_file = inp[&quot;filename&quot;]
+    filename = uploaded_file.filename           # abc.png
+    content_type = uploaded.content_type    # MIME type, e.g. image/png
+    content = await uploaded_file.read()       # image content
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h2 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Return a customized response (status code and headers)&lt;/h2&gt;&lt;a id=&quot;user-content-return-a-customized-response-status-code-and-headers&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Return a customized response (status code and headers)&quot; href=&quot;#return-a-customized-response-status-code-and-headers&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;import json
+from starlette.responses import Response
+
+async def handler(request):
+    data = {
+        &quot;name&quot;: &quot;Bo&quot;
+    }
+    return Response(json.dumps(data), media_type=&quot;application/json&quot;)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p dir=&quot;auto&quot;&gt;&lt;code&gt;Response&lt;/code&gt; takes &lt;code&gt;status_code&lt;/code&gt;, &lt;code&gt;headers&lt;/code&gt; and &lt;code&gt;media_type&lt;/code&gt;, so if we want to change a response&#x27;s status code, we can do:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;return Response(content, statu_code=404)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p dir=&quot;auto&quot;&gt;And customized headers:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;headers = {
+	&quot;x-extra-key&quot;: &quot;value&quot;
+}
+return Response(content, status_code=200, headers=headers)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h2 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Redirect&lt;/h2&gt;&lt;a id=&quot;user-content-redirect&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Redirect&quot; href=&quot;#redirect&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;from starlette.responses import RedirectResponse
+
+async handler(request):
+    # Customize status_code: 
+    #   301: permanent redirect 
+    #   302: temporary redirect 
+    #   303: see others
+    #   307: temporary redirect (default)
+    return RedirectResponse(url=url, status_code=303)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h2 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Request context&lt;/h2&gt;&lt;a id=&quot;user-content-request-context&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Request context&quot; href=&quot;#request-context&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;URL Object: &lt;code&gt;request.url&lt;/code&gt;&lt;/h3&gt;&lt;a id=&quot;user-content-url-object-requesturl&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: URL Object: request.url&quot; href=&quot;#url-object-requesturl&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;ul dir=&quot;auto&quot;&gt;
+&lt;li&gt;Get request full url: &lt;code&gt;url = str(request.url)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Get scheme: &lt;code&gt;request.url.scheme&lt;/code&gt; (http, https, ws, wss)&lt;/li&gt;
+&lt;li&gt;Get netloc: &lt;code&gt;request.url.netloc&lt;/code&gt;, e.g.: example.com:8080&lt;/li&gt;
+&lt;li&gt;Get path: &lt;code&gt;request.url.path&lt;/code&gt;, e.g.: /search&lt;/li&gt;
+&lt;li&gt;Get query string: &lt;code&gt;request.url.query&lt;/code&gt;, e.g.: kw=hello&lt;/li&gt;
+&lt;li&gt;Get hostname: &lt;code&gt;request.url.hostname&lt;/code&gt;, e.g.: example.com&lt;/li&gt;
+&lt;li&gt;Get port: &lt;code&gt;request.url.port&lt;/code&gt;, e.g.: 8080&lt;/li&gt;
+&lt;li&gt;If using secure scheme: &lt;code&gt;request.url.is_secure&lt;/code&gt;, True is schme is &lt;code&gt;https&lt;/code&gt; or &lt;code&gt;wss&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Headers: &lt;code&gt;request.headers&lt;/code&gt;&lt;/h3&gt;&lt;a id=&quot;user-content-headers-requestheaders&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Headers: request.headers&quot; href=&quot;#headers-requestheaders&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;{
+    &#x27;host&#x27;: &#x27;example.com:8080&#x27;, 
+    &#x27;connection&#x27;: &#x27;keep-alive&#x27;, 
+    &#x27;cache-control&#x27;: &#x27;max-age=0&#x27;, 
+    &#x27;sec-ch-ua&#x27;: &#x27;Google Chrome 80&#x27;, 
+    &#x27;dnt&#x27;: &#x27;1&#x27;, 
+    &#x27;upgrade-insecure-requests&#x27;: &#x27;1&#x27;, 
+    &#x27;user-agent&#x27;: &#x27;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) ...&#x27;,
+    &#x27;sec-fetch-dest&#x27;: &#x27;document&#x27;, 
+    &#x27;accept&#x27;: &#x27;text/html,image/apng,*/*;q=0.8;v=b3;q=0.9&#x27;, 
+    &#x27;sec-origin-policy&#x27;: &#x27;0&#x27;, 
+    &#x27;sec-fetch-site&#x27;: &#x27;none&#x27;, 
+    &#x27;sec-fetch-mode&#x27;: &#x27;navigate&#x27;, 
+    &#x27;sec-fetch-user&#x27;: &#x27;?1&#x27;, 
+    &#x27;accept-encoding&#x27;: &#x27;gzip, deflate, br&#x27;, 
+    &#x27;accept-language&#x27;: &#x27;en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6&#x27;, 
+    &#x27;cookie&#x27;: &#x27;session=eyJhZG1pbl91c2_KiQ...&#x27;
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Client: &lt;code&gt;request.client&lt;/code&gt;&lt;/h3&gt;&lt;a id=&quot;user-content-client-requestclient&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Client: request.client&quot; href=&quot;#client-requestclient&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;ul dir=&quot;auto&quot;&gt;
+&lt;li&gt;&lt;code&gt;request.client.host&lt;/code&gt;: get client sock IP&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;request.client.port&lt;/code&gt;: get client sock port&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Method: &lt;code&gt;request.method&lt;/code&gt;&lt;/h3&gt;&lt;a id=&quot;user-content-method-requestmethod&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Method: request.method&quot; href=&quot;#method-requestmethod&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;ul dir=&quot;auto&quot;&gt;
+&lt;li&gt;&lt;code&gt;request.method&lt;/code&gt;: GET, POST, etc.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Get Data&lt;/h3&gt;&lt;a id=&quot;user-content-get-data&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Get Data&quot; href=&quot;#get-data&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;ul dir=&quot;auto&quot;&gt;
+&lt;li&gt;&lt;code&gt;await request.body()&lt;/code&gt;: get raw data from body&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;await request.json()&lt;/code&gt;: get passed data and parse it as JSON&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;await request.form()&lt;/code&gt;: get posted data and pass it as dictionary&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Scope: &lt;code&gt;request.scope&lt;/code&gt;&lt;/h3&gt;&lt;a id=&quot;user-content-scope-requestscope&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Scope: request.scope&quot; href=&quot;#scope-requestscope&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;{
+    &#x27;type&#x27;: &#x27;http&#x27;, 
+    &#x27;http_version&#x27;: &#x27;1.1&#x27;, 
+    &#x27;server&#x27;: (&#x27;127.0.0.1&#x27;, 9092), 
+    &#x27;client&#x27;: (&#x27;127.0.0.1&#x27;, 53102), 
+    &#x27;scheme&#x27;: &#x27;https&#x27;, 
+    &#x27;method&#x27;: &#x27;GET&#x27;, 
+    &#x27;root_path&#x27;: &#x27;&#x27;, 
+    &#x27;path&#x27;: &#x27;/&#x27;, 
+    &#x27;raw_path&#x27;: b&#x27;/&#x27;, 
+    &#x27;query_string&#x27;: b&#x27;kw=hello&#x27;, 
+    &#x27;headers&#x27;: [
+        (b&#x27;host&#x27;, b&#x27;example.com:8080&#x27;), 
+        (b&#x27;connection&#x27;, b&#x27;keep-alive&#x27;), 
+        (b&#x27;cache-control&#x27;, b&#x27;max-age=0&#x27;), 
+        ...
+    ], 
+    &#x27;app&#x27;: &amp;lt;starlette.applications.Starlette object at 0x1081bd650&amp;gt;, 
+    &#x27;session&#x27;: {&#x27;uid&#x27;: &#x27;57ba03ea7333f72a25f837cf&#x27;}, 
+    &#x27;router&#x27;: &amp;lt;starlette.routing.Router object at 0x1081bd6d0&amp;gt;, 
+    &#x27;endpoint&#x27;: &amp;lt;class &#x27;app.index.Index&#x27;&amp;gt;, 
+    &#x27;path_params&#x27;: {}
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h2 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Put varaible in request &amp;amp; app scope&lt;/h2&gt;&lt;a id=&quot;user-content-put-varaible-in-request--app-scope&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Put varaible in request &amp;amp; app scope&quot; href=&quot;#put-varaible-in-request--app-scope&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;app.state.dbconn = get_db_conn()
+request.state.start_time = time.time()
+# use app-scope state variable in a request
+request.app.state.dbconn
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h2 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Utility functions&lt;/h2&gt;&lt;a id=&quot;user-content-utility-functions&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Utility functions&quot; href=&quot;#utility-functions&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Use &lt;code&gt;State&lt;/code&gt; to wrap a dictionary&lt;/h3&gt;&lt;a id=&quot;user-content-use-state-to-wrap-a-dictionary&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Use State to wrap a dictionary&quot; href=&quot;#use-state-to-wrap-a-dictionary&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;from starlette.datastructures import State
+
+data = {
+    &quot;name&quot;: &quot;Bo&quot;
+}
+print(data[&quot;name&quot;])
+# now wrap it with State function
+wrapped = State(data)
+# You can use the dot syntaxt, but can&#x27;t use `wrapped[&quot;name&quot;]` any more.
+print(wrapped.name)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;login_required wrapper function&lt;/h3&gt;&lt;a id=&quot;user-content-login_required-wrapper-function&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: login_required wrapper function&quot; href=&quot;#login_required-wrapper-function&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;p dir=&quot;auto&quot;&gt;NB: This is easier to do in FastHTML using Beforeware.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;import functools
+from starlette.endpoints import HTTPEndpoint
+from starlette.responses import Response
+
+def login_required(login_url=&quot;/signin&quot;):
+    def decorator(handler):
+        @functools.wraps(handler)
+        async def new_handler(obj, req, *args, **kwargs):
+            user = req.session.get(&quot;login_user&quot;)
+            if user is None:
+                return seeother(login_url)
+            return await handler(obj, req, *args, **kwargs)
+        return new_handler
+    return decorator
+
+class MyAccount(HTTPEndpiont):
+    @login_required()
+    async def get(self, request):
+        # some logic here
+        content = &quot;hello&quot;
+        return Response(content)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h2 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Exceptions&lt;/h2&gt;&lt;a id=&quot;user-content-exceptions&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Exceptions&quot; href=&quot;#exceptions&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;p dir=&quot;auto&quot;&gt;Handle exception and customize 403, 404, 503, 500 page:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;from starlette.exceptions import HTTPException
+
+async def exc_handle_403(request, exc):
+    return HTMLResponse(&quot;My 403 page&quot;, status_code=exc.status_code)
+
+async def exc_handle_404(request, exc):
+    return HTMLResponse(&quot;My 404 page&quot;, status_code=exc.status_code)
+
+async def exc_handle_503(request, exc):
+    return HTMLResponse(&quot;Failed, please try it later&quot;, status_code=exc.status_code)
+
+# error is not exception, 500 is server side unexpected error, all other status code will be treated as Exception
+async def err_handle_500(request, exc):
+    import traceback
+    Log.error(traceback.format_exc())
+    return HTMLResponse(&quot;My 500 page&quot;, status_code=500)
+
+# To add handler, we can add either status_code or Exception itself as key
+exception_handlers = {
+    403: exc_handle_403,
+    404: exc_handle_404,
+    503: exc_handle_503,
+    500: err_handle_500,
+    #HTTPException: exc_handle_500,
+}
+
+app = Starlette(routes=routes, exception_handlers=exception_handlers)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h2 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Background Task&lt;/h2&gt;&lt;a id=&quot;user-content-background-task&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Background Task&quot; href=&quot;#background-task&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Put some async task as background task&lt;/h3&gt;&lt;a id=&quot;user-content-put-some-async-task-as-background-task&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Put some async task as background task&quot; href=&quot;#put-some-async-task-as-background-task&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;import aiofiles
+from starlette.background import BackgroundTask
+from starlette.responses import Response
+
+aiofiles_remove = aiofiles.os.wrap(os.remove)
+
+async def del_file(fpath):
+    await aiofiles_remove(fpath)
+
+async def handler(request):
+    content = &quot;&quot;
+    fpath = &quot;/tmp/tmpfile.txt&quot;
+    task = BackgroundTask(del_file, fpath=fpath)
+    return Response(content, background=task)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Put multiple tasks as background task&lt;/h3&gt;&lt;a id=&quot;user-content-put-multiple-tasks-as-background-task&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Put multiple tasks as background task&quot; href=&quot;#put-multiple-tasks-as-background-task&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;from starlette.background import BackgroundTasks
+
+async def task1(name):
+    pass
+
+async def task2(email):
+    pass
+
+async def handler(request):
+    tasks = BackgroundTasks()
+    tasks.add_task(task1, name=&quot;John&quot;)
+    tasks.add_task(task2, email=&quot;info@example.com&quot;)
+    content = &quot;&quot;
+    return Response(content, background=tasks)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h2 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Write middleware&lt;/h2&gt;&lt;a id=&quot;user-content-write-middleware&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Write middleware&quot; href=&quot;#write-middleware&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;p dir=&quot;auto&quot;&gt;There are 2 ways to write middleware:&lt;/p&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Define &lt;code&gt;__call__&lt;/code&gt; function:&lt;/h3&gt;&lt;a id=&quot;user-content-define-__call__-function&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Define __call__ function:&quot; href=&quot;#define-__call__-function&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;class MyMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        # see above scope dictionary as reference
+        headers = dict(scope[&quot;headers&quot;])
+        # do something
+        # pass to next middleware
+        return await self.app(scope, receive, send)
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;markdown-heading&quot; dir=&quot;auto&quot;&gt;&lt;h3 class=&quot;heading-element&quot; dir=&quot;auto&quot;&gt;Use &lt;code&gt;BaseHTTPMiddleware&lt;/code&gt;&lt;/h3&gt;&lt;a id=&quot;user-content-use-basehttpmiddleware&quot; class=&quot;anchor&quot; aria-label=&quot;Permalink: Use BaseHTTPMiddleware&quot; href=&quot;#use-basehttpmiddleware&quot;&gt;&lt;svg class=&quot;octicon octicon-link&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; height=&quot;16&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;from starlette.middleware.base import BaseHTTPMiddleware
+
+class CustomHeaderMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        # do something before pass to next middleware
+        response = await call_next(request)
+        # do something after next middleware returned
+        response.headers[&#x27;X-Author&#x27;] = &#x27;John&#x27;
+        return response
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/article&gt;
+  &lt;/div&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+      &lt;a name=&quot;comments&quot;&gt;&lt;/a&gt;
+      &lt;div class=&quot;js-quote-selection-container&quot; data-quote-markdown=&quot;.js-comment-body&quot;&gt;
+        &lt;div class=&quot;js-discussion &quot;
+        &gt;
+          &lt;div class=&quot;ml-md-6 pl-md-3 ml-0 pl-0&quot;&gt;
+            
+
+
+
+&lt;div id=&quot;partial-timeline-marker&quot;
+      class=&quot;js-timeline-marker js-updatable-content&quot;
+      data-last-modified=&quot;Fri, 30 Aug 2024 21:11:26 GMT&quot;
+      &gt;
+&lt;/div&gt;
+
+          &lt;/div&gt;
+
+          &lt;div class=&quot;discussion-timeline-actions&quot;&gt;
+            &lt;div data-view-component=&quot;true&quot; class=&quot;flash flash-warn mt-3&quot;&gt;
+  
+    &lt;a rel=&quot;nofollow&quot; class=&quot;btn btn-primary&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;authentication.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;location_in_page&amp;quot;:&amp;quot;signed out comment&amp;quot;,&amp;quot;repository_id&amp;quot;:null,&amp;quot;auth_type&amp;quot;:&amp;quot;SIGN_UP&amp;quot;,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;fb4970e3680ce0ee99f75d44a5db8048023d8df8930b17d2c7468b08b6a4ff6d&quot; href=&quot;/join?source=comment-gist&quot;&gt;Sign up for free&lt;/a&gt;
+    &lt;strong&gt;to join this conversation on GitHub&lt;/strong&gt;.
+    Already have an account?
+    &lt;a rel=&quot;nofollow&quot; class=&quot;Link--inTextBlock&quot; data-hydro-click=&quot;{&amp;quot;event_type&amp;quot;:&amp;quot;authentication.click&amp;quot;,&amp;quot;payload&amp;quot;:{&amp;quot;location_in_page&amp;quot;:&amp;quot;signed out comment&amp;quot;,&amp;quot;repository_id&amp;quot;:null,&amp;quot;auth_type&amp;quot;:&amp;quot;LOG_IN&amp;quot;,&amp;quot;originating_url&amp;quot;:&amp;quot;https://gist.github.com/jph00/e91192e9bdc1640f5421ce3c904f2efb&amp;quot;,&amp;quot;user_id&amp;quot;:null}}&quot; data-hydro-click-hmac=&quot;208da376fdebefb7fd4026f2fadafb668c60179ca80c1f5b3dc7c736d6cea749&quot; data-test-selector=&quot;comments-sign-in-link&quot; href=&quot;/login?return_to=https%3A%2F%2Fgist.github.com%2Fjph00%2Fe91192e9bdc1640f5421ce3c904f2efb&quot;&gt;Sign in to comment&lt;/a&gt;
+
+
+  
+&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;&lt;!-- /.container --&gt;
+
+    &lt;/main&gt;
+  &lt;/div&gt;
+
+  &lt;/div&gt;
+
+          &lt;footer class=&quot;footer pt-8 pb-6 f6 color-fg-muted p-responsive&quot; role=&quot;contentinfo&quot; &gt;
+  &lt;h2 class=&#x27;sr-only&#x27;&gt;Footer&lt;/h2&gt;
+
+  
+
+
+  &lt;div class=&quot;d-flex flex-justify-center flex-items-center flex-column-reverse flex-lg-row flex-wrap flex-lg-nowrap&quot;&gt;
+    &lt;div class=&quot;d-flex flex-items-center flex-shrink-0 mx-2&quot;&gt;
+      &lt;a aria-label=&quot;Homepage&quot; title=&quot;GitHub&quot; class=&quot;footer-octicon mr-2&quot; href=&quot;https://github.com&quot;&gt;
+        &lt;svg aria-hidden=&quot;true&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; version=&quot;1.1&quot; width=&quot;24&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-mark-github&quot;&gt;
+    &lt;path d=&quot;M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+&lt;/a&gt;
+      &lt;span&gt;
+        &amp;copy; 2024 GitHub,&amp;nbsp;Inc.
+      &lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;nav aria-label=&quot;Footer&quot;&gt;
+      &lt;h3 class=&quot;sr-only&quot; id=&quot;sr-footer-heading&quot;&gt;Footer navigation&lt;/h3&gt;
+
+      &lt;ul class=&quot;list-style-none d-flex flex-justify-center flex-wrap mb-2 mb-lg-0&quot; aria-labelledby=&quot;sr-footer-heading&quot;&gt;
+
+          &lt;li class=&quot;mx-2&quot;&gt;
+            &lt;a data-analytics-event=&quot;{&amp;quot;category&amp;quot;:&amp;quot;Footer&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;go to Terms&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;text:terms&amp;quot;}&quot; href=&quot;https://docs.github.com/site-policy/github-terms/github-terms-of-service&quot; data-view-component=&quot;true&quot; class=&quot;Link--secondary Link&quot;&gt;Terms&lt;/a&gt;
+          &lt;/li&gt;
+
+          &lt;li class=&quot;mx-2&quot;&gt;
+            &lt;a data-analytics-event=&quot;{&amp;quot;category&amp;quot;:&amp;quot;Footer&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;go to privacy&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;text:privacy&amp;quot;}&quot; href=&quot;https://docs.github.com/site-policy/privacy-policies/github-privacy-statement&quot; data-view-component=&quot;true&quot; class=&quot;Link--secondary Link&quot;&gt;Privacy&lt;/a&gt;
+          &lt;/li&gt;
+
+          &lt;li class=&quot;mx-2&quot;&gt;
+            &lt;a data-analytics-event=&quot;{&amp;quot;category&amp;quot;:&amp;quot;Footer&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;go to security&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;text:security&amp;quot;}&quot; href=&quot;https://github.com/security&quot; data-view-component=&quot;true&quot; class=&quot;Link--secondary Link&quot;&gt;Security&lt;/a&gt;
+          &lt;/li&gt;
+
+          &lt;li class=&quot;mx-2&quot;&gt;
+            &lt;a data-analytics-event=&quot;{&amp;quot;category&amp;quot;:&amp;quot;Footer&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;go to status&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;text:status&amp;quot;}&quot; href=&quot;https://www.githubstatus.com/&quot; data-view-component=&quot;true&quot; class=&quot;Link--secondary Link&quot;&gt;Status&lt;/a&gt;
+          &lt;/li&gt;
+
+          &lt;li class=&quot;mx-2&quot;&gt;
+            &lt;a data-analytics-event=&quot;{&amp;quot;category&amp;quot;:&amp;quot;Footer&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;go to docs&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;text:docs&amp;quot;}&quot; href=&quot;https://docs.github.com/&quot; data-view-component=&quot;true&quot; class=&quot;Link--secondary Link&quot;&gt;Docs&lt;/a&gt;
+          &lt;/li&gt;
+
+          &lt;li class=&quot;mx-2&quot;&gt;
+            &lt;a data-analytics-event=&quot;{&amp;quot;category&amp;quot;:&amp;quot;Footer&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;go to contact&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;text:contact&amp;quot;}&quot; href=&quot;https://support.github.com?tags=dotcom-footer&quot; data-view-component=&quot;true&quot; class=&quot;Link--secondary Link&quot;&gt;Contact&lt;/a&gt;
+          &lt;/li&gt;
+
+          &lt;li class=&quot;mr-3&quot; &gt;
+  &lt;cookie-consent-link&gt;
+    &lt;button
+      type=&quot;button&quot;
+      class=&quot;Link--secondary underline-on-hover border-0 p-0 color-bg-transparent&quot;
+      data-action=&quot;click:cookie-consent-link#showConsentManagement&quot;
+      data-analytics-event=&quot;{&amp;quot;location&amp;quot;:&amp;quot;footer&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;cookies&amp;quot;,&amp;quot;context&amp;quot;:&amp;quot;subfooter&amp;quot;,&amp;quot;tag&amp;quot;:&amp;quot;link&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;cookies_link_subfooter_footer&amp;quot;}&quot;
+    &gt;
+      Manage cookies
+    &lt;/button&gt;
+  &lt;/cookie-consent-link&gt;
+&lt;/li&gt;
+
+&lt;li class=&quot;mr-3&quot;&gt;
+  &lt;cookie-consent-link&gt;
+    &lt;button
+      type=&quot;button&quot;
+      class=&quot;Link--secondary underline-on-hover border-0 p-0 color-bg-transparent&quot;
+      data-action=&quot;click:cookie-consent-link#showConsentManagement&quot;
+      data-analytics-event=&quot;{&amp;quot;location&amp;quot;:&amp;quot;footer&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;dont_share_info&amp;quot;,&amp;quot;context&amp;quot;:&amp;quot;subfooter&amp;quot;,&amp;quot;tag&amp;quot;:&amp;quot;link&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;dont_share_info_link_subfooter_footer&amp;quot;}&quot;
+    &gt;
+      Do not share my personal information
+    &lt;/button&gt;
+  &lt;/cookie-consent-link&gt;
+&lt;/li&gt;
+
+      &lt;/ul&gt;
+    &lt;/nav&gt;
+  &lt;/div&gt;
+&lt;/footer&gt;
+
+
+
+
+    &lt;ghcc-consent id=&quot;ghcc&quot; class=&quot;position-fixed bottom-0 left-0&quot; style=&quot;z-index: 999999&quot; data-initial-cookie-consent-allowed=&quot;&quot; data-cookie-consent-required=&quot;false&quot;&gt;&lt;/ghcc-consent&gt;
+
+
+  &lt;div id=&quot;ajax-error-message&quot; class=&quot;ajax-error-message flash flash-error&quot; hidden&gt;
+    &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-alert&quot;&gt;
+    &lt;path d=&quot;M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+    &lt;button type=&quot;button&quot; class=&quot;flash-close js-ajax-error-dismiss&quot; aria-label=&quot;Dismiss error&quot;&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-x&quot;&gt;
+    &lt;path d=&quot;M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+    &lt;/button&gt;
+    You can’t perform that action at this time.
+  &lt;/div&gt;
+
+    &lt;template id=&quot;site-details-dialog&quot;&gt;
+  &lt;details class=&quot;details-reset details-overlay details-overlay-dark lh-default color-fg-default hx_rsm&quot; open&gt;
+    &lt;summary role=&quot;button&quot; aria-label=&quot;Close dialog&quot;&gt;&lt;/summary&gt;
+    &lt;details-dialog class=&quot;Box Box--overlay d-flex flex-column anim-fade-in fast hx_rsm-dialog hx_rsm-modal&quot;&gt;
+      &lt;button class=&quot;Box-btn-octicon m-0 btn-octicon position-absolute right-0 top-0&quot; type=&quot;button&quot; aria-label=&quot;Close dialog&quot; data-close-dialog&gt;
+        &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-x&quot;&gt;
+    &lt;path d=&quot;M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+      &lt;/button&gt;
+      &lt;div class=&quot;octocat-spinner my-6 js-details-dialog-spinner&quot;&gt;&lt;/div&gt;
+    &lt;/details-dialog&gt;
+  &lt;/details&gt;
+&lt;/template&gt;
+
+    &lt;div class=&quot;Popover js-hovercard-content position-absolute&quot; style=&quot;display: none; outline: none;&quot;&gt;
+  &lt;div class=&quot;Popover-message Popover-message--bottom-left Popover-message--large Box color-shadow-large&quot; style=&quot;width:360px;&quot;&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+    &lt;template id=&quot;snippet-clipboard-copy-button&quot;&gt;
+  &lt;div class=&quot;zeroclipboard-container position-absolute right-0 top-0&quot;&gt;
+    &lt;clipboard-copy aria-label=&quot;Copy&quot; class=&quot;ClipboardButton btn js-clipboard-copy m-2 p-0&quot; data-copy-feedback=&quot;Copied!&quot; data-tooltip-direction=&quot;w&quot;&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-copy js-clipboard-copy-icon m-2&quot;&gt;
+    &lt;path d=&quot;M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check js-clipboard-check-icon color-fg-success d-none m-2&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+    &lt;/clipboard-copy&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;template id=&quot;snippet-clipboard-copy-button-unpositioned&quot;&gt;
+  &lt;div class=&quot;zeroclipboard-container&quot;&gt;
+    &lt;clipboard-copy aria-label=&quot;Copy&quot; class=&quot;ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 d-flex flex-justify-center flex-items-center&quot; data-copy-feedback=&quot;Copied!&quot; data-tooltip-direction=&quot;w&quot;&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-copy js-clipboard-copy-icon&quot;&gt;
+    &lt;path d=&quot;M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z&quot;&gt;&lt;/path&gt;&lt;path d=&quot;M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+      &lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; viewBox=&quot;0 0 16 16&quot; version=&quot;1.1&quot; width=&quot;16&quot; data-view-component=&quot;true&quot; class=&quot;octicon octicon-check js-clipboard-check-icon color-fg-success d-none&quot;&gt;
+    &lt;path d=&quot;M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z&quot;&gt;&lt;/path&gt;
+&lt;/svg&gt;
+    &lt;/clipboard-copy&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+
+
+
+    &lt;/div&gt;
+
+    &lt;div id=&quot;js-global-screen-reader-notice&quot; class=&quot;sr-only mt-n1&quot; aria-live=&quot;polite&quot; aria-atomic=&quot;true&quot; &gt;&lt;/div&gt;
+    &lt;div id=&quot;js-global-screen-reader-notice-assertive&quot; class=&quot;sr-only mt-n1&quot; aria-live=&quot;assertive&quot; aria-atomic=&quot;true&quot;&gt;&lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</doc>
   </docs>
   <examples>
     <doc title="Websockets application" info="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
@@ -1689,7 +2981,7 @@ async def ws(msg:str, send):
 
 serve()
 </doc>
-    <doc title="Todo list application" info="Detailed walk-thru of a complete CRUD app in FastHTML showing idiomatic use of FastHTML and HTMX patterns">###
+    <doc title="Todo list application" info="Detailed walk-thru of a complete CRUD app in FastHTML showing idiomatic use of FastHTML and HTMX patterns.">###
 # Walkthrough of an idiomatic fasthtml app
 ###
 

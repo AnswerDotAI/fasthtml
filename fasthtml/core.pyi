@@ -1,3 +1,4 @@
+"""The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
 import json, uuid, inspect, types, uvicorn
 from starlette.datastructures import URLPath
@@ -116,12 +117,12 @@ def _wrap_ws(ws, data, params):
 async def _send_ws(ws, resp):
     ...
 
-def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
+def _ws_endp(recv, conn=None, disconn=None):
     ...
 
 class WS_RouteX(WebSocketRoute):
 
-    def __init__(self, path: str, recv, conn: callable=None, disconn: callable=None, *, name=None, middleware=None, hdrs=None, before=None):
+    def __init__(self, app, path: str, recv, conn: callable=None, disconn: callable=None, *, name=None, middleware=None):
         ...
 
 def uri(_arg, **kwargs):
@@ -168,7 +169,7 @@ async def _wrap_call(f, req, params):
 
 class RouteX(Route):
 
-    def __init__(self, path: str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None, hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
+    def __init__(self, app, path: str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None):
         ...
 
     async def _endp(self, req):
@@ -176,7 +177,7 @@ class RouteX(Route):
 
 class RouterX(Router):
 
-    def __init__(self, routes=None, redirect_slashes=True, default=None, on_startup=None, on_shutdown=None, lifespan=None, *, middleware=None, hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
+    def __init__(self, app, routes=None, redirect_slashes=True, default=None, *, middleware=None):
         ...
 
     def add_route(self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):

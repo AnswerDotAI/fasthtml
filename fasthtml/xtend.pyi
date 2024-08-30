@@ -1,4 +1,5 @@
-__all__ = ['A', 'Form', 'AX', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Any', 'Prev', 'Now', 'AnyNow', 'run_js', 'Titled', 'Socials', 'Favicon', 'jsd', 'clear']
+"""Simple extensions to standard HTML components, such as adding sensible defaults"""
+__all__ = ['A', 'Form', 'AX', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'Titled', 'Socials', 'Favicon', 'jsd', 'clear']
 from dataclasses import dataclass, asdict
 from typing import Any
 from fastcore.utils import *
@@ -67,10 +68,6 @@ def On(code: str, event: str='click', sel: str='', me=True):
     """An async surreal.js script block event handler for `event` on selector `sel`"""
     ...
 
-def Any(sel: str, code: str, event: str='click'):
-    """An `any` async surreal.js script block event handler for `event` on selector `sel`"""
-    ...
-
 def Prev(code: str, event: str='click'):
     """An async surreal.js script block event handler for `event` on previous sibling"""
     ...
@@ -85,6 +82,9 @@ def AnyNow(sel: str, code: str):
 
 def run_js(js, id=None, **kw):
     """Run `js` script, auto-generating `id` based on name of caller if needed, and js-escaping any `kw` params"""
+    ...
+
+def HtmxOn(eventname: str, code: str):
     ...
 
 def Titled(title: str='FastHTML app', *args, cls='container', target_id=None, hx_vals=None, id=None, style=None, accesskey=None, contenteditable=None, dir=None, draggable=None, enterkeyhint=None, hidden=None, inert=None, inputmode=None, lang=None, popover=None, spellcheck=None, tabindex=None, translate=None, hx_get=None, hx_post=None, hx_put=None, hx_delete=None, hx_patch=None, hx_trigger=None, hx_target=None, hx_swap=None, hx_swap_oob=None, hx_include=None, hx_select=None, hx_select_oob=None, hx_indicator=None, hx_push_url=None, hx_confirm=None, hx_disable=None, hx_replace_url=None, hx_disabled_elt=None, hx_ext=None, hx_headers=None, hx_history=None, hx_history_elt=None, hx_inherit=None, hx_params=None, hx_preserve=None, hx_prompt=None, hx_request=None, hx_sync=None, hx_validate=None, **kwargs) -> FT:

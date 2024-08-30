@@ -230,7 +230,7 @@ async def _send_ws(ws, resp):
     res = to_xml(resp, indent=fh_cfg.indent) if isinstance(resp, (list,tuple,FT)) or hasattr(resp, '__ft__') else resp
     await ws.send_text(res)
 
-def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
+def _ws_endp(recv, conn=None, disconn=None):
     cls = type('WS_Endp', (WebSocketEndpoint,), {"encoding":"text"})
     
     async def _generic_handler(handler, ws, data=None):
@@ -252,9 +252,9 @@ def _ws_endp(recv, conn=None, disconn=None, hdrs=None, before=None):
 
 # %% ../nbs/api/00_core.ipynb
 class WS_RouteX(WebSocketRoute):
-    def __init__(self, path:str, recv, conn:callable=None, disconn:callable=None, *,
-                 name=None, middleware=None, hdrs=None, before=None):
-        super().__init__(path, _ws_endp(recv, conn, disconn, hdrs, before), name=name, middleware=middleware)
+    def __init__(self, app, path:str, recv, conn:callable=None, disconn:callable=None, *,
+                 name=None, middleware=None):
+        super().__init__(path, _ws_endp(recv, conn, disconn), name=name, middleware=middleware)
 
 # %% ../nbs/api/00_core.ipynb
 def uri(_arg, **kwargs):
@@ -360,25 +360,23 @@ async def _wrap_call(f, req, params):
 
 # %% ../nbs/api/00_core.ipynb
 class RouteX(Route):
-    def __init__(self, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None,
-                hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
-        self.sig = _sig(endpoint)
-        self.f,self.hdrs,self.ftrs,self.before,self.after,self.htmlkw,self.bodykw = endpoint,hdrs,ftrs,before,after,htmlkw,bodykw
+    def __init__(self, app, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None):
+        self.f,self.sig,self._app = endpoint,_sig(endpoint),app
         super().__init__(path, self._endp, methods=methods, name=name, include_in_schema=include_in_schema, middleware=middleware)
 
     async def _endp(self, req):
         resp = None
         req.injects = []
-        req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (self.hdrs,self.ftrs,self.htmlkw,self.bodykw))
+        req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (self._app.hdrs,self._app.ftrs,self._app.htmlkw,self._app.bodykw))
         req.hdrs,req.ftrs = list(req.hdrs),list(req.ftrs)
-        for b in self.before:
+        for b in self._app.before:
             if not resp:
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
                 else: bf,skip = b,[]
                 if not any(re.fullmatch(r, req.url.path) for r in skip):
                     resp = await _wrap_call(bf, req, _sig(bf).parameters)
         if not resp: resp = await _wrap_call(self.f, req, self.sig.parameters)
-        for a in self.after:
+        for a in self._app.after:
             _,*wreq = await _wrap_req(req, _sig(a).parameters)
             nr = a(resp, *wreq)
             if nr: resp = nr
@@ -386,19 +384,17 @@ class RouteX(Route):
 
 # %% ../nbs/api/00_core.ipynb
 class RouterX(Router):
-    def __init__(self, routes=None, redirect_slashes=True, default=None, on_startup=None, on_shutdown=None,
-                 lifespan=None, *, middleware=None, hdrs=None, ftrs=None, before=None, after=None, htmlkw=None, **bodykw):
-        super().__init__(routes, redirect_slashes, default, on_startup, on_shutdown,
-                 lifespan=lifespan, middleware=middleware)
-        self.hdrs,self.ftrs,self.bodykw,self.htmlkw,self.before,self.after = hdrs,ftrs,bodykw,htmlkw or {},before,after
+    def __init__(self, app, routes=None, redirect_slashes=True, default=None, *, middleware=None):
+        self._app = app
+        super().__init__(routes, redirect_slashes, default, app.on_startup, app.on_shutdown,
+                         lifespan=app.lifespan, middleware=middleware)
 
-    def add_route( self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
-        route = RouteX(path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema,
-                       hdrs=self.hdrs, ftrs=self.ftrs, before=self.before, after=self.after, htmlkw=self.htmlkw, **self.bodykw)
+    def add_route(self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
+        route = RouteX(self._app, path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema)
         self.routes.append(route)
 
-    def add_ws( self, path: str, recv: callable, conn:callable=None, disconn:callable=None, name=None):
-        route = WS_RouteX(path, recv=recv, conn=conn, disconn=disconn, name=name, hdrs=self.hdrs, before=self.before)
+    def add_ws(self, path: str, recv: callable, conn:callable=None, disconn:callable=None, name=None):
+        route = WS_RouteX(self._app, path, recv=recv, conn=conn, disconn=disconn, name=name)
         self.routes.append(route)
 
 # %% ../nbs/api/00_core.ipynb
@@ -450,12 +446,6 @@ class FastHTML(Starlette):
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
                  htmlkw=None, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
-        secret_key = get_key(secret_key, key_fname)
-        if sess_cls:
-            sess = Middleware(sess_cls, secret_key=secret_key,session_cookie=session_cookie,
-                              max_age=max_age, path=sess_path, same_site=same_site,
-                              https_only=sess_https_only, domain=sess_domain)
-            middleware.append(sess)
         hdrs,ftrs = listify(hdrs),listify(ftrs)
         htmlkw = htmlkw or {}
         if default_hdrs:
@@ -464,14 +454,21 @@ class FastHTML(Starlette):
             if ct_hdr: hdrs = [htmxctsrc] + hdrs
             if htmx: hdrs = [htmxsrc,fhjsscr] + hdrs
             hdrs = [charset, viewport] + hdrs
+        self.on_startup,self.on_shutdown,self.lifespan,self.hdrs,self.ftrs = on_startup,on_shutdown,lifespan,hdrs,ftrs
+        self.before,self.after,self.htmlkw,self.bodykw = before,after,htmlkw,bodykw
+        secret_key = get_key(secret_key, key_fname)
+        if sess_cls:
+            sess = Middleware(sess_cls, secret_key=secret_key,session_cookie=session_cookie,
+                              max_age=max_age, path=sess_path, same_site=same_site,
+                              https_only=sess_https_only, domain=sess_domain)
+            middleware.append(sess)
         exception_handlers = ifnone(exception_handlers, {})
         if 404 not in exception_handlers: 
             def _not_found(req, exc): return  Response('404 Not Found', status_code=404)  
             exception_handlers[404] = _not_found
         excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in exception_handlers.items()}
-        super().__init__(debug, routes, middleware, excs, on_startup, on_shutdown, lifespan=lifespan)
-        self.router = RouterX(routes, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan,
-                              hdrs=hdrs, ftrs=ftrs, before=before, after=after, htmlkw=htmlkw, **bodykw)
+        super().__init__(debug, routes, middleware, excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
+        self.router = RouterX(self, routes)
 
     def ws(self, path:str, conn=None, disconn=None, name=None):
         "Add a websocket route at `path`"
@@ -557,6 +554,6 @@ reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|o
 class MiddlewareBase:
     async def __call__(self, scope, receive, send) -> None:
         if scope["type"] not in ["http", "websocket"]:
-            await self.app(scope, receive, send)
+            await self._app(scope, receive, send)
             return
         return HTTPConnection(scope)
