@@ -2,6 +2,28 @@
 
 <!-- do not remove -->
 
+## 0.5.0
+
+### New Features
+
+- Make hdrs, ftrs, htmlkw, bodykw, etc available to `RouterX` and `RouteX` via `._app` ([#381](https://github.com/AnswerDotAI/fasthtml/issues/381))
+- Add `OAuth` class ([#381](https://github.com/AnswerDotAI/fasthtml/issues/381))
+    - Move redirect url into methods for oauth
+- Add options to change default static media directory ([#373](https://github.com/AnswerDotAI/fasthtml/pull/373)), thanks to [@coreman14](https://github.com/coreman14)
+- Add `PicoBusy()` function to display loading spinner during html load ([#372](https://github.com/AnswerDotAI/fasthtml/issues/372))
+- Add `HtmxOn()` to allow adding htmx event listeners more easily ([#371](https://github.com/AnswerDotAI/fasthtml/issues/371))
+- Set toasts to only work with FT responses ([#368](https://github.com/AnswerDotAI/fasthtml/pull/368)), thanks to [@pydanny](https://github.com/pydanny)
+- Routing subapp improvements ([#365](https://github.com/AnswerDotAI/fasthtml/pull/365)), thanks to [@Isaac-Flath](https://github.com/Isaac-Flath)
+- Add all HTMX attrs to component signatures ([#363](https://github.com/AnswerDotAI/fasthtml/issues/363))
+- Add markdown version of all docs ([#361](https://github.com/AnswerDotAI/fasthtml/issues/361))
+- add easy to use chunked transfer extension header ([#346](https://github.com/AnswerDotAI/fasthtml/pull/346)), thanks to [@fabge](https://github.com/fabge)
+- Set 404 exception handling to give "404 Not Found" message ([#335](https://github.com/AnswerDotAI/fasthtml/pull/335)), thanks to [@Isaac-Flath](https://github.com/Isaac-Flath)
+
+### Bugs Squashed
+
+- [BUG] Toasts don't show after redirect ([#358](https://github.com/AnswerDotAI/fasthtml/issues/358))
+
+
 ## 0.4.5
 
 ### New Features
