@@ -78,9 +78,7 @@ def fast_app(
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
                   sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, surreal=surreal, htmx=htmx, htmlkw=htmlkw,
                   reload_attempts=reload_attempts, reload_interval=reload_interval, **(bodykw or {}))
-
-    @app.route("/{fname:path}.{ext:static}")
-    async def get(fname:str, ext:str): return FileResponse(f'{static_path or "."}/{fname}.{ext}')
+    app.static_route_exts()
     if not db_file: return app,app.route
 
     db = database(db_file)
