@@ -17,6 +17,7 @@ format:
   commonmark: default
 
 website:
+  favicon: favicon.ico
   twitter-card: true
   open-graph: true
   repo-actions: [issue]
