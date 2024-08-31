@@ -565,6 +565,19 @@ def reg_re_param(m, s):
 reg_re_param("path", ".*?")
 reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|html|map")
 
+@patch
+def static_route_exts(self:FastHTML, prefix='/', static_path='.', exts='static'):
+    "Add a static route at URL path `prefix` with files from `static_path` and `exts` defined by `reg_re_param()`"
+    @app.route(f"{prefix}{{fname:path}}.{{ext:{exts}}}")
+    async def get(fname:str, ext:str): return FileResponse(f'{static_path}/{fname}.{ext}')
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def static_route(self:FastHTML, ext='', prefix='/', static_path='.'):
+    "Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')"
+    @app.route(f"{prefix}{{fname:path}}{ext}")
+    async def get(fname:str): return FileResponse(f'{static_path}/{fname}{ext}')
+
 # %% ../nbs/api/00_core.ipynb
 class MiddlewareBase:
     async def __call__(self, scope, receive, send) -> None:

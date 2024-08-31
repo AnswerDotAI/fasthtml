@@ -28,7 +28,7 @@ def get(id:int):
     return fill_form(res, todos[id])
 
 @rt("/")
-def put(todo: Todo): return todos.upsert(todo), clear('current-todo')
+def put(todo: Todo): return todos.update(todo), clear('current-todo')
 
 @rt("/todos/{id}")
 def get(id:int):
