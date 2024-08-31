@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.5.1
+
+### New Features
+
+- Add `sse_message`, `EventStream`, and `signal_shutdown` ([#384](https://github.com/AnswerDotAI/fasthtml/issues/384))
+
+
 ## 0.5.0
 
 ### New Features
