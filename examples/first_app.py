@@ -23,7 +23,7 @@ def home():
                 header=add,
                 footer=Div(id='current-todo')
             )
-    return Page('Todo list', card)
+    return PageX('Todo list', card)
 
 @rt("/")
 def get(): return home()
@@ -56,7 +56,7 @@ def get(id:int):
             hx_put="/", id="edit"
         )
     frm = fill_form(res, todos[id])
-    return Page('Edit Todo', frm)
+    return PageX('Edit Todo', frm)
 
 @rt("/todos/{id}")
 def get(id:int):
@@ -65,5 +65,5 @@ def get(id:int):
         Button('Delete', hx_delete='/', value=id, name="id"),
         Button('Back', hx_get='/')
     )
-    return Page('Todo details', contents)
+    return PageX('Todo details', contents)
 
