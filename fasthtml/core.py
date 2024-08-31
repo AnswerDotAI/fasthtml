@@ -5,11 +5,11 @@
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport',
            'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict',
-           'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key',
-           'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
+           'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple',
+           'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
 
 # %% ../nbs/api/00_core.ipynb
-import json,uuid,inspect,types,uvicorn
+import json,uuid,inspect,types,uvicorn,signal,asyncio
 from starlette.datastructures import URLPath
 
 from fastcore.utils import *
@@ -27,7 +27,6 @@ from urllib.parse import urlencode, parse_qs, quote, unquote
 from copy import copy,deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
-from starlette.requests import HTTPConnection
 
 from .starlette import *
 
@@ -249,6 +248,22 @@ def _ws_endp(recv, conn=None, disconn=None):
     if disconn: cls.on_disconnect = _disconnect
     cls.on_receive = _recv
     return cls
+
+# %% ../nbs/api/00_core.ipynb
+def EventStream(s):
+    "Create a text/event-stream response from `s`"
+    return StreamingResponse(s, media_type="text/event-stream")
+
+# %% ../nbs/api/00_core.ipynb
+def signal_shutdown():
+    event = asyncio.Event()
+    def signal_handler(signum, frame):
+        event.set()
+        signal.signal(signum, signal.SIG_DFL)
+        os.kill(os.getpid(), signum)
+
+    for sig in (signal.SIGINT, signal.SIGTERM): signal.signal(sig, signal_handler)
+    return event
 
 # %% ../nbs/api/00_core.ipynb
 class WS_RouteX(WebSocketRoute):
