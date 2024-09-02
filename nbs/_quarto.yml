@@ -18,7 +18,10 @@ format:
 
 website:
   favicon: favicon.ico
-  twitter-card: true
+  twitter-card:
+    creator: "@jeremyphoward"
+    site: "@answerdotai"
+    image: https://docs.fastht.ml/og-image.png
   open-graph: true
   repo-actions: [issue]
   navbar:
