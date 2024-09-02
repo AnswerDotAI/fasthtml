@@ -11,19 +11,6 @@ Things to remember when writing FastHTML apps:
 
 
 
-<div>
-
-> **New content as of September 1, 2024**
->
-> - [Forms](../tutorials/quickstart_for_web_devs.html#forms)
-> - [Server-side Events
->   (SSE)](../tutorials/quickstart_for_web_devs.html#server-sent-events-sse)
->
-> We’re going to be adding more to this document, so check back
-> frequently for updates.
-
-</div>
-
 ## Installation
 
 ``` bash
@@ -459,6 +446,10 @@ serve()
 
 We can build our own `ft` components and combine them with other
 components. The simplest method is defining them as a function.
+
+``` python
+from fasthtml.common import *
+```
 
 ``` python
 def hero(title, statement):
@@ -1046,6 +1037,19 @@ that plugs nicely into HTMX in the browser
 Line 26  
 The endpoint view needs to be an async function that returns a
 [`EventStream`](https://AnswerDotAI.github.io/fasthtml/api/core.html#eventstream)
+
+<div>
+
+> **New content as of September 1, 2024**
+>
+> - [Forms](../tutorials/quickstart_for_web_devs.html#forms)
+> - [Server-side Events
+>   (SSE)](../tutorials/quickstart_for_web_devs.html#server-sent-events-sse)
+>
+> We’re going to be adding more to this document, so check back
+> frequently for updates.
+
+</div>
 
 ## Unwritten quickstart sections
 
