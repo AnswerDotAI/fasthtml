@@ -1,6 +1,14 @@
 # FastHTML
 
-> FastHTML is a python library which brings together Starlette, Uvicorn, HTMX, and fastcore's `FT` "FastTags" into a library for creating server-rendered hypermedia applications. The `FastHTML` class itself inherits from `Starlette`, and adds decorator-based routing with many additions, Beforeware, automatic `FT` to HTML rendering, and much more. Although parts of its API are inspired by FastAPI, it is *not* compatible with FastAPI syntax and is not targeted at creating API services. FastHTML includes support for Pico CSS and the fastlite sqlite library, although using both are optional; sqlite can be used directly or via the fastsql library, and any CSS framework can be used. FastHTML is compatible with web components and any vanilla JS library, but not with React, Vue, or Svelte. Support for the Surreal and css-scope-inline libraries are also included, but both are optional.
+> FastHTML is a python library which brings together Starlette, Uvicorn, HTMX, and fastcore's `FT` "FastTags" into a library for creating server-rendered hypermedia applications. The `FastHTML` class itself inherits from `Starlette`, and adds decorator-based routing with many additions, Beforeware, automatic `FT` to HTML rendering, and much more.
+
+Things to remember when writing FastHTML apps:
+
+- Although parts of its API are inspired by FastAPI, it is *not* compatible with FastAPI syntax and is not targeted at creating API services
+- FastHTML includes support for Pico CSS and the fastlite sqlite library, although using both are optional; sqlalchemy can be used directly or via the fastsql library, and any CSS framework can be used. Support for the Surreal and css-scope-inline libraries are also included, but both are optional
+- FastHTML is compatible with JS-native web components and any vanilla JS library, but not with React, Vue, or Svelte
+- Use `serve()` for running uvicorn (`if __name__ == "__main__"` is not needed since it's automatic)
+- When a title is needed with a response, use `Titled`; note that that already wraps children in `Container`, and already includes both the meta title as well as the H1 element.
 
 ## Docs
 

@@ -1,6 +1,6 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
-import json, uuid, inspect, types, uvicorn
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
+import json, uuid, inspect, types, uvicorn, signal, asyncio
 from starlette.datastructures import URLPath
 from fastcore.utils import *
 from fastcore.xml import *
@@ -16,7 +16,6 @@ from urllib.parse import urlencode, parse_qs, quote, unquote
 from copy import copy, deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
-from starlette.requests import HTTPConnection
 from .starlette import *
 empty = Parameter.empty
 
@@ -120,6 +119,13 @@ async def _send_ws(ws, resp):
 def _ws_endp(recv, conn=None, disconn=None):
     ...
 
+def EventStream(s):
+    """Create a text/event-stream response from `s`"""
+    ...
+
+def signal_shutdown():
+    ...
+
 class WS_RouteX(WebSocketRoute):
 
     def __init__(self, app, path: str, recv, conn: callable=None, disconn: callable=None, *, name=None, middleware=None):
@@ -217,6 +223,14 @@ class FastHTML(Starlette):
 
     def route(self, path: str=None, methods=None, name=None, include_in_schema=True):
         """Add a route at `path`"""
+        ...
+
+    def static_route_exts(self, prefix='/', static_path='.', exts='static'):
+        """Add a static route at URL path `prefix` with files from `static_path` and `exts` defined by `reg_re_param()`"""
+        ...
+
+    def static_route(self, ext='', prefix='/', static_path='.'):
+        """Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')"""
         ...
 all_meths = 'get post put delete patch head trace options'.split()
 for o in all_meths:
