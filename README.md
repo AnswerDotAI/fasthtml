@@ -83,6 +83,28 @@ the new version returned by the second route.
 This “hypermedia-based” approach to web development is a powerful way to
 build web applications.
 
+### Getting help from AI
+
+Because FastHTML is newer than most LLMs, AI systems like Cursor,
+ChatGPT, Claude, and Copilot won’t give useful answers about it. To fix
+that problem, we’ve provided an LLM-friendly guide that teaches them how
+to use FastHTML. To use it, add this link for your AI helper to use:
+
+- [/llms-ctx.txt](https://docs.fastht.ml/llms-ctx.txt)
+
+This example is in a format based on recommendations from Anthropic for
+use with [Claude
+Projects](https://support.anthropic.com/en/articles/9517075-what-are-projects).
+This works so well that we’ve actually found that Claude can provide
+even better information that our own documentation! For instance, read
+through [this annotated Claude
+chat](https://gist.github.com/jph00/9559b0a563f6a370029bec1d1cc97b74)
+for some great getting-started information, entirely generated from a
+project using the above text file as context.
+
+If you use Cursor, type `@doc` then choose “*Add new doc*”, and use the
+/llms-ctx.txt link above.
+
 ## Next Steps
 
 Start with the official sources to learn more about FastHTML:
