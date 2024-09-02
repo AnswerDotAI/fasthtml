@@ -96,7 +96,7 @@ This example is in a format based on recommendations from Anthropic for
 use with [Claude
 Projects](https://support.anthropic.com/en/articles/9517075-what-are-projects).
 This works so well that we’ve actually found that Claude can provide
-even better information that our own documentation! For instance, read
+even better information than our own documentation! For instance, read
 through [this annotated Claude
 chat](https://gist.github.com/jph00/9559b0a563f6a370029bec1d1cc97b74)
 for some great getting-started information, entirely generated from a
