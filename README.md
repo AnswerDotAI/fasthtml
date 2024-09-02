@@ -103,7 +103,10 @@ for some great getting-started information, entirely generated from a
 project using the above text file as context.
 
 If you use Cursor, type `@doc` then choose “*Add new doc*”, and use the
-/llms-ctx.txt link above.
+/llms-ctx.txt link above. The context file is auto-generated from our
+[`llms.txt`](https://llmstxt.org/) (our proposed standard for providing
+AI-friendly information)—you can generate alternative versions suitable
+for other models as needed.
 
 ## Next Steps
 
