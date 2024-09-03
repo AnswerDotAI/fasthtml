@@ -166,7 +166,7 @@ class OAuth:
 
     def login(self, info, state): raise NotImplementedError()
     def logout(self, session): return RedirectResponse(self.login_path, status_code=303)
-    def chk_auth(self, info, ident): raise NotImplementedError()
+    def chk_auth(self, info, ident, session): raise NotImplementedError()
     def _chk_auth(self, info, session):
         ident = info.get(self.cli.id_key)
         return ident and self.chk_auth(info, ident, session)
