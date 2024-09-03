@@ -152,7 +152,7 @@ class OAuth:
             base_url = f"{req.url.scheme}://{req.url.netloc}"
             print(base_url)
             info = AttrDictDefault(cli.retr_info(code, base_url+redir_path))
-            if not self._chk_auth(info): return RedirectResponse(self.login_path, status_code=303)
+            if not self._chk_auth(info, session): return RedirectResponse(self.login_path, status_code=303)
             session['auth'] = cli.token['access_token']
             return self.login(info, state)
 
@@ -162,7 +162,7 @@ class OAuth:
             return self.logout(session)
 
     def redir_url(self, req): return f"{req.url.scheme}://{req.url.netloc}{self.redir_path}"
-    def login_link(self, req): return self.cli.login_link(self.redir_url(req))
+    def login_link(self, req, scope=None, state=None): return self.cli.login_link(self.redir_url(req), scope=scope, state=state)
 
     def login(self, info, state): raise NotImplementedError()
     def logout(self, session): return RedirectResponse(self.login_path, status_code=303)
