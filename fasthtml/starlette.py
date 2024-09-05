@@ -15,6 +15,6 @@ from starlette.routing import Route, Router, Mount, WebSocketRoute
 from starlette.exceptions import HTTPException,WebSocketException
 from starlette.endpoints import HTTPEndpoint,WebSocketEndpoint
 from starlette.config import Config
-from starlette.datastructures import CommaSeparatedStrings, Secret, UploadFile
+from starlette.datastructures import CommaSeparatedStrings, Secret, UploadFile, URLPath
 from starlette.types import ASGIApp, Receive, Scope, Send
 from starlette.concurrency import run_in_threadpool
