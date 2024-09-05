@@ -6,7 +6,7 @@
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc',
            'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
            'HtmxResponseHeaders', 'form2dict', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX',
-           'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie',
+           'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie',
            'reg_re_param', 'MiddlewareBase']
 
 # %% ../nbs/api/00_core.ipynb
@@ -371,6 +371,7 @@ def _xt_resp(req, resp):
 # %% ../nbs/api/00_core.ipynb
 def _resp(req, resp, cls=empty):
     if not resp: resp=()
+    if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if cls in (Any,FT): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     if isinstance(resp, Response): return resp
@@ -382,6 +383,14 @@ def _resp(req, resp, cls=empty):
         resp = str(resp)
         cls = HTMLResponse
     return cls(resp)
+
+# %% ../nbs/api/00_core.ipynb
+class Redirect:
+    "Use HTMX or Starlette RedirectResponse as required to redirect to `loc`"
+    def __init__(self, loc): self.loc = loc
+    def __response__(self, req):
+        if 'hx-request' in req.headers: return HtmxResponseHeaders(redirect=self.loc)
+        return RedirectResponse(self.loc, status_code=303)
 
 # %% ../nbs/api/00_core.ipynb
 async def _wrap_call(f, req, params):
