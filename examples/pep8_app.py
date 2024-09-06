@@ -89,7 +89,7 @@ def logout(sess):
 
 # FastHTML uses Starlette's path syntax, and adds a `static` type.
 @app.get("/{fname:path}.{ext:static}")
-async def static(fname: str, ext: str):
+def static(fname: str, ext: str):
     return fh.FileResponse(f'{fname}.{ext}')
 
 
@@ -145,7 +145,7 @@ def delete(id: int):
 
 
 @app.get("/edit/{id}")
-async def edit(id: int):
+def edit(id: int):
     # The `hx_put` attribute tells HTMX to send a PUT request when the form is submitted.
     res = fh.Form(
         fh.Group(fh.Input(id="title"), fh.Button("Save")),
@@ -161,12 +161,12 @@ async def edit(id: int):
 
 
 @app.put("/")
-async def put(todo: Todo):
+def put(todo: Todo):
     return todos.upsert(todo), clr_details()
 
 
 @app.post("/")
-async def post(todo: Todo):
+def post(todo: Todo):
     # This is used to clear the input field after adding the new todo.
     new_inp = fh.Input(id="new-title", name="title", placeholder="New Todo", hx_swap_oob='true')
     # `insert` returns the inserted todo, which is appended to the start of the list.
@@ -174,7 +174,7 @@ async def post(todo: Todo):
 
 
 @app.get("/todos/{id}")
-async def get_todo(id: int):
+def get_todo(id: int):
     todo = todos[id]
     btn = fh.Button('delete', hx_delete=f'/todos/{todo.id}', target_id=f'todo-{todo.id}', hx_swap="outerHTML")
     # The "markdown" class is used here because that's the CSS selector we used in the JS earlier.
