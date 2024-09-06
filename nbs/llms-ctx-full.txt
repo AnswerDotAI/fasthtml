@@ -667,45 +667,112 @@ Age
 
 The usefulness of FastHTML forms becomes more apparent when they are
 combined with FastHTML views. We’ll show how this works by using the
-test client from above.
+test client from above. First, let’s create a SQlite database:
 
 ``` python
-@rt("/profile")
-def post(profile: Profile):
+db = Database("profiles.db")
+profiles = db.create(Profile, pk="email")
+```
+
+Now we insert a record into the database:
+
+``` python
+profiles.insert(profile)
+```
+
+    Profile(email='john@example.com', phone='123456789', age=5)
+
+And we can then demonstrate in the code that form is filled and
+displayed to the user.
+
+``` python
+@rt("/profile/{email}")
+def profile(email:str):
+    profile = profiles[email]
     filled_profile_form = fill_form(profile_form, profile)
     return Titled(f'Profile for {profile.email}', filled_profile_form)
 
-new_data = dict(email='jeremy@example.com', phone='7654321', age=25)
-print(client.post("/profile", data=new_data).text)
+print(client.get(f"/profile/john@example.com").text)
 ```
 
-Line 2  
-We use the `Profile` dataclass definition to set the type for the
-incoming `profile` content
-
 Line 3  
-We use
-[`fill_form`](https://AnswerDotAI.github.io/fasthtml/api/components.html#fill_form)
-to populate the form from the incoming `profile` dataclass
+Fetch the profile using the profile table’s `email` primary key
 
-Line 6  
-This is different cotnent from the previous dataclass used above.
+Line 4  
+Fill the form for display.
 
 
      <!doctype html>
 
      <html>
        <head>
-         <title>Profile for jeremy@example.com</title>
+         <title>Profile for john@example.com</title>
        </head>
        <body>
          <main class="container">
-           <h1>Profile for jeremy@example.com</h1>
+           <h1>Profile for john@example.com</h1>
            <form enctype="multipart/form-data" method="post" action="/profile">
              <fieldset>
                <label>
     Email
-                 <input name="email" value="jeremy@example.com">
+                 <input name="email" value="john@example.com">
+               </label>
+               <label>
+    Phone
+                 <input name="phone" value="123456789">
+               </label>
+               <label>
+    Age
+                 <input name="age" value="5">
+               </label>
+             </fieldset>
+             <button type="submit">Save</button>
+           </form>
+         </main>
+       </body>
+     </html>
+
+And now let’s demonstrate making a change to the data.
+
+``` python
+@rt("/profile")
+def post(profile: Profile):
+    profiles.update(profile)
+    return RedirectResponse(url=f"/profile/{profile.email}")
+
+new_data = dict(email='john@example.com', phone='7654321', age=25)
+print(client.post("/profile", data=new_data).text)
+```
+
+Line 2  
+We use the `Profile` dataclass definition to set the type for the
+incoming `profile` content. This validates the field types for the
+incoming data
+
+Line 3  
+Taking our validated data, we updated the profiles table
+
+Line 4  
+We redirect the user back to their profile view
+
+Line 7  
+The display is of the profile form view showing the changes in data.
+
+
+     <!doctype html>
+
+     <html>
+       <head>
+         <title>Profile for john@example.com</title>
+       </head>
+       <body>
+         <main class="container">
+           <h1>Profile for john@example.com</h1>
+           <form enctype="multipart/form-data" method="post" action="/profile">
+             <fieldset>
+               <label>
+    Email
+                 <input name="email" value="john@example.com">
                </label>
                <label>
     Phone
@@ -842,7 +909,7 @@ HTML(client.get('/settimestamp').text)
      <title>FastHTML page</title>
    </head>
    <body>
-     <p>Set to 2024-09-01 17:14:23.295484</p>
+     <p>Set to 2024-09-04 18:30:34.896373</p>
    </body>
  </html>
 
@@ -856,7 +923,7 @@ def get(now:date): return f'Cookie was set at time {now.time()}'
 client.get('/gettimestamp').text
 ```
 
-    'Cookie was set at time 17:14:23.295510'
+    'Cookie was set at time 18:30:34.896405'
 
 ## Sessions
 
@@ -1801,6 +1868,7 @@ Use whatever you'd like, but there's a few advantages with this approach over Ta
 * No high risk of eventually requiring a build step.
 * No chance of [deprecations](https://windicss.org/posts/sunsetting.html). 16 lines is infinitely maintainable.
 * Get the ultra-fast "inspect, play with styles, paste" workflow back.
+* No suffering from missing syntax highlighting on properties and units.
 * No suffering from FOUC (a flash of unstyled content).
 * Zero friction movement of styles between inline and `.css` files. Just replace `me`
 * No special tooling or plugins to install. Universal vanilla CSS. 
@@ -1850,7 +1918,14 @@ Tailwind verbosity goes up with more child elements.
     <div class="bg-[green]">green</div>
 </div>
 ```
-### CSS variables and child styling
+
+### CSS variables and child elements
+At first glance, **Tailwind Example 2** looks very promising! Exciting ...but:
+* 🔴 **Every child style requires an explicit selector.**
+  * Tailwinds' shorthand advantages sadly disappear.
+  * Any more child styles added in Tailwind will become longer than vanilla CSS.
+  * This limited example is the best case scenario for Tailwind.
+* 🔴 Not visible on github: **no highlighting for properties and units** begins to be painful.
 ```html
 <!doctype html>
 <html>

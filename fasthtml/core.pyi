@@ -1,9 +1,9 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'form2dict', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
 import json, uuid, inspect, types, uvicorn, signal, asyncio
-from starlette.datastructures import URLPath
 from fastcore.utils import *
 from fastcore.xml import *
+from fastcore.meta import use_kwargs_dict
 from types import UnionType, SimpleNamespace as ns, GenericAlias
 from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List, Any
 from datetime import datetime
@@ -68,6 +68,15 @@ def _form_arg(k, v, d):
 class HttpHeader:
     k: str
     v: str
+
+def _to_htmx_header(s):
+    ...
+htmx_resps = dict(location=None, push_url=None, redirect=None, refresh=None, replace_url=None, reswap=None, retarget=None, reselect=None, trigger=None, trigger_after_settle=None, trigger_after_swap=None)
+
+@use_kwargs_dict(**htmx_resps)
+def HtmxResponseHeaders(**kwargs):
+    """HTMX response headers"""
+    ...
 
 def _annotations(anno):
     """Same as `get_annotations`, but also works on namedtuples"""
@@ -169,6 +178,15 @@ def _xt_resp(req, resp):
 
 def _resp(req, resp, cls=empty):
     ...
+
+class Redirect:
+    """Use HTMX or Starlette RedirectResponse as required to redirect to `loc`"""
+
+    def __init__(self, loc):
+        ...
+
+    def __response__(self, req):
+        ...
 
 async def _wrap_call(f, req, params):
     ...
