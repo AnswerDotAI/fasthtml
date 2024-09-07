@@ -7,10 +7,10 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc',
            'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
            'HtmxResponseHeaders', 'form2dict', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX',
            'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie',
-           'reg_re_param', 'MiddlewareBase']
+           'reg_re_param', 'MiddlewareBase', 'Client']
 
 # %% ../nbs/api/00_core.ipynb
-import json,uuid,inspect,types,uvicorn,signal,asyncio
+import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -28,6 +28,7 @@ from urllib.parse import urlencode, parse_qs, quote, unquote
 from copy import copy,deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
+from httpx import ASGITransport, AsyncClient
 
 from .starlette import *
 
@@ -609,3 +610,20 @@ class MiddlewareBase:
             await self._app(scope, receive, send)
             return
         return HTTPConnection(scope)
+
+# %% ../nbs/api/00_core.ipynb
+class Client:
+    "An httpx ASGI client that doesn't require `async`"
+    def __init__(self, app, url="http://testserver"):
+        self.cli = AsyncClient(transport=ASGITransport(app), base_url=url)
+
+    def _sync(self, method, url, **kwargs):
+        @threaded
+        def f():
+            async def _request(): return await self.cli.request(method, url, **kwargs)
+            return asyncio.run(_request())
+        r = f()
+        r.join()
+        return r.result
+
+for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o, partialmethod(Client._sync, o))
