@@ -65,5 +65,4 @@ def get_todo(id:int):
                  target_id=tid(todo.id), hx_swap="outerHTML")
     return Div(Div(todo.title), btn)
 
-
-if __name__ == '__main__': serve()
+serve()
