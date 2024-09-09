@@ -67,7 +67,7 @@ def fast_app(
         bodykw:Optional[dict]=None, # Attrs to add to the Body tag
         reload_attempts:Optional[int]=1, # Number of reload attempts when live reloading
         reload_interval:Optional[int]=1000, # Time between reload attempts in ms
-        static_path:str="",  # Where the static file route points to, defaults to root dir
+        static_path:str=".",  # Where the static file route points to, defaults to root dir
         **kwargs)->Any:
     "Create a FastHTML or FastHTMLWithLiveReload app."
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
@@ -78,7 +78,7 @@ def fast_app(
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
                   sess_domain=sess_domain, key_fname=key_fname, ws_hdr=ws_hdr, surreal=surreal, htmx=htmx, htmlkw=htmlkw,
                   reload_attempts=reload_attempts, reload_interval=reload_interval, **(bodykw or {}))
-    app.static_route_exts()
+    app.static_route_exts(static_path=static_path)
     if not db_file: return app,app.route
 
     db = database(db_file)
