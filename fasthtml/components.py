@@ -52,13 +52,13 @@ fh_cfg['attrmap']=attrmap_x
 fh_cfg['valmap' ]=valmap
 
 # %% ../nbs/api/01_components.ipynb
-def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, **kwargs):
+def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=FT, **kwargs):
     if attrmap is None: attrmap=fh_cfg.attrmap
     if valmap  is None: valmap =fh_cfg.valmap
     kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style
     tag,c,kw = ft(tag, *c, attrmap=attrmap, valmap=valmap, **kwargs).list
     if tag in named and 'id' in kw and 'name' not in kw: kw['name'] = kw['id']
-    return FT(tag,c,kw, void_=tag in voids)
+    return ft_cls(tag,c,kw, void_=tag in voids)
 
 # %% ../nbs/api/01_components.ipynb
 @use_kwargs(hx_attrs, keep=True)
