@@ -29,6 +29,7 @@ from copy import copy,deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
 from httpx import ASGITransport, AsyncClient
+from anyio import from_thread
 
 from .starlette import *
 
@@ -613,17 +614,12 @@ class MiddlewareBase:
 
 # %% ../nbs/api/00_core.ipynb
 class Client:
-    "An httpx ASGI client that doesn't require `async`"
+    "A simple httpx ASGI client that doesn't require `async`"
     def __init__(self, app, url="http://testserver"):
         self.cli = AsyncClient(transport=ASGITransport(app), base_url=url)
 
     def _sync(self, method, url, **kwargs):
-        @threaded
-        def f():
-            async def _request(): return await self.cli.request(method, url, **kwargs)
-            return asyncio.run(_request())
-        r = f()
-        r.join()
-        return r.result
+        async def _request(): return await self.cli.request(method, url, **kwargs)
+        with from_thread.start_blocking_portal() as portal: return portal.call(_request)
 
 for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o, partialmethod(Client._sync, o))
