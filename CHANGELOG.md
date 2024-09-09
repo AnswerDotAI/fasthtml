@@ -2,6 +2,23 @@
 
 <!-- do not remove -->
 
+## 0.5.2
+
+### New Features
+
+- Greatly improved SVG support ([#409](https://github.com/AnswerDotAI/fasthtml/issues/409))
+- Add SVG HTMX helpers: `svg_sel`, `SvgOob`, and `SvgInb` ([#408](https://github.com/AnswerDotAI/fasthtml/issues/408))
+- Add `Client` and `Nbsp` ([#403](https://github.com/AnswerDotAI/fasthtml/issues/403))
+- Add `Redirect()` and handle magic `__response__` method ([#400](https://github.com/AnswerDotAI/fasthtml/issues/400))
+- Add `HtmxResponseHeaders` ([#399](https://github.com/AnswerDotAI/fasthtml/issues/399))
+- Add `session` to `OAuth.chk_auth` ([#394](https://github.com/AnswerDotAI/fasthtml/issues/394))
+- Add `static_routes` and `static_route_exts` methods to `FastHTML` ([#387](https://github.com/AnswerDotAI/fasthtml/issues/387))
+
+### Bugs Squashed
+
+- toasts do not show if response empty or tuple ([#386](https://github.com/AnswerDotAI/fasthtml/issues/386))
+- toasts.py not updated for router refactor ([#385](https://github.com/AnswerDotAI/fasthtml/issues/385))
+
 
 ## 0.5.1
 
