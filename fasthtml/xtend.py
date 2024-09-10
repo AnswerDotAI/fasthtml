@@ -111,14 +111,14 @@ def StyleX(fname, **kw):
 
 # %% ../nbs/api/02_xtend.ipynb
 def On(code:str, event:str='click', sel:str='', me=True):
-    "An async surreal.js script block event handler for `event` on selector `sel`"
+    "An async surreal.js script block event handler for `event` on selector `sel`, making available parent `p`, event `ev`, and target `e`"
     func = 'me' if me else 'any'
     if sel: sel=f'"{sel}"'
-    return Script(f'{func}({sel}).on("{event}", async ev=>{{\nlet e = me(ev);\n{code}\n}});\n')
+    return Script(f'{{let p=me(); {func}({sel}).on("{event}", async ev=>{{\nlet e = me(ev);\n{code}\n}});}}')
 
 # %% ../nbs/api/02_xtend.ipynb
 def Prev(code:str, event:str='click'):
-    "An async surreal.js script block event handler for `event` on previous sibling"
+    "An async surreal.js script block event handler for `event` on previous sibling, with same vars as `On`"
     return On(code, event=event, sel='-')
 
 # %% ../nbs/api/02_xtend.ipynb
