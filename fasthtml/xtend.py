@@ -113,7 +113,7 @@ def StyleX(fname, **kw):
 def On(code:str, event:str='click', sel:str='', me=True):
     "An async surreal.js script block event handler for `event` on selector `sel`, making available parent `p`, event `ev`, and target `e`"
     func = 'me' if me else 'any'
-    if sel: sel=f'"{sel}"'
+    if sel: sel=f'"{sel}"' if sel in ('-','prev') else f'"{sel}", p'
     return Script(f'{{let p=me(); {func}({sel}).on("{event}", async ev=>{{\nlet e = me(ev);\n{code}\n}});}}')
 
 # %% ../nbs/api/02_xtend.ipynb
