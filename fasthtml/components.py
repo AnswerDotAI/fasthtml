@@ -53,6 +53,8 @@ fh_cfg['valmap' ]=valmap
 
 # %% ../nbs/api/01_components.ipynb
 def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=FT, **kwargs):
+    ds,c = partition(c, risinstance(dict))
+    for d in ds: kwargs = {**kwargs, **d}
     if attrmap is None: attrmap=fh_cfg.attrmap
     if valmap  is None: valmap =fh_cfg.valmap
     kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style

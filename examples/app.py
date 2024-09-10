@@ -24,8 +24,9 @@ def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New 
 
 @app.get("/")
 def get_todos(req):
-    add = Form(Group(mk_input(), Button("Add")),
-               hx_post="/", target_id=id_list, hx_swap="beforeend")
+    add = Form(hx_post="/", target_id=id_list, hx_swap="beforeend")(
+        Group(mk_input(), Button("Add"))
+    )
     card = Card(Ul(*TODO_LIST, id=id_list),
                 header=add, footer=Div(id=id_curr)),
     return Titled('Todo list', card)
@@ -42,11 +43,12 @@ def find_todo(id): return next(o for o in TODO_LIST if o.id==id)
 @app.get("/edit/{id}")
 def edit_item(id:int):
     todo = find_todo(id)
-    res = Form(Group(Input(id="title"), Button("Save")),
-        Hidden(id="id"), CheckboxX(id="done", label='Done'),
-        hx_put="/", target_id=tid(id), id="edit")
-    fill_form(res, todo)
-    return res
+    res = Form(hx_put="/", target_id=tid(id), id="edit")(
+        Group(Input(id="title"), Button("Save")),
+        Hidden(id="id"),
+        CheckboxX(id="done", label='Done'),
+    )
+    return fill_form(res, todo)
 
 @app.put("/")
 def update(todo: TodoItem):

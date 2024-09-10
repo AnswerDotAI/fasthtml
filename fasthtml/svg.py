@@ -19,6 +19,7 @@ __all__ = ['g', 'svg_inb', 'Svg', 'ft_svg', 'Rect', 'Circle', 'Ellipse', 'transf
 from fastcore.utils import *
 from fastcore.meta import delegates
 from fastcore.xml import FT
+from .common import *
 from .components import *
 from .xtend import *
 

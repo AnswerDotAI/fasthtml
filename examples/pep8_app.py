@@ -49,12 +49,10 @@ app, rt = fh.fast_app(before=bware, hdrs=(fh.SortableJS('.sortable'), fh.KatexMa
 @app.get("/login")
 def login():
     # This creates a form with two input fields, and a submit button.
-    frm = fh.Form(
+    frm = fh.Form(action='/login', method='post')(
         fh.Input(id='name', placeholder='Name'),
         fh.Input(id='pwd', type='password', placeholder='Password'),
         fh.Button('login'),
-        action='/login',
-        method='post'
     )
     return fh.Titled("Login", frm)
 
@@ -147,14 +145,11 @@ def delete(id: int):
 @app.get("/edit/{id}")
 def edit(id: int):
     # The `hx_put` attribute tells HTMX to send a PUT request when the form is submitted.
-    res = fh.Form(
+    res = fh.Form(hx_put="/", target_id=f'todo-{id}', id="edit")(
         fh.Group(fh.Input(id="title"), fh.Button("Save")),
         fh.Hidden(id="id"),
         fh.CheckboxX(id="done", label='Done'),
         fh.Textarea(id="details", name="details", rows=10),
-        hx_put="/",
-        target_id=f'todo-{id}',
-        id="edit"
     )
     # `fill_form` populates the form with existing todo data, and returns the result.
     return fh.fill_form(res, todos[id])
@@ -182,4 +177,4 @@ def get_todo(id: int):
     return fh.Div(fh.H2(todo.title), fh.Div(todo.details, cls="markdown"), btn)
 
 
-fh.serve(port=8000)
+fh.serve()
