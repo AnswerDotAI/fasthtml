@@ -2486,7 +2486,7 @@ def logout(sess):
 # Note, this function is unnecessary, as the `fast_app()` call already includes this functionality.
 # However, it's included here to show how you can define your own static file handler.
 @rt("/{fname:path}.{ext:static}")
-async def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
+def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 
 # The `patch` decorator, which is defined in `fastcore`, adds a method to an existing class.
 # Here we are adding a method to the `Todo` class, which is returned by the `todos` table.
@@ -2576,7 +2576,7 @@ def delete(id:int):
     return clr_details()
 
 @rt("/edit/{id}")
-async def get(id:int):
+def get(id:int):
     # The `hx_put` attribute tells HTMX to send a PUT request when the form is submitted.
     # `target_id` specifies which element will be updated with the server's response.
     res = Form(Group(Input(id="title"), Button("Save")),
@@ -2589,14 +2589,14 @@ async def get(id:int):
     return fill_form(res, todos[id])
 
 @rt("/")
-async def put(todo: Todo):
+def put(todo: Todo):
     # `update` is part of the MiniDataAPI spec.
     # Note that the updated todo is returned. By returning the updated todo, we can update the list directly.
     # Because we return a tuple with `clr_details()`, the details view is also cleared.
     return todos.update(todo), clr_details()
 
 @rt("/")
-async def post(todo:Todo):
+def post(todo:Todo):
     # `hx_swap_oob='true'` tells HTMX to perform an out-of-band swap, updating this element wherever it appears.
     # This is used to clear the input field after adding the new todo.
     new_inp =  Input(id="new-title", name="title", placeholder="New Todo", hx_swap_oob='true')
@@ -2605,7 +2605,7 @@ async def post(todo:Todo):
     return todos.insert(todo), new_inp
 
 @rt("/todos/{id}")
-async def get(id:int):
+def get(id:int):
     todo = todos[id]
     # `hx_swap` determines how the update should occur. We use "outerHTML" to replace the entire todo `Li` element.
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
