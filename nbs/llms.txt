@@ -18,6 +18,10 @@ Things to remember when writing FastHTML apps:
 - [CSS Scope Inline](https://raw.githubusercontent.com/gnat/css-scope-inline/main/README.md): A JS library which allow `me` to be used in CSS selectors, by using a `MutationObserver` to monitor the DOM
 - [Starlette quick guide](https://gist.githubusercontent.com/jph00/e91192e9bdc1640f5421ce3c904f2efb/raw/61a2774912414029edaf1a55b506f0e283b93c46/starlette-quick.md): A quick overview of some Starlette features useful to FastHTML devs.
 
+## API
+
+- [API List](https://docs.fastht.ml//apilist.txt): A succint list of all functions and methods in fasthtml.
+
 ## Examples
 
 - [Websockets application](https://raw.githubusercontent.com/AnswerDotAI/fasthtml/main/examples/basic_ws.py): Very brief example of using websockets with HTMX and FastHTML
