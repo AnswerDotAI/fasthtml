@@ -20,7 +20,7 @@ Things to remember when writing FastHTML apps:
 
 ## API
 
-- [API List](https://docs.fastht.ml//apilist.txt): A succint list of all functions and methods in fasthtml.
+- [API List](https://docs.fastht.ml/apilist.txt): A succint list of all functions and methods in fasthtml.
 
 ## Examples
 
