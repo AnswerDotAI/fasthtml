@@ -179,7 +179,8 @@ async def _find_p(req, arg:str, p:Parameter):
     res = req.path_params.get(arg, None)
     if res in (empty,None): res = req.cookies.get(arg, None)
     if res in (empty,None): res = req.headers.get(snake2hyphens(arg), None)
-    if res in (empty,None): res = req.query_params.get(arg, None)
+    if res in (empty,None): res = req.query_params.getlist(arg)
+    if res==[]: res = None
     if res in (empty,None):
         frm = await req.form()
         res = _formitem(frm, arg)
