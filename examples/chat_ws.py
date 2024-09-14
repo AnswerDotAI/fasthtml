@@ -3,30 +3,21 @@ from fasthtml.common import *
 app = FastHTML(ws_hdr=True)
 rt = app.route
 
-def mk_inp(): return Input(id='msg')
-nid = 'msg-list'
-
-messages = []
+msgs = []
 @rt('/')
-def home():
-    return Div(
-        Div(Ul(*[Li(m) for m in messages], id=nid)),
-        Form(mk_inp(), id='form', ws_send=True),
-        hx_ext='ws', ws_connect='/ws')
+def home(): return Div(
+    Div(Ul(*[Li(m) for m in msgs], id='msg-list')),
+    Form(Input(id='msg'), id='form', ws_send=True),
+    hx_ext='ws', ws_connect='/ws')
 
 users = {}
-def on_connect(ws, send):
-    connection_id = str(id(ws))
-    users[connection_id] = send
-def on_disconnect(ws):
-    connection_id = str(id(ws))
-    if connection_id in users:
-        users.pop(connection_id)
+def on_conn(ws, send): users[str(id(ws))] = send
+def on_disconn(ws): users.pop(str(id(ws)), None)
 
-@app.ws('/ws', conn=on_connect, disconn=on_disconnect)
+@app.ws('/ws', conn=on_conn, disconn=on_disconn)
 async def ws(msg:str):
-    messages.append(msg)
-    for u in users.values():
-        await u(Ul(*[Li(m) for m in messages], id=nid))
+    msgs.append(msg)
+    # Use associated `send` function to send message to each user
+    for u in users.values(): await u(Ul(*[Li(m) for m in msgs], id='msg-list'))
 
 serve()
