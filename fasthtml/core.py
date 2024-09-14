@@ -417,7 +417,7 @@ class RouteX(Route):
         resp = None
         req.injects = []
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (self._app.hdrs,self._app.ftrs,self._app.htmlkw,self._app.bodykw))
-        req.hdrs,req.ftrs = list(req.hdrs),list(req.ftrs)
+        req.hdrs,req.ftrs = listify(req.hdrs),listify(req.ftrs)
         for b in self._app.before:
             if not resp:
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
