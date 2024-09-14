@@ -6,8 +6,8 @@
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc',
            'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
            'HtmxResponseHeaders', 'form2dict', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX',
-           'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie',
-           'reg_re_param', 'MiddlewareBase', 'Client']
+           'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'Client',
+           'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -358,7 +358,7 @@ def flat_tuple(o):
     return tuple(result)
 
 # %% ../nbs/api/00_core.ipynb
-def _xt_resp(req, resp):
+def _xt_cts(req, resp):
     resp = flat_tuple(resp)
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
@@ -368,7 +368,15 @@ def _xt_resp(req, resp):
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
         if not titles: titles = [Title('FastHTML page')]
         resp = Html(Head(*titles, *flat_xt(req.hdrs)), Body(bdy, *flat_xt(req.ftrs), **req.bodykw), **req.htmlkw)
-    return HTMLResponse(_to_xml(req, resp, indent=fh_cfg.indent), headers=http_hdrs)
+    return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs
+
+# %% ../nbs/api/00_core.ipynb
+def _xt_resp(req, resp):
+    cts,http_hdrs = _xt_cts(req, resp)
+    return HTMLResponse(cts, headers=http_hdrs)
+
+# %% ../nbs/api/00_core.ipynb
+def _is_ft_resp(resp): return isinstance(resp, (list,tuple,HttpHeader,FT)) or hasattr(resp, '__ft__')
 
 # %% ../nbs/api/00_core.ipynb
 def _resp(req, resp, cls=empty):
@@ -376,9 +384,9 @@ def _resp(req, resp, cls=empty):
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if cls in (Any,FT): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
-    if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
-    if isinstance(resp, (list,tuple,HttpHeader,FT)) or hasattr(resp, '__ft__'): return _xt_resp(req, resp)
+    if isinstance(resp, Response): return resp
+    if _is_ft_resp(resp): return _xt_resp(req, resp)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:
@@ -564,6 +572,18 @@ def serve(
         uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload, reload_includes=reload_includes, reload_excludes=reload_excludes)
 
 # %% ../nbs/api/00_core.ipynb
+class Client:
+    "A simple httpx ASGI client that doesn't require `async`"
+    def __init__(self, app, url="http://testserver"):
+        self.cli = AsyncClient(transport=ASGITransport(app), base_url=url)
+
+    def _sync(self, method, url, **kwargs):
+        async def _request(): return await self.cli.request(method, url, **kwargs)
+        with from_thread.start_blocking_portal() as portal: return portal.call(_request)
+
+for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o, partialmethod(Client._sync, o))
+
+# %% ../nbs/api/00_core.ipynb
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):
     "Create a 'set-cookie' `HttpHeader`"
     cookie = cookies.SimpleCookie()
@@ -613,13 +633,13 @@ class MiddlewareBase:
         return HTTPConnection(scope)
 
 # %% ../nbs/api/00_core.ipynb
-class Client:
-    "A simple httpx ASGI client that doesn't require `async`"
-    def __init__(self, app, url="http://testserver"):
-        self.cli = AsyncClient(transport=ASGITransport(app), base_url=url)
-
-    def _sync(self, method, url, **kwargs):
-        async def _request(): return await self.cli.request(method, url, **kwargs)
-        with from_thread.start_blocking_portal() as portal: return portal.call(_request)
-
-for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o, partialmethod(Client._sync, o))
+class FtResponse:
+    "Wrap an FT response with any Starlette `Response`"
+    def __init__(self, content, status_code:int=200, headers=None, cls=HTMLResponse, media_type:str|None=None, background=None):
+        self.content,self.status_code,self.headers = content,status_code,headers
+        self.cls,self.media_type,self.background = cls,media_type,background
+    
+    def __response__(self, req):
+        cts,httphdrs = _xt_cts(req, self.content)
+        headers = {**(self.headers or {}), **httphdrs}
+        return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=self.background)
