@@ -97,8 +97,11 @@ def _fill_item(item, obj):
     val = None if name is None else obj.get(name, None)
     if val is not None and not 'skip' in attr:
         if tag=='input':
-            if attr.get('type', '') in ('checkbox','radio'):
+            if attr.get('type', '') == 'checkbox':
                 if val: attr['checked'] = '1'
+                else: attr.pop('checked', '')
+            elif attr.get('type', '') == 'radio':
+                if val and val == attr['value']: attr['checked'] = '1'
                 else: attr.pop('checked', '')
             else: attr['value'] = val
         if tag=='textarea': cs=(val,)
