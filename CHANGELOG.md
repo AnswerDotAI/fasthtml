@@ -2,6 +2,22 @@
 
 <!-- do not remove -->
 
+## 0.5.3
+
+### New Features
+
+- Add `FtResponse` ([#425](https://github.com/AnswerDotAI/fasthtml/issues/425))
+- Add `sid_scr` ([#425](https://github.com/AnswerDotAI/fasthtml/issues/425))
+- Scope `On` selector to `p` ([#414](https://github.com/AnswerDotAI/fasthtml/issues/414))
+- Store `p=me()` before `On` handler ([#413](https://github.com/AnswerDotAI/fasthtml/issues/413))
+- Convert `dict` children in `ft_htmx` and `ft_hx` to kwargs ([#412](https://github.com/AnswerDotAI/fasthtml/issues/412))
+- Add reload on CSS and JS file changes ([#401](https://github.com/AnswerDotAI/fasthtml/issues/401))
+
+### Bugs Squashed
+
+- `static_path` ignored in `fast_app` ([#410](https://github.com/AnswerDotAI/fasthtml/issues/410))
+
+
 ## 0.5.2
 
 ### New Features
