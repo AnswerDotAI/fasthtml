@@ -2,6 +2,25 @@
 
 <!-- do not remove -->
 
+## 0.6.0
+
+### Breaking changes
+
+- `date` has been renamed to `parsed_date`
+
+### New Features
+
+- Handle non-list/tuple `hdrs` and `ftrs` in `FastHTML()` ([#426](https://github.com/AnswerDotAI/fasthtml/issues/426))
+- Handle automatic `datetime.date` form field conversion ([#415](https://github.com/AnswerDotAI/fasthtml/issues/415))
+
+### Bugs Squashed
+
+- Make sure only the selected radio button in a radio group is checked during `form_fill` ([#424](https://github.com/AnswerDotAI/fasthtml/pull/424)), thanks to [@rbavery](https://github.com/rbavery)
+- All radio buttons in a radio group are checked during `fill_form` ([#423](https://github.com/AnswerDotAI/fasthtml/issues/423))
+- receiving a list[str] as a parameter doesn't work with get request ([#422](https://github.com/AnswerDotAI/fasthtml/issues/422))
+- Multipart error when submitting with empty form-data ([#405](https://github.com/AnswerDotAI/fasthtml/issues/405))
+
+
 ## 0.5.3
 
 ### New Features
