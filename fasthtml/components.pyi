@@ -26,7 +26,7 @@ def attrmap_x(o):
 fh_cfg['attrmap'] = attrmap_x
 fh_cfg['valmap'] = valmap
 
-def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, **kwargs):
+def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=FT, **kwargs):
     ...
 
 @use_kwargs(hx_attrs, keep=True)

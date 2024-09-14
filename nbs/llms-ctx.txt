@@ -1,13 +1,10 @@
-<project title="FastHTML" summary='FastHTML is a python library which brings together Starlette, Uvicorn, HTMX, and fastcore&#39;s `FT` "FastTags" into a library for creating server-rendered hypermedia applications. The `FastHTML` class itself inherits from `Starlette`, and adds decorator-based routing with many additions, Beforeware, automatic `FT` to HTML rendering, and much more.'>
-Things to remember when writing FastHTML apps:
+<project title="FastHTML" summary='FastHTML is a python library which brings together Starlette, Uvicorn, HTMX, and fastcore&#39;s `FT` "FastTags" into a library for creating server-rendered hypermedia applications. The `FastHTML` class itself inherits from `Starlette`, and adds decorator-based routing with many additions, Beforeware, automatic `FT` to HTML rendering, and much more.'>Things to remember when writing FastHTML apps:
 
 - Although parts of its API are inspired by FastAPI, it is *not* compatible with FastAPI syntax and is not targeted at creating API services
 - FastHTML includes support for Pico CSS and the fastlite sqlite library, although using both are optional; sqlalchemy can be used directly or via the fastsql library, and any CSS framework can be used. Support for the Surreal and css-scope-inline libraries are also included, but both are optional
 - FastHTML is compatible with JS-native web components and any vanilla JS library, but not with React, Vue, or Svelte
 - Use `serve()` for running uvicorn (`if __name__ == "__main__"` is not needed since it's automatic)
-- When a title is needed with a response, use `Titled`; note that that already wraps children in `Container`, and already includes both the meta title as well as the H1 element.
-  <docs>
-    <doc title="FastHTML quick start" desc="A brief overview of many FastHTML features"># Web Devs Quickstart
+- When a title is needed with a response, use `Titled`; note that that already wraps children in `Container`, and already includes both the meta title as well as the H1 element.<docs><doc title="FastHTML quick start" desc="A brief overview of many FastHTML features"># Web Devs Quickstart
 
 
 
@@ -918,7 +915,7 @@ cookie name.
 
 ``` python
 @rt('/gettimestamp')
-def get(now:date): return f'Cookie was set at time {now.time()}'
+def get(now:parsed_date): return f'Cookie was set at time {now.time()}'
 
 client.get('/gettimestamp').text
 ```
@@ -1121,8 +1118,7 @@ The endpoint view needs to be an async function that returns a
 ## Unwritten quickstart sections
 
 - Websockets
-- Tables</doc>
-    <doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
+- Tables</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
 title = "Reference"
 +++
 
@@ -1381,8 +1377,7 @@ You can set them directly in javascript, or you can use a `meta` tag:
 
 ```html
 <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}'>
-```</doc>
-    <doc title="Surreal" desc="Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions"># 🗿 Surreal
+```</doc><doc title="Surreal" desc="Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions"># 🗿 Surreal
 ### Tiny jQuery alternative for plain Javascript with inline [Locality of Behavior](https://htmx.org/essays/locality-of-behaviour/)!
 
 ![cover](https://user-images.githubusercontent.com/24665/171092805-b41286b2-be4a-4aab-9ee6-d604699cc507.png)
@@ -1813,8 +1808,7 @@ Make an [issue](https://github.com/gnat/surreal/issues) or [pull request](https:
   * [Fava](https://github.com/fabiospampinato/fava). See: https://github.com/avajs/ava/issues/24#issuecomment-885949036
   * [Ava](https://github.com/avajs/ava/blob/main/docs/recipes/browser-testing.md)
   * [jsdom](https://github.com/jsdom/jsdom)
-    * [jsdom notes](https://github.com/jsdom/jsdom#executing-scripts)</doc>
-    <doc title="CSS Scope Inline" desc="A JS library which allow `me` to be used in CSS selectors, by using a `MutationObserver` to monitor the DOM"># 🌘 CSS Scope Inline
+    * [jsdom notes](https://github.com/jsdom/jsdom#executing-scripts)</doc><doc title="CSS Scope Inline" desc="A JS library which allow `me` to be used in CSS selectors, by using a `MutationObserver` to monitor the DOM"># 🌘 CSS Scope Inline
 
 ![cover](https://github.com/gnat/css-scope-inline/assets/24665/c4935c1b-34e3-4220-9d42-11f064999a57)
 (Art by [shahabalizadeh](https://www.artstation.com/artwork/zDgdd))
@@ -1825,7 +1819,7 @@ Make an [issue](https://github.com/gnat/surreal/issues) or [pull request](https:
 * Hate creating unique class names over.. and over.. to use once.
 * You want to co-locate your styles for ⚡️ [Locality of Behavior (LoB)](https://htmx.org/essays/locality-of-behaviour/)
 * You wish `this` would work in `<style>` tags.
-* Want all CSS features: [Nesting](https://caniuse.com/css-nesting), animations. Get scoped [`@keyframes`](https://github.com/gnat/css-scope-inline/blob/main/example.html#L86)!
+* Want all CSS features: [Nesting](https://caniuse.com/css-nesting), animations. Get scoped [`@keyframes`](https://github.com/gnat/css-scope-inline/blob/main/example.html#L50)!
 * You wish `@media` queries were shorter for [responsive design](https://tailwindcss.com/docs/responsive-design).
 * Only 16 lines. No build step. No dependencies.
 * Pairs well with [htmx](https://htmx.org) and [Surreal](https://github.com/gnat/surreal)
@@ -1978,8 +1972,7 @@ At first glance, **Tailwind Example 2** looks very promising! Exciting ...but:
 ```
 ## 🔎 Technical FAQ
 * Why do you use `querySelectorAll()` and not just process the `MutationObserver` results directly?
-  * This was indeed the original design; it will work well up until you begin recieving subtrees (ex: DOM swaps with [htmx](https://htmx.org), ajax, jquery, etc.) which requires walking all subtree elements to ensure we do not miss a `<style>`. This unfortunately involves re-scanning thousands of repeated elements. This is why `querySelectorAll()` ends up the performance (and simplicity) winner.</doc>
-    <doc title="Starlette quick guide" desc="A quick overview of some Starlette features useful to FastHTML devs."># 🌟 Starlette Quick Manual
+  * This was indeed the original design; it will work well up until you begin recieving subtrees (ex: DOM swaps with [htmx](https://htmx.org), ajax, jquery, etc.) which requires walking all subtree elements to ensure we do not miss a `<style>`. This unfortunately involves re-scanning thousands of repeated elements. This is why `querySelectorAll()` ends up the performance (and simplicity) winner.</doc><doc title="Starlette quick guide" desc="A quick overview of some Starlette features useful to FastHTML devs."># 🌟 Starlette Quick Manual
 
 
 2020-02-09
@@ -2292,10 +2285,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
         response.headers['X-Author'] = 'John'
         return response
 
-```</doc>
-  </docs>
-  <api>
-    <doc title="API List" desc="A succint list of all functions and methods in fasthtml."># fasthtml Module Documentation
+```</doc></docs><api><doc title="API List" desc="A succint list of all functions and methods in fasthtml."># fasthtml Module Documentation
 
 ## fasthtml.authmw
 
@@ -2363,6 +2353,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def form2dict(form)`
     Convert starlette form data to a dict
 
+- `def parse_form(req)`
+    Starlette errors on empty multipart forms, so this checks for that situation
+
 - `def flat_xt(lst)`
     Flatten lists
 
@@ -2404,6 +2397,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def serve(appname, app, host, port, reload, reload_includes, reload_excludes)`
     Run the app in an async server, with live reload set as the default.
 
+- `class Client`
+    A simple httpx ASGI client that doesn't require `async`
+
+    - `def __init__(self, app, url)`
+
 - `def cookie(key, value, max_age, expires, path, domain, secure, httponly, samesite)`
     Create a 'set-cookie' `HttpHeader`
 
@@ -2416,10 +2414,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `class MiddlewareBase`
     - `def __call__(self, scope, receive, send)`
 
-- `class Client`
-    A simple httpx ASGI client that doesn't require `async`
+- `class FtResponse`
+    Wrap an FT response with any Starlette `Response`
 
-    - `def __init__(self, app, url)`
+    - `def __init__(self, content, status_code, headers, cls, media_type, background)`
+    - `def __response__(self, req)`
 
 ## fasthtml.fastapp
 
@@ -2684,10 +2683,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def jsd(org, repo, root, path, prov, typ, ver, esm, **kwargs)`
     jsdelivr `Script` or CSS `Link` tag, or URL
-</doc>
-  </api>
-  <examples>
-    <doc title="Websockets application" desc="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
+</doc></api><examples><doc title="Websockets application" desc="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
 from fasthtml.common import *
 
 app = FastHTML(ws_hdr=True)
@@ -2714,8 +2710,7 @@ async def ws(msg:str, send):
     return Div('Goodbye ' + msg, id=nid), mk_inp()
 
 serve()
-</doc>
-    <doc title="Todo list application" desc="Detailed walk-thru of a complete CRUD app in FastHTML showing idiomatic use of FastHTML and HTMX patterns.">###
+</doc><doc title="Todo list application" desc="Detailed walk-thru of a complete CRUD app in FastHTML showing idiomatic use of FastHTML and HTMX patterns.">###
 # Walkthrough of an idiomatic fasthtml app
 ###
 
@@ -3007,7 +3002,4 @@ def get(id:int):
     # Because `class` is a reserved keyword in Python, we use `cls` instead, which FastHTML auto-converts.
     return Div(H2(todo.title), Div(todo.details, cls="markdown"), btn)
 
-serve()</doc>
-  </examples>
-</project>
-
+serve()</doc></examples></project>

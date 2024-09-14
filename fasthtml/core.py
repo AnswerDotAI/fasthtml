@@ -4,10 +4,10 @@
 
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc',
-           'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
-           'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown',
-           'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML',
-           'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
+           'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'str2date',
+           'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
+           'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX',
+           'get_key', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -18,7 +18,7 @@ from fastcore.meta import use_kwargs_dict
 
 from types import UnionType, SimpleNamespace as ns, GenericAlias
 from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List, Any
-from datetime import datetime
+from datetime import datetime,date
 from dataclasses import dataclass,fields
 from collections import namedtuple
 from inspect import isfunction,ismethod,Parameter,get_annotations
@@ -39,7 +39,7 @@ empty = Parameter.empty
 def _sig(f): return signature_ex(f, True)
 
 # %% ../nbs/api/00_core.ipynb
-def date(s:str):
+def parsed_date(s:str):
     "Convert `s` to a datetime"
     return dtparse.parse(s)
 
@@ -85,12 +85,17 @@ def _mk_list(t, v): return [t(o) for o in v]
 fh_cfg = AttrDict(indent=True)
 
 # %% ../nbs/api/00_core.ipynb
+def str2date(s:str)->date:
+    "`date.fromisoformat` with empty string handling"
+    return date.fromisoformat(s) if s else None
+
+# %% ../nbs/api/00_core.ipynb
 def _fix_anno(t):
     "Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"
     origin = get_origin(t)
     if origin is Union or origin is UnionType or origin in (list,List):
         t = first(o for o in get_args(t) if o!=type(None))
-    d = {bool: str2bool, int: str2int}
+    d = {bool: str2bool, int: str2int, date: str2date}
     res = d.get(t, t)
     if origin in (list,List): return partial(_mk_list, res)
     return lambda o: res(o[-1]) if isinstance(o,(list,tuple)) else res(o)

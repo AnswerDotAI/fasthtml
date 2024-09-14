@@ -1,12 +1,12 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie', 'reg_re_param', 'MiddlewareBase']
-import json, uuid, inspect, types, uvicorn, signal, asyncio
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'str2date', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
+import json, uuid, inspect, types, uvicorn, signal, asyncio, threading
 from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs_dict
 from types import UnionType, SimpleNamespace as ns, GenericAlias
 from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List, Any
-from datetime import datetime
+from datetime import datetime, date
 from dataclasses import dataclass, fields
 from collections import namedtuple
 from inspect import isfunction, ismethod, Parameter, get_annotations
@@ -16,13 +16,15 @@ from urllib.parse import urlencode, parse_qs, quote, unquote
 from copy import copy, deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
+from httpx import ASGITransport, AsyncClient
+from anyio import from_thread
 from .starlette import *
 empty = Parameter.empty
 
 def _sig(f):
     ...
 
-def date(s: str):
+def parsed_date(s: str):
     """Convert `s` to a datetime"""
     ...
 
@@ -55,6 +57,10 @@ def str2int(s) -> int:
 def _mk_list(t, v):
     ...
 fh_cfg = AttrDict(indent=True)
+
+def str2date(s: str) -> date:
+    """`date.fromisoformat` with empty string handling"""
+    ...
 
 def _fix_anno(t):
     """Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"""
@@ -91,6 +97,10 @@ def _formitem(form, k):
 
 def form2dict(form: FormData) -> dict:
     """Convert starlette form data to a dict"""
+    ...
+
+async def parse_form(req: Request) -> FormData:
+    """Starlette errors on empty multipart forms, so this checks for that situation"""
     ...
 
 async def _from_body(req, p):
@@ -173,7 +183,13 @@ def flat_tuple(o):
     """Flatten lists"""
     ...
 
+def _xt_cts(req, resp):
+    ...
+
 def _xt_resp(req, resp):
+    ...
+
+def _is_ft_resp(resp):
     ...
 
 def _resp(req, resp, cls=empty):
@@ -258,6 +274,17 @@ def serve(appname=None, app='app', host='0.0.0.0', port=None, reload=True, reloa
     """Run the app in an async server, with live reload set as the default."""
     ...
 
+class Client:
+    """A simple httpx ASGI client that doesn't require `async`"""
+
+    def __init__(self, app, url='http://testserver'):
+        ...
+
+    def _sync(self, method, url, **kwargs):
+        ...
+for o in ('get', 'post', 'delete', 'put', 'patch', 'options'):
+    setattr(Client, o, partialmethod(Client._sync, o))
+
 def cookie(key: str, value='', max_age=None, expires=None, path='/', domain=None, secure=False, httponly=False, samesite='lax'):
     """Create a 'set-cookie' `HttpHeader`"""
     ...
@@ -270,4 +297,13 @@ reg_re_param('static', 'ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|o
 class MiddlewareBase:
 
     async def __call__(self, scope, receive, send) -> None:
+        ...
+
+class FtResponse:
+    """Wrap an FT response with any Starlette `Response`"""
+
+    def __init__(self, content, status_code: int=200, headers=None, cls=HTMLResponse, media_type: str | None=None, background=None):
+        ...
+
+    def __response__(self, req):
         ...

@@ -1,5 +1,5 @@
 """Simple extensions to standard HTML components, such as adding sensible defaults"""
-__all__ = ['A', 'Form', 'AX', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'Titled', 'Socials', 'Favicon', 'jsd', 'clear']
+__all__ = ['sid_scr', 'A', 'Form', 'AX', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'Titled', 'Socials', 'Favicon', 'jsd', 'clear']
 from dataclasses import dataclass, asdict
 from typing import Any
 from fastcore.utils import *
@@ -32,11 +32,11 @@ def CheckboxX(checked: bool=False, label=None, value='1', id=None, name=None, *,
     """A Checkbox optionally inside a Label, preceded by a `Hidden` with matching name"""
     ...
 
-def Script(code: str='', *, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, **kwargs) -> FT:
+def Script(code: str='', *, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=fastcore.xml.FT, **kwargs) -> FT:
     """A Script tag that doesn't escape its code"""
     ...
 
-def Style(*c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, **kwargs) -> FT:
+def Style(*c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=fastcore.xml.FT, **kwargs) -> FT:
     """A Style tag that doesn't escape its code"""
     ...
 
@@ -65,11 +65,11 @@ def StyleX(fname, **kw):
     ...
 
 def On(code: str, event: str='click', sel: str='', me=True):
-    """An async surreal.js script block event handler for `event` on selector `sel`"""
+    """An async surreal.js script block event handler for `event` on selector `sel`, making available parent `p`, event `ev`, and target `e`"""
     ...
 
 def Prev(code: str, event: str='click'):
-    """An async surreal.js script block event handler for `event` on previous sibling"""
+    """An async surreal.js script block event handler for `event` on previous sibling, with same vars as `On`"""
     ...
 
 def Now(code: str, sel: str=''):
@@ -105,3 +105,4 @@ def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **k
 
 def clear(id):
     ...
+sid_scr = Script('\nfunction uuid() {\n    return [...crypto.getRandomValues(new Uint8Array(10))].map(b=>b.toString(36)).join(\'\');\n}\n\nsessionStorage.setItem("sid", sessionStorage.getItem("sid") || uuid());\n\nhtmx.on("htmx:configRequest", (e) => {\n    const sid = sessionStorage.getItem("sid");\n    if (sid) {\n        const url = new URL(e.detail.path, window.location.origin);\n        url.searchParams.set(\'sid\', sid);\n        e.detail.path = url.pathname + url.search;\n    }\n});\n')
