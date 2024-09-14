@@ -5,9 +5,9 @@
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc',
            'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
-           'HtmxResponseHeaders', 'form2dict', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX',
-           'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'Client',
-           'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
+           'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown',
+           'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML',
+           'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -144,12 +144,24 @@ def form2dict(form: FormData) -> dict:
     return {k: _formitem(form, k) for k in form}
 
 # %% ../nbs/api/00_core.ipynb
+async def parse_form(req: Request) -> FormData:
+    "Starlette errors on empty multipart forms, so this checks for that situation"
+    ctype = req.headers.get("Content-Type", "")
+    if not ctype.startswith("multipart/form-data"): return await req.form()
+    try: boundary = ctype.split("boundary=")[1].strip()
+    except IndexError: raise HTTPException(400, "Invalid form-data: no boundary")
+    min_len = len(boundary) + 6
+    clen = int(req.headers.get("Content-Length", "0"))
+    if clen <= min_len: return FormData()
+    return await req.form()
+
+# %% ../nbs/api/00_core.ipynb
 async def _from_body(req, p):
     anno = p.annotation
     # Get the fields and types of type `anno`, if available
     d = _annotations(anno)
     if req.headers.get('content-type', None)=='application/json': data = await req.json()
-    else: data = form2dict(await req.form())
+    else: data = form2dict(await parse_form(req))
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
 
@@ -181,9 +193,7 @@ async def _find_p(req, arg:str, p:Parameter):
     if res in (empty,None): res = req.headers.get(snake2hyphens(arg), None)
     if res in (empty,None): res = req.query_params.getlist(arg)
     if res==[]: res = None
-    if res in (empty,None):
-        frm = await req.form()
-        res = _formitem(frm, arg)
+    if res in (empty,None): res = _formitem(await parse_form(req), arg)
     # Raise 400 error if the param does not include a default
     if (res in (empty,None)) and p.default is empty: raise HTTPException(400, f"Missing required field: {arg}")
     # If we have a default, return that if we have no value
