@@ -465,7 +465,7 @@ class RouterX(Router):
 # %% ../nbs/api/00_core.ipynb
 htmxsrc   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
 htmxwssrc = Script(src="https://unpkg.com/htmx-ext-ws/ws.js")
-fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.3/fasthtml.js")
+fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js")
 htmxctsrc = Script(src="https://unpkg.com/htmx-ext-transfer-encoding-chunked/transfer-encoding-chunked.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
