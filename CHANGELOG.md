@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.6.1
+
+### New Features
+
+- Include both `m` (me) and `p` (prev) in `On` and `Prev` handlers, and run after DOM ready ([#429](https://github.com/AnswerDotAI/fasthtml/issues/429))
+
+### Bugs Squashed
+
+- `proc_htmx` not exported correctly ([#434](https://github.com/AnswerDotAI/fasthtml/issues/434))
+
+
 ## 0.6.0
 
 ### Breaking changes
