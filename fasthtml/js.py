@@ -27,7 +27,7 @@ def dark_media(
 
 # %% ../nbs/api/03_js.ipynb
 marked_imp = """import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
-    import { proc_htmx } from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
+    import "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
 """
 npmcdn = 'https://cdn.jsdelivr.net/npm/'
 
