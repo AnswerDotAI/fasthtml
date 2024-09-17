@@ -245,7 +245,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
         if arg.lower()=='send': return partial(_send_ws, ws)
         return None
     res = data.get(arg, None)
-    if res is empty or res is None: res = hdrs.get(snake2hyphens(arg), None)
+    if res is empty or res is None: res = hdrs.get(arg, None)
     if res is empty or res is None: res = p.default
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
@@ -253,7 +253,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
     return [anno(o) for o in res] if isinstance(res,list) else anno(res)
 
 def _wrap_ws(ws, data, params):
-    hdrs = data.pop('HEADERS', {})
+    hdrs = {k.lower().replace('-','_'):v for k,v in data.pop('HEADERS', {}).items()}
     return [_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()]
 
 # %% ../nbs/api/00_core.ipynb

@@ -1,13 +1,12 @@
-# Run with: uvicorn first_app:app --reload
 from fasthtml.common import *
 
 app,rt,todos,Todo = fast_app('data/todos.db', id=int, title=str, done=bool, pk='id')
 
 def TodoRow(todo):
     return Li(
-        A(todo.title, hx_get=f'/todos/{todo.id}'),
+        A(todo.title, href=f'/todos/{todo.id}'),
         (' (done)' if todo.done else '') + ' | ',
-        A('edit',     hx_get=f'/edit/{todo.id}'),
+        A('edit',     href=f'/edit/{todo.id}'),
         id=f'todo-{todo.id}'
     )
 
@@ -16,14 +15,14 @@ def home():
             Group(
                 Input(name="title", placeholder="New Todo"),
                 Button("Add")
-            ), hx_post="/"
+            ), action="/", method='post'
         )
     card = Card(
                 Ul(*map(TodoRow, todos()), id='todo-list'),
                 header=add,
                 footer=Div(id='current-todo')
             )
-    return PageX('Todo list', card)
+    return Titled('Todo list', card)
 
 @rt("/")
 def get(): return home()
@@ -33,13 +32,13 @@ def post(todo:Todo):
     todos.insert(todo)
     return home()
 
-@rt("/")
-def put(todo: Todo):
-    todos.upsert(todo)
+@rt("/update")
+def post(todo: Todo):
+    todos.update(todo)
     return home()
 
-@rt("/")
-def delete(id:int):
+@rt("/remove")
+def get(id:int):
     todos.delete(id)
     return home()
 
@@ -52,18 +51,20 @@ def get(id:int):
             ),
             Hidden(id="id"),
             CheckboxX(id="done", label='Done'),
-            Button('Back', hx_get='/'),
-            hx_put="/", id="edit"
+            A('Back', href='/', role="button"),
+            action="/update", id="edit", method='post'
         )
     frm = fill_form(res, todos[id])
-    return PageX('Edit Todo', frm)
+    return Titled('Edit Todo', frm)
 
 @rt("/todos/{id}")
 def get(id:int):
     contents = Div(
         Div(todos[id].title),
-        Button('Delete', hx_delete='/', value=id, name="id"),
-        Button('Back', hx_get='/')
+        A('Delete', href=f'/remove?id={id}', role="button"),
+        A('Back', href='/', role="button")
     )
-    return PageX('Todo details', contents)
+    return Titled('Todo details', contents)
+
+serve()
 
