@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.6.4
+
+### New Features
+
+- Pass query params to custom class annotated args ([#439](https://github.com/AnswerDotAI/fasthtml/issues/439))
+
+
 ## 0.6.3
 
 ### Bugs Squashed
