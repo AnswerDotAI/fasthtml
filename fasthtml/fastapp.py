@@ -94,4 +94,7 @@ def fast_app(
 
 # %% ../nbs/api/10_fastapp.ipynb
 def ContainerX(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
-def PageX(title, h1=None, *con): return Title(title), ContainerX(H1(h1 if h1 else title), *con)
+def PageX(title, *con, **kwargs):
+    h1_title = kwargs['h1'] if 'h1' in kwargs else title
+    return Title(title), ContainerX(H1(h1_title), *con)
+
