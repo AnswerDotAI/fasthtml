@@ -167,6 +167,7 @@ async def _from_body(req, p):
     d = _annotations(anno)
     if req.headers.get('content-type', None)=='application/json': data = await req.json()
     else: data = form2dict(await parse_form(req))
+    if req.query_params: data = {**data, **dict(req.query_params)}
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
 
