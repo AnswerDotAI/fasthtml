@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.6.3
+
+### Bugs Squashed
+
+- `svg.Path` not passing `d` param ([#438](https://github.com/AnswerDotAI/fasthtml/issues/438))
+
+
 ## 0.6.2
 
 ### New Features
