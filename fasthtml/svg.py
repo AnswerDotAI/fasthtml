@@ -158,7 +158,7 @@ class PathFT(FT):
 @delegates(ft_svg)
 def Path(d='', fill=None, stroke=None, stroke_width=None, **kwargs):
     "Create a standard `path` SVG element. This is a special object"
-    return ft_svg('path', fill=fill, stroke=stroke, stroke_width=stroke_width, ft_cls=PathFT, **kwargs)
+    return ft_svg('path', d=d, fill=fill, stroke=stroke, stroke_width=stroke_width, ft_cls=PathFT, **kwargs)
 
 # %% ../nbs/api/05_svg.ipynb
 svg_inb = dict(hx_select="svg>*")
