@@ -2431,6 +2431,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, ws_hdr, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
+- `def jupy_app(pico, hdrs, middleware, **kwargs)`
+    Same as `fast_app` but for Jupyter notebooks
+
 ## fasthtml.js
 
 > Basic external Javascript lib wrappers
@@ -2446,6 +2449,33 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def HighlightJS(sel, langs, light, dark)`
     Implements browser-based syntax highlighting. Usage example [here](/tutorials/quickstart_for_web_devs.html#code-highlighting).
+
+## fasthtml.jupyter
+
+- `def nb_serve(app, log_level, port, **kwargs)`
+    Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+- `def nb_serve_async(app, log_level, port, **kwargs)`
+    Async version of `nb_serve`
+
+- `def is_port_free(port, host)`
+    Check if `port` is free on `host`
+
+- `def wait_port_free(port, host, max_wait)`
+    Wait for `port` to be free on `host`
+
+- `class JupyUvi`
+    Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+    - `def __init__(self, app, log_level, port, start, **kwargs)`
+    - `def start(self)`
+    - `def stop(self)`
+
+- `def FastJupy(hdrs, middleware, **kwargs)`
+    Same as FastHTML, but with Jupyter compatible middleware and headers added
+
+- `def HTMX(host, port)`
+    An iframe which displays the HTMX application in a notebook.
 
 ## fasthtml.live_reload
 
@@ -2777,7 +2807,6 @@ def before(req, sess):
 
 markdown_js = """
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
-import { proc_htmx} from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
 proc_htmx('.markdown', e => e.innerHTML = marked.parse(e.textContent));
 """
 
