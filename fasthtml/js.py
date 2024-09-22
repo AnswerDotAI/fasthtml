@@ -27,7 +27,6 @@ def dark_media(
 
 # %% ../nbs/api/03_js.ipynb
 marked_imp = """import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
-    import { proc_htmx } from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.3/fasthtml.js";
 """
 npmcdn = 'https://cdn.jsdelivr.net/npm/'
 
@@ -85,7 +84,6 @@ def SortableJS(
     ):
     src = """
 import {Sortable} from 'https://cdn.jsdelivr.net/npm/sortablejs/+esm';
-import {proc_htmx} from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.3/fasthtml.js";
 proc_htmx('%s', Sortable.create);
 """ % sel
     return Script(src, type='module')

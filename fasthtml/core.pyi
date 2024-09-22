@@ -220,6 +220,9 @@ class RouterX(Router):
     def __init__(self, app, routes=None, redirect_slashes=True, default=None, *, middleware=None):
         ...
 
+    def _add_route(self, route):
+        ...
+
     def add_route(self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
         ...
 
@@ -227,7 +230,7 @@ class RouterX(Router):
         ...
 htmxsrc = Script(src='https://unpkg.com/htmx.org@next/dist/htmx.min.js')
 htmxwssrc = Script(src='https://unpkg.com/htmx-ext-ws/ws.js')
-fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@main/fasthtml.js')
+fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js')
 htmxctsrc = Script(src='https://unpkg.com/htmx-ext-transfer-encoding-chunked/transfer-encoding-chunked.js')
 surrsrc = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js')
 scopesrc = Script(src='https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js')
