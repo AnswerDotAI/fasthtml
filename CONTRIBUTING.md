@@ -2,24 +2,13 @@
 
 This project uses [nbdev](https://nbdev.fast.ai/getting_started.html) for development. Before beginning, make sure that nbdev and a jupyter-compatible client such as jupyterlab or nbclassic are installed. To make changes, update the notebooks in the `nbs` folder, not the .py files directly. Then, run `nbdev_export`. For more details, have a look at the [nbdev tutorial](https://nbdev.fast.ai/tutorials/tutorial.html).
 
-## How to get started
-
-Before anything else, please install the git hooks that run automatic scripts during each commit and merge to strip the notebooks of superfluous metadata (and avoid merge conflicts). After cloning the repository, run the following command inside it:
+You may want to set up a `prep` alias in `~/.zshrc` or other shell startup file:
 
 ```sh
-nbdev_install_hooks
-```
-
-This is a one-off command that you only have to run when you're first setting up the repo locally.
-
-You will also want to set up a `prep` alias in `~/.zshrc` or other shell startup file:
-
-```sh
-# nbdev alias to clean Jupyter notebooks before committing
 alias prep='nbdev_export && nbdev_clean && nbdev_trust'
 ```
 
-Run `prep` before each commit.
+Run `prep` before each commit to ensure your python files are up to date, and you notebooks cleaned of metadata and notarized.
 
 ## Did you find a bug?
 
