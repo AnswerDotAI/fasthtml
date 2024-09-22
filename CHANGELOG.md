@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.6.5
+
+### New Features
+
+- Jupyter compatibility ([#445](https://github.com/AnswerDotAI/fasthtml/issues/445))
+- Redefining a route overwrites existing definition (e.g for use in notebooks) ([#444](https://github.com/AnswerDotAI/fasthtml/issues/444))
+
+### Bugs Squashed
+
+- [BUG] d argument is not passed in Path function for SVGs ([#437](https://github.com/AnswerDotAI/fasthtml/issues/437))
+
+
 ## 0.6.4
 
 ### New Features
