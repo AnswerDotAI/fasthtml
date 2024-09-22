@@ -304,6 +304,7 @@ class WS_RouteX(WebSocketRoute):
     def __init__(self, app, path:str, recv, conn:callable=None, disconn:callable=None, *,
                  name=None, middleware=None):
         super().__init__(path, _ws_endp(recv, conn, disconn), name=name, middleware=middleware)
+        self.methods = ['WS']
 
 # %% ../nbs/api/00_core.ipynb
 def uri(_arg, **kwargs):
@@ -454,14 +455,21 @@ class RouterX(Router):
         self._app = app
         super().__init__(routes, redirect_slashes, default, app.on_startup, app.on_shutdown,
                          lifespan=app.lifespan, middleware=middleware)
+    
+    def _add_route(self, route):
+        route.methods = [m.upper() for m in listify(route.methods)]
+        self.routes = [r for r in self.routes if not
+                       (r.path==route.path and r.name == route.name and
+                        ((route.methods is None) or (set(r.methods) == set(route.methods))))]
+        self.routes.append(route)
 
     def add_route(self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
         route = RouteX(self._app, path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema)
-        self.routes.append(route)
+        self._add_route(route)
 
     def add_ws(self, path: str, recv: callable, conn:callable=None, disconn:callable=None, name=None):
         route = WS_RouteX(self._app, path, recv=recv, conn=conn, disconn=disconn, name=name)
-        self.routes.append(route)
+        self._add_route(route)
 
 # %% ../nbs/api/00_core.ipynb
 htmxsrc   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
