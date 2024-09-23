@@ -7,7 +7,8 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc',
            'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'str2date',
            'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
            'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX',
-           'get_key', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
+           'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase',
+           'FtResponse']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -511,6 +512,16 @@ def _mk_locfunc(f,p):
     return _lf()
 
 # %% ../nbs/api/00_core.ipynb
+def def_hdrs(htmx=True, ct_hdr=False, ws_hdr=False, surreal=True):
+    "Default headers for a FastHTML app"
+    hdrs = []
+    if surreal: hdrs = [surrsrc,scopesrc] + hdrs
+    if ws_hdr: hdrs = [htmxwssrc] + hdrs
+    if ct_hdr: hdrs = [htmxctsrc] + hdrs
+    if htmx: hdrs = [htmxsrc,fhjsscr] + hdrs
+    return [charset, viewport] + hdrs
+
+# %% ../nbs/api/00_core.ipynb
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
@@ -522,12 +533,7 @@ class FastHTML(Starlette):
         middleware,before,after = map(_list, (middleware,before,after))
         hdrs,ftrs = listify(hdrs),listify(ftrs)
         htmlkw = htmlkw or {}
-        if default_hdrs:
-            if surreal: hdrs = [surrsrc,scopesrc] + hdrs
-            if ws_hdr: hdrs = [htmxwssrc] + hdrs
-            if ct_hdr: hdrs = [htmxctsrc] + hdrs
-            if htmx: hdrs = [htmxsrc,fhjsscr] + hdrs
-            hdrs = [charset, viewport] + hdrs
+        if default_hdrs: hdrs = def_hdrs(htmx, ct_hdr=ct_hdr, ws_hdr=ws_hdr, surreal=surreal) + hdrs
         self.on_startup,self.on_shutdown,self.lifespan,self.hdrs,self.ftrs = on_startup,on_shutdown,lifespan,hdrs,ftrs
         self.before,self.after,self.htmlkw,self.bodykw = before,after,htmlkw,bodykw
         secret_key = get_key(secret_key, key_fname)

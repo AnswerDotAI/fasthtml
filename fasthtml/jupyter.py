@@ -96,4 +96,29 @@ def HTMX(host='localhost', port=8000):
         window.addEventListener('message', function(e) {
             if (e.data.height) frame.style.height = (e.data.height+1) + 'px';
         }, false);
-    }"></iframe> """)
+    }" allow="accelerometer;
+autoplay;
+camera;
+clipboard-read;
+clipboard-write;
+display-capture;
+encrypted-media;
+fullscreen;
+gamepad;
+geolocation;
+gyroscope;
+hid;
+identity-credentials-get;
+idle-detection;
+magnetometer;
+microphone;
+midi;
+payment;
+picture-in-picture;
+publickey-credentials-get;
+screen-wake-lock;
+serial;
+usb;
+web-share;
+xr-spatial-tracking
+"></iframe> """)
