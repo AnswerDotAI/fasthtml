@@ -2,12 +2,11 @@
 
 <!-- do not remove -->
 
-## 0.6.5
+## 0.6.6
 
 ### New Features
 
 - Add `def_hdrs` ([#446](https://github.com/AnswerDotAI/fasthtml/issues/446))
-
 
 
 ## 0.6.5
