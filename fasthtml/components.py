@@ -18,6 +18,7 @@ __all__ = ['named', 'html_attrs', 'hx_attrs', 'hx_attrs_annotations', 'show', 'a
 # %% ../nbs/api/01_components.ipynb
 from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
 from bs4 import BeautifulSoup, Comment
+from typing import Literal, Optional
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -25,8 +26,7 @@ from fastcore.meta import use_kwargs, delegates
 from fastcore.test import *
 from .core import fh_cfg
 
-import types, json, inspect
-from typing import Any, Dict, Literal, Optional 
+import types, json
 
 try: from IPython import display
 except ImportError: display=None
@@ -41,19 +41,21 @@ def show(ft,*rest):
 named = set('a button form frame iframe img input map meta object param select textarea'.split())
 html_attrs = 'id cls title style accesskey contenteditable dir draggable enterkeyhint hidden inert inputmode lang popover spellcheck tabindex translate'.split()
 hx_attrs = 'get post put delete patch trigger target swap swap_oob include select select_oob indicator push_url confirm disable replace_url vals disabled_elt ext headers history history_elt indicator inherit params preserve prompt replace_url request sync validate'
-hx_attrs = html_attrs + [f'hx_{o}' for o in hx_attrs.split()]
+hx_attrs = [f'hx_{o}' for o in hx_attrs.split()]
 hx_attrs_annotations = {
-    'hx_swap': Optional[Literal[
-      "innerHTML",
-      "outerHTML",
-      "afterbegin",
-      "beforebegin",
-      "beforeend",
-      "afterend",
-      "delete",
-      "none",
-    ]]
+    "hx_swap": Literal["innerHTML", "outerHTML", "afterbegin", "beforebegin", "beforeend", "afterend", "delete", "none"] | str,
+    "hx_swap_oob": Literal["true", "innerHTML", "outerHTML", "afterbegin", "beforebegin", "beforeend", "afterend", "delete", "none"] | str,
+    "hx_push_url": Literal["true", "false"] | str, 
+    "hx_replace_url": Literal["true", "false"] | str, 
+    "hx_disabled_elt": Literal["this", "next", "previous"] | str, 
+    "hx_history": Literal["false"] | str,
+    "hx_params": Literal["*", "none"] | str,
+    "hx_replace_url": Literal["true", "false"] | str, 
+    "hx_validate": Literal["true", "false"],
 }
+hx_attrs_annotations |= {o: str for o in set(hx_attrs) - set(hx_attrs_annotations.keys())}
+hx_attrs_annotations = {k: Optional[v] for k,v in hx_attrs_annotations.items()} 
+hx_attrs = html_attrs + hx_attrs
 
 # %% ../nbs/api/01_components.ipynb
 def attrmap_x(o):

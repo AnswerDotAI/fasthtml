@@ -4,8 +4,8 @@
 
 # %% auto 0
 __all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces',
-           'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow', 'run_js',
-           'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear']
+           'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow',
+           'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
@@ -108,6 +108,11 @@ def StyleX(fname, **kw):
     attrs = ['type', 'media', 'scoped', 'title', 'nonce', 'integrity', 'crossorigin']
     sty_kw = {k:kw.pop(k) for k in attrs if k in kw}
     return Style(replace_css_vars(s, **kw), **sty_kw)
+
+# %% ../nbs/api/02_xtend.ipynb
+def Nbsp():
+    "A non-breaking space"
+    return Safe('&nbsp;')
 
 # %% ../nbs/api/02_xtend.ipynb
 def Surreal(code:str):
