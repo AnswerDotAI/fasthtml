@@ -1,5 +1,5 @@
 """Simple extensions to standard HTML components, such as adding sensible defaults"""
-__all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear']
+__all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear']
 from dataclasses import dataclass, asdict
 from typing import Any
 from fastcore.utils import *
@@ -62,6 +62,10 @@ def replace_css_vars(css, pre='tpl', **kwargs):
 
 def StyleX(fname, **kw):
     """A `style` element with contents read from `fname` and variables replaced from `kw`"""
+    ...
+
+def Nbsp():
+    """A non-breaking space"""
     ...
 
 def Surreal(code: str):
