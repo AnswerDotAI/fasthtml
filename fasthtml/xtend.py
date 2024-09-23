@@ -112,7 +112,7 @@ def StyleX(fname, **kw):
 # %% ../nbs/api/02_xtend.ipynb
 def Nbsp():
     "A non-breaking space"
-    return Safe('nbsp;')
+    return Safe('&nbsp;')
 
 # %% ../nbs/api/02_xtend.ipynb
 def Surreal(code:str):
