@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.6.7
+
+### Bugs Squashed
+
+- Remove IPython dep ([#456](https://github.com/AnswerDotAI/fasthtml/issues/456))
+
+
 ## 0.6.6
 
 ### New Features
