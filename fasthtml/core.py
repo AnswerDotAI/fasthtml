@@ -588,7 +588,8 @@ def serve(
         port=None, # If port is None it will default to 5001 or the PORT environment variable
         reload=True, # Default is to reload the app upon code changes
         reload_includes:list[str]|str|None=None, # Additional files to watch for changes
-        reload_excludes:list[str]|str|None=None # Files to ignore for changes
+        reload_excludes:list[str]|str|None=None, # Files to ignore for changes
+        msg:list[str]|None=None, # List of terminal messages to print
         ): 
     "Run the app in an async server, with live reload set as the default."
     bk = inspect.currentframe().f_back
@@ -599,7 +600,9 @@ def serve(
         elif code.co_name=='main' and bk.f_back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
     if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
-        print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
+        if isinstance(msg, str):msg = (msg,)
+        msgs = (f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}', *msg)
+        for m in msgs: print(m)
         uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload, reload_includes=reload_includes, reload_excludes=reload_excludes)
 
 # %% ../nbs/api/00_core.ipynb
