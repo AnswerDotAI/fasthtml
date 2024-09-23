@@ -6,6 +6,14 @@
 
 ### New Features
 
+- Add `def_hdrs` ([#446](https://github.com/AnswerDotAI/fasthtml/issues/446))
+
+
+
+## 0.6.5
+
+### New Features
+
 - Jupyter compatibility ([#445](https://github.com/AnswerDotAI/fasthtml/issues/445))
 - Redefining a route overwrites existing definition (e.g for use in notebooks) ([#444](https://github.com/AnswerDotAI/fasthtml/issues/444))
 
