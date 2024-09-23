@@ -13,3 +13,4 @@ from .live_reload import *
 from .toaster import *
 from .js import *
 from .fastapp import *
+from .jupyter import *
