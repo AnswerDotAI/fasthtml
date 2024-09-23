@@ -12,10 +12,9 @@ from .basics import *
 from .pico import *
 from .starlette import *
 from .live_reload import FastHTMLWithLiveReload
-from .jupyter import _iframe_scr, cors_allow
 
 # %% auto 0
-__all__ = ['fast_app', 'jupy_app']
+__all__ = ['fast_app']
 
 # %% ../nbs/api/10_fastapp.ipynb
 def _get_tbl(dt, nm, schema):
@@ -92,10 +91,3 @@ def fast_app(
     dbtbls = [_get_tbl(db.t, k, v) for k,v in tbls.items()]
     if len(dbtbls)==1: dbtbls=dbtbls[0]
     return app,app.route,*dbtbls
-
-# %% ../nbs/api/10_fastapp.ipynb
-def jupy_app(pico=False, hdrs=None, middleware=None, **kwargs):
-    "Same as `fast_app` but for Jupyter notebooks"
-    hdrs = listify(hdrs)+[_iframe_scr]
-    middleware = listify(middleware)+[cors_allow]
-    return fast_app(pico=pico, hdrs=hdrs, middleware=middleware, **kwargs)
