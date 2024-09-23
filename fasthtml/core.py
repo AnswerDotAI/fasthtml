@@ -547,7 +547,7 @@ class FastHTML(Starlette):
             def _not_found(req, exc): return  Response('404 Not Found', status_code=404)  
             exception_handlers[404] = _not_found
         excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in exception_handlers.items()}
-        super().__init__(debug, routes, middleware, excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
+        super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
         self.router = RouterX(self, routes)
 
     def ws(self, path:str, conn=None, disconn=None, name=None):
