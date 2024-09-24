@@ -566,9 +566,9 @@ def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_sche
     pathstr = None if callable(path) else path
     def f(func):
         n,fn,p = name,func.__name__,pathstr
-        assert path or (fn not in all_meths), "Must provide a path when using http verb-based function name"
         if methods: m = [methods] if isinstance(methods,str) else methods
-        else: m = [fn] if fn in all_meths else ['get','post']
+        elif fn in all_meths and p is not None: m = [fn]
+        else: m = ['get','post']
         if not n: n = fn
         if not p: p = '/'+('' if fn=='index' else fn)
         self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema)
