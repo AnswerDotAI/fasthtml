@@ -1,5 +1,5 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'str2date', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'str2date', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
 import json, uuid, inspect, types, uvicorn, signal, asyncio, threading
 from fastcore.utils import *
 from fastcore.xml import *
@@ -247,6 +247,10 @@ def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
     ...
 
 def _mk_locfunc(f, p):
+    ...
+
+def def_hdrs(htmx=True, ct_hdr=False, ws_hdr=False, surreal=True):
+    """Default headers for a FastHTML app"""
     ...
 
 class FastHTML(Starlette):
