@@ -7,8 +7,8 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc',
            'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'str2date',
            'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
            'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX',
-           'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase',
-           'FtResponse']
+           'get_key', 'def_hdrs', 'StatusCodeExceptionMiddleware', 'FastHTML', 'serve', 'Client', 'cookie',
+           'reg_re_param', 'MiddlewareBase', 'FtResponse']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -522,6 +522,27 @@ def def_hdrs(htmx=True, ct_hdr=False, ws_hdr=False, surreal=True):
     return [charset, viewport] + hdrs
 
 # %% ../nbs/api/00_core.ipynb
+class StatusCodeExceptionMiddleware:
+    "Adds missing status codes"
+    async def dispatch(self, request, call_next):
+        try:
+            response = await call_next(request)
+        except Exception as exc:
+            # Get the exception handler for this exception type
+            handler = request.app.exception_handlers.get(type(exc)) or request.app.exception_handlers.get(Exception)
+            
+            if handler:
+                response = await handler(request, exc)
+                
+                # If the response doesn't have a status code, set it based on the exception
+                if isinstance(response, Response) and response.status_code is None:
+                    response.status_code = getattr(exc, 'status_code', 500)
+            else:
+                raise
+
+        return response
+
+# %% ../nbs/api/00_core.ipynb
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
@@ -547,6 +568,7 @@ class FastHTML(Starlette):
             def _not_found(req, exc): return  Response('404 Not Found', status_code=404)  
             exception_handlers[404] = _not_found
         excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in exception_handlers.items()}
+        middleware.append(StatusCodeExceptionMiddleware)        
         super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
         self.router = RouterX(self, routes)
 
