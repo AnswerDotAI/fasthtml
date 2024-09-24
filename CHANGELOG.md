@@ -2,6 +2,7 @@
 
 <!-- do not remove -->
 
+
 ## 0.6.8
 
 ### New Features
@@ -9,6 +10,7 @@
 - Allow for handler names with same name as an http verb, even if path not provided ([#459](https://github.com/AnswerDotAI/fasthtml/issues/459))
 - Support explicit iframe height in Jupyter HTMX ([#458](https://github.com/AnswerDotAI/fasthtml/pull/458)), thanks to [@callmephilip](https://github.com/callmephilip)
 - Improve type annotations for element attributes ([#453](https://github.com/AnswerDotAI/fasthtml/pull/453)), thanks to [@callmephilip](https://github.com/callmephilip)
+- Make compatible w/ ddtrace ([#452](https://github.com/AnswerDotAI/fasthtml/pull/452)), thanks to [@derekgliwa](https://github.com/derekgliwa)
 
 
 ## 0.6.7
