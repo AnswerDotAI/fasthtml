@@ -1,4 +1,3 @@
-# Run with: python app.py
 from fasthtml.common import *
 
 id_curr = 'current-todo'
@@ -68,3 +67,4 @@ def get_todo(id:int):
     return Div(Div(todo.title), btn)
 
 serve()
+

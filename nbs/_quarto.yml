@@ -1,5 +1,7 @@
 project:
   type: website
+  pre-render: 
+    - pysym2md --output_file apilist.txt fasthtml
   resources: 
     - "*.txt"
   preview:

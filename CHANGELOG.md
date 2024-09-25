@@ -2,6 +2,103 @@
 
 <!-- do not remove -->
 
+
+## 0.6.8
+
+### New Features
+
+- Allow for handler names with same name as an http verb, even if path not provided ([#459](https://github.com/AnswerDotAI/fasthtml/issues/459))
+- Support explicit iframe height in Jupyter HTMX ([#458](https://github.com/AnswerDotAI/fasthtml/pull/458)), thanks to [@callmephilip](https://github.com/callmephilip)
+- Improve type annotations for element attributes ([#453](https://github.com/AnswerDotAI/fasthtml/pull/453)), thanks to [@callmephilip](https://github.com/callmephilip)
+- Make compatible w/ ddtrace ([#452](https://github.com/AnswerDotAI/fasthtml/pull/452)), thanks to [@derekgliwa](https://github.com/derekgliwa)
+
+
+## 0.6.7
+
+### Bugs Squashed
+
+- Remove IPython dep ([#456](https://github.com/AnswerDotAI/fasthtml/issues/456))
+
+
+## 0.6.6
+
+### New Features
+
+- Add `def_hdrs` ([#446](https://github.com/AnswerDotAI/fasthtml/issues/446))
+
+
+## 0.6.5
+
+### New Features
+
+- Jupyter compatibility ([#445](https://github.com/AnswerDotAI/fasthtml/issues/445))
+- Redefining a route overwrites existing definition (e.g for use in notebooks) ([#444](https://github.com/AnswerDotAI/fasthtml/issues/444))
+
+### Bugs Squashed
+
+- [BUG] d argument is not passed in Path function for SVGs ([#437](https://github.com/AnswerDotAI/fasthtml/issues/437))
+
+
+## 0.6.4
+
+### New Features
+
+- Pass query params to custom class annotated args ([#439](https://github.com/AnswerDotAI/fasthtml/issues/439))
+
+
+## 0.6.3
+
+### Bugs Squashed
+
+- `svg.Path` not passing `d` param ([#438](https://github.com/AnswerDotAI/fasthtml/issues/438))
+
+
+## 0.6.2
+
+### New Features
+
+- Include both `m` (me) and `p` (prev) in `On` and `Prev` handlers, and run after DOM ready ([#429](https://github.com/AnswerDotAI/fasthtml/issues/429))
+
+### Bugs Squashed
+
+- `proc_htmx` not exported correctly ([#434](https://github.com/AnswerDotAI/fasthtml/issues/434))
+
+
+## 0.6.0
+
+### Breaking changes
+
+- `date` has been renamed to `parsed_date`
+
+### New Features
+
+- Handle non-list/tuple `hdrs` and `ftrs` in `FastHTML()` ([#426](https://github.com/AnswerDotAI/fasthtml/issues/426))
+- Handle automatic `datetime.date` form field conversion ([#415](https://github.com/AnswerDotAI/fasthtml/issues/415))
+
+### Bugs Squashed
+
+- Make sure only the selected radio button in a radio group is checked during `form_fill` ([#424](https://github.com/AnswerDotAI/fasthtml/pull/424)), thanks to [@rbavery](https://github.com/rbavery)
+- All radio buttons in a radio group are checked during `fill_form` ([#423](https://github.com/AnswerDotAI/fasthtml/issues/423))
+- receiving a list[str] as a parameter doesn't work with get request ([#422](https://github.com/AnswerDotAI/fasthtml/issues/422))
+- Multipart error when submitting with empty form-data ([#405](https://github.com/AnswerDotAI/fasthtml/issues/405))
+
+
+## 0.5.3
+
+### New Features
+
+- Add `FtResponse` ([#425](https://github.com/AnswerDotAI/fasthtml/issues/425))
+- Add `sid_scr` ([#425](https://github.com/AnswerDotAI/fasthtml/issues/425))
+- Scope `On` selector to `p` ([#414](https://github.com/AnswerDotAI/fasthtml/issues/414))
+- Store `p=me()` before `On` handler ([#413](https://github.com/AnswerDotAI/fasthtml/issues/413))
+- Convert `dict` children in `ft_htmx` and `ft_hx` to kwargs ([#412](https://github.com/AnswerDotAI/fasthtml/issues/412))
+- Add reload on CSS and JS file changes ([#401](https://github.com/AnswerDotAI/fasthtml/issues/401))
+
+### Bugs Squashed
+
+- `static_path` ignored in `fast_app` ([#410](https://github.com/AnswerDotAI/fasthtml/issues/410))
+
+
 ## 0.5.2
 
 ### New Features

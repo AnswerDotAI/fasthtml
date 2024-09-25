@@ -14,7 +14,7 @@ from .starlette import *
 from .live_reload import FastHTMLWithLiveReload
 
 # %% auto 0
-__all__ = ['fast_app', 'ContainerX', 'PageX']
+__all__ = ['fast_app']
 
 # %% ../nbs/api/10_fastapp.ipynb
 def _get_tbl(dt, nm, schema):
@@ -91,7 +91,3 @@ def fast_app(
     dbtbls = [_get_tbl(db.t, k, v) for k,v in tbls.items()]
     if len(dbtbls)==1: dbtbls=dbtbls[0]
     return app,app.route,*dbtbls
-
-# %% ../nbs/api/10_fastapp.ipynb
-def ContainerX(*cs, **kwargs): return Main(*cs, **kwargs, cls='container', hx_push_url='true', hx_swap_oob='true', id='main')
-def PageX(title, *con): return Title(title), ContainerX(H1(title), *con)

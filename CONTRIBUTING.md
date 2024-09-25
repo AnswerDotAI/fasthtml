@@ -1,25 +1,17 @@
 # How to contribute
 
-This project uses [nbdev](https://nbdev.fast.ai/getting_started.html) for development. Before beginning, make sure that nbdev and a jupyter-compatible client such as jupyterlab or nbclassic are installed. To make changes, update the notebooks in the `nbs` folder, not the .py files directly. Then, run `nbdev_export`. For more details, have a look at the [nbdev tutorial](https://nbdev.fast.ai/tutorials/tutorial.html).
+Make sure you have read the [doc on code style](
+https://docs.fast.ai/dev/style.html) first. (Note that we don't follow PEP8, but instead follow a coding style designed specifically for numerical and interactive programming.)
 
-## How to get started
+This project uses [nbdev](https://nbdev.fast.ai/getting_started.html) for development. Before beginning, make sure that nbdev and a jupyter-compatible client such as jupyterlab or nbclassic are installed. To make changes, update the notebooks in the `nbs` folder, not the .py files directly. Then, run `nbdev_export`. For more details, have a look at the [nbdev tutorial](https://nbdev.fast.ai/tutorials/tutorial.html). Depending on the code changes, you might also need to run `tools/update.sh` to update python interface modules and [LLM reference material](https://github.com/AnswerDotAI/llms-txt).
 
-Before anything else, please install the git hooks that run automatic scripts during each commit and merge to strip the notebooks of superfluous metadata (and avoid merge conflicts). After cloning the repository, run the following command inside it:
-
-```sh
-nbdev_install_hooks
-```
-
-This is a one-off command that you only have to run when you're first setting up the repo locally.
-
-You will also want to set up a `prep` alias in `~/.zshrc` or other shell startup file:
+You may want to set up a `prep` alias in `~/.zshrc` or other shell startup file:
 
 ```sh
-# nbdev alias to clean Jupyter notebooks before committing
 alias prep='nbdev_export && nbdev_clean && nbdev_trust'
 ```
 
-Run `prep` before each commit.
+Run `prep` before each commit to ensure your python files are up to date, and you notebooks cleaned of metadata and notarized.
 
 ## Did you find a bug?
 

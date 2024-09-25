@@ -4,10 +4,11 @@
 
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc',
-           'viewport', 'charset', 'all_meths', 'date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'HttpHeader',
-           'HtmxResponseHeaders', 'form2dict', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX',
-           'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'FastHTML', 'serve', 'cookie',
-           'reg_re_param', 'MiddlewareBase', 'Client']
+           'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'str2date',
+           'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
+           'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX',
+           'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase',
+           'FtResponse']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -18,7 +19,7 @@ from fastcore.meta import use_kwargs_dict
 
 from types import UnionType, SimpleNamespace as ns, GenericAlias
 from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List, Any
-from datetime import datetime
+from datetime import datetime,date
 from dataclasses import dataclass,fields
 from collections import namedtuple
 from inspect import isfunction,ismethod,Parameter,get_annotations
@@ -39,7 +40,7 @@ empty = Parameter.empty
 def _sig(f): return signature_ex(f, True)
 
 # %% ../nbs/api/00_core.ipynb
-def date(s:str):
+def parsed_date(s:str):
     "Convert `s` to a datetime"
     return dtparse.parse(s)
 
@@ -85,12 +86,17 @@ def _mk_list(t, v): return [t(o) for o in v]
 fh_cfg = AttrDict(indent=True)
 
 # %% ../nbs/api/00_core.ipynb
+def str2date(s:str)->date:
+    "`date.fromisoformat` with empty string handling"
+    return date.fromisoformat(s) if s else None
+
+# %% ../nbs/api/00_core.ipynb
 def _fix_anno(t):
     "Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"
     origin = get_origin(t)
     if origin is Union or origin is UnionType or origin in (list,List):
         t = first(o for o in get_args(t) if o!=type(None))
-    d = {bool: str2bool, int: str2int}
+    d = {bool: str2bool, int: str2int, date: str2date}
     res = d.get(t, t)
     if origin in (list,List): return partial(_mk_list, res)
     return lambda o: res(o[-1]) if isinstance(o,(list,tuple)) else res(o)
@@ -144,12 +150,25 @@ def form2dict(form: FormData) -> dict:
     return {k: _formitem(form, k) for k in form}
 
 # %% ../nbs/api/00_core.ipynb
+async def parse_form(req: Request) -> FormData:
+    "Starlette errors on empty multipart forms, so this checks for that situation"
+    ctype = req.headers.get("Content-Type", "")
+    if not ctype.startswith("multipart/form-data"): return await req.form()
+    try: boundary = ctype.split("boundary=")[1].strip()
+    except IndexError: raise HTTPException(400, "Invalid form-data: no boundary")
+    min_len = len(boundary) + 6
+    clen = int(req.headers.get("Content-Length", "0"))
+    if clen <= min_len: return FormData()
+    return await req.form()
+
+# %% ../nbs/api/00_core.ipynb
 async def _from_body(req, p):
     anno = p.annotation
     # Get the fields and types of type `anno`, if available
     d = _annotations(anno)
     if req.headers.get('content-type', None)=='application/json': data = await req.json()
-    else: data = form2dict(await req.form())
+    else: data = form2dict(await parse_form(req))
+    if req.query_params: data = {**data, **dict(req.query_params)}
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
 
@@ -179,10 +198,9 @@ async def _find_p(req, arg:str, p:Parameter):
     res = req.path_params.get(arg, None)
     if res in (empty,None): res = req.cookies.get(arg, None)
     if res in (empty,None): res = req.headers.get(snake2hyphens(arg), None)
-    if res in (empty,None): res = req.query_params.get(arg, None)
-    if res in (empty,None):
-        frm = await req.form()
-        res = _formitem(frm, arg)
+    if res in (empty,None): res = req.query_params.getlist(arg)
+    if res==[]: res = None
+    if res in (empty,None): res = _formitem(await parse_form(req), arg)
     # Raise 400 error if the param does not include a default
     if (res in (empty,None)) and p.default is empty: raise HTTPException(400, f"Missing required field: {arg}")
     # If we have a default, return that if we have no value
@@ -229,7 +247,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
         if arg.lower()=='send': return partial(_send_ws, ws)
         return None
     res = data.get(arg, None)
-    if res is empty or res is None: res = hdrs.get(snake2hyphens(arg), None)
+    if res is empty or res is None: res = hdrs.get(arg, None)
     if res is empty or res is None: res = p.default
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
@@ -237,7 +255,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
     return [anno(o) for o in res] if isinstance(res,list) else anno(res)
 
 def _wrap_ws(ws, data, params):
-    hdrs = data.pop('HEADERS', {})
+    hdrs = {k.lower().replace('-','_'):v for k,v in data.pop('HEADERS', {}).items()}
     return [_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()]
 
 # %% ../nbs/api/00_core.ipynb
@@ -287,6 +305,7 @@ class WS_RouteX(WebSocketRoute):
     def __init__(self, app, path:str, recv, conn:callable=None, disconn:callable=None, *,
                  name=None, middleware=None):
         super().__init__(path, _ws_endp(recv, conn, disconn), name=name, middleware=middleware)
+        self.methods = ['WS']
 
 # %% ../nbs/api/00_core.ipynb
 def uri(_arg, **kwargs):
@@ -358,7 +377,7 @@ def flat_tuple(o):
     return tuple(result)
 
 # %% ../nbs/api/00_core.ipynb
-def _xt_resp(req, resp):
+def _xt_cts(req, resp):
     resp = flat_tuple(resp)
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
@@ -368,7 +387,15 @@ def _xt_resp(req, resp):
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
         if not titles: titles = [Title('FastHTML page')]
         resp = Html(Head(*titles, *flat_xt(req.hdrs)), Body(bdy, *flat_xt(req.ftrs), **req.bodykw), **req.htmlkw)
-    return HTMLResponse(_to_xml(req, resp, indent=fh_cfg.indent), headers=http_hdrs)
+    return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs
+
+# %% ../nbs/api/00_core.ipynb
+def _xt_resp(req, resp):
+    cts,http_hdrs = _xt_cts(req, resp)
+    return HTMLResponse(cts, headers=http_hdrs)
+
+# %% ../nbs/api/00_core.ipynb
+def _is_ft_resp(resp): return isinstance(resp, (list,tuple,HttpHeader,FT)) or hasattr(resp, '__ft__')
 
 # %% ../nbs/api/00_core.ipynb
 def _resp(req, resp, cls=empty):
@@ -376,9 +403,9 @@ def _resp(req, resp, cls=empty):
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if cls in (Any,FT): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
-    if isinstance(resp, Response): return resp
     if cls is not empty: return cls(resp)
-    if isinstance(resp, (list,tuple,HttpHeader,FT)) or hasattr(resp, '__ft__'): return _xt_resp(req, resp)
+    if isinstance(resp, Response): return resp
+    if _is_ft_resp(resp): return _xt_resp(req, resp)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:
@@ -409,7 +436,7 @@ class RouteX(Route):
         resp = None
         req.injects = []
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (self._app.hdrs,self._app.ftrs,self._app.htmlkw,self._app.bodykw))
-        req.hdrs,req.ftrs = list(req.hdrs),list(req.ftrs)
+        req.hdrs,req.ftrs = listify(req.hdrs),listify(req.ftrs)
         for b in self._app.before:
             if not resp:
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
@@ -429,19 +456,26 @@ class RouterX(Router):
         self._app = app
         super().__init__(routes, redirect_slashes, default, app.on_startup, app.on_shutdown,
                          lifespan=app.lifespan, middleware=middleware)
+    
+    def _add_route(self, route):
+        route.methods = [m.upper() for m in listify(route.methods)]
+        self.routes = [r for r in self.routes if not
+                       (r.path==route.path and r.name == route.name and
+                        ((route.methods is None) or (set(r.methods) == set(route.methods))))]
+        self.routes.append(route)
 
     def add_route(self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
         route = RouteX(self._app, path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema)
-        self.routes.append(route)
+        self._add_route(route)
 
     def add_ws(self, path: str, recv: callable, conn:callable=None, disconn:callable=None, name=None):
         route = WS_RouteX(self._app, path, recv=recv, conn=conn, disconn=disconn, name=name)
-        self.routes.append(route)
+        self._add_route(route)
 
 # %% ../nbs/api/00_core.ipynb
 htmxsrc   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
 htmxwssrc = Script(src="https://unpkg.com/htmx-ext-ws/ws.js")
-fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@main/fasthtml.js")
+fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js")
 htmxctsrc = Script(src="https://unpkg.com/htmx-ext-transfer-encoding-chunked/transfer-encoding-chunked.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
@@ -478,6 +512,16 @@ def _mk_locfunc(f,p):
     return _lf()
 
 # %% ../nbs/api/00_core.ipynb
+def def_hdrs(htmx=True, ct_hdr=False, ws_hdr=False, surreal=True):
+    "Default headers for a FastHTML app"
+    hdrs = []
+    if surreal: hdrs = [surrsrc,scopesrc] + hdrs
+    if ws_hdr: hdrs = [htmxwssrc] + hdrs
+    if ct_hdr: hdrs = [htmxctsrc] + hdrs
+    if htmx: hdrs = [htmxsrc,fhjsscr] + hdrs
+    return [charset, viewport] + hdrs
+
+# %% ../nbs/api/00_core.ipynb
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None,
@@ -489,12 +533,7 @@ class FastHTML(Starlette):
         middleware,before,after = map(_list, (middleware,before,after))
         hdrs,ftrs = listify(hdrs),listify(ftrs)
         htmlkw = htmlkw or {}
-        if default_hdrs:
-            if surreal: hdrs = [surrsrc,scopesrc] + hdrs
-            if ws_hdr: hdrs = [htmxwssrc] + hdrs
-            if ct_hdr: hdrs = [htmxctsrc] + hdrs
-            if htmx: hdrs = [htmxsrc,fhjsscr] + hdrs
-            hdrs = [charset, viewport] + hdrs
+        if default_hdrs: hdrs = def_hdrs(htmx, ct_hdr=ct_hdr, ws_hdr=ws_hdr, surreal=surreal) + hdrs
         self.on_startup,self.on_shutdown,self.lifespan,self.hdrs,self.ftrs = on_startup,on_shutdown,lifespan,hdrs,ftrs
         self.before,self.after,self.htmlkw,self.bodykw = before,after,htmlkw,bodykw
         secret_key = get_key(secret_key, key_fname)
@@ -508,7 +547,7 @@ class FastHTML(Starlette):
             def _not_found(req, exc): return  Response('404 Not Found', status_code=404)  
             exception_handlers[404] = _not_found
         excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in exception_handlers.items()}
-        super().__init__(debug, routes, middleware, excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
+        super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
         self.router = RouterX(self, routes)
 
     def ws(self, path:str, conn=None, disconn=None, name=None):
@@ -527,9 +566,9 @@ def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_sche
     pathstr = None if callable(path) else path
     def f(func):
         n,fn,p = name,func.__name__,pathstr
-        assert path or (fn not in all_meths), "Must provide a path when using http verb-based function name"
         if methods: m = [methods] if isinstance(methods,str) else methods
-        else: m = [fn] if fn in all_meths else ['get','post']
+        elif fn in all_meths and p is not None: m = [fn]
+        else: m = ['get','post']
         if not n: n = fn
         if not p: p = '/'+('' if fn=='index' else fn)
         self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema)
@@ -562,6 +601,18 @@ def serve(
         if not port: port=int(os.getenv("PORT", default=5001))
         print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
         uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload, reload_includes=reload_includes, reload_excludes=reload_excludes)
+
+# %% ../nbs/api/00_core.ipynb
+class Client:
+    "A simple httpx ASGI client that doesn't require `async`"
+    def __init__(self, app, url="http://testserver"):
+        self.cli = AsyncClient(transport=ASGITransport(app), base_url=url)
+
+    def _sync(self, method, url, **kwargs):
+        async def _request(): return await self.cli.request(method, url, **kwargs)
+        with from_thread.start_blocking_portal() as portal: return portal.call(_request)
+
+for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o, partialmethod(Client._sync, o))
 
 # %% ../nbs/api/00_core.ipynb
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):
@@ -613,13 +664,13 @@ class MiddlewareBase:
         return HTTPConnection(scope)
 
 # %% ../nbs/api/00_core.ipynb
-class Client:
-    "A simple httpx ASGI client that doesn't require `async`"
-    def __init__(self, app, url="http://testserver"):
-        self.cli = AsyncClient(transport=ASGITransport(app), base_url=url)
-
-    def _sync(self, method, url, **kwargs):
-        async def _request(): return await self.cli.request(method, url, **kwargs)
-        with from_thread.start_blocking_portal() as portal: return portal.call(_request)
-
-for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o, partialmethod(Client._sync, o))
+class FtResponse:
+    "Wrap an FT response with any Starlette `Response`"
+    def __init__(self, content, status_code:int=200, headers=None, cls=HTMLResponse, media_type:str|None=None, background=None):
+        self.content,self.status_code,self.headers = content,status_code,headers
+        self.cls,self.media_type,self.background = cls,media_type,background
+    
+    def __response__(self, req):
+        cts,httphdrs = _xt_cts(req, self.content)
+        headers = {**(self.headers or {}), **httphdrs}
+        return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=self.background)

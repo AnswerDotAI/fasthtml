@@ -1,5 +1,4 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
-import { proc_htmx } from "https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js/fasthtml.js";
 import katex from "https://cdn.jsdelivr.net/npm/katex/dist/katex.mjs";
 
 const renderMath = (tex, displayMode) => { return katex.renderToString(tex, {
