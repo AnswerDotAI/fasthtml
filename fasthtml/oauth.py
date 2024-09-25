@@ -45,7 +45,6 @@ class GitHubAppClient(_AppClient):
     id_key = 'id'
 
     def __init__(self, client_id, client_secret, code=None, scope=None, **kwargs):
-        if not scope: scope="user"
         super().__init__(client_id, client_secret, code=code, scope=scope, **kwargs)
 
 # %% ../nbs/api/08_oauth.ipynb
