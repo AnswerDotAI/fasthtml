@@ -2,6 +2,12 @@
 
 <!-- do not remove -->
 
+## 0.6.9
+
+### New Features
+
+- Add `oauth.redir_url` function ([#476](https://github.com/AnswerDotAI/fasthtml/issues/476))
+
 
 ## 0.6.8
 
