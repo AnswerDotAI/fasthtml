@@ -497,8 +497,16 @@ def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) els
 # %% ../nbs/api/00_core.ipynb
 def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
     async def _f(req, exc):
+        # get status code from exc
+        # attach exc.status code to res
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (hdrs, ftrs, htmlkw, bodykw))
         res = await _handle(f, (req, exc))
+        # The below is simplistic, doesn't take into account that here res is a tuple containing
+        # an awaited function
+        # if res[0].status_code==200: res.status_code=exc.status_code
+        
+        # The below accounts for res being a tuple but isn't caught by the test
+        if isinstance(res, tuple) and res[0].status_code==200: res.status_code=exc.status_code
         return _resp(req, res)
     return _f
 
