@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.6.10
+
+### New Features
+
+- Document usage with Jupyter ([#469](https://github.com/AnswerDotAI/fasthtml/issues/469))
+
+
 ## 0.6.9
 
 ### New Features
