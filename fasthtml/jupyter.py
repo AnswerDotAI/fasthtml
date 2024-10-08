@@ -88,9 +88,9 @@ def FastJupy(hdrs=None, middleware=None, **kwargs):
     return FastHTML(hdrs=hdrs, middleware=middleware, **kwargs)
 
 # %% ../nbs/api/06_jupyter.ipynb
-def HTMX(host='localhost', port=8000, iframe_height="auto"):
+def HTMX(path="", host='localhost', port=8000, iframe_height="auto"):
     "An iframe which displays the HTMX application in a notebook."
-    return HTML(f'<iframe src="http://{host}:{port}" style="width: 100%; height: {iframe_height}; border: none;" ' + """onload="{
+    return HTML(f'<iframe src="http://{host}:{port}/{path}" style="width: 100%; height: {iframe_height}; border: none;" ' + """onload="{
         let frame = this;
         window.addEventListener('message', function(e) {
             if (e.data.height) frame.style.height = (e.data.height+1) + 'px';
