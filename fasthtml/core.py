@@ -4,11 +4,10 @@
 
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc',
-           'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'str2date',
-           'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
-           'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX',
-           'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase',
-           'FtResponse']
+           'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader',
+           'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown',
+           'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'def_hdrs',
+           'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -72,23 +71,10 @@ def _get_htmx(h):
     return HtmxHeaders(**res)
 
 # %% ../nbs/api/00_core.ipynb
-def str2int(s)->int:
-    "Convert `s` to an `int`"
-    s = s.lower()
-    if s=='on': return 1
-    if s=='none': return 0
-    return 0 if not s else int(s)
-
-# %% ../nbs/api/00_core.ipynb
 def _mk_list(t, v): return [t(o) for o in v]
 
 # %% ../nbs/api/00_core.ipynb
 fh_cfg = AttrDict(indent=True)
-
-# %% ../nbs/api/00_core.ipynb
-def str2date(s:str)->date:
-    "`date.fromisoformat` with empty string handling"
-    return date.fromisoformat(s) if s else None
 
 # %% ../nbs/api/00_core.ipynb
 def _fix_anno(t):
