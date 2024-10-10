@@ -82,7 +82,7 @@ def _fix_anno(t):
     origin = get_origin(t)
     if origin is Union or origin is UnionType or origin in (list,List):
         t = first(o for o in get_args(t) if o!=type(None))
-    d = {bool: str2bool, int: str2int, date: str2date}
+    d = {bool: str2bool, int: str2int, date: str2date, UploadFile: noop}
     res = d.get(t, t)
     if origin in (list,List): return partial(_mk_list, res)
     return lambda o: res(o[-1]) if isinstance(o,(list,tuple)) else res(o)
