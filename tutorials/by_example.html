@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An introduction to FastHTML from the ground up, with four complete examples">
+
+<title>FastHTML By Example – fasthtml</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="FastHTML By Example – fasthtml">
+<meta property="og:description" content="An introduction to FastHTML from the ground up, with four complete examples">
+<meta property="og:site_name" content="fasthtml">
+<meta name="twitter:title" content="FastHTML By Example – fasthtml">
+<meta name="twitter:description" content="An introduction to FastHTML from the ground up, with four complete examples">
+<meta name="twitter:image" content="https://docs.fastht.ml/og-image.png">
+<meta name="twitter:creator" content="@jeremyphoward">
+<meta name="twitter:site" content="@answerdotai">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../logo.svg" alt="" class="navbar-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://fastht.ml"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://about.fastht.ml"> 
+<span class="menu-text">Learn</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/answerdotai/fasthtml"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://x.com/answerdotai"> <i class="bi bi-twitter" role="img" aria-label="Fast.ai Twitter">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../tutorials/index.html">Tutorials</a></li><li class="breadcrumb-item"><a href="../tutorials/by_example.html">FastHTML By Example</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Get Started</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../tutorials/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/by_example.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">FastHTML By Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/quickstart_for_web_devs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Web Devs Quickstart</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/e2e.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">JS App Walkthrough</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/jupyter_and_fasthtml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Jupyter to write FastHTML</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Explanations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/explaining_xt_components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><strong>FT</strong> Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/faq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FAQ</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/minidataapi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MiniDataAPI Spec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/oauth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OAuth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/routes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Routes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/websockets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WebSockets</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/defining_xt_component.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Custom Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/handlers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Handling handlers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/live_reload.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Live Reloading</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Source</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Core</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/xtend.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Component extensions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/js.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Javascript examples</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/pico.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pico.css components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/svg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SVG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/jupyter.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Jupyter compatibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/oauth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OAuth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Command Line Tools</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/fastapp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">fastapp</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#fasthtml-basics" id="toc-fasthtml-basics" class="nav-link active" data-scroll-target="#fasthtml-basics">FastHTML Basics</a></li>
+  <li><a href="#constructing-html" id="toc-constructing-html" class="nav-link" data-scroll-target="#constructing-html">Constructing HTML</a></li>
+  <li><a href="#defining-routes" id="toc-defining-routes" class="nav-link" data-scroll-target="#defining-routes">Defining Routes</a></li>
+  <li><a href="#styling-basics" id="toc-styling-basics" class="nav-link" data-scroll-target="#styling-basics">Styling Basics</a></li>
+  <li><a href="#web-page---web-app" id="toc-web-page---web-app" class="nav-link" data-scroll-target="#web-page---web-app">Web Page -&gt; Web App</a></li>
+  <li><a href="#htmx" id="toc-htmx" class="nav-link" data-scroll-target="#htmx">HTMX</a>
+  <ul class="collapse">
+  <li><a href="#replacing-elements-besides-the-target" id="toc-replacing-elements-besides-the-target" class="nav-link" data-scroll-target="#replacing-elements-besides-the-target">Replacing Elements Besides the Target</a></li>
+  </ul></li>
+  <li><a href="#full-example-1---todo-app" id="toc-full-example-1---todo-app" class="nav-link" data-scroll-target="#full-example-1---todo-app">Full Example #1 - ToDo App</a></li>
+  <li><a href="#full-example-2---image-generation-app" id="toc-full-example-2---image-generation-app" class="nav-link" data-scroll-target="#full-example-2---image-generation-app">Full Example #2 - Image Generation App</a>
+  <ul class="collapse">
+  <li><a href="#again-with-style" id="toc-again-with-style" class="nav-link" data-scroll-target="#again-with-style">Again, with Style</a></li>
+  <li><a href="#again-with-sessions" id="toc-again-with-sessions" class="nav-link" data-scroll-target="#again-with-sessions">Again, with Sessions</a></li>
+  <li><a href="#again-with-credits" id="toc-again-with-credits" class="nav-link" data-scroll-target="#again-with-credits">Again, with Credits!</a></li>
+  </ul></li>
+  <li><a href="#more-on-routing-and-request-parameters" id="toc-more-on-routing-and-request-parameters" class="nav-link" data-scroll-target="#more-on-routing-and-request-parameters">More on Routing and Request Parameters</a>
+  <ul class="collapse">
+  <li><a href="#cookies" id="toc-cookies" class="nav-link" data-scroll-target="#cookies">Cookies</a></li>
+  <li><a href="#user-agent-and-hx-request" id="toc-user-agent-and-hx-request" class="nav-link" data-scroll-target="#user-agent-and-hx-request">User Agent and HX-Request</a></li>
+  <li><a href="#starlette-requests" id="toc-starlette-requests" class="nav-link" data-scroll-target="#starlette-requests">Starlette Requests</a></li>
+  <li><a href="#starlette-responses" id="toc-starlette-responses" class="nav-link" data-scroll-target="#starlette-responses">Starlette Responses</a></li>
+  <li><a href="#static-files" id="toc-static-files" class="nav-link" data-scroll-target="#static-files">Static Files</a></li>
+  <li><a href="#websockets" id="toc-websockets" class="nav-link" data-scroll-target="#websockets">WebSockets</a></li>
+  </ul></li>
+  <li><a href="#full-example-3---chatbot-example-with-daisyui-components" id="toc-full-example-3---chatbot-example-with-daisyui-components" class="nav-link" data-scroll-target="#full-example-3---chatbot-example-with-daisyui-components">Full Example #3 - Chatbot Example with DaisyUI Components</a></li>
+  <li><a href="#full-example-4---multiplayer-game-of-life-example-with-websockets" id="toc-full-example-4---multiplayer-game-of-life-example-with-websockets" class="nav-link" data-scroll-target="#full-example-4---multiplayer-game-of-life-example-with-websockets">Full Example #4 - Multiplayer Game of Life Example with Websockets</a></li>
+  <li><a href="#ft-objects-and-html" id="toc-ft-objects-and-html" class="nav-link" data-scroll-target="#ft-objects-and-html">FT objects and HTML</a></li>
+  <li><a href="#custom-scripts-and-styling" id="toc-custom-scripts-and-styling" class="nav-link" data-scroll-target="#custom-scripts-and-styling">Custom Scripts and Styling</a></li>
+  <li><a href="#deploying-your-app" id="toc-deploying-your-app" class="nav-link" data-scroll-target="#deploying-your-app">Deploying Your App</a>
+  <ul class="collapse">
+  <li><a href="#railway" id="toc-railway" class="nav-link" data-scroll-target="#railway">Railway</a></li>
+  <li><a href="#replit" id="toc-replit" class="nav-link" data-scroll-target="#replit">Replit</a></li>
+  <li><a href="#huggingface" id="toc-huggingface" class="nav-link" data-scroll-target="#huggingface">HuggingFace</a></li>
+  </ul></li>
+  <li><a href="#where-next" id="toc-where-next" class="nav-link" data-scroll-target="#where-next">Where Next?</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="by_example.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../tutorials/index.html">Tutorials</a></li><li class="breadcrumb-item"><a href="../tutorials/by_example.html">FastHTML By Example</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">FastHTML By Example</h1>
+</div>
+
+<div>
+  <div class="description">
+    An introduction to FastHTML from the ground up, with four complete examples
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>This tutorial provides an alternate introduction to FastHTML by building out example applications. We also illustrate how to use FastHTML foundations to create custom web apps. Finally, this document serves as minimal context for a LLM to turn it into a FastHTML assistant.</p>
+<p>Let’s get started.</p>
+<section id="fasthtml-basics" class="level2">
+<h2 class="anchored" data-anchor-id="fasthtml-basics">FastHTML Basics</h2>
+<p>FastHTML is <em>just Python</em>. You can install it with <code>pip install python-fasthtml</code>. Extensions/components built for it can likewise be distributed via PyPI or as simple Python files.</p>
+<p>The core usage of FastHTML is to define routes, and then to define what to do at each route. This is similar to the <a href="https://fastapi.tiangolo.com/">FastAPI</a> web framework (in fact we implemented much of the functionality to match the FastAPI usage examples), but where FastAPI focuses on returning JSON data to build APIs, FastHTML focuses on returning HTML data.</p>
+<p>Here’s a simple FastHTML app that returns a “Hello, World” message:</p>
+<div id="cell-5" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> FastHTML, serve</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML()</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> home():</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"&lt;h1&gt;Hello, World&lt;/h1&gt;"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>serve()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To run this app, place it in a file, say <code>app.py</code>, and then run it with <code>python app.py</code>.</p>
+<pre><code>INFO:     Will watch for changes in these directories: ['/home/jonathan/fasthtml-example']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [871942] using WatchFiles
+INFO:     Started server process [871945]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.</code></pre>
+<p>If you navigate to <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a> in a browser, you’ll see your “Hello, World”. If you edit the <code>app.py</code> file and save it, the server will reload and you’ll see the updated message when you refresh the page in your browser.</p>
+</section>
+<section id="constructing-html" class="level2">
+<h2 class="anchored" data-anchor-id="constructing-html">Constructing HTML</h2>
+<p>Notice we wrote some HTML in the previous example. We don’t want to do that! Some web frameworks require that you learn HTML, CSS, JavaScript AND some templating language AND python. We want to do as much as possible with just one language. Fortunately, the Python module <a href="https://fastcore.fast.ai/xml.html">fastcore.xml</a> has all we need for constructing HTML from Python, and FastHTML includes all the tags you need to get started. For example:</p>
+<div id="cell-9" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>page <span class="op">=</span> Html(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Head(Title(<span class="st">'Some page'</span>)),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Body(Div(<span class="st">'Some text, '</span>, A(<span class="st">'A link'</span>, href<span class="op">=</span><span class="st">'https://example.com'</span>), Img(src<span class="op">=</span><span class="st">"https://placehold.co/200"</span>), cls<span class="op">=</span><span class="st">'myclass'</span>)))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(to_xml(page))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;!doctype html&gt;&lt;/!doctype&gt;
+
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Some page&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div class="myclass"&gt;
+Some text, 
+      &lt;a href="https://example.com"&gt;A link&lt;/a&gt;
+      &lt;img src="https://placehold.co/200"&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<div id="cell-10" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>show(page)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<!--!doctype-->
+
+
+  
+    <title>Some page</title>
+  
+  
+    <div class="myclass">
+Some text, 
+      <a href="https://example.com">A link</a>
+      <img src="https://placehold.co/200">
+    </div>
+  
+
+</div>
+</div>
+<p>If that <code>import *</code> worries you, you can always import only the tags you need.</p>
+<p>FastHTML is smart enough to know about fastcore.xml, and so you don’t need to use the <code>to_xml</code> function to convert your FT objects to HTML. You can just return them as you would any other Python object. For example, if we modify our previous example to use fastcore.xml, we can return an FT object directly:</p>
+<div id="cell-12" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML()</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> home():</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    page <span class="op">=</span> Html(</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        Head(Title(<span class="st">'Some page'</span>)),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        Body(Div(<span class="st">'Some text, '</span>, A(<span class="st">'A link'</span>, href<span class="op">=</span><span class="st">'https://example.com'</span>), Img(src<span class="op">=</span><span class="st">"https://placehold.co/200"</span>), cls<span class="op">=</span><span class="st">'myclass'</span>)))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> page</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>serve()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This will render the HTML in the browser.</p>
+<p>For debugging, you can right-click on the rendered HTML in the browser and select “Inspect” to see the underlying HTML that was generated. There you’ll also find the ‘network’ tab, which shows you the requests that were made to render the page. Refresh and look for the request to <code>127.0.0.1</code> - and you’ll see it’s just a <code>GET</code> request to <code>/</code>, and the response body is the HTML you just returned.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Live Reloading
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You can also enable <a href="../ref/live_reload.html">live reloading</a> so you don’t have to manually refresh your browser to view updates.</p>
+</div>
+</div>
+<p>You can also use Starlette’s <code>TestClient</code> to try it out in a notebook:</p>
+<div id="cell-15" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> starlette.testclient <span class="im">import</span> TestClient</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> TestClient(app)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> client.get(<span class="st">"/"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(r.text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;Some page&lt;/title&gt;
+&lt;/head&gt;
+  &lt;body&gt;&lt;div class="myclass"&gt;
+Some text, 
+  &lt;a href="https://example.com"&gt;A link&lt;/a&gt;
+  &lt;img src="https://placehold.co/200"&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>FastHTML wraps things in an Html tag if you don’t do it yourself (unless the request comes from htmx, in which case you get the element directly). See <a href="#ft-objects-and-html">FT objects and HTML</a> for more on creating custom components or adding HTML rendering to existing Python objects. To give the page a non-default title, return a Title before your main content:</p>
+<div id="cell-17" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> home():</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Title(<span class="st">"Page Demo"</span>), Div(H1(<span class="st">'Hello, World'</span>), P(<span class="st">'Some text'</span>), P(<span class="st">'Some more text'</span>))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> TestClient(app)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client.get(<span class="st">"/"</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;!doctype html&gt;&lt;/!doctype&gt;
+
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Page Demo&lt;/title&gt;
+    &lt;meta charset="utf-8"&gt;&lt;/meta&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;&lt;/meta&gt;
+    &lt;script src="https://unpkg.com/htmx.org@next/dist/htmx.min.js"&gt;&lt;/script&gt;
+    &lt;script src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@1.3.0/surreal.js"&gt;&lt;/script&gt;
+    &lt;script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+&lt;div&gt;
+  &lt;h1&gt;Hello, World&lt;/h1&gt;
+  &lt;p&gt;Some text&lt;/p&gt;
+  &lt;p&gt;Some more text&lt;/p&gt;
+&lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>We’ll use this pattern often in the examples to follow.</p>
+</section>
+<section id="defining-routes" class="level2">
+<h2 class="anchored" data-anchor-id="defining-routes">Defining Routes</h2>
+<p>The HTTP protocol defines a number of methods (‘verbs’) to send requests to a server. The most common are GET, POST, PUT, DELETE, and HEAD. We saw ‘GET’ in action before - when you navigate to a URL, you’re making a GET request to that URL. We can do different things on a route for different HTTP methods. For example:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">"/"</span>, methods<span class="op">=</span><span class="st">'get'</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> home():</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> H1(<span class="st">'Hello, World'</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">"/"</span>, methods<span class="op">=</span>[<span class="st">'post'</span>, <span class="st">'put'</span>])</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post_or_put():</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"got a POST or PUT request"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This says that when someone navigates to the root URL “/” (i.e.&nbsp;sends a GET request), they will see the big “Hello, World” heading. When someone submits a POST or PUT request to the same URL, the server should return the string “got a post or put request”.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Test the POST request
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You can test the POST request with <code>curl -X POST http://127.0.0.1:8000 -d "some data"</code>. This sends some data to the server, you should see the response “got a post or put request” printed in the terminal.</p>
+</div>
+</div>
+<p>There are a few other ways you can specify the route+method - FastHTML has <code>.get</code>, <code>.post</code>, etc. as shorthand for <code>route(..., methods=['get'])</code>, etc.</p>
+<div id="cell-21" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> my_function():</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"Hello World from a GET request"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Or you can use the <code>@rt</code> decorator without a method but specify the method with the name of the function. For example:</p>
+<div id="cell-23" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rt <span class="op">=</span> app.route</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post():</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"Hello World from a POST request"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-24" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>client.post(<span class="st">"/"</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Hello World from a POST request'</code></pre>
+</div>
+</div>
+<p>You’re welcome to pick whichever style you prefer. Using routes lets you show different content on different pages - ‘/home’, ‘/about’ and so on. You can also respond differently to different kinds of requests to the same route, as shown above. You can also pass data via the route:</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" aria-current="page"><code>@app.get</code></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false"><code>@rt</code></a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div id="cell-26" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/greet/</span><span class="sc">{nm}</span><span class="st">"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet(nm:<span class="bu">str</span>):</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"Good day to you, </span><span class="sc">{</span>nm<span class="sc">}</span><span class="ss">!"</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>client.get(<span class="st">"/greet/Dave"</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Good day to you, Dave!'</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div id="cell-28" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/greet/</span><span class="sc">{nm}</span><span class="st">"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(nm:<span class="bu">str</span>):</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"Good day to you, </span><span class="sc">{</span>nm<span class="sc">}</span><span class="ss">!"</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>client.get(<span class="st">"/greet/Dave"</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Good day to you, Dave!'</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>More on this in the <a href="#more-on-routing-and-request-parameters">More on Routing and Request Parameters</a> section, which goes deeper into the different ways to get information from a request.</p>
+</section>
+<section id="styling-basics" class="level2">
+<h2 class="anchored" data-anchor-id="styling-basics">Styling Basics</h2>
+<p>Plain HTML probably isn’t quite what you imagine when you visualize your beautiful web app. CSS is the go-to language for styling HTML. But again, we don’t want to learn extra languages unless we absolutely have to! Fortunately, there are ways to get much more visually appealing sites by relying on the hard work of others, using existing CSS libraries. One of our favourites is <a href="https://picocss.com/">PicoCSS</a>. A common way to add CSS files to web pages is to use a <a href="https://www.w3schools.com/tags/tag_link.asp"><code>&lt;link&gt;</code></a> tag inside your <a href="https://www.w3schools.com/tags/tag_header.asp">HTML header</a>, like this:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">header</span><span class="dt">&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">link</span><span class="ot"> rel</span><span class="op">=</span><span class="st">"stylesheet"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css"</span><span class="dt">&gt;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">header</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>For convenience, FastHTML already defines a Pico component for you with <code>picolink</code>:</p>
+<div id="cell-35" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(to_xml(picolink))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css"&gt;
+
+&lt;style&gt;:root { --pico-font-size: 100%; }&lt;/style&gt;
+</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>picolink</code> also includes a <code>&lt;style&gt;</code> tag, as we found that setting the font-size to 100% to be a good default. We show you how to override this below.</p>
+</div>
+</div>
+<p>Since we typically want CSS styling on all pages of our app, FastHTML lets you define a shared HTML header with the <code>hdrs</code> argument as shown below:</p>
+<div id="cell-38" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-14-2" class="code-annotation-target"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a>css <span class="op">=</span> Style(<span class="st">':root {--pico-font-size:90%,--pico-font-family: Pacifico, cursive;}'</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-14-3" class="code-annotation-target"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML(hdrs<span class="op">=</span>(picolink, css))</span>
+<span id="annotated-cell-14-4"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-5"><a href="#annotated-cell-14-5" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">"/"</span>)</span>
+<span id="annotated-cell-14-6"><a href="#annotated-cell-14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get():</span>
+<span id="annotated-cell-14-7"><a href="#annotated-cell-14-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (Title(<span class="st">"Hello World"</span>), </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-14-8" class="code-annotation-target"><a href="#annotated-cell-14-8" aria-hidden="true" tabindex="-1"></a>            Main(H1(<span class="st">'Hello, World'</span>), cls<span class="op">=</span><span class="st">"container"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="2" data-code-annotation="1">Custom styling to override the pico defaults</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="3" data-code-annotation="2">Define shared headers for all pages</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="8" data-code-annotation="3">As per the <a href="https://picocss.com/docs">pico docs</a>, we put all of our content inside a <code>&lt;main&gt;</code> tag with a class of <code>container</code>:</span>
+</dd>
+</dl>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Returning Tuples
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We’re returning a tuple here (a title and the main page). Returning a tuple, list, <code>FT</code> object, or an object with a <code>__ft__</code> method tells FastHTML to turn the main body into a full HTML page that includes the headers (including the pico link and our custom css) which we passed in. This only occurs if the request isn’t from HTMX (for HTMX requests we need only return the rendered components).</p>
+</div>
+</div>
+<p>You can check out the Pico <a href="https://picocss.com/examples">examples</a> page to see how different elements will look. If everything is working, the page should now render nice text with our custom font, and it should respect the user’s light/dark mode preferences too.</p>
+<p>If you want to <a href="https://picocss.com/docs/css-variables">override the default styles</a> or add more custom CSS, you can do so by adding a <code>&lt;style&gt;</code> tag to the headers as shown above. So you are allowed to write CSS to your heart’s content - we just want to make sure you don’t necessarily have to! Later on we’ll see examples using other component libraries and tailwind css to do more fancy styling things, along with tips to get an LLM to write all those fiddly bits so you don’t have to.</p>
+</section>
+<section id="web-page---web-app" class="level2">
+<h2 class="anchored" data-anchor-id="web-page---web-app">Web Page -&gt; Web App</h2>
+<p>Showing content is all well and good, but we typically expect a bit more <em>interactivity</em> from something calling itself a web app! So, let’s add a few different pages, and use a form to let users add messages to a list:</p>
+<div id="cell-45" class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML()</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [<span class="st">"This is a message, which will get rendered as a paragraph"</span>]</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> home():</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Main(H1(<span class="st">'Messages'</span>), </span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>                <span class="op">*</span>[P(msg) <span class="cf">for</span> msg <span class="kw">in</span> messages],</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>                A(<span class="st">"Link to Page 2 (to add messages)"</span>, href<span class="op">=</span><span class="st">"/page2"</span>))</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/page2"</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> page2():</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Main(P(<span class="st">"Add a message with the form below:"</span>),</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>                Form(Input(<span class="bu">type</span><span class="op">=</span><span class="st">"text"</span>, name<span class="op">=</span><span class="st">"data"</span>),</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>                     Button(<span class="st">"Submit"</span>),</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>                     action<span class="op">=</span><span class="st">"/"</span>, method<span class="op">=</span><span class="st">"post"</span>))</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/"</span>)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_message(data:<span class="bu">str</span>):</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    messages.append(data)</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> home()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We re-render the entire homepage to show the newly added message. This is fine, but modern web apps often don’t re-render the entire page, they just update a part of the page. In fact even very complicated applications are often implemented as ‘Single Page Apps’ (SPAs). This is where HTMX comes in.</p>
+</section>
+<section id="htmx" class="level2">
+<h2 class="anchored" data-anchor-id="htmx">HTMX</h2>
+<p><a href="https://htmx.org/">HTMX</a> addresses some key limitations of HTML. In vanilla HTML, links can trigger a GET request to show a new page, and forms can send requests containing data to the server. A lot of ‘Web 1.0’ design revolved around ways to use these to do everything we wanted. But why should only <em>some</em> elements be allowed to trigger requests? And why should we refresh the <em>entire page</em> with the result each time one does? HTMX extends HTML to allow us to trigger requests from <em>any</em> element on all kinds of events, and to update a part of the page without refreshing the entire page. It’s a powerful tool for building modern web apps.</p>
+<p>It does this by adding attributes to HTML tags to make them do things. For example, here’s a page with a counter and a button that increments it:</p>
+<div id="cell-49" class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> home():</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Title(<span class="st">"Count Demo"</span>), Main(</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        H1(<span class="st">"Count Demo"</span>),</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        P(<span class="ss">f"Count is set to </span><span class="sc">{</span>count<span class="sc">}</span><span class="ss">"</span>, <span class="bu">id</span><span class="op">=</span><span class="st">"count"</span>),</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        Button(<span class="st">"Increment"</span>, hx_post<span class="op">=</span><span class="st">"/increment"</span>, hx_target<span class="op">=</span><span class="st">"#count"</span>, hx_swap<span class="op">=</span><span class="st">"innerHTML"</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/increment"</span>)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> increment():</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"incrementing"</span>)</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> count</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    count <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"Count is set to </span><span class="sc">{</span>count<span class="sc">}</span><span class="ss">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The button triggers a POST request to <code>/increment</code> (since we set <code>hx_post="/increment"</code>), which increments the count and returns the new count. The <code>hx_target</code> attribute tells HTMX where to put the result. If no target is specified it replaces the element that triggered the request. The <code>hx_swap</code> attribute specifies how it adds the result to the page. Useful options are:</p>
+<ul>
+<li><em><code>innerHTML</code></em>: Replace the target element’s content with the result.</li>
+<li><em><code>outerHTML</code></em>: Replace the target element with the result.</li>
+<li><em><code>beforebegin</code></em>: Insert the result before the target element.</li>
+<li><em><code>beforeend</code></em>: Insert the result inside the target element, after its last child.</li>
+<li><em><code>afterbegin</code></em>: Insert the result inside the target element, before its first child.</li>
+<li><em><code>afterend</code></em>: Insert the result after the target element.</li>
+</ul>
+<p>You can also use an hx_swap of <code>delete</code> to delete the target element regardless of response, or of <code>none</code> to do nothing.</p>
+<p>By default, requests are triggered by the “natural” event of an element - click in the case of a button (and most other elements). You can also specify different triggers, along with various modifiers - see the <a href="https://htmx.org/docs/#triggers">HTMX docs</a> for more.</p>
+<p>This pattern of having elements trigger requests that modify or replace other elements is a key part of the HTMX philosophy. It takes a little getting used to, but once mastered it is extremely powerful.</p>
+<section id="replacing-elements-besides-the-target" class="level3">
+<h3 class="anchored" data-anchor-id="replacing-elements-besides-the-target">Replacing Elements Besides the Target</h3>
+<p>Sometimes having a single target is not enough, and we’d like to specify some additional elements to update or remove. In these cases, returning elements with an id that matches the element to be replaced and <code>hx_swap_oob='true'</code> will replace those elements too. We’ll use this in the next example to clear an input field when we submit a form.</p>
+</section>
+</section>
+<section id="full-example-1---todo-app" class="level2">
+<h2 class="anchored" data-anchor-id="full-example-1---todo-app">Full Example #1 - ToDo App</h2>
+<p>The canonical demo web app! A TODO list. Rather than create yet another variant for this tutorial, we recommend starting with this video tutorial from Jeremy:</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/Auqrm7WFc0I" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="by_example_files/figure-html/cell-53-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<p>We’ve made a number of variants of this app - so in addition to the version shown in the video you can browse <a href="https://github.com/AnswerDotAI/fasthtml-tut">this</a> series of examples with increasing complexity, the heavily-commented <a href="https://github.com/AnswerDotAI/fasthtml/blob/main/examples/adv_app.py">“idiomatic” version here</a>, and the <a href="https://github.com/AnswerDotAI/fasthtml-example/tree/main/01_todo_app">example</a> linked from the <a href="https://fastht.ml/">FastHTML homepage</a>.</p>
+</section>
+<section id="full-example-2---image-generation-app" class="level2">
+<h2 class="anchored" data-anchor-id="full-example-2---image-generation-app">Full Example #2 - Image Generation App</h2>
+<p>Let’s create an image generation app. We’d like to wrap a text-to-image model in a nice UI, where the user can type in a prompt and see a generated image appear. We’ll use a model hosted by <a href="https://replicate.com">Replicate</a> to actually generate the images. Let’s start with the homepage, with a form to submit prompts and a div to hold the generated images:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Main page</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get():</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    inp <span class="op">=</span> Input(<span class="bu">id</span><span class="op">=</span><span class="st">"new-prompt"</span>, name<span class="op">=</span><span class="st">"prompt"</span>, placeholder<span class="op">=</span><span class="st">"Enter a prompt"</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    add <span class="op">=</span> Form(Group(inp, Button(<span class="st">"Generate"</span>)), hx_post<span class="op">=</span><span class="st">"/"</span>, target_id<span class="op">=</span><span class="st">'gen-list'</span>, hx_swap<span class="op">=</span><span class="st">"afterbegin"</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    gen_list <span class="op">=</span> Div(<span class="bu">id</span><span class="op">=</span><span class="st">'gen-list'</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Title(<span class="st">'Image Generation Demo'</span>), Main(H1(<span class="st">'Magic Image Generation'</span>), add, gen_list, cls<span class="op">=</span><span class="st">'container'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Submitting the form will trigger a POST request to <code>/</code>, so next we need to generate an image and add it to the list. One problem: generating images is slow! We’ll start the generation in a separate thread, but this now surfaces a different problem: we want to update the UI right away, but our image will only be ready a few seconds later. This is a common pattern - think about how often you see a loading spinner online. We need a way to return a temporary bit of UI which will eventually be replaced by the final image. Here’s how we might do this:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generation_preview(<span class="bu">id</span>):</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os.path.exists(<span class="ss">f"gens/</span><span class="sc">{</span><span class="bu">id</span><span class="sc">}</span><span class="ss">.png"</span>):</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Div(Img(src<span class="op">=</span><span class="ss">f"/gens/</span><span class="sc">{</span><span class="bu">id</span><span class="sc">}</span><span class="ss">.png"</span>), <span class="bu">id</span><span class="op">=</span><span class="ss">f'gen-</span><span class="sc">{</span><span class="bu">id</span><span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Div(<span class="st">"Generating..."</span>, <span class="bu">id</span><span class="op">=</span><span class="ss">f'gen-</span><span class="sc">{</span><span class="bu">id</span><span class="sc">}</span><span class="ss">'</span>, </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>                   hx_post<span class="op">=</span><span class="ss">f"/generations/</span><span class="sc">{</span><span class="bu">id</span><span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>                   hx_trigger<span class="op">=</span><span class="st">'every 1s'</span>, hx_swap<span class="op">=</span><span class="st">'outerHTML'</span>)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/generations/</span><span class="sc">{id}</span><span class="st">"</span>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(<span class="bu">id</span>:<span class="bu">int</span>): <span class="cf">return</span> generation_preview(<span class="bu">id</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/"</span>)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(prompt:<span class="bu">str</span>):</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span> <span class="op">=</span> <span class="bu">len</span>(generations)</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    generate_and_save(prompt, <span class="bu">id</span>)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    generations.append(prompt)</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    clear_input <span class="op">=</span>  Input(<span class="bu">id</span><span class="op">=</span><span class="st">"new-prompt"</span>, name<span class="op">=</span><span class="st">"prompt"</span>, placeholder<span class="op">=</span><span class="st">"Enter a prompt"</span>, hx_swap_oob<span class="op">=</span><span class="st">'true'</span>)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> generation_preview(<span class="bu">id</span>), clear_input</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="at">@threaded</span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_and_save(prompt, <span class="bu">id</span>): ... </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The form sends the prompt to the <code>/</code> route, which starts the generation in a separate thread then returns two things:</p>
+<ul>
+<li>A generation preview element that will be added to the top of the <code>gen-list</code> div (since that is the target_id of the form which triggered the request)</li>
+<li>An input field that will replace the form’s input field (that has the same id), using the hx_swap_oob=‘true’ trick. This clears the prompt field so the user can type another prompt.</li>
+</ul>
+<p>The generation preview first returns a temporary “Generating…” message, which polls the <code>/generations/{id}</code> route every second. This is done by setting hx_post to the route and hx_trigger to ‘every 1s’. The <code>/generations/{id}</code> route returns the preview element every second until the image is ready, at which point it returns the final image. Since the final image replaces the temporary one (hx_swap=‘outerHTML’), the polling stops running and the generation preview is now complete.</p>
+<p>This works nicely - the user can submit several prompts without having to wait for the first one to generate, and as the images become available they are added to the list. You can see the full code of this version <a href="https://github.com/AnswerDotAI/fasthtml-example/blob/main/image_app_simple/draft1.py">here</a>.</p>
+<section id="again-with-style" class="level3">
+<h3 class="anchored" data-anchor-id="again-with-style">Again, with Style</h3>
+<p>The app is functional, but can be improved. The <a href="https://github.com/AnswerDotAI/fasthtml-example/blob/main/image_app_simple/main.py">next version</a> adds more stylish generation previews, lays out the images in a grid layout that is responsive to different screen sizes, and adds a database to track generations and make them persistent. The database part is very similar to the todo list example, so let’s just quickly look at how we add the nice grid layout. This is what the result looks like:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="by_example_files/figure-html/cell-58-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<p>Step one was looking around for existing components. The Pico CSS library we’ve been using has a rudimentary grid but recommends using an alternative layout system. One of the options listed was <a href="http://flexboxgrid.com/">Flexbox</a>.</p>
+<p>To use Flexbox you create a “row” with one or more elements. You can specify how wide things should be with a specific syntax in the class name. For example, <code>col-xs-12</code> means a box that will take up 12 columns (out of 12 total) of the row on extra small screens, <code>col-sm-6</code> means a column that will take up 6 columns of the row on small screens, and so on. So if you want four columns on large screens you would use <code>col-lg-3</code> for each item (i.e.&nbsp;each item is using 3 columns out of 12).</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"row"</span><span class="dt">&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"col-xs-12"</span><span class="dt">&gt;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"box"</span><span class="dt">&gt;</span>This takes up the full width<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This was non-intuitive to me. Thankfully ChatGPT et al know web stuff quite well, and we can also experiment in a notebook to test things out:</p>
+<div id="cell-60" class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>grid <span class="op">=</span> Html(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    Link(rel<span class="op">=</span><span class="st">"stylesheet"</span>, href<span class="op">=</span><span class="st">"https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"text/css"</span>),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    Div(</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>        Div(Div(<span class="st">"This takes up the full width"</span>, cls<span class="op">=</span><span class="st">"box"</span>, style<span class="op">=</span><span class="st">"background-color: #800000;"</span>), cls<span class="op">=</span><span class="st">"col-xs-12"</span>),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        Div(Div(<span class="st">"This takes up half"</span>, cls<span class="op">=</span><span class="st">"box"</span>, style<span class="op">=</span><span class="st">"background-color: #008000;"</span>), cls<span class="op">=</span><span class="st">"col-xs-6"</span>),</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        Div(Div(<span class="st">"This takes up half"</span>, cls<span class="op">=</span><span class="st">"box"</span>, style<span class="op">=</span><span class="st">"background-color: #0000B0;"</span>), cls<span class="op">=</span><span class="st">"col-xs-6"</span>),</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        cls<span class="op">=</span><span class="st">"row"</span>, style<span class="op">=</span><span class="st">"color: #fff;"</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>show(grid)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<!--!doctype-->
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css" type="text/css">
+  <div class="row" style="color: #fff;">
+    <div class="col-xs-12">
+      <div class="box" style="background-color: #800000;">This takes up the full width</div>
+    </div>
+    <div class="col-xs-6">
+      <div class="box" style="background-color: #008000;">This takes up half</div>
+    </div>
+    <div class="col-xs-6">
+      <div class="box" style="background-color: #0000B0;">This takes up half</div>
+    </div>
+  </div>
+
+</div>
+</div>
+<p>Aside: when in doubt with CSS stuff, add a background color or a border so you can see what’s happening!</p>
+<p>Translating this into our app, we have a new homepage with a <code>div (class="row")</code> to store the generated images / previews, and a <code>generation_preview</code> function that returns boxes with the appropriate classes and styles to make them appear in the grid. I chose a layout with different numbers of columns for different screen sizes, but you could also <em>just</em> specify the <code>col-xs</code> class if you wanted the same layout on all devices.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>gridlink <span class="op">=</span> Link(rel<span class="op">=</span><span class="st">"stylesheet"</span>, href<span class="op">=</span><span class="st">"https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"text/css"</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML(hdrs<span class="op">=</span>(picolink, gridlink))</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Main page</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get():</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    inp <span class="op">=</span> Input(<span class="bu">id</span><span class="op">=</span><span class="st">"new-prompt"</span>, name<span class="op">=</span><span class="st">"prompt"</span>, placeholder<span class="op">=</span><span class="st">"Enter a prompt"</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    add <span class="op">=</span> Form(Group(inp, Button(<span class="st">"Generate"</span>)), hx_post<span class="op">=</span><span class="st">"/"</span>, target_id<span class="op">=</span><span class="st">'gen-list'</span>, hx_swap<span class="op">=</span><span class="st">"afterbegin"</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    gen_containers <span class="op">=</span> [generation_preview(g) <span class="cf">for</span> g <span class="kw">in</span> gens(limit<span class="op">=</span><span class="dv">10</span>)] <span class="co"># Start with last 10</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    gen_list <span class="op">=</span> Div(<span class="op">*</span>gen_containers[::<span class="op">-</span><span class="dv">1</span>], <span class="bu">id</span><span class="op">=</span><span class="st">'gen-list'</span>, cls<span class="op">=</span><span class="st">"row"</span>) <span class="co"># flexbox container: class = row</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Title(<span class="st">'Image Generation Demo'</span>), Main(H1(<span class="st">'Magic Image Generation'</span>), add, gen_list, cls<span class="op">=</span><span class="st">'container'</span>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the image (if available) and prompt for a generation</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generation_preview(g):</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    grid_cls <span class="op">=</span> <span class="st">"box col-xs-12 col-sm-6 col-md-4 col-lg-3"</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    image_path <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>g<span class="sc">.</span>folder<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>g<span class="sc">.</span><span class="bu">id</span><span class="sc">}</span><span class="ss">.png"</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os.path.exists(image_path):</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Div(Card(</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>                       Img(src<span class="op">=</span>image_path, alt<span class="op">=</span><span class="st">"Card image"</span>, cls<span class="op">=</span><span class="st">"card-img-top"</span>),</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>                       Div(P(B(<span class="st">"Prompt: "</span>), g.prompt, cls<span class="op">=</span><span class="st">"card-text"</span>),cls<span class="op">=</span><span class="st">"card-body"</span>),</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>                   ), <span class="bu">id</span><span class="op">=</span><span class="ss">f'gen-</span><span class="sc">{</span>g<span class="sc">.</span><span class="bu">id</span><span class="sc">}</span><span class="ss">'</span>, cls<span class="op">=</span>grid_cls)</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Div(<span class="ss">f"Generating gen </span><span class="sc">{</span>g<span class="sc">.</span><span class="bu">id</span><span class="sc">}</span><span class="ss"> with prompt </span><span class="sc">{</span>g<span class="sc">.</span>prompt<span class="sc">}</span><span class="ss">"</span>, </span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>            <span class="bu">id</span><span class="op">=</span><span class="ss">f'gen-</span><span class="sc">{</span>g<span class="sc">.</span><span class="bu">id</span><span class="sc">}</span><span class="ss">'</span>, hx_get<span class="op">=</span><span class="ss">f"/gens/</span><span class="sc">{</span>g<span class="sc">.</span><span class="bu">id</span><span class="sc">}</span><span class="ss">"</span>, </span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>            hx_trigger<span class="op">=</span><span class="st">"every 2s"</span>, hx_swap<span class="op">=</span><span class="st">"outerHTML"</span>, cls<span class="op">=</span>grid_cls)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can see the final result in <a href="https://github.com/AnswerDotAI/fasthtml-example/blob/main/image_app_simple/main.py">main.py</a> in the <code>image_app_simple</code> example directory, along with info on deploying it (tl;dr don’t!). We’ve also deployed a version that only shows <em>your</em> generations (tied to browser session) and has a credit system to save our bank accounts. You can access that <a href="https://image-gen-public-credit-pool.replit.app/">here</a>. Now for the next question: how do we keep track of different users?</p>
+</section>
+<section id="again-with-sessions" class="level3">
+<h3 class="anchored" data-anchor-id="again-with-sessions">Again, with Sessions</h3>
+<p>At the moment everyone sees all images! How do we keep some sort of unique identifier tied to a user? Before going all the way to setting up users, login pages etc., let’s look at a way to at least limit generations to the user’s <em>session</em>. You could do this manually with cookies. For convenience and security, fasthtml (via Starlette) has a special mechanism for storing small amounts of data in the user’s browser via the <code>session</code> argument to your route. This acts like a dictionary and you can set and get values from it. For example, here we look for a <code>session_id</code> key, and if it doesn’t exist we generate a new one:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(session):</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">'session_id'</span> <span class="kw">not</span> <span class="kw">in</span> session: session[<span class="st">'session_id'</span>] <span class="op">=</span> <span class="bu">str</span>(uuid.uuid4())</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> H1(<span class="ss">f"Session ID: </span><span class="sc">{</span>session[<span class="st">'session_id'</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Refresh the page a few times - you’ll notice that the session ID remains the same. If you clear your browsing data, you’ll get a new session ID. And if you load the page in a different browser (but not a different tab), you’ll get a new session ID. This will persist within the current browser, letting us use it as a key for our generations. As a bonus, someone can’t spoof this session id by passing it in another way (for example, sending a query parameter). Behind the scenes, the data <em>is</em> stored in a browser cookie but it is signed with a secret key that stops the user or anyone nefarious from being able to tamper with it. The cookie is decoded back into a dictionary by something called a middleware function, which we won’t cover here. All you need to know is that we can use this to store bits of state in the user’s browser.</p>
+<p>In the image app example, we can add a <code>session_id</code> column to our database, and modify our homepage like so:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(session):</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">'session_id'</span> <span class="kw">not</span> <span class="kw">in</span> session: session[<span class="st">'session_id'</span>] <span class="op">=</span> <span class="bu">str</span>(uuid.uuid4())</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    inp <span class="op">=</span> Input(<span class="bu">id</span><span class="op">=</span><span class="st">"new-prompt"</span>, name<span class="op">=</span><span class="st">"prompt"</span>, placeholder<span class="op">=</span><span class="st">"Enter a prompt"</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    add <span class="op">=</span> Form(Group(inp, Button(<span class="st">"Generate"</span>)), hx_post<span class="op">=</span><span class="st">"/"</span>, target_id<span class="op">=</span><span class="st">'gen-list'</span>, hx_swap<span class="op">=</span><span class="st">"afterbegin"</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    gen_containers <span class="op">=</span> [generation_preview(g) <span class="cf">for</span> g <span class="kw">in</span> gens(limit<span class="op">=</span><span class="dv">10</span>, where<span class="op">=</span><span class="ss">f"session_id == '</span><span class="sc">{</span>session[<span class="st">'session_id'</span>]<span class="sc">}</span><span class="ss">'"</span>)]</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So we check if the session id exists in the session, add one if not, and then limit the generations shown to only those tied to this session id. We filter the database with a where clause - see [TODO link Jeremy’s example for a more reliable way to do this]. The only other change we need to make is to store the session id in the database when a generation is made. You can check out this version <a href="https://github.com/AnswerDotAI/fasthtml-example/blob/main/image_app_session_credits/session.py">here</a>. You could instead write this app without relying on a database at all - simply storing the filenames of the generated images in the session, for example. But this more general approach of linking some kind of unique session identifier to users or data in our tables is a useful general pattern for more complex examples.</p>
+</section>
+<section id="again-with-credits" class="level3">
+<h3 class="anchored" data-anchor-id="again-with-credits">Again, with Credits!</h3>
+<p>Generating images with replicate costs money. So next let’s add a pool of credits that get used up whenever anyone generates an image. To recover our lost funds, we’ll also set up a payment system so that generous users can buy more credits for everyone. You could modify this to let users buy credits tied to their session ID, but at that point you risk having angry customers losing their money after wiping their browser history, and should consider setting up proper account management :)</p>
+<p>Taking payments with Stripe is intimidating but very doable. <a href="https://testdriven.io/blog/flask-stripe-tutorial/">Here’s a tutorial</a> that shows the general principle using Flask. As with other popular tasks in the web-dev world, ChatGPT knows a lot about Stripe - but you should exercise extra caution when writing code that handles money!</p>
+<p>For the <a href="https://github.com/AnswerDotAI/fasthtml-example/blob/main/image_app_session_credits/main.py">finished example</a> we add the bare minimum:</p>
+<ul>
+<li>A way to create a Stripe checkout session and redirect the user to the session URL</li>
+<li>‘Success’ and ‘Cancel’ routes to handle the result of the checkout</li>
+<li>A route that listens for a webhook from Stripe to update the number of credits when a payment is made.</li>
+</ul>
+<p>In a typical application you’ll want to keep track of which users make payments, catch other kinds of stripe events and so on. This example is more a ‘this is possible, do your own research’ than ‘this is how you do it’. But hopefully it does illustrate the key idea: there is no magic here. Stripe (and many other technologies) relies on sending users to different routes and shuttling data back and forth in requests. And we know how to do that!</p>
+</section>
+</section>
+<section id="more-on-routing-and-request-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="more-on-routing-and-request-parameters">More on Routing and Request Parameters</h2>
+<p>There are a number of ways information can be passed to the server. When you specify arguments to a route, FastHTML will search the request for values with the same name, and convert them to the correct type. In order, it searches</p>
+<ul>
+<li>The path parameters</li>
+<li>The query parameters</li>
+<li>The cookies</li>
+<li>The headers</li>
+<li>The session</li>
+<li>Form data</li>
+</ul>
+<p>There are also a few special arguments</p>
+<ul>
+<li><code>request</code> (or any prefix like <code>req</code>): gets the raw Starlette <code>Request</code> object</li>
+<li><code>session</code> (or any prefix like <code>sess</code>): gets the session object</li>
+<li><code>auth</code></li>
+<li><code>htmx</code></li>
+<li><code>app</code></li>
+</ul>
+<p>In this section let’s quickly look at some of these in action.</p>
+<div id="cell-70" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML()</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>cli <span class="op">=</span> TestClient(app)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Part of the route (path parameters):</p>
+<div id="cell-72" class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">'/user/</span><span class="sc">{nm}</span><span class="st">'</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(nm:<span class="bu">str</span>): <span class="cf">return</span> <span class="ss">f"Good day to you, </span><span class="sc">{</span>nm<span class="sc">}</span><span class="ss">!"</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/user/jph'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Good day to you, jph!'</code></pre>
+</div>
+</div>
+<p>Matching with a regex:</p>
+<div id="cell-74" class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>reg_re_param(<span class="st">"imgext"</span>, <span class="st">"ico|gif|jpg|jpeg|webm"</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="vs">r'/static/{path:path}</span><span class="sc">{fn}</span><span class="vs">.{ext:imgext}'</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_img(fn:<span class="bu">str</span>, path:<span class="bu">str</span>, ext:<span class="bu">str</span>): <span class="cf">return</span> <span class="ss">f"Getting </span><span class="sc">{</span>fn<span class="sc">}</span><span class="ss">.</span><span class="sc">{</span>ext<span class="sc">}</span><span class="ss"> from /</span><span class="sc">{</span>path<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/static/foo/jph.ico'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Getting jph.ico from /foo/'</code></pre>
+</div>
+</div>
+<p>Using an enum (try using a string that isn’t in the enum):</p>
+<div id="cell-76" class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>ModelName <span class="op">=</span> str_enum(<span class="st">'ModelName'</span>, <span class="st">"alexnet"</span>, <span class="st">"resnet"</span>, <span class="st">"lenet"</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/models/</span><span class="sc">{nm}</span><span class="st">"</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> model(nm:ModelName): <span class="cf">return</span> nm</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/models/alexnet'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>alexnet</code></pre>
+</div>
+</div>
+<p>Casting to a Path:</p>
+<div id="cell-78" class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/files/</span><span class="sc">{path}</span><span class="st">"</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> txt(path: Path): <span class="cf">return</span> path.with_suffix(<span class="st">'.txt'</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/files/foo'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>foo.txt</code></pre>
+</div>
+</div>
+<p>An integer with a default value:</p>
+<div id="cell-80" class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>fake_db <span class="op">=</span> [{<span class="st">"name"</span>: <span class="st">"Foo"</span>}, {<span class="st">"name"</span>: <span class="st">"Bar"</span>}]</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/items/"</span>)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> read_item(idx:<span class="bu">int</span><span class="op">|</span><span class="va">None</span> <span class="op">=</span> <span class="dv">0</span>): <span class="cf">return</span> fake_db[idx]</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/items/?idx=1'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{"name":"Bar"}</code></pre>
+</div>
+</div>
+<div id="cell-81" class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/items/'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{"name":"Foo"}</code></pre>
+</div>
+</div>
+<p>Boolean values (takes anything “truthy” or “falsy”):</p>
+<div id="cell-83" class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/booly/"</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> booly(coming:<span class="bu">bool</span><span class="op">=</span><span class="va">True</span>): <span class="cf">return</span> <span class="st">'Coming'</span> <span class="cf">if</span> coming <span class="cf">else</span> <span class="st">'Not coming'</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/booly/?coming=true'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coming</code></pre>
+</div>
+</div>
+<div id="cell-84" class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/booly/?coming=no'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Not coming</code></pre>
+</div>
+</div>
+<p>Getting dates:</p>
+<div id="cell-86" class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/datie/"</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> datie(d:parsed_date): <span class="cf">return</span> d</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>date_str <span class="op">=</span> <span class="st">"17th of May, 2024, 2p"</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="ss">f'/datie/?d=</span><span class="sc">{</span>date_str<span class="sc">}</span><span class="ss">'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2024-05-17 14:00:00</code></pre>
+</div>
+</div>
+<p>Matching a dataclass:</p>
+<div id="cell-88" class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, asdict</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Bodie:</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>    a:<span class="bu">int</span><span class="op">;</span>b:<span class="bu">str</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">"/bodie/</span><span class="sc">{nm}</span><span class="st">"</span>)</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(nm:<span class="bu">str</span>, data:Bodie):</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> asdict(data)</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>    res[<span class="st">'nm'</span>] <span class="op">=</span> nm</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> res</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>cli.post(<span class="st">'/bodie/me'</span>, data<span class="op">=</span><span class="bu">dict</span>(a<span class="op">=</span><span class="dv">1</span>, b<span class="op">=</span><span class="st">'foo'</span>)).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'{"a":1,"b":"foo","nm":"me"}'</code></pre>
+</div>
+</div>
+<section id="cookies" class="level3">
+<h3 class="anchored" data-anchor-id="cookies">Cookies</h3>
+<p>Cookies can be set via a Starlette Response object, and can be read back by specifying the name:</p>
+<div id="cell-90" class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/setcookie"</span>)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> setc(req):</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    now <span class="op">=</span> datetime.now()</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> Response(<span class="ss">f'Set to </span><span class="sc">{</span>now<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>    res.set_cookie(<span class="st">'now'</span>, <span class="bu">str</span>(now))</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> res</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/setcookie'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Set to 2024-07-20 23:14:54.364793'</code></pre>
+</div>
+</div>
+<div id="cell-91" class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/getcookie"</span>)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> getc(now:parsed_date): <span class="cf">return</span> <span class="ss">f'Cookie was set at time </span><span class="sc">{</span>now<span class="sc">.</span>time()<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/getcookie'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Cookie was set at time 23:14:54.364793'</code></pre>
+</div>
+</div>
+</section>
+<section id="user-agent-and-hx-request" class="level3">
+<h3 class="anchored" data-anchor-id="user-agent-and-hx-request">User Agent and HX-Request</h3>
+<p>An argument of <code>user_agent</code> will match the header <code>User-Agent</code>. This holds for special headers like <code>HX-Request</code> (used by HTMX to signal when a request comes from an HTMX request) - the general pattern is that “-” is replaced with “_” and strings are turned to lowercase.</p>
+<div id="cell-93" class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/ua"</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> ua(user_agent:<span class="bu">str</span>): <span class="cf">return</span> user_agent</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/ua'</span>, headers<span class="op">=</span>{<span class="st">'User-Agent'</span>:<span class="st">'FastHTML'</span>}).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'FastHTML'</code></pre>
+</div>
+</div>
+<div id="cell-94" class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/hxtest"</span>)</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hxtest(htmx): <span class="cf">return</span> htmx.request</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/hxtest'</span>, headers<span class="op">=</span>{<span class="st">'HX-Request'</span>:<span class="st">'1'</span>}).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'1'</code></pre>
+</div>
+</div>
+</section>
+<section id="starlette-requests" class="level3">
+<h3 class="anchored" data-anchor-id="starlette-requests">Starlette Requests</h3>
+<p>If you add an argument called <code>request</code>(or any prefix of that, for example <code>req</code>) it will be populated with the Starlette <code>Request</code> object. This is useful if you want to do your own processing manually. For example, although FastHTML will parse forms for you, you could instead get form data like so:</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/form"</span>)</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> form(request:Request):</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>    form_data <span class="op">=</span> <span class="cf">await</span> request.form()</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> form_data.get(<span class="st">'a'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>See the <a href="https://starlette.io/docs/">Starlette docs</a> for more information on the <code>Request</code> object.</p>
+</section>
+<section id="starlette-responses" class="level3">
+<h3 class="anchored" data-anchor-id="starlette-responses">Starlette Responses</h3>
+<p>You can return a Starlette Response object from a route to control the response. For example:</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/redirect"</span>)</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> redirect():</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> RedirectResponse(url<span class="op">=</span><span class="st">"/"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We used this to set cookies in the previous example. See the <a href="https://starlette.io/docs/">Starlette docs</a> for more information on the <code>Response</code> object.</p>
+</section>
+<section id="static-files" class="level3">
+<h3 class="anchored" data-anchor-id="static-files">Static Files</h3>
+<p>We often want to serve static files like images. This is easily done! For common file types (images, CSS etc) we can create a route that returns a Starlette <code>FileResponse</code> like so:</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For images, CSS, etc.</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/{fname:path}.{ext:static}"</span>)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> static(fname: <span class="bu">str</span>, ext: <span class="bu">str</span>):</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> FileResponse(<span class="ss">f'</span><span class="sc">{</span>fname<span class="sc">}</span><span class="ss">.</span><span class="sc">{</span>ext<span class="sc">}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can customize it to suit your needs (for example, only serving files in a certain directory). You’ll notice some variant of this route in all our complete examples - even for apps with no static files the browser will typically request a <code>/favicon.ico</code> file, for example, and as the astute among you will have noticed this has sparked a bit of competition between Johno and Jeremy regarding which country flag should serve as the default!</p>
+</section>
+<section id="websockets" class="level3">
+<h3 class="anchored" data-anchor-id="websockets">WebSockets</h3>
+<p>For certain applications such as multiplayer games, websockets can be a powerful feature. Luckily HTMX and FastHTML has you covered! Simply specify that you wish to include the websocket header extension from HTMX:</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML(ws_hdr<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>rt <span class="op">=</span> app.route</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>With that, you are now able to specify the different websocket specific HTMX goodies. For example, say we have a website we want to setup a websocket, you can simply:</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mk_inp(): <span class="cf">return</span> Input(<span class="bu">id</span><span class="op">=</span><span class="st">'msg'</span>)</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/'</span>)</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(request):</span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>    cts <span class="op">=</span> Div(</span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>        Div(<span class="bu">id</span><span class="op">=</span><span class="st">'notifications'</span>),</span>
+<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>        Form(mk_inp(), <span class="bu">id</span><span class="op">=</span><span class="st">'form'</span>, ws_send<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>        hx_ext<span class="op">=</span><span class="st">'ws'</span>, ws_connect<span class="op">=</span><span class="st">'/ws'</span>)</span>
+<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">'Websocket Test'</span>, cts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And this will setup a connection on the route <code>/ws</code> along with a form that will send a message to the websocket whenever the form is submitted. Let’s go ahead and handle this route:</p>
+<div class="sourceCode" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.ws</span>(<span class="st">'/ws'</span>)</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> ws(msg:<span class="bu">str</span>, send):</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> send(Div(<span class="st">'Hello '</span> <span class="op">+</span> msg, <span class="bu">id</span><span class="op">=</span><span class="st">"notifications"</span>))</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> sleep(<span class="dv">2</span>)</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Div(<span class="st">'Goodbye '</span> <span class="op">+</span> msg, <span class="bu">id</span><span class="op">=</span><span class="st">"notifications"</span>), mk_inp()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>One thing you might have noticed is a lack of target id for our websocket trigger for swapping HTML content. This is because HTMX always swaps content with websockets with Out of Band Swaps. Therefore, HTMX will look for the id in the returned HTML content from the server for determining what to swap. To send stuff to the client, you can either use the <code>send</code> parameter or simply return the content or both!</p>
+<p>Now, sometimes you might want to perform actions when a client connects or disconnects such as add or remove a user from a player queue. To hook into these events, you can pass your connection or disconnection function to the <code>app.ws</code> decorator:</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> on_connect(send):</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Connected!'</span>)</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> send(Div(<span class="st">'Hello, you have connected'</span>, <span class="bu">id</span><span class="op">=</span><span class="st">"notifications"</span>))</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> on_disconnect(ws):</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Disconnected!'</span>)</span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a><span class="at">@app.ws</span>(<span class="st">'/ws'</span>, conn<span class="op">=</span>on_connect, disconn<span class="op">=</span>on_disconnect)</span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> ws(msg:<span class="bu">str</span>, send):</span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> send(Div(<span class="st">'Hello '</span> <span class="op">+</span> msg, <span class="bu">id</span><span class="op">=</span><span class="st">"notifications"</span>))</span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> sleep(<span class="dv">2</span>)</span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Div(<span class="st">'Goodbye '</span> <span class="op">+</span> msg, <span class="bu">id</span><span class="op">=</span><span class="st">"notifications"</span>), mk_inp()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="full-example-3---chatbot-example-with-daisyui-components" class="level2">
+<h2 class="anchored" data-anchor-id="full-example-3---chatbot-example-with-daisyui-components">Full Example #3 - Chatbot Example with DaisyUI Components</h2>
+<p>Let’s go back to the topic of adding components or styling beyond the simple PicoCSS examples so far. How might we adopt a component or framework? In this example, let’s build a chatbot UI leveraging the <a href="https://daisyui.com/components/chat/">DaisyUI chat bubble</a>. The final result will look like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="by_example_files/figure-html/cell-101-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<p>At first glance, DaisyUI’s chat component looks quite intimidating. The examples look like this:</p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat chat-start"</span><span class="dt">&gt;</span></span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat-image avatar"</span><span class="dt">&gt;</span></span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"w-10 rounded-full"</span><span class="dt">&gt;</span></span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> alt</span><span class="op">=</span><span class="st">"Tailwind CSS chat bubble component"</span><span class="ot"> src</span><span class="op">=</span><span class="st">"https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat-header"</span><span class="dt">&gt;</span></span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a>    Obi-Wan Kenobi</span>
+<span id="cb68-9"><a href="#cb68-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">time</span><span class="ot"> class</span><span class="op">=</span><span class="st">"text-xs opacity-50"</span><span class="dt">&gt;</span>12:45<span class="dt">&lt;/</span><span class="kw">time</span><span class="dt">&gt;</span></span>
+<span id="cb68-10"><a href="#cb68-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-11"><a href="#cb68-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat-bubble"</span><span class="dt">&gt;</span>You were the Chosen One!<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-12"><a href="#cb68-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat-footer opacity-50"</span><span class="dt">&gt;</span></span>
+<span id="cb68-13"><a href="#cb68-13" aria-hidden="true" tabindex="-1"></a>    Delivered</span>
+<span id="cb68-14"><a href="#cb68-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-15"><a href="#cb68-15" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-16"><a href="#cb68-16" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat chat-end"</span><span class="dt">&gt;</span></span>
+<span id="cb68-17"><a href="#cb68-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat-image avatar"</span><span class="dt">&gt;</span></span>
+<span id="cb68-18"><a href="#cb68-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"w-10 rounded-full"</span><span class="dt">&gt;</span></span>
+<span id="cb68-19"><a href="#cb68-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> alt</span><span class="op">=</span><span class="st">"Tailwind CSS chat bubble component"</span><span class="ot"> src</span><span class="op">=</span><span class="st">"https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb68-20"><a href="#cb68-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-21"><a href="#cb68-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-22"><a href="#cb68-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat-header"</span><span class="dt">&gt;</span></span>
+<span id="cb68-23"><a href="#cb68-23" aria-hidden="true" tabindex="-1"></a>    Anakin</span>
+<span id="cb68-24"><a href="#cb68-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">time</span><span class="ot"> class</span><span class="op">=</span><span class="st">"text-xs opacity-50"</span><span class="dt">&gt;</span>12:46<span class="dt">&lt;/</span><span class="kw">time</span><span class="dt">&gt;</span></span>
+<span id="cb68-25"><a href="#cb68-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-26"><a href="#cb68-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat-bubble"</span><span class="dt">&gt;</span>I hate you!<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-27"><a href="#cb68-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"chat-footer opacity-50"</span><span class="dt">&gt;</span></span>
+<span id="cb68-28"><a href="#cb68-28" aria-hidden="true" tabindex="-1"></a>    Seen at 12:46</span>
+<span id="cb68-29"><a href="#cb68-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb68-30"><a href="#cb68-30" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We have several things going for us however.</p>
+<ul>
+<li>ChatGPT knows DaisyUI and Tailwind (DaisyUI is a Tailwind component library)</li>
+<li>We can build things up piece by piece with AI standing by to help.</li>
+</ul>
+<p><a href="https://h2f.answer.ai/">https://h2f.answer.ai/</a> is a tool that can convert HTML to FT (fastcore.xml) and back, which is useful for getting a quick starting point when you have an HTML example to start from.</p>
+<p>We can strip out some unnecessary bits and try to get the simplest possible example working in a notebook first:</p>
+<div id="cell-103" class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loading tailwind and daisyui</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>headers <span class="op">=</span> (Script(src<span class="op">=</span><span class="st">"https://cdn.tailwindcss.com"</span>),</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>           Link(rel<span class="op">=</span><span class="st">"stylesheet"</span>, href<span class="op">=</span><span class="st">"https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css"</span>))</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Displaying a single message</span></span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> Div(</span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>    Div(<span class="st">"Chat header here"</span>, cls<span class="op">=</span><span class="st">"chat-header"</span>),</span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a>    Div(<span class="st">"My message goes here"</span>, cls<span class="op">=</span><span class="st">"chat-bubble chat-bubble-primary"</span>),</span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a>    cls<span class="op">=</span><span class="st">"chat chat-start"</span></span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a><span class="co"># show(Html(*headers, d)) # uncomment to view</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we can extend this to render multiple messages, with the message being on the left (<code>chat-start</code>) or right (<code>chat-end</code>) depending on the role. While we’re at it, we can also change the color (<code>chat-bubble-primary</code>) of the message and put them all in a <code>chat-box</code> div:</p>
+<div id="cell-105" class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"role"</span>:<span class="st">"user"</span>, <span class="st">"content"</span>:<span class="st">"Hello"</span>},</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"role"</span>:<span class="st">"assistant"</span>, <span class="st">"content"</span>:<span class="st">"Hi, how can I assist you?"</span>}</span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ChatMessage(msg):</span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Div(</span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a>        Div(msg[<span class="st">'role'</span>], cls<span class="op">=</span><span class="st">"chat-header"</span>),</span>
+<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a>        Div(msg[<span class="st">'content'</span>], cls<span class="op">=</span><span class="ss">f"chat-bubble chat-bubble-</span><span class="sc">{</span><span class="st">'primary'</span> <span class="cf">if</span> msg[<span class="st">'role'</span>] <span class="op">==</span> <span class="st">'user'</span> <span class="cf">else</span> <span class="st">'secondary'</span><span class="sc">}</span><span class="ss">"</span>),</span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a>        cls<span class="op">=</span><span class="ss">f"chat chat-</span><span class="sc">{</span><span class="st">'end'</span> <span class="cf">if</span> msg[<span class="st">'role'</span>] <span class="op">==</span> <span class="st">'user'</span> <span class="cf">else</span> <span class="st">'start'</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a>chatbox <span class="op">=</span> Div(<span class="op">*</span>[ChatMessage(msg) <span class="cf">for</span> msg <span class="kw">in</span> messages], cls<span class="op">=</span><span class="st">"chat-box"</span>, <span class="bu">id</span><span class="op">=</span><span class="st">"chatlist"</span>)</span>
+<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-14"><a href="#cb70-14" aria-hidden="true" tabindex="-1"></a><span class="co"># show(Html(*headers, chatbox)) # Uncomment to view</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, it was back to the ChatGPT to tweak the chat box so it wouldn’t grow as messages were added. I asked:</p>
+<pre><code>"I have something like this (it's working now) 
+[code]
+The messages are added to this div so it grows over time. 
+Is there a way I can set it's height to always be 80% of the total window height with a scroll bar if needed?"</code></pre>
+<p>Based on this query GPT4o helpfully shared that “This can be achieved using Tailwind CSS utility classes. Specifically, you can use h-[80vh] to set the height to 80% of the viewport height, and overflow-y-auto to add a vertical scroll bar when needed.”</p>
+<p>To put it another way: none of the CSS classes in the following example were written by a human, and what edits I did make were informed by advice from the AI that made it relatively painless!</p>
+<p>The actual chat functionality of the app is based on our <a href="https://claudette.answer.ai/">claudette</a> library. As with the image example, we face a potential hiccup in that getting a response from an LLM is slow. We need a way to have the user message added to the UI immediately, and then have the response added once it’s available. We could do something similar to the image generation example above, or use websockets. Check out the <a href="https://github.com/AnswerDotAI/fasthtml-example/tree/main/02_chatbot">full example</a> for implementations of both, along with further details.</p>
+</section>
+<section id="full-example-4---multiplayer-game-of-life-example-with-websockets" class="level2">
+<h2 class="anchored" data-anchor-id="full-example-4---multiplayer-game-of-life-example-with-websockets">Full Example #4 - Multiplayer Game of Life Example with Websockets</h2>
+<p>Let’s see how we can implement a collaborative website using Websockets in FastHTML. To showcase this, we will use the famous <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life">Conway’s Game of Life</a>, which is a game that takes place in a grid world. Each cell in the grid can be either alive or dead. The cell’s state is initially given by a user before the game is started and then evolves through the iteration of the grid world once the clock starts. Whether a cell’s state will change from the previous state depends on simple rules based on its neighboring cells’ states. Here is the standard Game of Life logic implemented in Python courtesy of ChatGPT:</p>
+<div class="sourceCode" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>grid <span class="op">=</span> [[<span class="dv">0</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>)] <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>)]</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_grid(grid: <span class="bu">list</span>[<span class="bu">list</span>[<span class="bu">int</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">list</span>[<span class="bu">int</span>]]:</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>    new_grid <span class="op">=</span> [[<span class="dv">0</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>)] <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>)]</span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> count_neighbors(x, y):</span>
+<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a>        directions <span class="op">=</span> [(<span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>), (<span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>), (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>), (<span class="dv">0</span>, <span class="dv">1</span>), (<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>), (<span class="dv">1</span>, <span class="dv">0</span>), (<span class="dv">1</span>, <span class="dv">1</span>)]</span>
+<span id="cb72-6"><a href="#cb72-6" aria-hidden="true" tabindex="-1"></a>        count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb72-7"><a href="#cb72-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> dx, dy <span class="kw">in</span> directions:</span>
+<span id="cb72-8"><a href="#cb72-8" aria-hidden="true" tabindex="-1"></a>            nx, ny <span class="op">=</span> x <span class="op">+</span> dx, y <span class="op">+</span> dy</span>
+<span id="cb72-9"><a href="#cb72-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="dv">0</span> <span class="op">&lt;=</span> nx <span class="op">&lt;</span> <span class="bu">len</span>(grid) <span class="kw">and</span> <span class="dv">0</span> <span class="op">&lt;=</span> ny <span class="op">&lt;</span> <span class="bu">len</span>(grid[<span class="dv">0</span>]): count <span class="op">+=</span> grid[nx][ny]</span>
+<span id="cb72-10"><a href="#cb72-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> count</span>
+<span id="cb72-11"><a href="#cb72-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(grid)):</span>
+<span id="cb72-12"><a href="#cb72-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(grid[<span class="dv">0</span>])):</span>
+<span id="cb72-13"><a href="#cb72-13" aria-hidden="true" tabindex="-1"></a>            neighbors <span class="op">=</span> count_neighbors(i, j)</span>
+<span id="cb72-14"><a href="#cb72-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> grid[i][j] <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb72-15"><a href="#cb72-15" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> neighbors <span class="op">&lt;</span> <span class="dv">2</span> <span class="kw">or</span> neighbors <span class="op">&gt;</span> <span class="dv">3</span>: new_grid[i][j] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb72-16"><a href="#cb72-16" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>: new_grid[i][j] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb72-17"><a href="#cb72-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> neighbors <span class="op">==</span> <span class="dv">3</span>: new_grid[i][j] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb72-18"><a href="#cb72-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> new_grid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This would be a very dull game if we were to run it, since the initial state of everything would remain dead. Therefore, we need a way of letting the user give an initial state before starting the game. FastHTML to the rescue!</p>
+<div class="sourceCode" id="cb73"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Grid():</span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>    cells <span class="op">=</span> []</span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> y, row <span class="kw">in</span> <span class="bu">enumerate</span>(game_state[<span class="st">'grid'</span>]):</span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> x, cell <span class="kw">in</span> <span class="bu">enumerate</span>(row):</span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a>            cell_class <span class="op">=</span> <span class="st">'alive'</span> <span class="cf">if</span> cell <span class="cf">else</span> <span class="st">'dead'</span></span>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>            cell <span class="op">=</span> Div(cls<span class="op">=</span><span class="ss">f'cell </span><span class="sc">{</span>cell_class<span class="sc">}</span><span class="ss">'</span>, hx_put<span class="op">=</span><span class="st">'/update'</span>, hx_vals<span class="op">=</span>{<span class="st">'x'</span>: x, <span class="st">'y'</span>: y}, hx_swap<span class="op">=</span><span class="st">'none'</span>, hx_target<span class="op">=</span><span class="st">'#gol'</span>, hx_trigger<span class="op">=</span><span class="st">'click'</span>)</span>
+<span id="cb73-7"><a href="#cb73-7" aria-hidden="true" tabindex="-1"></a>            cells.append(cell)</span>
+<span id="cb73-8"><a href="#cb73-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Div(<span class="op">*</span>cells, <span class="bu">id</span><span class="op">=</span><span class="st">'grid'</span>)</span>
+<span id="cb73-9"><a href="#cb73-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-10"><a href="#cb73-10" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/update'</span>)</span>
+<span id="cb73-11"><a href="#cb73-11" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> put(x: <span class="bu">int</span>, y: <span class="bu">int</span>):</span>
+<span id="cb73-12"><a href="#cb73-12" aria-hidden="true" tabindex="-1"></a>    grid[y][x] <span class="op">=</span> <span class="dv">1</span> <span class="cf">if</span> grid[y][x] <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Above is a component for representing the game’s state that the user can interact with and update on the server using cool HTMX features such as <code>hx_vals</code> for determining which cell was clicked to make it dead or alive. Now, you probably noticed that the HTTP request in this case is a PUT request, which does not return anything and this means our client’s view of the grid world and the server’s game state will immediately become out of sync :(. We could of course just return a new Grid component with the updated state, but that would only work for a single client, if we had more, they quickly get out of sync with each other and the server. Now Websockets to the rescue!</p>
+<p>Websockets are a way for the server to keep a persistent connection with clients and send data to the client without explicitly being requested for information, which is not possible with HTTP. Luckily FastHTML and HTMX work well with Websockets. Simply state you wish to use websockets for your app and define a websocket route:</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML(hdrs<span class="op">=</span>(picolink, gridlink, css, htmx_ws), ws_hdr<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>player_queue <span class="op">=</span> []</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> update_players():</span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, player <span class="kw">in</span> <span class="bu">enumerate</span>(player_queue):</span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>: <span class="cf">await</span> player(Grid())</span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span>: player_queue.pop(i)</span>
+<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> on_connect(send): player_queue.append(send)</span>
+<span id="cb74-10"><a href="#cb74-10" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> on_disconnect(send): <span class="cf">await</span> update_players()</span>
+<span id="cb74-11"><a href="#cb74-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-12"><a href="#cb74-12" aria-hidden="true" tabindex="-1"></a><span class="at">@app.ws</span>(<span class="st">'/gol'</span>, conn<span class="op">=</span>on_connect, disconn<span class="op">=</span>on_disconnect)</span>
+<span id="cb74-13"><a href="#cb74-13" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> ws(msg:<span class="bu">str</span>, send): <span class="cf">pass</span></span>
+<span id="cb74-14"><a href="#cb74-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-15"><a href="#cb74-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Home(): <span class="cf">return</span> Title(<span class="st">'Game of Life'</span>), Main(gol, Div(Grid(), <span class="bu">id</span><span class="op">=</span><span class="st">'gol'</span>, cls<span class="op">=</span><span class="st">'row center-xs'</span>), hx_ext<span class="op">=</span><span class="st">"ws"</span>, ws_connect<span class="op">=</span><span class="st">"/gol"</span>)</span>
+<span id="cb74-16"><a href="#cb74-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-17"><a href="#cb74-17" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/update'</span>)</span>
+<span id="cb74-18"><a href="#cb74-18" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> put(x: <span class="bu">int</span>, y: <span class="bu">int</span>):</span>
+<span id="cb74-19"><a href="#cb74-19" aria-hidden="true" tabindex="-1"></a>    grid[y][x] <span class="op">=</span> <span class="dv">1</span> <span class="cf">if</span> grid[y][x] <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb74-20"><a href="#cb74-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> update_players()</span>
+<span id="cb74-21"><a href="#cb74-21" aria-hidden="true" tabindex="-1"></a>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Here we simply keep track of all the players that have connected or disconnected to our site and when an update occurs, we send updates to all the players still connected via websockets. Via HTMX, you are still simply exchanging HTML from the server to the client and will swap in the content based on how you setup your <code>hx_swap</code> attribute. There is only one difference, that being all swaps are OOB. You can find more information on the HTMX websocket extension documentation page <a href="https://github.com/bigskysoftware/htmx-extensions/blob/main/src/ws/README.md">here</a>. You can find a full fledge hosted example of this app <a href="https://game-of-life-production-ed7f.up.railway.app/">here</a>.</p>
+</section>
+<section id="ft-objects-and-html" class="level2">
+<h2 class="anchored" data-anchor-id="ft-objects-and-html">FT objects and HTML</h2>
+<p>These FT objects create a ‘FastTag’ structure [tag,children,attrs] for <code>to_xml()</code>. When we call <code>Div(...)</code>, the elements we pass in are the children. Attributes are passed in as keywords. <code>class</code> and <code>for</code> are special words in python, so we use <code>cls</code>, <code>klass</code> or <code>_class</code> instead of <code>class</code> and <code>fr</code> or <code>_for</code> instead of <code>for</code>. Note these objects are just 3-element lists - you can create custom ones too as long as they’re also 3-element lists. Alternately, leaf nodes can be strings instead (which is why you can do <code>Div('some text')</code>). If you pass something that isn’t a 3-element list or a string, it will be converted to a string using str()… unless (our final trick) you define a <code>__ft__</code> method that will run before str(), so you can render things a custom way.</p>
+<p>For example, here’s one way we could make a custom class that can be rendered into HTML:</p>
+<div id="cell-112" class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Person:</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name, age):</span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.age <span class="op">=</span> age</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __ft__(<span class="va">self</span>):</span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [<span class="st">'div'</span>, [<span class="ss">f'</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>name<span class="sc">}</span><span class="ss"> is </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>age<span class="sc">}</span><span class="ss"> years old.'</span>], {}]</span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> Person(<span class="st">'Jonathan'</span>, <span class="dv">28</span>)</span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(to_xml(Div(p, <span class="st">"more text"</span>, cls<span class="op">=</span><span class="st">"container"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;div class="container"&gt;
+  &lt;div&gt;Jonathan is 28 years old.&lt;/div&gt;
+more text
+&lt;/div&gt;
+</code></pre>
+</div>
+</div>
+<p>In the examples, you’ll see we often patch in <code>__ft__</code> methods to existing classes to control how they’re rendered. For example, if Person didn’t have a <code>__ft__</code> method or we wanted to override it, we could add a new one like this:</p>
+<div id="cell-114" class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastcore.<span class="bu">all</span> <span class="im">import</span> patch</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a><span class="at">@patch</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> __ft__(<span class="va">self</span>:Person):</span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Div(<span class="st">"Person info:"</span>, Ul(Li(<span class="st">"Name:"</span>,<span class="va">self</span>.name), Li(<span class="st">"Age:"</span>, <span class="va">self</span>.age)))</span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>show(p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+Person info:
+  <ul>
+    <li>
+Name:
+Jonathan
+    </li>
+    <li>
+Age:
+28
+    </li>
+  </ul>
+</div>
+</div>
+</div>
+<p>Some tags from fastcore.xml are overwritten by fasthtml.core and a few are further extended by fasthtml.xtend using this method. Over time, we hope to see others developing custom components too, giving us a larger and larger ecosystem of reusable components.</p>
+</section>
+<section id="custom-scripts-and-styling" class="level2">
+<h2 class="anchored" data-anchor-id="custom-scripts-and-styling">Custom Scripts and Styling</h2>
+<p>There are many popular JavaScript and CSS libraries that can be used via a simple <a href="https://AnswerDotAI.github.io/fasthtml/api/xtend.html#script"><code>Script</code></a> or <a href="https://AnswerDotAI.github.io/fasthtml/api/xtend.html#style"><code>Style</code></a> tag. But in some cases you will need to write more custom code. FastHTML’s <a href="https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/js.py">js.py</a> contains a few examples that may be useful as reference.</p>
+<p>For example, to use the <a href="https://marked.js.org/">marked.js</a> library to render markdown in a div, including in components added after the page has loaded via htmx, we do something like this:</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { marked } <span class="im">from</span> <span class="st">"https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js"</span><span class="op">;</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a><span class="fu">proc_htmx</span>(<span class="st">'%s'</span><span class="op">,</span> e <span class="kw">=&gt;</span> e<span class="op">.</span><span class="at">innerHTML</span> <span class="op">=</span> marked<span class="op">.</span><span class="fu">parse</span>(e<span class="op">.</span><span class="at">textContent</span>))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>proc_htmx</code> is a shortcut that we wrote to apply a function to elements matching a selector, including the element that triggered the event. Here’s the code for reference:</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode javascript code-with-copy"><code class="sourceCode javascript"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">function</span> <span class="fu">proc_htmx</span>(sel<span class="op">,</span> func) {</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>  htmx<span class="op">.</span><span class="fu">onLoad</span>(elt <span class="kw">=&gt;</span> {</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> elements <span class="op">=</span> htmx<span class="op">.</span><span class="fu">findAll</span>(elt<span class="op">,</span> sel)<span class="op">;</span></span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (elt<span class="op">.</span><span class="fu">matches</span>(sel)) elements<span class="op">.</span><span class="fu">unshift</span>(elt)</span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>    elements<span class="op">.</span><span class="fu">forEach</span>(func)<span class="op">;</span></span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <a href="https://github.com/AnswerDotAI/fasthtml-example/tree/main/ai_pictionary">AI Pictionary example</a> uses a larger chunk of custom JavaScript to handle the drawing canvas. It’s a good example of the type of application where running code on the client side makes the most sense, but still shows how you can integrate it with FastHTML on the server side to add functionality (like the AI responses) easily.</p>
+<p>Adding styling with custom CSS and libraries such as tailwind is done the same way we add custom JavaScript. The <a href="https://github.com/AnswerDotAI/fasthtml-example/tree/main/doodle">doodle example</a> uses <a href="https://github.com/chr15m/DoodleCSS">Doodle.CSS</a> to style the page in a quirky way.</p>
+</section>
+<section id="deploying-your-app" class="level2">
+<h2 class="anchored" data-anchor-id="deploying-your-app">Deploying Your App</h2>
+<p>We can deploy FastHTML almost anywhere you can deploy python apps. We’ve tested Railway, Replit, <a href="https://github.com/AnswerDotAI/fasthtml-hf">HuggingFace</a>, and <a href="https://github.com/AnswerDotAI/fasthtml-example/blob/main/deploying-to-pythonanywhere.md">PythonAnywhere</a>.</p>
+<section id="railway" class="level3">
+<h3 class="anchored" data-anchor-id="railway">Railway</h3>
+<ol type="1">
+<li><a href="https://docs.railway.app/guides/cli">Install the Railway CLI</a> and sign up for an account.</li>
+<li>Set up a folder with our app as <code>main.py</code></li>
+<li>In the folder, run <code>railway login</code>.</li>
+<li>Use the <code>fh_railway_deploy</code> script to deploy our project:</li>
+</ol>
+<div class="sourceCode" id="cb80"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fh_railway_deploy</span> MY_APP_NAME</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>What the script does for us:</p>
+<ol start="4" type="1">
+<li>Do we have an existing railway project?
+<ul>
+<li>Yes: Link the project folder to our existing Railway project.</li>
+<li>No: Create a new Railway project.</li>
+</ul></li>
+<li>Deploy the project. We’ll see the logs as the service is built and run!</li>
+<li>Fetches and displays the URL of our app.</li>
+<li>By default, mounts a <code>/app/data</code> folder on the cloud to our app’s root folder. The app is run in <code>/app</code> by default, so from our app anything we store in <code>/data</code> will persist across restarts.</li>
+</ol>
+<p>A final note about Railway: We can add secrets like API keys that can be accessed as environment variables from our apps via <a href="https://docs.railway.app/guides/variables">‘Variables’</a>. For example, for the image app (TODO link), we can add a <code>REPLICATE_API_KEY</code> variable, and then in <code>main.py</code> we can access it as <code>os.environ['REPLICATE_API_KEY']</code>.</p>
+</section>
+<section id="replit" class="level3">
+<h3 class="anchored" data-anchor-id="replit">Replit</h3>
+<p>Fork <a href="https://replit.com/@johnowhitaker/FastHTML-Example">this repl</a> for a minimal example you can edit to your heart’s content. <code>.replit</code> has been edited to add the right run command (<code>run = ["uvicorn", "main:app", "--reload"]</code>) and to set up the ports correctly. FastHTML was installed with <code>poetry add python-fasthtml</code>, you can add additional packages as needed in the same way. Running the app in Replit will show you a webview, but you may need to open in a new tab for all features (such as cookies) to work. When you’re ready, you can deploy your app by clicking the ‘Deploy’ button. You pay for usage - for an app that is mostly idle the cost is usually a few cents per month.</p>
+<p>You can store secrets like API keys via the ‘Secrets’ tab in the Replit project settings.</p>
+</section>
+<section id="huggingface" class="level3">
+<h3 class="anchored" data-anchor-id="huggingface">HuggingFace</h3>
+<p>Follow the instructions in <a href="https://github.com/AnswerDotAI/fasthtml-hf">this repository</a> to deploy to HuggingFace spaces.</p>
+</section>
+</section>
+<section id="where-next" class="level2">
+<h2 class="anchored" data-anchor-id="where-next">Where Next?</h2>
+<p>We’ve covered a lot of ground here! Hopefully this has given you plenty to work with in building your own FastHTML apps. If you have any questions, feel free to ask in the #fasthtml Discord channel (in the fastai Discord community). You can look through the other examples in the <a href="https://github.com/AnswerDotAI/fasthtml-example">fasthtml-example repository</a> for more ideas, and keep an eye on Jeremy’s <a href="https://www.youtube.com/@howardjeremyp">YouTube channel</a> where we’ll be releasing a number of “dev chats” related to FastHTML in the near future.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/AnswerDotAI\.github\.io\/fasthtml");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
