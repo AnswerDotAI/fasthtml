@@ -47,7 +47,7 @@ class FastHTMLWithLiveReload(FastHTML):
         >>> app = FastHTMLWithLiveReload()
 
         Run:
-            run_uv()
+            serve()
     """
     LIVE_RELOAD_ROUTE = WebSocketRoute("/live-reload", endpoint=live_reload_websocket)
 
