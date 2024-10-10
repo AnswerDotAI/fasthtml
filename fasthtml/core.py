@@ -368,17 +368,20 @@ def _xt_cts(req, resp):
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
+    tasks,resp = partition(resp, risinstance(BackgroundTask))
+    ts = BackgroundTasks()
+    for t in tasks: ts.tasks.append(t)
     hdr_tags = 'title','meta','link','style','base'
     titles,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
         if not titles: titles = [Title('FastHTML page')]
         resp = Html(Head(*titles, *flat_xt(req.hdrs)), Body(bdy, *flat_xt(req.ftrs), **req.bodykw), **req.htmlkw)
-    return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs
+    return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs, ts
 
 # %% ../nbs/api/00_core.ipynb
 def _xt_resp(req, resp):
-    cts,http_hdrs = _xt_cts(req, resp)
-    return HTMLResponse(cts, headers=http_hdrs)
+    cts,http_hdrs,tasks = _xt_cts(req, resp)
+    return HTMLResponse(cts, headers=http_hdrs, background=tasks)
 
 # %% ../nbs/api/00_core.ipynb
 def _is_ft_resp(resp): return isinstance(resp, (list,tuple,HttpHeader,FT)) or hasattr(resp, '__ft__')
@@ -652,11 +655,11 @@ class MiddlewareBase:
 # %% ../nbs/api/00_core.ipynb
 class FtResponse:
     "Wrap an FT response with any Starlette `Response`"
-    def __init__(self, content, status_code:int=200, headers=None, cls=HTMLResponse, media_type:str|None=None, background=None):
+    def __init__(self, content, status_code:int=200, headers=None, cls=HTMLResponse, media_type:str|None=None):
         self.content,self.status_code,self.headers = content,status_code,headers
-        self.cls,self.media_type,self.background = cls,media_type,background
+        self.cls,self.media_type = cls,media_type
     
     def __response__(self, req):
-        cts,httphdrs = _xt_cts(req, self.content)
+        cts,httphdrs,tasks = _xt_cts(req, self.content)
         headers = {**(self.headers or {}), **httphdrs}
-        return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=self.background)
+        return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=tasks)
