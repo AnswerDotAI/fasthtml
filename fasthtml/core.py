@@ -193,6 +193,10 @@ async def _find_p(req, arg:str, p:Parameter):
     if (res in (empty,None)) and p.default is empty: raise HTTPException(400, f"Missing required field: {arg}")
     # If we have a default, return that if we have no value
     if res in (empty,None): res = p.default
+    # if anno is a Generic Alias but res isn't an iterable then wrap in list
+    if isinstance(anno, GenericAlias):
+        try: iter(res)
+        except TypeError: res = [res]    
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
     anno = _fix_anno(anno)
