@@ -2,6 +2,20 @@
 
 <!-- do not remove -->
 
+## 0.6.11
+
+### New Features
+
+- Add `pusher()` for real time DOM updates; add `fh_cfg.auto_id` to automatically add unique IDs ([#517](https://github.com/AnswerDotAI/fasthtml/issues/517))
+- Support background tasks ([#512](https://github.com/AnswerDotAI/fasthtml/issues/512))
+- Allows for passing route functions ([#511](https://github.com/AnswerDotAI/fasthtml/pull/511)), thanks to [@Isaac-Flath](https://github.com/Isaac-Flath)
+- Add path arg to HTMX ([#504](https://github.com/AnswerDotAI/fasthtml/pull/504)), thanks to [@Isaac-Flath](https://github.com/Isaac-Flath)
+
+### Bugs Squashed
+
+- Multi file upload does not work ([#509](https://github.com/AnswerDotAI/fasthtml/issues/509))
+
+
 ## 0.6.10
 
 ### New Features
