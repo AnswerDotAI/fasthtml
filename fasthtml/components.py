@@ -65,16 +65,21 @@ def attrmap_x(o):
 # %% ../nbs/api/01_components.ipynb
 fh_cfg['attrmap']=attrmap_x
 fh_cfg['valmap' ]=valmap
+fh_cfg['ft_cls' ]=FT
+fh_cfg['auto_id' ]=False
 
 # %% ../nbs/api/01_components.ipynb
-def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=FT, **kwargs):
+def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, auto_id=None, **kwargs):
     ds,c = partition(c, risinstance(dict))
     for d in ds: kwargs = {**kwargs, **d}
+    if ft_cls is None: ft_cls = fh_cfg.ft_cls
     if attrmap is None: attrmap=fh_cfg.attrmap
     if valmap  is None: valmap =fh_cfg.valmap
+    if auto_id is None: auto_id = fh_cfg.auto_id
+    if auto_id and not id: id = unqid()
     kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style
     tag,c,kw = ft(tag, *c, attrmap=attrmap, valmap=valmap, **kwargs).list
-    if tag in named and 'id' in kw and 'name' not in kw: kw['name'] = kw['id']
+    if tag in named and id and 'name' not in kw: kw['name'] = kw['id']
     return ft_cls(tag,c,kw, void_=tag in voids)
 
 # %% ../nbs/api/01_components.ipynb
