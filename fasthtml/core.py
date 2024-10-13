@@ -7,7 +7,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'scopesrc', 'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader',
            'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown',
            'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'def_hdrs',
-           'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'pusher']
+           'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'Pusher']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -689,21 +689,32 @@ def _add_ids(s):
     for c in s.children: _add_ids(c)
 
 # %% ../nbs/api/00_core.ipynb
-def pusher(app, dest_id='_dest', auto_id=True):
-    queue = asyncio.Queue()
+class Pusher:
+    def __init__(self, app, dest_id='_dest', auto_id=True):
+        store_attr()
+        self._queue = None
+        self('')
+        @app.route
+        def index():
+            return Div(id=self.dest_id, hx_trigger='load', hx_ext="ws",
+                       ws_send=True, ws_connect="/ws")
+    
+    @property
+    def queue(self):
+        self.set_q()
+        return self._queue
 
-    @app.ws("/ws")
-    async def ws(ws, send):
-        while True: await send(await queue.get())
+    def set_q(self):
+        if self._queue: return
+        self._queue = asyncio.Queue()
+        @self.app.ws("/ws")
+        async def ws(ws, send):
+            try:
+                while True:  await send(await self.queue.get())
+            except WebSocketDisconnect: self._queue=None
 
-    @app.route
-    def index():
-        return Div(id=dest_id, hx_trigger='load', ws_send=True, hx_ext="ws", ws_connect="/ws")
-
-    def push(*s):
+    def __call__(self, *s):
         id = getattr(s[0], 'id', None)
-        if not id: s = Div(*s, hx_swap_oob='innerHTML', id=dest_id)
-        if auto_id: _add_ids(s)
-        queue.put_nowait(s)
-
-    return push
+        if not id: s = Div(*s, hx_swap_oob='innerHTML', id=self.dest_id)
+        if self.auto_id: _add_ids(s)
+        self.queue.put_nowait(s)
