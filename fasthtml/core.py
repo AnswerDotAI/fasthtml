@@ -193,6 +193,10 @@ async def _find_p(req, arg:str, p:Parameter):
     if (res in (empty,None)) and p.default is empty: raise HTTPException(400, f"Missing required field: {arg}")
     # If we have a default, return that if we have no value
     if res in (empty,None): res = p.default
+    # For multiple file uploads with a single file:
+    # if anno is a Generic Alias and res is an UploadFile, then wrap in a list. 
+    if isinstance(anno, GenericAlias) and isinstance(res, UploadFile):
+        res = [res]
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
     anno = _fix_anno(anno)
@@ -200,6 +204,8 @@ async def _find_p(req, arg:str, p:Parameter):
     except ValueError: raise HTTPException(404, req.url.path) from None
 
 async def _wrap_req(req, params):
+    # If [UF, UF] then it behaves on way
+    # If [UF] then it behaves another way
     return [await _find_p(req, arg, p) for arg,p in params.items()]
 
 # %% ../nbs/api/00_core.ipynb
