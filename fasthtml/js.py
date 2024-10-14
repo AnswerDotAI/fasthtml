@@ -93,7 +93,7 @@ proc_htmx('%s', Sortable.create);
 def MermaidJS(
         sel='.language-mermaid',  # CSS selector for mermaid elements
         theme='base',  # Mermaid theme to use
-        delay=500  # Delay in milliseconds before rendering
+        delay=0  # Delay in milliseconds before rendering
     ):
     "Implements browser-based Mermaid diagram rendering."
     src = """
