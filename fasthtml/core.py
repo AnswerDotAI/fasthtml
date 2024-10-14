@@ -204,6 +204,8 @@ async def _find_p(req, arg:str, p:Parameter):
     except ValueError: raise HTTPException(404, req.url.path) from None
 
 async def _wrap_req(req, params):
+    # If [UF, UF] then it behaves on way
+    # If [UF] then it behaves another way
     return [await _find_p(req, arg, p) for arg,p in params.items()]
 
 # %% ../nbs/api/00_core.ipynb
