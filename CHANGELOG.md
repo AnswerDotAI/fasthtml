@@ -2,6 +2,19 @@
 
 <!-- do not remove -->
 
+## 0.6.13
+
+### New Features
+
+- Add `scope` param ([#519](https://github.com/AnswerDotAI/fasthtml/issues/519))
+- Allow `FastHTML.ws` to be used without a function ([#519](https://github.com/AnswerDotAI/fasthtml/issues/519))
+- Allow setting of xmlns in `Svg` ([#519](https://github.com/AnswerDotAI/fasthtml/issues/519))
+
+### Bugs Squashed
+
+- Add missing `unqid` import ([#519](https://github.com/AnswerDotAI/fasthtml/issues/519))
+
+
 ## 0.6.12
 
 ### New Features
