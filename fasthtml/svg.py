@@ -31,12 +31,12 @@ g = globals()
 for o in _all_: g[o] = partial(ft_hx, o[0].lower() + o[1:])
 
 # %% ../nbs/api/05_svg.ipynb
-def Svg(*args, viewBox=None, h=None, w=None, height=None, width=None, **kwargs):
+def Svg(*args, viewBox=None, h=None, w=None, height=None, width=None, xmlns="http://www.w3.org/2000/svg", **kwargs):
     "An SVG tag; xmlns is added automatically, and viewBox defaults to height and width if not provided"
     if h: height=h
     if w: width=w
     if not viewBox and height and width: viewBox=f'0 0 {width} {height}'
-    return ft_svg('svg', *args, xmlns="http://www.w3.org/2000/svg", viewBox=viewBox, height=height, width=width, **kwargs)
+    return ft_svg('svg', *args, xmlns=xmlns, viewBox=viewBox, height=height, width=width, **kwargs)
 
 # %% ../nbs/api/05_svg.ipynb
 @delegates(ft_hx)

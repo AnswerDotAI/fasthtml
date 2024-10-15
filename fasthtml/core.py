@@ -175,6 +175,7 @@ async def _find_p(req, arg:str, p:Parameter):
     if anno is empty:
         if 'request'.startswith(arg.lower()): return req
         if 'session'.startswith(arg.lower()): return req.scope.get('session', {})
+        if arg.lower()=='scope': return dict2obj(req.scope)
         if arg.lower()=='auth': return req.scope.get('auth', None)
         if arg.lower()=='htmx': return _get_htmx(req.headers)
         if arg.lower()=='app': return req.scope['app']
@@ -229,6 +230,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
         if issubclass(anno, Starlette): return ws.scope['app']
     if anno is empty:
         if arg.lower()=='ws': return ws
+        if arg.lower()=='scope': return dict2obj(ws.scope)
         if arg.lower()=='data': return data
         if arg.lower()=='htmx': return _get_htmx(hdrs)
         if arg.lower()=='app': return ws.scope['app']
@@ -554,8 +556,8 @@ class FastHTML(Starlette):
 
     def ws(self, path:str, conn=None, disconn=None, name=None):
         "Add a websocket route at `path`"
-        def f(func):
-            self.router.add_ws(path, func, conn=conn, disconn=disconn, name=name)
+        def f(func=None):
+            self.router.add_ws(path, func or noop, conn=conn, disconn=disconn, name=name)
             return func
         return f
 

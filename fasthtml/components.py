@@ -24,7 +24,7 @@ from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
 from fastcore.test import *
-from .core import fh_cfg
+from .core import fh_cfg, unqid
 
 import types, json
 
