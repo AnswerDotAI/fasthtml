@@ -5,7 +5,7 @@
 # %% auto 0
 __all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces',
            'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow',
-           'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear']
+           'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear', 'with_sid']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
@@ -15,6 +15,7 @@ from fastcore.utils import *
 from fastcore.xtras import partial_format
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
+from .core import *
 from .components import *
 
 try: from IPython import display
@@ -232,3 +233,10 @@ htmx.on("htmx:configRequest", (e) => {
     }
 });
 ''')
+
+# %% ../nbs/api/02_xtend.ipynb
+def with_sid(app, dest, path='/'):
+    id = unqid()
+    @app.route(path)
+    def get():
+        return Div(id=id, hx_get=dest, hx_trigger=f'load delay:0.001s', hx_target=f'#{id}', hx_swap='outerHTML')

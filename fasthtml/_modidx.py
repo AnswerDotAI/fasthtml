@@ -227,4 +227,5 @@ d = { 'settings': { 'branch': 'main',
                                 'fasthtml.xtend.loose_format': ('api/xtend.html#loose_format', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.replace_css_vars': ('api/xtend.html#replace_css_vars', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.run_js': ('api/xtend.html#run_js', 'fasthtml/xtend.py'),
-                                'fasthtml.xtend.undouble_braces': ('api/xtend.html#undouble_braces', 'fasthtml/xtend.py')}}}
+                                'fasthtml.xtend.undouble_braces': ('api/xtend.html#undouble_braces', 'fasthtml/xtend.py'),
+                                'fasthtml.xtend.with_sid': ('api/xtend.html#with_sid', 'fasthtml/xtend.py')}}}

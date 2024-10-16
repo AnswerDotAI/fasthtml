@@ -211,7 +211,7 @@ def flat_xt(lst):
     for item in lst:
         if isinstance(item, (list,tuple)): result.extend(item)
         else: result.append(item)
-    return result
+    return tuple(result)
 
 # %% ../nbs/api/00_core.ipynb
 class Beforeware:
@@ -347,7 +347,7 @@ def _find_targets(req, resp):
 def _apply_ft(o):
     if isinstance(o, tuple): o = tuple(_apply_ft(c) for c in o)
     if hasattr(o, '__ft__'): o = o.__ft__()
-    if isinstance(o, FT): o.children = [_apply_ft(c) for c in o.children]
+    if isinstance(o, FT): o.children = tuple(_apply_ft(c) for c in o.children)
     return o
 
 def _to_xml(req, resp, indent):

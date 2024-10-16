@@ -74,10 +74,13 @@ class JupyUvi:
 # %% ../nbs/api/06_jupyter.ipynb
 # The script lets an iframe parent know of changes so that it can resize automatically.  
 _iframe_scr = Script("""
-    function sendmsg() {window.parent.postMessage({height: document.documentElement.offsetHeight}, '*')}
+    function sendmsg() {
+        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');
+    }
     window.onload = function() {
         sendmsg();
-        document.body.addEventListener('htmx:afterSettle', sendmsg);
+        document.body.addEventListener('htmx:afterSettle',    sendmsg);
+        document.body.addEventListener('htmx:wsAfterMessage', sendmsg);
     };""")
 
 # %% ../nbs/api/06_jupyter.ipynb
@@ -93,6 +96,7 @@ def HTMX(path="", host='localhost', port=8000, iframe_height="auto"):
     return HTML(f'<iframe src="http://{host}:{port}{str(path)}" style="width: 100%; height: {iframe_height}; border: none;" ' + """onload="{
         let frame = this;
         window.addEventListener('message', function(e) {
+            if (e.source !== frame.contentWindow) return; // Only proceed if the message is from this iframe
             if (e.data.height) frame.style.height = (e.data.height+1) + 'px';
         }, false);
     }" allow="accelerometer; autoplay; camera; clipboard-read; clipboard-write; display-capture; encrypted-media; fullscreen; gamepad; geolocation; gyroscope; hid; identity-credentials-get; idle-detection; magnetometer; microphone; midi; payment; picture-in-picture; publickey-credentials-get; screen-wake-lock; serial; usb; web-share; xr-spatial-tracking"></iframe> """)
