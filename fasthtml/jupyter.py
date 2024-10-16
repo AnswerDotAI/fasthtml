@@ -2,14 +2,14 @@
 
 # %% auto 0
 __all__ = ['cors_allow', 'nb_serve', 'nb_serve_async', 'is_port_free', 'wait_port_free', 'JupyUvi', 'FastJupy', 'HTMX',
-           'jupy_app']
+           'ws_client', 'jupy_app']
 
 # %% ../nbs/api/06_jupyter.ipynb
 import asyncio, socket, time, uvicorn
 from threading import Thread
 from fastcore.utils import *
 from .common import *
-from IPython.display import HTML,Markdown,IFrame
+from IPython.display import HTML,Markdown,IFrame,display
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware import Middleware
 from fastcore.parallel import startthread
@@ -100,6 +100,20 @@ def HTMX(path="", host='localhost', port=8000, iframe_height="auto"):
             if (e.data.height) frame.style.height = (e.data.height+1) + 'px';
         }, false);
     }" allow="accelerometer; autoplay; camera; clipboard-read; clipboard-write; display-capture; encrypted-media; fullscreen; gamepad; geolocation; gyroscope; hid; identity-credentials-get; idle-detection; magnetometer; microphone; midi; payment; picture-in-picture; publickey-credentials-get; screen-wake-lock; serial; usb; web-share; xr-spatial-tracking"></iframe> """)
+
+# %% ../nbs/api/06_jupyter.ipynb
+def ws_client(app, nm='', host='localhost', port=8000, ws_connect='/ws', frame=True, link=True, **kwargs):
+    path = f'/{nm}'
+    c = Main('', cls="container", id=unqid())
+    @app.get(path)
+    def f():
+        return Div(c, id=nm or '_dest', hx_trigger='load',
+                   hx_ext="ws", ws_connect=ws_connect, **kwargs)
+    if link: display(HTML(f'<a href="http://{host}:{port}{path}" target="_blank">open in browser</a>'))
+    if frame: display(HTMX(path, host=host, port=port))
+    def send(o): asyncio.create_task(app._send(o))
+    c.on(send)
+    return c
 
 # %% ../nbs/api/06_jupyter.ipynb
 def jupy_app(pico=False, hdrs=None, middleware=None, **kwargs):
