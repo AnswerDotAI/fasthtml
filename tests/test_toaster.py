@@ -19,6 +19,11 @@ def post(session):
 def get(session):
     return Titled("Hello, world!", P(str(session)))
 
+@rt("/see-toast-ft-response")
+def get(session):
+    add_toast(session, "Toast FtResponse", "info")
+    return FtResponse(Titled("Hello, world!", P(str(session))))
+
 def test_get_toaster():
     cli.get('/set-toast-get', follow_redirects=False)
     res = cli.get('/see-toast')
@@ -32,6 +37,11 @@ def test_post_toaster():
     res = cli.get('/see-toast')
     assert 'Toast post' in res.text
 
+def test_ft_response():
+    res = cli.get('/see-toast-ft-response')
+    assert 'Toast FtResponse' in res.text
+
 test_get_toaster()
 test_post_toaster()
+test_ft_response()
 
