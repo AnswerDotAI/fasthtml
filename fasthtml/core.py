@@ -7,7 +7,8 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'scopesrc', 'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader',
            'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown',
            'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'def_hdrs',
-           'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'Pusher']
+           'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws',
+           'ws_client']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -691,32 +692,26 @@ def _add_ids(s):
     for c in s.children: _add_ids(c)
 
 # %% ../nbs/api/00_core.ipynb
-class Pusher:
-    def __init__(self, app, dest_id='_dest', auto_id=True):
-        store_attr()
-        self._queue = None
-        self('')
-        @app.route
-        def index():
-            return Div(id=self.dest_id, hx_trigger='load', hx_ext="ws",
-                       ws_send=True, ws_connect="/ws")
-    
-    @property
-    def queue(self):
-        self.set_q()
-        return self._queue
+def setup_ws(app):
+    conns = {}
+    async def on_connect(scope, send): conns[scope.client] = send
+    async def on_disconnect(scope): conns.pop(scope.client)
+    app.ws('/ws', conn=on_connect, disconn=on_disconnect)()
+    async def send(s):
+        for o in conns.values(): await o(s)
+    app._send = send
+    return send
 
-    def set_q(self):
-        if self._queue: return
-        self._queue = asyncio.Queue()
-        @self.app.ws("/ws")
-        async def ws(ws, send):
-            try:
-                while True:  await send(await self.queue.get())
-            except WebSocketDisconnect: self._queue=None
-
-    def __call__(self, *s):
-        id = getattr(s[0], 'id', None)
-        if not id: s = Div(*s, hx_swap_oob='innerHTML', id=self.dest_id)
-        if self.auto_id: _add_ids(s)
-        self.queue.put_nowait(s)
+# %% ../nbs/api/00_core.ipynb
+def ws_client(app, nm='', host='localhost', port=8000, ws_connect='/ws', frame=True, link=True, **kwargs):
+    path = f'/{nm}'
+    c = Container('', id=unqid())
+    @app.get(path)
+    def f():
+        return Div(c, id=nm or '_dest', hx_trigger='load',
+                   hx_ext="ws", ws_connect=ws_connect, **kwargs)
+    if link: display(HTML(f'<a href="http://{host}:{port}{path}" target="_blank">open in browser</a>'))
+    if frame: display(HTMX(path, host=host, port=port))
+    def send(o): asyncio.create_task(app._send(o))
+    c.on(send)
+    return c
