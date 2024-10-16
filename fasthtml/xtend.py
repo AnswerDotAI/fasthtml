@@ -236,7 +236,5 @@ htmx.on("htmx:configRequest", (e) => {
 
 # %% ../nbs/api/02_xtend.ipynb
 def with_sid(app, dest, path='/'):
-    id = unqid()
     @app.route(path)
-    def get():
-        return Div(id=id, hx_get=dest, hx_trigger=f'load delay:0.001s', hx_target=f'#{id}', hx_swap='outerHTML')
+    def get(): return Div(hx_get=dest, hx_trigger=f'load delay:0.001s', hx_swap='outerHTML')
