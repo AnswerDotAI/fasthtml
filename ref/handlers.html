@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="How handlers work in FastHTML">
+
+<title>Handling handlers – fasthtml</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Handling handlers – fasthtml">
+<meta property="og:description" content="How handlers work in FastHTML">
+<meta property="og:site_name" content="fasthtml">
+<meta name="twitter:title" content="Handling handlers – fasthtml">
+<meta name="twitter:description" content="How handlers work in FastHTML">
+<meta name="twitter:image" content="https://docs.fastht.ml/og-image.png">
+<meta name="twitter:creator" content="@jeremyphoward">
+<meta name="twitter:site" content="@answerdotai">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../logo.svg" alt="" class="navbar-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://fastht.ml"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://about.fastht.ml"> 
+<span class="menu-text">Learn</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/answerdotai/fasthtml"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://x.com/answerdotai"> <i class="bi bi-twitter" role="img" aria-label="Fast.ai Twitter">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../ref/defining_xt_component.html">Reference</a></li><li class="breadcrumb-item"><a href="../ref/handlers.html">Handling handlers</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Get Started</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../tutorials/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/by_example.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FastHTML By Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/quickstart_for_web_devs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Web Devs Quickstart</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/e2e.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">JS App Walkthrough</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/jupyter_and_fasthtml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Jupyter to write FastHTML</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Explanations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/explaining_xt_components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><strong>FT</strong> Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/faq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FAQ</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/minidataapi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MiniDataAPI Spec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/oauth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OAuth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/routes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Routes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/websockets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WebSockets</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/defining_xt_component.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Custom Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/handlers.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Handling handlers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/live_reload.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Live Reloading</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Source</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Core</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/xtend.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Component extensions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/js.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Javascript examples</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/pico.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pico.css components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/svg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SVG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/jupyter.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Jupyter compatibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/oauth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OAuth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Command Line Tools</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/fastapp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">fastapp</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#basic-route-handling" id="toc-basic-route-handling" class="nav-link active" data-scroll-target="#basic-route-handling">Basic Route Handling</a></li>
+  <li><a href="#request-and-response-objects" id="toc-request-and-response-objects" class="nav-link" data-scroll-target="#request-and-response-objects">Request and Response Objects</a></li>
+  <li><a href="#path-and-query-parameters" id="toc-path-and-query-parameters" class="nav-link" data-scroll-target="#path-and-query-parameters">Path and Query Parameters</a></li>
+  <li><a href="#form-data-and-json-handling" id="toc-form-data-and-json-handling" class="nav-link" data-scroll-target="#form-data-and-json-handling">Form Data and JSON Handling</a></li>
+  <li><a href="#cookies-sessions-file-uploads-and-more" id="toc-cookies-sessions-file-uploads-and-more" class="nav-link" data-scroll-target="#cookies-sessions-file-uploads-and-more">Cookies, Sessions, File Uploads, and more</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="handlers.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../ref/defining_xt_component.html">Reference</a></li><li class="breadcrumb-item"><a href="../ref/handlers.html">Handling handlers</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Handling handlers</h1>
+</div>
+
+<div>
+  <div class="description">
+    How handlers work in FastHTML
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<div id="c4859e91" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> namedtuple</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> TypedDict</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json,time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cab9ef0b" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#fasthtml"><code>FastHTML</code></a> class is the main application class for FastHTML apps.</p>
+<div id="f912bfa6" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rt <span class="op">=</span> app.route</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code>app.route</code> is used to register route handlers. It is a decorator, which means we place it before a function that is used as a handler. Because it’s used frequently in most FastHTML applications, we often alias it as <code>rt</code>, as we do here.</p>
+<section id="basic-route-handling" class="level2">
+<h2 class="anchored" data-anchor-id="basic-route-handling">Basic Route Handling</h2>
+<div id="313af67b" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/hi"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> <span class="st">'Hi there'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Handler functions can return strings directly. These strings are sent as the response body to the client.</p>
+<div id="82287e75" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cli <span class="op">=</span> Client(app)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#client"><code>Client</code></a> is a test client for FastHTML applications. It allows you to simulate requests to your app without running a server.</p>
+<div id="5e0e207d" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/hi'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Hi there'</code></pre>
+</div>
+</div>
+<p>The <code>get</code> method on a <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#client"><code>Client</code></a> instance simulates GET requests to the app. It returns a response object that has a <code>.text</code> attribute, which you can use to access the body of the response. It calls <code>httpx.get</code> internally – all httpx HTTP verbs are supported.</p>
+<div id="1763888b" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/hi"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(): <span class="cf">return</span> <span class="st">'Postal'</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>cli.post(<span class="st">'/hi'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Postal'</code></pre>
+</div>
+</div>
+<p>Handler functions can be defined for different HTTP methods on the same route. Here, we define a <code>post</code> handler for the <code>/hi</code> route. The <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#client"><code>Client</code></a> instance can simulate different HTTP methods, including POST requests.</p>
+</section>
+<section id="request-and-response-objects" class="level2">
+<h2 class="anchored" data-anchor-id="request-and-response-objects">Request and Response Objects</h2>
+<div id="274666db" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/hostie"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_host(req): <span class="cf">return</span> req.headers[<span class="st">'host'</span>]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/hostie'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'testserver'</code></pre>
+</div>
+</div>
+<p>Handler functions can accept a <code>req</code> (or <code>request</code>) parameter, which represents the incoming request. This object contains information about the request, including headers. In this example, we return the <code>host</code> header from the request. The test client uses ‘testserver’ as the default host.</p>
+<p>In this example, we use <code>@app.get("/hostie")</code> instead of <code>@rt("/hostie")</code>. The <code>@app.get()</code> decorator explicitly specifies the HTTP method (GET) for the route, while <code>@rt()</code> by default handles both GET and POST requests.</p>
+<div id="36292bf3" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> yoyo(): <span class="cf">return</span> <span class="st">'a yoyo'</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>cli.post(<span class="st">'/yoyo'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'a yoyo'</code></pre>
+</div>
+</div>
+<p>If the <code>@rt</code> decorator is used without arguments, it uses the function name as the route path. Here, the <code>yoyo</code> function becomes the handler for the <code>/yoyo</code> route. This handler responds to GET and POST methods, since a specific method wasn’t provided.</p>
+<div id="0d813cd0" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ft1(): <span class="cf">return</span> Html(Div(<span class="st">'Text.'</span>))</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/ft1'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;html&gt;
+   &lt;div&gt;Text.&lt;/div&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>Handler functions can return <a href="https://docs.fastht.ml/explains/explaining_xt_components.html"><code>FT</code></a> objects, which are automatically converted to HTML strings. The <code>FT</code> class can take other <code>FT</code> components as arguments, such as <code>Div</code>. This allows for easy composition of HTML elements in your responses.</p>
+<div id="43f20c45" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> autopost(): <span class="cf">return</span> Html(Div(<span class="st">'Text.'</span>, hx_post<span class="op">=</span>yoyo.rt()))</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/autopost'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;html&gt;
+   &lt;div hx-post="/yoyo"&gt;Text.&lt;/div&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>The <code>rt</code> decorator modifies the <code>yoyo</code> function by adding an <code>rt()</code> method. This method returns the route path associated with the handler. It’s a convenient way to reference the route of a handler function dynamically.</p>
+<p>In the example, <code>yoyo.rt()</code> is used as the value for <code>hx_post</code>. This means when the div is clicked, it will trigger an HTMX POST request to the route of the <code>yoyo</code> handler. This approach allows for flexible, DRY code by avoiding hardcoded route strings and automatically updating if the route changes.</p>
+<p>This pattern is particularly useful in larger applications where routes might change, or when building reusable components that need to reference their own routes dynamically.</p>
+<div id="1aac05b2" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> autoget(): <span class="cf">return</span> Html(Body(Div(<span class="st">'Text.'</span>, cls<span class="op">=</span><span class="st">'px-2'</span>, hx_post<span class="op">=</span>show_host.rt(a<span class="op">=</span><span class="st">'b'</span>))))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/autoget'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;html&gt;
+   &lt;body&gt;
+     &lt;div hx-post="/hostie?a=b" class="px-2"&gt;Text.&lt;/div&gt;
+   &lt;/body&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>The <code>rt()</code> method of handler functions can also accept parameters. When called with parameters, it returns the route path with a query string appended. In this example, <code>show_host.rt(a='b')</code> generates the path <code>/hostie?a=b</code>.</p>
+<p>The <code>Body</code> component is used here to demonstrate nesting of FT components. <code>Div</code> is nested inside <code>Body</code>, showcasing how you can create more complex HTML structures.</p>
+<p>The <code>cls</code> parameter is used to add a CSS class to the <code>Div</code>. This translates to the <code>class</code> attribute in the rendered HTML. (<code>class</code> can’t be used as a parameter name directly in Python since it’s a reserved word.)</p>
+<div id="87cb61fd" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/ft2'</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> Title(<span class="st">'Foo'</span>),H1(<span class="st">'bar'</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/ft2'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;!doctype html&gt;
+
+ &lt;html&gt;
+   &lt;head&gt;
+     &lt;title&gt;Foo&lt;/title&gt;
+     &lt;meta charset="utf-8"&gt;
+     &lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;
+     &lt;script src="https://unpkg.com/htmx.org@next/dist/htmx.min.js"&gt;&lt;/script&gt;
+     &lt;script src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@main/fasthtml.js"&gt;&lt;/script&gt;
+     &lt;script src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js"&gt;&lt;/script&gt;
+     &lt;script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"&gt;&lt;/script&gt;
+   &lt;/head&gt;
+   &lt;body&gt;
+     &lt;h1&gt;bar&lt;/h1&gt;
+   &lt;/body&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>Handler functions can return multiple <code>FT</code> objects as a tuple. The first item is treated as the <code>Title</code>, and the rest are added to the <code>Body</code>. When the request is not an HTMX request, FastHTML automatically adds necessary HTML boilerplate, including default <code>head</code> content with required scripts.</p>
+<p>When using <code>app.route</code> (or <code>rt</code>), if the function name matches an HTTP verb (e.g., <code>get</code>, <code>post</code>, <code>put</code>, <code>delete</code>), that HTTP method is automatically used for the route. In this case, a path must be explicitly provided as an argument to the decorator.</p>
+<div id="108d93d3" class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>hxhdr <span class="op">=</span> {<span class="st">'headers'</span>:{<span class="st">'hx-request'</span>:<span class="st">"1"</span>}}</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/ft2'</span>, <span class="op">**</span>hxhdr).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;title&gt;Foo&lt;/title&gt;
+
+ &lt;h1&gt;bar&lt;/h1&gt;
+</code></pre>
+</div>
+</div>
+<p>For HTMX requests (indicated by the <code>hx-request</code> header), FastHTML returns only the specified components without the full HTML structure. This allows for efficient partial page updates in HTMX applications.</p>
+<div id="42b8d631" class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/ft3'</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> H1(<span class="st">'bar'</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/ft3'</span>, <span class="op">**</span>hxhdr).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;h1&gt;bar&lt;/h1&gt;
+</code></pre>
+</div>
+</div>
+<p>When a handler function returns a single <code>FT</code> object for an HTMX request, it’s rendered as a single HTML partial.</p>
+<div id="b9e4eb09" class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/ft4'</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> Html(Head(Title(<span class="st">'hi'</span>)), Body(P(<span class="st">'there'</span>)))</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/ft4'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;html&gt;
+   &lt;head&gt;
+     &lt;title&gt;hi&lt;/title&gt;
+   &lt;/head&gt;
+   &lt;body&gt;
+     &lt;p&gt;there&lt;/p&gt;
+   &lt;/body&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>Handler functions can return a complete <code>Html</code> structure, including <code>Head</code> and <code>Body</code> components. When a full HTML structure is returned, FastHTML doesn’t add any additional boilerplate. This gives you full control over the HTML output when needed.</p>
+<div id="00725561" class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> index(): <span class="cf">return</span> <span class="st">"welcome!"</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>welcome!</code></pre>
+</div>
+</div>
+<p>The <code>index</code> function is a special handler in FastHTML. When defined without arguments to the <code>@rt</code> decorator, it automatically becomes the handler for the root path (<code>'/'</code>). This is a convenient way to define the main page or entry point of your application.</p>
+</section>
+<section id="path-and-query-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="path-and-query-parameters">Path and Query Parameters</h2>
+<div id="64343367" class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/user/</span><span class="sc">{nm}</span><span class="st">'</span>, name<span class="op">=</span><span class="st">'gday'</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(nm:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>): <span class="cf">return</span> <span class="ss">f"Good day to you, </span><span class="sc">{</span>nm<span class="sc">}</span><span class="ss">!"</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/user/Alexis'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Good day to you, Alexis!'</code></pre>
+</div>
+</div>
+<p>Handler functions can use path parameters, defined using curly braces in the route – this is implemented by Starlette directly, so all Starlette path parameters can be used. These parameters are passed as arguments to the function.</p>
+<p>The <code>name</code> parameter in the decorator allows you to give the route a name, which can be used for URL generation.</p>
+<p>In this example, <code>{nm}</code> in the route becomes the <code>nm</code> parameter in the function. The function uses this parameter to create a personalized greeting.</p>
+<div id="29a96715" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> autolink(): <span class="cf">return</span> Html(Div(<span class="st">'Text.'</span>, link<span class="op">=</span>uri(<span class="st">'gday'</span>, nm<span class="op">=</span><span class="st">'Alexis'</span>)))</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/autolink'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;html&gt;
+   &lt;div href="/user/Alexis"&gt;Text.&lt;/div&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>The <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#uri"><code>uri</code></a> function is used to generate URLs for named routes. It takes the route name as its first argument, followed by any path or query parameters needed for that route.</p>
+<p>In this example, <code>uri('gday', nm='Alexis')</code> generates the URL for the route named ‘gday’ (which we defined earlier as ‘/user/{nm}’), with ‘Alexis’ as the value for the ‘nm’ parameter.</p>
+<p>The <code>link</code> parameter in FT components sets the <code>href</code> attribute of the rendered HTML element. By using <code>uri()</code>, we can dynamically generate correct URLs even if the underlying route structure changes.</p>
+<p>This approach promotes maintainable code by centralizing route definitions and avoiding hardcoded URLs throughout the application.</p>
+<div id="54266599" class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/link'</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(req): <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span>req<span class="sc">.</span>url_for(<span class="st">'gday'</span>, nm<span class="op">=</span><span class="st">'Alexis'</span>)<span class="sc">}</span><span class="ss">; </span><span class="sc">{</span>req<span class="sc">.</span>url_for(<span class="st">'show_host'</span>)<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/link'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'http://testserver/user/Alexis; http://testserver/hostie'</code></pre>
+</div>
+</div>
+<p>The <code>url_for</code> method of the request object can be used to generate URLs for named routes. It takes the route name as its first argument, followed by any path parameters needed for that route.</p>
+<p>In this example, <code>req.url_for('gday', nm='Alexis')</code> generates the full URL for the route named ‘gday’, including the scheme and host. Similarly, <code>req.url_for('show_host')</code> generates the URL for the ‘show_host’ route.</p>
+<p>This method is particularly useful when you need to generate absolute URLs, such as for email links or API responses. It ensures that the correct host and scheme are included, even if the application is accessed through different domains or protocols.</p>
+<div id="48d73da1" class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>app.url_path_for(<span class="st">'gday'</span>, nm<span class="op">=</span><span class="st">'Jeremy'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'/user/Jeremy'</code></pre>
+</div>
+</div>
+<p>The <code>url_path_for</code> method of the application can be used to generate URL paths for named routes. Unlike <code>url_for</code>, it returns only the path component of the URL, without the scheme or host.</p>
+<p>In this example, <code>app.url_path_for('gday', nm='Jeremy')</code> generates the path ‘/user/Jeremy’ for the route named ‘gday’.</p>
+<p>This method is useful when you need relative URLs or just the path component, such as for internal links or when constructing URLs in a host-agnostic manner.</p>
+<div id="381a1b68" class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/oops'</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(nope): <span class="cf">return</span> nope</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> cli.get(<span class="st">'/oops?nope=1'</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(r)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>r.text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;Response [200 OK]&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Users/jhoward/Documents/GitHub/fasthtml/fasthtml/core.py:175: UserWarning: `nope has no type annotation and is not a recognised special name, so is ignored.
+  if arg!='resp': warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>''</code></pre>
+</div>
+</div>
+<p>Handler functions can include parameters, but they must be type-annotated or have special names (like <code>req</code>) to be recognized. In this example, the <code>nope</code> parameter is not annotated, so it’s ignored, resulting in a warning.</p>
+<p>When a parameter is ignored, it doesn’t receive the value from the query string. This can lead to unexpected behavior, as the function attempts to return <code>nope</code>, which is undefined.</p>
+<p>The <code>cli.get('/oops?nope=1')</code> call succeeds with a 200 OK status because the handler doesn’t raise an exception, but it returns an empty response, rather than the intended value.</p>
+<p>To fix this, you should either add a type annotation to the parameter (e.g., <code>def get(nope: str):</code>) or use a recognized special name like <code>req</code>.</p>
+<div id="9e983268" class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/html/</span><span class="sc">{idx}</span><span class="st">'</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(idx:<span class="bu">int</span>): <span class="cf">return</span> Body(H4(<span class="ss">f'Next is </span><span class="sc">{</span>idx<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">.'</span>))</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/html/1'</span>, <span class="op">**</span>hxhdr).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;body&gt;
+   &lt;h4&gt;Next is 2.&lt;/h4&gt;
+ &lt;/body&gt;
+</code></pre>
+</div>
+</div>
+<p>Path parameters can be type-annotated, and FastHTML will automatically convert them to the specified type if possible. In this example, <code>idx</code> is annotated as <code>int</code>, so it’s converted from the string in the URL to an integer.</p>
+<div id="bb085687" class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>reg_re_param(<span class="st">"imgext"</span>, <span class="st">"ico|gif|jpg|jpeg|webm"</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="vs">r'/static/{path:path}</span><span class="sc">{fn}</span><span class="vs">.{ext:imgext}'</span>)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(fn:<span class="bu">str</span>, path:<span class="bu">str</span>, ext:<span class="bu">str</span>): <span class="cf">return</span> <span class="ss">f"Getting </span><span class="sc">{</span>fn<span class="sc">}</span><span class="ss">.</span><span class="sc">{</span>ext<span class="sc">}</span><span class="ss"> from /</span><span class="sc">{</span>path<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/static/foo/jph.ico'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Getting jph.ico from /foo/</code></pre>
+</div>
+</div>
+<p>The <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#reg_re_param"><code>reg_re_param</code></a> function is used to register custom path parameter types using regular expressions. Here, we define a new path parameter type called “imgext” that matches common image file extensions.</p>
+<p>Handler functions can use complex path patterns with multiple parameters and custom types. In this example, the route pattern <code>r'/static/{path:path}{fn}.{ext:imgext}'</code> uses three path parameters:</p>
+<ol type="1">
+<li><code>path</code>: A Starlette built-in type that matches any path segments</li>
+<li><code>fn</code>: The filename without extension</li>
+<li><code>ext</code>: Our custom “imgext” type that matches specific image extensions</li>
+</ol>
+<div id="c2cbb818" class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>ModelName <span class="op">=</span> str_enum(<span class="st">'ModelName'</span>, <span class="st">"alexnet"</span>, <span class="st">"resnet"</span>, <span class="st">"lenet"</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/models/</span><span class="sc">{nm}</span><span class="st">"</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(nm:ModelName): <span class="cf">return</span> nm</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/models/alexnet'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>alexnet</code></pre>
+</div>
+</div>
+<p>We define <code>ModelName</code> as an enum with three possible values: “alexnet”, “resnet”, and “lenet”. Handler functions can use these enum types as parameter annotations. In this example, the <code>nm</code> parameter is annotated with <code>ModelName</code>, which ensures that only valid model names are accepted.</p>
+<p>When a request is made with a valid model name, the handler function returns that name. This pattern is useful for creating type-safe APIs with a predefined set of valid values.</p>
+<div id="747fc88c" class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/files/</span><span class="sc">{path}</span><span class="st">"</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(path: Path): <span class="cf">return</span> path.with_suffix(<span class="st">'.txt'</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/files/foo'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>foo.txt</code></pre>
+</div>
+</div>
+<p>Handler functions can use <a href="https://AnswerDotAI.github.io/fasthtml/api/svg.html#path"><code>Path</code></a> objects as parameter types. The <a href="https://AnswerDotAI.github.io/fasthtml/api/svg.html#path"><code>Path</code></a> type is from Python’s standard library <code>pathlib</code> module, which provides an object-oriented interface for working with file paths. In this example, the <code>path</code> parameter is annotated with <a href="https://AnswerDotAI.github.io/fasthtml/api/svg.html#path"><code>Path</code></a>, so FastHTML automatically converts the string from the URL to a <a href="https://AnswerDotAI.github.io/fasthtml/api/svg.html#path"><code>Path</code></a> object.</p>
+<p>This approach is particularly useful when working with file-related routes, as it provides a convenient and platform-independent way to handle file paths.</p>
+<div id="ab7dbef3" class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>fake_db <span class="op">=</span> [{<span class="st">"name"</span>: <span class="st">"Foo"</span>}, {<span class="st">"name"</span>: <span class="st">"Bar"</span>}]</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/items/"</span>)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(idx:<span class="bu">int</span><span class="op">|</span><span class="va">None</span> <span class="op">=</span> <span class="dv">0</span>): <span class="cf">return</span> fake_db[idx]</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/items/?idx=1'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{"name":"Bar"}</code></pre>
+</div>
+</div>
+<p>Handler functions can use query parameters, which are automatically parsed from the URL. In this example, <code>idx</code> is a query parameter with a default value of 0. It’s annotated as <code>int|None</code>, allowing it to be either an integer or None.</p>
+<p>The function uses this parameter to index into a fake database (<code>fake_db</code>). When a request is made with a valid <code>idx</code> query parameter, the handler returns the corresponding item from the database.</p>
+<div id="3fcd79dd" class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/items/'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{"name":"Foo"}</code></pre>
+</div>
+</div>
+<p>When no <code>idx</code> query parameter is provided, the handler function uses the default value of 0. This results in returning the first item from the <code>fake_db</code> list, which is <code>{"name":"Foo"}</code>.</p>
+<p>This behavior demonstrates how default values for query parameters work in FastHTML. They allow the API to have a sensible default behavior when optional parameters are not provided.</p>
+<div id="bd37ec72" class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/items/?idx=g'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;Response [404 Not Found]&gt;</code></pre>
+</div>
+</div>
+<p>When an invalid value is provided for a typed query parameter, FastHTML returns a 404 Not Found response. In this example, ‘g’ is not a valid integer for the <code>idx</code> parameter, so the request fails with a 404 status.</p>
+<p>This behavior ensures type safety and prevents invalid inputs from reaching the handler function.</p>
+<div id="7eb43107" class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/booly/"</span>)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(coming:<span class="bu">bool</span><span class="op">=</span><span class="va">True</span>): <span class="cf">return</span> <span class="st">'Coming'</span> <span class="cf">if</span> coming <span class="cf">else</span> <span class="st">'Not coming'</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/booly/?coming=true'</span>).text)</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/booly/?coming=no'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coming
+Not coming</code></pre>
+</div>
+</div>
+<p>Handler functions can use boolean query parameters. In this example, <code>coming</code> is a boolean parameter with a default value of <code>True</code>. FastHTML automatically converts string values like ‘true’, ‘false’, ‘1’, ‘0’, ‘on’, ‘off’, ‘yes’, and ‘no’ to their corresponding boolean values.</p>
+<p>The underscore <code>_</code> is used as the function name in this example to indicate that the function’s name is not important or won’t be referenced elsewhere. This is a common Python convention for throwaway or unused variables, and it works here because FastHTML uses the route decorator parameter, when provided, to determine the URL path, not the function name. By default, both <code>get</code> and <code>post</code> methods can be used in routes that don’t specify an http method (by either using <code>app.get</code>, <code>def get</code>, or the <code>methods</code> parameter to <code>app.route</code>).</p>
+<div id="2356f7ab" class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/datie/"</span>)</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(d:parsed_date): <span class="cf">return</span> d</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>date_str <span class="op">=</span> <span class="st">"17th of May, 2024, 2p"</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="ss">f'/datie/?d=</span><span class="sc">{</span>date_str<span class="sc">}</span><span class="ss">'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2024-05-17 14:00:00</code></pre>
+</div>
+</div>
+<p>Handler functions can use <code>date</code> objects as parameter types. FastHTML uses <code>dateutil.parser</code> library to automatically parse a wide variety of date string formats into <code>date</code> objects.</p>
+<div id="aaeed51d" class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/ua"</span>)</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> _(user_agent:<span class="bu">str</span>): <span class="cf">return</span> user_agent</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/ua'</span>, headers<span class="op">=</span>{<span class="st">'User-Agent'</span>:<span class="st">'FastHTML'</span>}).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FastHTML</code></pre>
+</div>
+</div>
+<p>Handler functions can access HTTP headers by using parameter names that match the header names. In this example, <code>user_agent</code> is used as a parameter name, which automatically captures the value of the ‘User-Agent’ header from the request.</p>
+<p>The <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#client"><code>Client</code></a> instance allows setting custom headers for test requests. Here, we set the ‘User-Agent’ header to ‘FastHTML’ in the test request.</p>
+<div id="ed42ed51" class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/hxtest"</span>)</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(htmx): <span class="cf">return</span> htmx.request</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/hxtest'</span>, headers<span class="op">=</span>{<span class="st">'HX-Request'</span>:<span class="st">'1'</span>}).text)</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/hxtest2"</span>)</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(foo:HtmxHeaders, req): <span class="cf">return</span> foo.request</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/hxtest2'</span>, headers<span class="op">=</span>{<span class="st">'HX-Request'</span>:<span class="st">'1'</span>}).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1
+1</code></pre>
+</div>
+</div>
+<p>Handler functions can access HTMX-specific headers using either the special <code>htmx</code> parameter name, or a parameter annotated with <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#htmxheaders"><code>HtmxHeaders</code></a>. Both approaches provide access to HTMX-related information.</p>
+<p>In these examples, the <code>htmx.request</code> attribute returns the value of the ‘HX-Request’ header.</p>
+<div id="4efd072f" class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>app.chk <span class="op">=</span> <span class="st">'foo'</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/app"</span>)</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(app): <span class="cf">return</span> app.chk</span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/app'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>foo</code></pre>
+</div>
+</div>
+<p>Handler functions can access the <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#fasthtml"><code>FastHTML</code></a> application instance using the special <code>app</code> parameter name. This allows handlers to access application-level attributes and methods.</p>
+<p>In this example, we set a custom attribute <code>chk</code> on the application instance. The handler function then uses the <code>app</code> parameter to access this attribute and return its value.</p>
+<div id="856a2b93" class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/app2"</span>)</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(foo:FastHTML): <span class="cf">return</span> foo.chk,HttpHeader(<span class="st">"mykey"</span>, <span class="st">"myval"</span>)</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> cli.get(<span class="st">'/app2'</span>, <span class="op">**</span>hxhdr)</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(r.text)</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(r.headers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>foo
+
+Headers({'mykey': 'myval', 'content-length': '4', 'content-type': 'text/html; charset=utf-8'})</code></pre>
+</div>
+</div>
+<p>Handler functions can access the <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#fasthtml"><code>FastHTML</code></a> application instance using a parameter annotated with <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#fasthtml"><code>FastHTML</code></a>. This allows handlers to access application-level attributes and methods, just like using the special <code>app</code> parameter name.</p>
+<p>Handlers can return tuples containing both content and <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#httpheader"><code>HttpHeader</code></a> objects. <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#httpheader"><code>HttpHeader</code></a> allows setting custom HTTP headers in the response.</p>
+<p>In this example:</p>
+<ul>
+<li>We define a handler that returns both the <code>chk</code> attribute from the application and a custom header.</li>
+<li>The <code>HttpHeader("mykey", "myval")</code> sets a custom header in the response.</li>
+<li>We use the test client to make a request and examine both the response text and headers.</li>
+<li>The response includes the custom header “mykey” along with standard headers like content-length and content-type.</li>
+</ul>
+<div id="1591dde8" class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/app3"</span>)</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(foo:FastHTML): <span class="cf">return</span> HtmxResponseHeaders(location<span class="op">=</span><span class="st">"http://example.org"</span>)</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> cli.get(<span class="st">'/app3'</span>)</span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(r.headers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Headers({'hx-location': 'http://example.org', 'content-length': '0', 'content-type': 'text/html; charset=utf-8'})</code></pre>
+</div>
+</div>
+<p>Handler functions can return <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#htmxresponseheaders"><code>HtmxResponseHeaders</code></a> objects to set HTMX-specific response headers. This is useful for HTMX-specific behaviors like client-side redirects.</p>
+<p>In this example we define a handler that returns an <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#htmxresponseheaders"><code>HtmxResponseHeaders</code></a> object with a <code>location</code> parameter, which sets the <code>HX-Location</code> header in the response. HTMX uses this for client-side redirects.</p>
+<div id="b8be4ef3" class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/app4"</span>)</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(foo:FastHTML): <span class="cf">return</span> Redirect(<span class="st">"http://example.org"</span>)</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/app4'</span>, follow_redirects<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;Response [303 See Other]&gt;</code></pre>
+</div>
+</div>
+<p>Handler functions can return <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#redirect"><code>Redirect</code></a> objects to perform HTTP redirects. This is useful for redirecting users to different pages or external URLs.</p>
+<p>In this example:</p>
+<ul>
+<li>We define a handler that returns a <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#redirect"><code>Redirect</code></a> object with the URL “http://example.org”.</li>
+<li>The <code>cli.get('/app4', follow_redirects=False)</code> call simulates a GET request to the ‘/app4’ route without following redirects.</li>
+<li>The response has a 303 See Other status code, indicating a redirect.</li>
+</ul>
+<p>The <code>follow_redirects=False</code> parameter is used to prevent the test client from automatically following the redirect, allowing us to inspect the redirect response itself.</p>
+<div id="e713a48a" class="cell">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>Redirect.__response__</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;function fasthtml.core.Redirect.__response__(self, req)&gt;</code></pre>
+</div>
+</div>
+<p>The <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#redirect"><code>Redirect</code></a> class in FastHTML implements a <code>__response__</code> method, which is a special method recognized by the framework. When a handler returns a <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#redirect"><code>Redirect</code></a> object, FastHTML internally calls this <code>__response__</code> method to replace the original response.</p>
+<p>The <code>__response__</code> method takes a <code>req</code> parameter, which represents the incoming request. This allows the method to access request information if needed when constructing the redirect response.</p>
+<div id="8a91b0af" class="cell">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span></span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> meta(): </span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ((Title(<span class="st">'hi'</span>),H1(<span class="st">'hi'</span>)),</span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>        (Meta(<span class="bu">property</span><span class="op">=</span><span class="st">'image'</span>), Meta(<span class="bu">property</span><span class="op">=</span><span class="st">'site_name'</span>)))</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.post(<span class="st">'/meta'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;!doctype html&gt;
+
+ &lt;html&gt;
+   &lt;head&gt;
+     &lt;title&gt;hi&lt;/title&gt;
+     &lt;meta property="image"&gt;
+     &lt;meta property="site_name"&gt;
+     &lt;meta charset="utf-8"&gt;
+     &lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;
+     &lt;script src="https://unpkg.com/htmx.org@next/dist/htmx.min.js"&gt;&lt;/script&gt;
+     &lt;script src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@main/fasthtml.js"&gt;&lt;/script&gt;
+     &lt;script src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js"&gt;&lt;/script&gt;
+     &lt;script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"&gt;&lt;/script&gt;
+   &lt;/head&gt;
+   &lt;body&gt;
+     &lt;h1&gt;hi&lt;/h1&gt;
+   &lt;/body&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>FastHTML automatically identifies elements typically placed in the <code>&lt;head&gt;</code> (like <code>Title</code> and <code>Meta</code>) and positions them accordingly, while other elements go in the <code>&lt;body&gt;</code>.</p>
+<p>In this example: - <code>(Title('hi'), H1('hi'))</code> defines the title and main heading. The title is placed in the head, and the H1 in the body. - <code>(Meta(property='image'), Meta(property='site_name'))</code> defines two meta tags, which are both placed in the head.</p>
+</section>
+<section id="form-data-and-json-handling" class="level2">
+<h2 class="anchored" data-anchor-id="form-data-and-json-handling">Form Data and JSON Handling</h2>
+<div id="a3596991" class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">'/profile/me'</span>)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> profile_update(username: <span class="bu">str</span>): <span class="cf">return</span> username</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.post(<span class="st">'/profile/me'</span>, data<span class="op">=</span>{<span class="st">'username'</span> : <span class="st">'Alexis'</span>}).text)</span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> cli.post(<span class="st">'/profile/me'</span>, data<span class="op">=</span>{})</span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(r.text)</span>
+<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a>r</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Alexis
+Missing required field: username</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;Response [400 Bad Request]&gt;</code></pre>
+</div>
+</div>
+<p>Handler functions can accept form data parameters, without needing to manually extract it from the request. In this example, <code>username</code> is expected to be sent as form data.</p>
+<p>If required form data is missing, FastHTML automatically returns a 400 Bad Request response with an error message.</p>
+<p>The <code>data</code> parameter in the <code>cli.post()</code> method simulates sending form data in the request.</p>
+<div id="fdb9239c" class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">'/pet/dog'</span>)</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pet_dog(dogname: <span class="bu">str</span> <span class="op">=</span> <span class="va">None</span>): <span class="cf">return</span> dogname <span class="kw">or</span> <span class="st">'unknown name'</span></span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.post(<span class="st">'/pet/dog'</span>, data<span class="op">=</span>{}).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>unknown name</code></pre>
+</div>
+</div>
+<p>Handlers can have optional form data parameters with default values. In this example, <code>dogname</code> is an optional parameter with a default value of <code>None</code>.</p>
+<p>Here, if the form data doesn’t include the <code>dogname</code> field, the function uses the default value. The function returns either the provided <code>dogname</code> or ‘unknown name’ if <code>dogname</code> is <code>None</code>.</p>
+<div id="2045fc36" class="cell">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Bodie: a:<span class="bu">int</span><span class="op">;</span>b:<span class="bu">str</span></span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/bodie/</span><span class="sc">{nm}</span><span class="st">"</span>)</span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(nm:<span class="bu">str</span>, data:Bodie):</span>
+<span id="cb81-6"><a href="#cb81-6" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> asdict(data)</span>
+<span id="cb81-7"><a href="#cb81-7" aria-hidden="true" tabindex="-1"></a>    res[<span class="st">'nm'</span>] <span class="op">=</span> nm</span>
+<span id="cb81-8"><a href="#cb81-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> res</span>
+<span id="cb81-9"><a href="#cb81-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-10"><a href="#cb81-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.post(<span class="st">'/bodie/me'</span>, data<span class="op">=</span><span class="bu">dict</span>(a<span class="op">=</span><span class="dv">1</span>, b<span class="op">=</span><span class="st">'foo'</span>, nm<span class="op">=</span><span class="st">'me'</span>)).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{"a":1,"b":"foo","nm":"me"}</code></pre>
+</div>
+</div>
+<p>You can use dataclasses to define structured form data. In this example, <code>Bodie</code> is a dataclass with <code>a</code> (int) and <code>b</code> (str) fields.</p>
+<p>FastHTML automatically converts the incoming form data to a <code>Bodie</code> instance where attribute names match parameter names. Other form data elements are matched with parameters with the same names (in this case, <code>nm</code>).</p>
+<p>Handler functions can return dictionaries, which FastHTML automatically JSON-encodes.</p>
+<div id="3cf710c5" class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/bodied/"</span>)</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bodied(data:<span class="bu">dict</span>): <span class="cf">return</span> data</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="bu">dict</span>(a<span class="op">=</span><span class="dv">1</span>, b<span class="op">=</span><span class="st">'foo'</span>)</span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.post(<span class="st">'/bodied/'</span>, data<span class="op">=</span>d).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{"a":"1","b":"foo"}</code></pre>
+</div>
+</div>
+<p><code>dict</code> parameters capture all form data as a dictionary. In this example, the <code>data</code> parameter is annotated with <code>dict</code>, so FastHTML automatically converts all incoming form data into a dictionary.</p>
+<p>Note that when form data is converted to a dictionary, all values become strings, even if they were originally numbers. This is why the ‘a’ key in the response has a string value “1” instead of the integer 1.</p>
+<div id="be68e29e" class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>nt <span class="op">=</span> namedtuple(<span class="st">'Bodient'</span>, [<span class="st">'a'</span>,<span class="st">'b'</span>])</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/bodient/"</span>)</span>
+<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bodient(data:nt): <span class="cf">return</span> asdict(data)</span>
+<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.post(<span class="st">'/bodient/'</span>, data<span class="op">=</span>d).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{"a":"1","b":"foo"}</code></pre>
+</div>
+</div>
+<p>Handler functions can use named tuples to define structured form data. In this example, <code>Bodient</code> is a named tuple with <code>a</code> and <code>b</code> fields.</p>
+<p>FastHTML automatically converts the incoming form data to a <code>Bodient</code> instance where field names match parameter names. As with the previous example, all form data values are converted to strings in the process.</p>
+<div id="381b2ecf" class="cell">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BodieTD(TypedDict): a:<span class="bu">int</span><span class="op">;</span>b:<span class="bu">str</span><span class="op">=</span><span class="st">'foo'</span></span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/bodietd/"</span>)</span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bodient(data:BodieTD): <span class="cf">return</span> data</span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.post(<span class="st">'/bodietd/'</span>, data<span class="op">=</span>d).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{"a":1,"b":"foo"}</code></pre>
+</div>
+</div>
+<p>You can use <code>TypedDict</code> to define structured form data with type hints. In this example, <code>BodieTD</code> is a <code>TypedDict</code> with <code>a</code> (int) and <code>b</code> (str) fields, where <code>b</code> has a default value of ‘foo’.</p>
+<p>FastHTML automatically converts the incoming form data to a <code>BodieTD</code> instance where keys match the defined fields. Unlike with regular dictionaries or named tuples, FastHTML respects the type hints in <code>TypedDict</code>, converting values to the specified types when possible (e.g., converting ‘1’ to the integer 1 for the ‘a’ field).</p>
+<div id="3366d88f" class="cell">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Bodie2:</span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a>    a:<span class="bu">int</span><span class="op">|</span><span class="va">None</span><span class="op">;</span> b:<span class="bu">str</span></span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, a, b<span class="op">=</span><span class="st">'foo'</span>): store_attr()</span>
+<span id="cb89-4"><a href="#cb89-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-5"><a href="#cb89-5" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/bodie2/"</span>)</span>
+<span id="cb89-6"><a href="#cb89-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bodie(d:Bodie2): <span class="cf">return</span> <span class="ss">f"a: </span><span class="sc">{</span>d<span class="sc">.</span>a<span class="sc">}</span><span class="ss">; b: </span><span class="sc">{</span>d<span class="sc">.</span>b<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb89-7"><a href="#cb89-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.post(<span class="st">'/bodie2/'</span>, data<span class="op">=</span>{<span class="st">'a'</span>:<span class="dv">1</span>}).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>a: 1; b: foo</code></pre>
+</div>
+</div>
+<p>Custom classes can be used to define structured form data. Here, <code>Bodie2</code> is a custom class with <code>a</code> (int|None) and <code>b</code> (str) attributes, where <code>b</code> has a default value of ‘foo’. The <code>store_attr()</code> function (from fastcore) automatically assigns constructor parameters to instance attributes.</p>
+<p>FastHTML automatically converts the incoming form data to a <code>Bodie2</code> instance, matching form fields to constructor parameters. It respects type hints and default values.</p>
+<div id="6c1fbc4b" class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/b"</span>)</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> index(it: Bodie): <span class="cf">return</span> Titled(<span class="st">"It worked!"</span>, P(<span class="ss">f"</span><span class="sc">{</span>it<span class="sc">.</span>a<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>it<span class="sc">.</span>b<span class="sc">}</span><span class="ss">"</span>))</span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> json.dumps({<span class="st">"b"</span>: <span class="st">"Lorem"</span>, <span class="st">"a"</span>: <span class="dv">15</span>})</span>
+<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.post(<span class="st">'/b'</span>, headers<span class="op">=</span>{<span class="st">"Content-Type"</span>: <span class="st">"application/json"</span>, <span class="st">'hx-request'</span>:<span class="st">"1"</span>}, data<span class="op">=</span>s).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;title&gt;It worked!&lt;/title&gt;
+
+ &lt;main class="container"&gt;
+   &lt;h1&gt;It worked!&lt;/h1&gt;
+   &lt;p&gt;15, Lorem&lt;/p&gt;
+ &lt;/main&gt;
+</code></pre>
+</div>
+</div>
+<p>Handler functions can accept JSON data as input, which is automatically parsed into the specified type. In this example, <code>it</code> is of type <code>Bodie</code>, and FastHTML converts the incoming JSON data to a <code>Bodie</code> instance.</p>
+<p>The <a href="https://AnswerDotAI.github.io/fasthtml/api/xtend.html#titled"><code>Titled</code></a> component is used to create a page with a title and main content. It automatically generates an <code>&lt;h1&gt;</code> with the provided title, wraps the content in a <code>&lt;main&gt;</code> tag with a “container” class, and adds a <code>title</code> to the head.</p>
+<p>When making a request with JSON data: - Set the “Content-Type” header to “application/json” - Provide the JSON data as a string in the <code>data</code> parameter of the request</p>
+</section>
+<section id="cookies-sessions-file-uploads-and-more" class="level2">
+<h2 class="anchored" data-anchor-id="cookies-sessions-file-uploads-and-more">Cookies, Sessions, File Uploads, and more</h2>
+<div id="0c7b420e" class="cell">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/setcookie"</span>)</span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(): <span class="cf">return</span> cookie(<span class="st">'now'</span>, datetime.now())</span>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-4"><a href="#cb93-4" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/getcookie"</span>)</span>
+<span id="cb93-5"><a href="#cb93-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(now:parsed_date): <span class="cf">return</span> <span class="ss">f'Cookie was set at time </span><span class="sc">{</span>now<span class="sc">.</span>time()<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb93-6"><a href="#cb93-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-7"><a href="#cb93-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/setcookie'</span>).text)</span>
+<span id="cb93-8"><a href="#cb93-8" aria-hidden="true" tabindex="-1"></a>time.sleep(<span class="fl">0.01</span>)</span>
+<span id="cb93-9"><a href="#cb93-9" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/getcookie'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code></code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>'Cookie was set at time 16:53:08.485345'</code></pre>
+</div>
+</div>
+<p>Handler functions can set and retrieve cookies. In this example:</p>
+<ul>
+<li>The <code>/setcookie</code> route sets a cookie named ‘now’ with the current datetime.</li>
+<li>The <code>/getcookie</code> route retrieves the ‘now’ cookie and returns its value.</li>
+</ul>
+<p>The <code>cookie()</code> function is used to create a cookie response. FastHTML automatically converts the datetime object to a string when setting the cookie, and parses it back to a date object when retrieving it.</p>
+<div id="cd6d793b" class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>cookie(<span class="st">'now'</span>, datetime.now())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>HttpHeader(k='set-cookie', v='now="2024-09-07 16:54:05.275757"; Path=/; SameSite=lax')</code></pre>
+</div>
+</div>
+<p>The <code>cookie()</code> function returns an <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#httpheader"><code>HttpHeader</code></a> object with the ‘set-cookie’ key. You can return it in a tuple along with <code>FT</code> elements, along with anything else FastHTML supports in responses.</p>
+<div id="b8c0f5bc" class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML(secret_key<span class="op">=</span><span class="st">'soopersecret'</span>)</span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>cli <span class="op">=</span> Client(app)</span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>rt <span class="op">=</span> app.route</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="5bce33f0" class="cell">
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/setsess"</span>)</span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(sess, foo:<span class="bu">str</span><span class="op">=</span><span class="st">''</span>):</span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a>    now <span class="op">=</span> datetime.now()</span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a>    sess[<span class="st">'auth'</span>] <span class="op">=</span> <span class="bu">str</span>(now)</span>
+<span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f'Set to </span><span class="sc">{</span>now<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb99-7"><a href="#cb99-7" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/getsess"</span>)</span>
+<span id="cb99-8"><a href="#cb99-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(sess): <span class="cf">return</span> <span class="ss">f'Session time: </span><span class="sc">{</span>sess[<span class="st">"auth"</span>]<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb99-9"><a href="#cb99-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb99-10"><a href="#cb99-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/setsess'</span>).text)</span>
+<span id="cb99-11"><a href="#cb99-11" aria-hidden="true" tabindex="-1"></a>time.sleep(<span class="fl">0.01</span>)</span>
+<span id="cb99-12"><a href="#cb99-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb99-13"><a href="#cb99-13" aria-hidden="true" tabindex="-1"></a>cli.get(<span class="st">'/getsess'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Set to 2024-09-07 16:56:20.445950</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>'Session time: 2024-09-07 16:56:20.445950'</code></pre>
+</div>
+</div>
+<p>Sessions store and retrieve data across requests. To use sessions, you should to initialize the FastHTML application with a <code>secret_key</code>. This is used to cryptographically sign the cookie used by the session.</p>
+<p>The <code>sess</code> parameter in handler functions provides access to the session data. You can set and get session variables using dictionary-style access.</p>
+<div id="4d17ab9c" class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/upload"</span>)</span>
+<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> post(uf:UploadFile): <span class="cf">return</span> (<span class="cf">await</span> uf.read()).decode()</span>
+<span id="cb102-3"><a href="#cb102-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb102-4"><a href="#cb102-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'../../CHANGELOG.md'</span>, <span class="st">'rb'</span>) <span class="im">as</span> f:</span>
+<span id="cb102-5"><a href="#cb102-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(cli.post(<span class="st">'/upload'</span>, files<span class="op">=</span>{<span class="st">'uf'</span>:f}, data<span class="op">=</span>{<span class="st">'msg'</span>:<span class="st">'Hello'</span>}).text[:<span class="dv">15</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># Release notes</code></pre>
+</div>
+</div>
+<p>Handler functions can accept file uploads using Starlette’s <code>UploadFile</code> type. In this example:</p>
+<ul>
+<li>The <code>/upload</code> route accepts a file upload named <code>uf</code>.</li>
+<li>The <code>UploadFile</code> object provides an asynchronous <code>read()</code> method to access the file contents.</li>
+<li>We use <code>await</code> to read the file content asynchronously and decode it to a string.</li>
+</ul>
+<p>We added <code>async</code> to the handler function because it uses <code>await</code> to read the file content asynchronously. In Python, any function that uses <code>await</code> must be declared as <code>async</code>. This allows the function to be run asynchronously, potentially improving performance by not blocking other operations while waiting for the file to be read.</p>
+<div id="46b2e24f" class="cell">
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>app.static_route(<span class="st">'.md'</span>, static_path<span class="op">=</span><span class="st">'../..'</span>)</span>
+<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/README.md'</span>).text[:<span class="dv">10</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># FastHTML</code></pre>
+</div>
+</div>
+<p>The <code>static_route</code> method of the FastHTML application allows serving static files with specified extensions from a given directory. In this example:</p>
+<ul>
+<li><code>.md</code> files are served from the <code>../..</code> directory (two levels up from the current directory).</li>
+<li>Accessing <code>/README.md</code> returns the contents of the README.md file from that directory.</li>
+</ul>
+<div id="68b95489" class="cell">
+<div class="sourceCode cell-code" id="cb106"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a><span class="bu">help</span>(app.static_route_exts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Help on method static_route_exts in module fasthtml.core:
+
+static_route_exts(prefix='/', static_path='.', exts='static') method of fasthtml.core.FastHTML instance
+    Add a static route at URL path `prefix` with files from `static_path` and `exts` defined by `reg_re_param()`
+</code></pre>
+</div>
+</div>
+<div id="0ed44d28" class="cell">
+<div class="sourceCode cell-code" id="cb108"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>app.static_route_exts()</span>
+<span id="cb108-2"><a href="#cb108-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.get(<span class="st">'/README.txt'</span>).text[:<span class="dv">50</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>These are the source notebooks for FastHTML.
+
+</code></pre>
+</div>
+</div>
+<p>The <code>static_route_exts</code> method of the FastHTML application allows serving static files with specified extensions from a given directory. By default:</p>
+<ul>
+<li>It serves files from the current directory (‘.’).</li>
+<li>It uses the ‘static’ regex, which includes common static file extensions like ‘ico’, ‘gif’, ‘jpg’, ‘css’, ‘js’, etc.</li>
+<li>The URL prefix is set to ‘/’.</li>
+</ul>
+<p>The ‘static’ regex is defined by FastHTML using this code:</p>
+<div class="sourceCode" id="cb110"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a>reg_re_param(<span class="st">"static"</span>, <span class="st">"ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|html|map"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="102c17ab" class="cell">
+<div class="sourceCode cell-code" id="cb111"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/form-submit/</span><span class="sc">{list_id}</span><span class="st">"</span>)</span>
+<span id="cb111-2"><a href="#cb111-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> options(list_id: <span class="bu">str</span>):</span>
+<span id="cb111-3"><a href="#cb111-3" aria-hidden="true" tabindex="-1"></a>    headers <span class="op">=</span> {</span>
+<span id="cb111-4"><a href="#cb111-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Access-Control-Allow-Origin'</span>: <span class="st">'*'</span>,</span>
+<span id="cb111-5"><a href="#cb111-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Access-Control-Allow-Methods'</span>: <span class="st">'POST'</span>,</span>
+<span id="cb111-6"><a href="#cb111-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Access-Control-Allow-Headers'</span>: <span class="st">'*'</span>,</span>
+<span id="cb111-7"><a href="#cb111-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb111-8"><a href="#cb111-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Response(status_code<span class="op">=</span><span class="dv">200</span>, headers<span class="op">=</span>headers)</span>
+<span id="cb111-9"><a href="#cb111-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb111-10"><a href="#cb111-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cli.options(<span class="st">'/form-submit/2'</span>).headers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Headers({'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST', 'access-control-allow-headers': '*', 'content-length': '0', 'set-cookie': 'session_=eyJhdXRoIjogIjIwMjQtMDktMDcgMTY6NTY6MjAuNDQ1OTUwIiwgIm5hbWUiOiAiMiJ9.Ztv60A.N0b4z5rNg6GT3xCFc8X4DqwcNjQ; path=/; Max-Age=31536000; httponly; samesite=lax'})</code></pre>
+</div>
+</div>
+<p>FastHTML handlers can handle OPTIONS requests and set custom headers. In this example:</p>
+<ul>
+<li>The <code>/form-submit/{list_id}</code> route handles OPTIONS requests.</li>
+<li>Custom headers are set to allow cross-origin requests (CORS).</li>
+<li>The function returns a Starlette <code>Response</code> object with a 200 status code and the custom headers.</li>
+</ul>
+<p>You can return any Starlette Response type from a handler function, giving you full control over the response when needed.</p>
+<div id="42a5810a" class="cell">
+<div class="sourceCode cell-code" id="cb113"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _not_found(req, exc): <span class="cf">return</span> Div(<span class="st">'nope'</span>)</span>
+<span id="cb113-2"><a href="#cb113-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb113-3"><a href="#cb113-3" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastHTML(exception_handlers<span class="op">=</span>{<span class="dv">404</span>:_not_found})</span>
+<span id="cb113-4"><a href="#cb113-4" aria-hidden="true" tabindex="-1"></a>cli <span class="op">=</span> Client(app)</span>
+<span id="cb113-5"><a href="#cb113-5" aria-hidden="true" tabindex="-1"></a>rt <span class="op">=</span> app.route</span>
+<span id="cb113-6"><a href="#cb113-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb113-7"><a href="#cb113-7" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> cli.get(<span class="st">'/'</span>)</span>
+<span id="cb113-8"><a href="#cb113-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(r.text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;!doctype html&gt;
+
+ &lt;html&gt;
+   &lt;head&gt;
+     &lt;title&gt;FastHTML page&lt;/title&gt;
+     &lt;meta charset="utf-8"&gt;
+     &lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;
+     &lt;script src="https://unpkg.com/htmx.org@next/dist/htmx.min.js"&gt;&lt;/script&gt;
+     &lt;script src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@main/fasthtml.js"&gt;&lt;/script&gt;
+     &lt;script src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js"&gt;&lt;/script&gt;
+     &lt;script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"&gt;&lt;/script&gt;
+   &lt;/head&gt;
+   &lt;body&gt;
+     &lt;div&gt;nope&lt;/div&gt;
+   &lt;/body&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>FastHTML allows you to define custom exception handlers. In this example we defined a custom 404 (Not Found) handler function <code>_not_found</code>, which returns a <code>Div</code> component with the text ‘nope’.</p>
+<p>FastHTML includes the full HTML structure, since we returned an HTML partial.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/AnswerDotAI\.github\.io\/fasthtml");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

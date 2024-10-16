@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="A fast introduction to FastHTML for experienced web developers.">
+
+<title>Web Devs Quickstart – fasthtml</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Web Devs Quickstart – fasthtml">
+<meta property="og:description" content="A fast introduction to FastHTML for experienced web developers.">
+<meta property="og:site_name" content="fasthtml">
+<meta name="twitter:title" content="Web Devs Quickstart – fasthtml">
+<meta name="twitter:description" content="A fast introduction to FastHTML for experienced web developers.">
+<meta name="twitter:image" content="https://docs.fastht.ml/og-image.png">
+<meta name="twitter:creator" content="@jeremyphoward">
+<meta name="twitter:site" content="@answerdotai">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../logo.svg" alt="" class="navbar-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://fastht.ml"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://about.fastht.ml"> 
+<span class="menu-text">Learn</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/answerdotai/fasthtml"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://x.com/answerdotai"> <i class="bi bi-twitter" role="img" aria-label="Fast.ai Twitter">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../tutorials/index.html">Tutorials</a></li><li class="breadcrumb-item"><a href="../tutorials/quickstart_for_web_devs.html">Web Devs Quickstart</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Get Started</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../tutorials/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/by_example.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FastHTML By Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/quickstart_for_web_devs.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Web Devs Quickstart</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/e2e.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">JS App Walkthrough</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/jupyter_and_fasthtml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Jupyter to write FastHTML</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Explanations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/explaining_xt_components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><strong>FT</strong> Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/faq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FAQ</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/minidataapi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MiniDataAPI Spec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/oauth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OAuth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/routes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Routes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/websockets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WebSockets</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/defining_xt_component.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Custom Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/handlers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Handling handlers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/live_reload.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Live Reloading</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Source</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Core</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/xtend.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Component extensions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/js.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Javascript examples</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/pico.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pico.css components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/svg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SVG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/jupyter.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Jupyter compatibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/oauth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OAuth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Command Line Tools</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/fastapp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">fastapp</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#installation" id="toc-installation" class="nav-link active" data-scroll-target="#installation">Installation</a></li>
+  <li><a href="#a-minimal-application" id="toc-a-minimal-application" class="nav-link" data-scroll-target="#a-minimal-application">A Minimal Application</a></li>
+  <li><a href="#a-minimal-charting-application" id="toc-a-minimal-charting-application" class="nav-link" data-scroll-target="#a-minimal-charting-application">A Minimal Charting Application</a></li>
+  <li><a href="#debug-mode" id="toc-debug-mode" class="nav-link" data-scroll-target="#debug-mode">Debug Mode</a></li>
+  <li><a href="#routing" id="toc-routing" class="nav-link" data-scroll-target="#routing">Routing</a></li>
+  <li><a href="#variables-in-urls" id="toc-variables-in-urls" class="nav-link" data-scroll-target="#variables-in-urls">Variables in URLs</a>
+  <ul class="collapse">
+  <li><a href="#what-happens-if-we-enter-incorrect-data" id="toc-what-happens-if-we-enter-incorrect-data" class="nav-link" data-scroll-target="#what-happens-if-we-enter-incorrect-data">What happens if we enter incorrect data?</a></li>
+  </ul></li>
+  <li><a href="#http-methods" id="toc-http-methods" class="nav-link" data-scroll-target="#http-methods">HTTP Methods</a></li>
+  <li><a href="#css-files-and-inline-styles" id="toc-css-files-and-inline-styles" class="nav-link" data-scroll-target="#css-files-and-inline-styles">CSS Files and Inline Styles</a></li>
+  <li><a href="#other-static-media-file-locations" id="toc-other-static-media-file-locations" class="nav-link" data-scroll-target="#other-static-media-file-locations">Other Static Media File Locations</a></li>
+  <li><a href="#rendering-markdown" id="toc-rendering-markdown" class="nav-link" data-scroll-target="#rendering-markdown">Rendering Markdown</a></li>
+  <li><a href="#code-highlighting" id="toc-code-highlighting" class="nav-link" data-scroll-target="#code-highlighting">Code highlighting</a></li>
+  <li><a href="#defining-new-ft-components" id="toc-defining-new-ft-components" class="nav-link" data-scroll-target="#defining-new-ft-components">Defining new <code>ft</code> components</a>
+  <ul class="collapse">
+  <li><a href="#pass-through-components" id="toc-pass-through-components" class="nav-link" data-scroll-target="#pass-through-components">Pass through components</a></li>
+  <li><a href="#dataclasses-as-ft-components" id="toc-dataclasses-as-ft-components" class="nav-link" data-scroll-target="#dataclasses-as-ft-components">Dataclasses as ft components</a></li>
+  </ul></li>
+  <li><a href="#testing-views-in-notebooks" id="toc-testing-views-in-notebooks" class="nav-link" data-scroll-target="#testing-views-in-notebooks">Testing views in notebooks</a></li>
+  <li><a href="#forms" id="toc-forms" class="nav-link" data-scroll-target="#forms">Forms</a>
+  <ul class="collapse">
+  <li><a href="#forms-with-views" id="toc-forms-with-views" class="nav-link" data-scroll-target="#forms-with-views">Forms with views</a></li>
+  </ul></li>
+  <li><a href="#strings-and-conversion-order" id="toc-strings-and-conversion-order" class="nav-link" data-scroll-target="#strings-and-conversion-order">Strings and conversion order</a></li>
+  <li><a href="#custom-exception-handlers" id="toc-custom-exception-handlers" class="nav-link" data-scroll-target="#custom-exception-handlers">Custom exception handlers</a></li>
+  <li><a href="#cookies" id="toc-cookies" class="nav-link" data-scroll-target="#cookies">Cookies</a></li>
+  <li><a href="#sessions" id="toc-sessions" class="nav-link" data-scroll-target="#sessions">Sessions</a></li>
+  <li><a href="#toasts-also-known-as-messages" id="toc-toasts-also-known-as-messages" class="nav-link" data-scroll-target="#toasts-also-known-as-messages">Toasts (also known as Messages)</a></li>
+  <li><a href="#authentication-and-authorization" id="toc-authentication-and-authorization" class="nav-link" data-scroll-target="#authentication-and-authorization">Authentication and authorization</a></li>
+  <li><a href="#server-sent-events-sse" id="toc-server-sent-events-sse" class="nav-link" data-scroll-target="#server-sent-events-sse">Server-sent events (SSE)</a></li>
+  <li><a href="#websockets" id="toc-websockets" class="nav-link" data-scroll-target="#websockets">Websockets</a></li>
+  <li><a href="#file-uploads" id="toc-file-uploads" class="nav-link" data-scroll-target="#file-uploads">File Uploads</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="quickstart_for_web_devs.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../tutorials/index.html">Tutorials</a></li><li class="breadcrumb-item"><a href="../tutorials/quickstart_for_web_devs.html">Web Devs Quickstart</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Web Devs Quickstart</h1>
+</div>
+
+<div>
+  <div class="description">
+    A fast introduction to FastHTML for experienced web developers.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="installation" class="level2">
+<h2 class="anchored" data-anchor-id="installation">Installation</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install python-fasthtml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="a-minimal-application" class="level2">
+<h2 class="anchored" data-anchor-id="a-minimal-application">A Minimal Application</h2>
+<p>A minimal FastHTML application looks something like this:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>main.py</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-2" data-filename="main.py"><pre class="sourceCode numberSource python code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3"></a>app, rt <span class="op">=</span> fast_app()</span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-2-5" class="code-annotation-target"><a href="#annotated-cell-2-5"></a><span class="at">@rt</span>(<span class="st">"/"</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-2-6" class="code-annotation-target"><a href="#annotated-cell-2-6"></a><span class="kw">def</span> get():</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-2-7" class="code-annotation-target"><a href="#annotated-cell-2-7"></a>    <span class="cf">return</span> Titled(<span class="st">"FastHTML"</span>, P(<span class="st">"Let's do this!"</span>))</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-2-9" class="code-annotation-target"><a href="#annotated-cell-2-9"></a>serve()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">We import what we need for rapid development! A carefully-curated set of FastHTML functions and other Python objects is brought into our global namespace for convenience.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="2">We instantiate a FastHTML app with the <code>fast_app()</code> utility function. This provides a number of really useful defaults that we’ll take advantage of later in the tutorial.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="5" data-code-annotation="3">We use the <code>rt()</code> decorator to tell FastHTML what to return when a user visits <code>/</code> in their browser.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="6" data-code-annotation="4">We connect this route to HTTP GET requests by defining a view function called <code>get()</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="7" data-code-annotation="5">A tree of Python function calls that return all the HTML required to write a properly formed web page. You’ll soon see the power of this approach.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="9" data-code-annotation="6">The <code>serve()</code> utility configures and runs FastHTML using a library called <code>uvicorn</code>.</span>
+</dd>
+</dl>
+<p>Run the code:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> main.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The terminal will look like this:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">INFO:</span>     Uvicorn running on http://0.0.0.0:5001 <span class="er">(</span><span class="ex">Press</span> CTRL+C to quit<span class="kw">)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">INFO:</span>     Started reloader process <span class="pp">[</span><span class="ss">58058</span><span class="pp">]</span> using WatchFiles</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">INFO:</span>     Started server process <span class="pp">[</span><span class="ss">58060</span><span class="pp">]</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">INFO:</span>     Waiting for application startup.</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">INFO:</span>     Application startup complete.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Confirm FastHTML is running by opening your web browser to <a href="http://127.0.0.1:5001">127.0.0.1:5001</a>. You should see something like the image below:</p>
+<p><img src="quickstart-web-dev/quickstart-fasthtml.png" class="img-fluid"></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While some linters and developers will complain about the wildcard import, it is by design here and perfectly safe. FastHTML is very deliberate about the objects it exports in <code>fasthtml.common</code>. If it bothers you, you can import the objects you need individually, though it will make the code more verbose and less readable.</p>
+<p>If you want to learn more about how FastHTML handles imports, we cover that <a href="https://docs.fastht.ml/explains/faq.html#why-use-import">here</a>.</p>
+</div>
+</div>
+</section>
+<section id="a-minimal-charting-application" class="level2">
+<h2 class="anchored" data-anchor-id="a-minimal-charting-application">A Minimal Charting Application</h2>
+<p>The <a href="https://AnswerDotAI.github.io/fasthtml/api/xtend.html#script"><code>Script</code></a> function allows you to include JavaScript. You can use Python to generate parts of your JS or JSON like this:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(hdrs<span class="op">=</span>(Script(src<span class="op">=</span><span class="st">"https://cdn.plot.ly/plotly-2.32.0.min.js"</span>),))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> json.dumps({</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data"</span>: [{<span class="st">"x"</span>: [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>],<span class="st">"type"</span>: <span class="st">"scatter"</span>},</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"x"</span>: [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>],<span class="st">"y"</span>: [<span class="dv">16</span>, <span class="dv">5</span>, <span class="dv">11</span>, <span class="dv">9</span>],<span class="st">"type"</span>: <span class="st">"scatter"</span>}],</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"title"</span>: <span class="st">"Plotly chart in FastHTML "</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"description"</span>: <span class="st">"This is a demo dashboard"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span>: <span class="st">"scatter"</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/"</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get():</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Titled(<span class="st">"Chart Demo"</span>, Div(<span class="bu">id</span><span class="op">=</span><span class="st">"myDiv"</span>),</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    Script(<span class="ss">f"var data = </span><span class="sc">{</span>data<span class="sc">}</span><span class="ss">; Plotly.newPlot('myDiv', data);"</span>))</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>serve()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="debug-mode" class="level2">
+<h2 class="anchored" data-anchor-id="debug-mode">Debug Mode</h2>
+<p>When we can’t figure out a bug in FastHTML, we can run it in <code>DEBUG</code> mode. When an error is thrown, the error screen is displayed in the browser. This error setting should never be used in a deployed app.</p>
+<div class="sourceCode" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-3" class="code-annotation-target"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(debug<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/"</span>)</span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get():</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-6-7" class="code-annotation-target"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span><span class="op">/</span><span class="dv">0</span></span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">"FastHTML Error!"</span>, P(<span class="st">"Let's error!"</span>))</span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>serve()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="3" data-code-annotation="1"><code>debug=True</code> sets debug mode on.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="7" data-code-annotation="2">Python throws an error when it tries to divide an integer by zero.</span>
+</dd>
+</dl>
+</section>
+<section id="routing" class="level2">
+<h2 class="anchored" data-anchor-id="routing">Routing</h2>
+<p>FastHTML builds upon FastAPI’s friendly decorator pattern for specifying URLs, with extra features:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>main.py</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-7" data-filename="main.py"><pre class="sourceCode numberSource python code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span> </span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2"></a></span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3"></a>app, rt <span class="op">=</span> fast_app()</span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-7-5" class="code-annotation-target"><a href="#annotated-cell-7-5"></a><span class="at">@rt</span>(<span class="st">"/"</span>)</span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6"></a><span class="kw">def</span> get():</span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7"></a>  <span class="cf">return</span> Titled(<span class="st">"FastHTML"</span>, P(<span class="st">"Let's do this!"</span>))</span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-7-9" class="code-annotation-target"><a href="#annotated-cell-7-9"></a><span class="at">@rt</span>(<span class="st">"/hello"</span>)</span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10"></a><span class="kw">def</span> get():</span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11"></a>  <span class="cf">return</span> Titled(<span class="st">"Hello, world!"</span>)</span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12"></a></span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13"></a>serve()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="5" data-code-annotation="1">The “/” URL on line 5 is the home of a project. This would be accessed at <a href="http://127.0.0.1:5001">127.0.0.1:5001</a>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="9" data-code-annotation="2">“/hello” URL on line 9 will be found by the project if the user visits <a href="http://127.0.0.1:5001/hello">127.0.0.1:5001/hello</a>.</span>
+</dd>
+</dl>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>It looks like <code>get()</code> is being defined twice, but that’s not the case. Each function decorated with <code>rt</code> is totally separate, and is injected into the router. We’re not calling them in the module’s namespace (<code>locals()</code>). Rather, we’re loading them into the routing mechanism using the <code>rt</code> decorator.</p>
+</div>
+</div>
+<p>You can do more! Read on to learn what we can do to make parts of the URL dynamic.</p>
+</section>
+<section id="variables-in-urls" class="level2">
+<h2 class="anchored" data-anchor-id="variables-in-urls">Variables in URLs</h2>
+<p>You can add variable sections to a URL by marking them with <code>{variable_name}</code>. Your function then receives the <code>{variable_name}</code> as a keyword argument, but only if it is the correct type. Here’s an example:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>main.py</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-8" data-filename="main.py"><pre class="sourceCode numberSource python code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span> </span>
+<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2"></a></span>
+<span id="annotated-cell-8-3"><a href="#annotated-cell-8-3"></a>app, rt <span class="op">=</span> fast_app()</span>
+<span id="annotated-cell-8-4"><a href="#annotated-cell-8-4"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-8-5" class="code-annotation-target"><a href="#annotated-cell-8-5"></a><span class="at">@rt</span>(<span class="st">"/</span><span class="sc">{name}</span><span class="st">/</span><span class="sc">{age}</span><span class="st">"</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-8-6" class="code-annotation-target"><a href="#annotated-cell-8-6"></a><span class="kw">def</span> get(name: <span class="bu">str</span>, age: <span class="bu">int</span>):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-8-7" class="code-annotation-target"><a href="#annotated-cell-8-7"></a>  <span class="cf">return</span> Titled(<span class="ss">f"Hello </span><span class="sc">{</span>name<span class="sc">.</span>title()<span class="sc">}</span><span class="ss">, age </span><span class="sc">{</span>age<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-8-8"><a href="#annotated-cell-8-8"></a></span>
+<span id="annotated-cell-8-9"><a href="#annotated-cell-8-9"></a>serve()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="5" data-code-annotation="1">We specify two variable names, <code>name</code> and <code>age</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="6" data-code-annotation="2">We define two function arguments named identically to the variables. You will note that we specify the Python types to be passed.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="7" data-code-annotation="3">We use these functions in our project.</span>
+</dd>
+</dl>
+<p>Try it out by going to this address: <a href="http://127.0.0.1:5001/uma/5">127.0.0.1:5001/uma/5</a>. You should get a page that says,</p>
+<blockquote class="blockquote">
+<p>“Hello Uma, age 5”.</p>
+</blockquote>
+<section id="what-happens-if-we-enter-incorrect-data" class="level3">
+<h3 class="anchored" data-anchor-id="what-happens-if-we-enter-incorrect-data">What happens if we enter incorrect data?</h3>
+<p>The <a href="http://127.0.0.1:5001/uma/5">127.0.0.1:5001/uma/5</a> URL works because <code>5</code> is an integer. If we enter something that is not, such as <a href="http://127.0.0.1:5001/uma/five">127.0.0.1:5001/uma/five</a>, then FastHTML will return an error instead of a web page.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+FastHTML URL routing supports more complex types
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The two examples we provide here use Python’s built-in <code>str</code> and <code>int</code> types, but you can use your own types, including more complex ones such as those defined by libraries like <a href="https://pypi.org/project/attrs/">attrs</a>, <a href="https://pypi.org/project/pydantic/">pydantic</a>, and even <a href="https://pypi.org/project/sqlmodel/">sqlmodel</a>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="http-methods" class="level2">
+<h2 class="anchored" data-anchor-id="http-methods">HTTP Methods</h2>
+<p>FastHTML matches function names to HTTP methods. So far the URL routes we’ve defined have been for HTTP GET methods, the most common method for web pages.</p>
+<p>Form submissions often are sent as HTTP POST. When dealing with more dynamic web page designs, also known as Single Page Apps (SPA for short), the need can arise for other methods such as HTTP PUT and HTTP DELETE. The way FastHTML handles this is by changing the function name.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>main.py</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-9" data-filename="main.py"><pre class="sourceCode numberSource python code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span> </span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2"></a></span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3"></a>app, rt <span class="op">=</span> fast_app()</span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4"></a></span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5"></a><span class="at">@rt</span>(<span class="st">"/"</span>)  </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-6" class="code-annotation-target"><a href="#annotated-cell-9-6"></a><span class="kw">def</span> get():</span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7"></a>  <span class="cf">return</span> Titled(<span class="st">"HTTP GET"</span>, P(<span class="st">"Handle GET"</span>))</span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8"></a></span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9"></a><span class="at">@rt</span>(<span class="st">"/"</span>)  </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-10" class="code-annotation-target"><a href="#annotated-cell-9-10"></a><span class="kw">def</span> post():</span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11"></a>  <span class="cf">return</span> Titled(<span class="st">"HTTP POST"</span>, P(<span class="st">"Handle POST"</span>))</span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12"></a></span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13"></a>serve()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="6" data-code-annotation="1">On line 6 because the <code>get()</code> function name is used, this will handle HTTP GETs going to the <code>/</code> URI.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="10" data-code-annotation="2">On line 10 because the <code>post()</code> function name is used, this will handle HTTP POSTs going to the <code>/</code> URI.</span>
+</dd>
+</dl>
+</section>
+<section id="css-files-and-inline-styles" class="level2">
+<h2 class="anchored" data-anchor-id="css-files-and-inline-styles">CSS Files and Inline Styles</h2>
+<p>Here we modify default headers to demonstrate how to use the <a href="https://github.com/oxalorg/sakura">Sakura CSS microframework</a> instead of FastHTML’s default of Pico CSS.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>main.py</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-10" data-filename="main.py"><pre class="sourceCode numberSource python code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span> </span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2"></a></span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3"></a>app, rt <span class="op">=</span> fast_app(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-10-4" class="code-annotation-target"><a href="#annotated-cell-10-4"></a>    pico<span class="op">=</span><span class="va">False</span>,</span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5"></a>    hdrs<span class="op">=</span>(</span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6"></a>        Link(rel<span class="op">=</span><span class="st">'stylesheet'</span>, href<span class="op">=</span><span class="st">'assets/normalize.min.css'</span>, <span class="bu">type</span><span class="op">=</span><span class="st">'text/css'</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-10-7" class="code-annotation-target"><a href="#annotated-cell-10-7"></a>        Link(rel<span class="op">=</span><span class="st">'stylesheet'</span>, href<span class="op">=</span><span class="st">'assets/sakura.css'</span>, <span class="bu">type</span><span class="op">=</span><span class="st">'text/css'</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-10-8" class="code-annotation-target"><a href="#annotated-cell-10-8"></a>        Style(<span class="st">"p {color: red;}"</span>)</span>
+<span id="annotated-cell-10-9"><a href="#annotated-cell-10-9"></a>))</span>
+<span id="annotated-cell-10-10"><a href="#annotated-cell-10-10"></a></span>
+<span id="annotated-cell-10-11"><a href="#annotated-cell-10-11"></a><span class="at">@app.get</span>(<span class="st">"/"</span>)</span>
+<span id="annotated-cell-10-12"><a href="#annotated-cell-10-12"></a><span class="kw">def</span> home():</span>
+<span id="annotated-cell-10-13"><a href="#annotated-cell-10-13"></a>    <span class="cf">return</span> Titled(<span class="st">"FastHTML"</span>,</span>
+<span id="annotated-cell-10-14"><a href="#annotated-cell-10-14"></a>        P(<span class="st">"Let's do this!"</span>),</span>
+<span id="annotated-cell-10-15"><a href="#annotated-cell-10-15"></a>    )</span>
+<span id="annotated-cell-10-16"><a href="#annotated-cell-10-16"></a></span>
+<span id="annotated-cell-10-17"><a href="#annotated-cell-10-17"></a>serve()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="4" data-code-annotation="1">By setting <code>pico</code> to <code>False</code>, FastHTML will not include <code>pico.min.css</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="7" data-code-annotation="2">This will generate an HTML <code>&lt;link&gt;</code> tag for sourcing the css for Sakura.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="8" data-code-annotation="3">If you want an inline styles, the <code>Style()</code> function will put the result into the HTML.</span>
+</dd>
+</dl>
+</section>
+<section id="other-static-media-file-locations" class="level2">
+<h2 class="anchored" data-anchor-id="other-static-media-file-locations">Other Static Media File Locations</h2>
+<p>As you saw, <a href="https://AnswerDotAI.github.io/fasthtml/api/xtend.html#script"><code>Script</code></a> and <code>Link</code> are specific to the most common static media use cases in web apps: including JavaScript, CSS, and images. But it also works with videos and other static media files. The default behavior is to look for these files in the root directory - typically we don’t do anything special to include them. We can change the default directory that is looked in for files by adding the <code>static_path</code> parameter to the <a href="https://AnswerDotAI.github.io/fasthtml/api/fastapp.html#fast_app"><code>fast_app</code></a> function.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(static_path<span class="op">=</span><span class="st">'public'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>FastHTML also allows us to define a route that uses <code>FileResponse</code> to serve the file at a specified path. This is useful for serving images, videos, and other media files from a different directory without having to change the paths of many files. So if we move the directory containing the media files, we only need to change the path in one place. In the example below, we call images from a directory called <code>public</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/{fname:path}.{ext:static}"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(fname:<span class="bu">str</span>, ext:<span class="bu">str</span>): </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> FileResponse(<span class="ss">f'public/</span><span class="sc">{</span>fname<span class="sc">}</span><span class="ss">.</span><span class="sc">{</span>ext<span class="sc">}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="rendering-markdown" class="level2">
+<h2 class="anchored" data-anchor-id="rendering-markdown">Rendering Markdown</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>hdrs <span class="op">=</span> (MarkdownJS(), HighlightJS(langs<span class="op">=</span>[<span class="st">'python'</span>, <span class="st">'javascript'</span>, <span class="st">'html'</span>, <span class="st">'css'</span>]), )</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(hdrs<span class="op">=</span>hdrs)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>content <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="st">Here are some _markdown_ elements.</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="st">- This is a list item</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="st">- This is another list item</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="st">- And this is a third list item</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="st">**Fenced code blocks work here.**</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/'</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(req):</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">"Markdown rendering example"</span>, Div(content,cls<span class="op">=</span><span class="st">"marked"</span>))</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>serve()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="code-highlighting" class="level2">
+<h2 class="anchored" data-anchor-id="code-highlighting">Code highlighting</h2>
+<p>Here’s how to highlight code without any markdown configuration.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the HighlightJS built-in header</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>hdrs <span class="op">=</span> (HighlightJS(langs<span class="op">=</span>[<span class="st">'python'</span>, <span class="st">'javascript'</span>, <span class="st">'html'</span>, <span class="st">'css'</span>]),)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(hdrs<span class="op">=</span>hdrs)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>code_example <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="st">import datetime</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="st">import time</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="st">for i in range(10):</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="st">    print(f"{datetime.datetime.now()}")</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="st">    time.sleep(1)</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/'</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(req):</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">"Markdown rendering example"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        Div(</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>            <span class="co"># The code example needs to be surrounded by</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Pre &amp; Code elements</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>            Pre(Code(code_example))</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>serve()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="defining-new-ft-components" class="level2">
+<h2 class="anchored" data-anchor-id="defining-new-ft-components">Defining new <code>ft</code> components</h2>
+<p>We can build our own <code>ft</code> components and combine them with other components. The simplest method is defining them as a function.</p>
+<div id="cell-28" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-29" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hero(title, statement):</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Div(H1(title),P(statement), cls<span class="op">=</span><span class="st">"hero"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># usage example</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>Main(</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    hero(<span class="st">"Hello World"</span>, <span class="st">"This is a hero statement"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<div class="sourceCode" id="cb11"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">main</span><span class="dt">&gt;</span>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"hero"</span><span class="dt">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Hello World<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>This is a hero statement<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">main</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<section id="pass-through-components" class="level3">
+<h3 class="anchored" data-anchor-id="pass-through-components">Pass through components</h3>
+<p>For when we need to define a new component that allows zero-to-many components to be nested within them, we lean on Python’s <code>*args</code> and <code>**kwargs</code> mechanism. Useful for creating page layout controls.</p>
+<div id="cell-32" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> layout(<span class="op">*</span>args, <span class="op">**</span>kwargs):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Dashboard layout for all our dashboard views"""</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Main(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        H1(<span class="st">"Dashboard"</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        Div(<span class="op">*</span>args, <span class="op">**</span>kwargs),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        cls<span class="op">=</span><span class="st">"dashboard"</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co"># usage example</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>layout(</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    Ul(<span class="op">*</span>[Li(o) <span class="cf">for</span> o <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>)]),</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    P(<span class="st">"Some content"</span>, cls<span class="op">=</span><span class="st">"description"</span>),</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<div class="sourceCode" id="cb13"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">main</span><span class="ot"> class</span><span class="op">=</span><span class="st">"dashboard"</span><span class="dt">&gt;</span>  <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Dashboard<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>0<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>1<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>2<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="ot"> class</span><span class="op">=</span><span class="st">"description"</span><span class="dt">&gt;</span>Some content<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">main</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="dataclasses-as-ft-components" class="level3">
+<h3 class="anchored" data-anchor-id="dataclasses-as-ft-components">Dataclasses as ft components</h3>
+<p>While functions are easy to read, for more complex components some might find it easier to use a dataclass.</p>
+<div id="cell-35" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Hero:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    title: <span class="bu">str</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    statement: <span class="bu">str</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __ft__(<span class="va">self</span>):</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">""" The __ft__ method renders the dataclass at runtime."""</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Div(H1(<span class="va">self</span>.title),P(<span class="va">self</span>.statement), cls<span class="op">=</span><span class="st">"hero"</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&nbsp;usage example</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>Main(</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    Hero(<span class="st">"Hello World"</span>, <span class="st">"This is a hero statement"</span>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<div class="sourceCode" id="cb15"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">main</span><span class="dt">&gt;</span>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"hero"</span><span class="dt">&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Hello World<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>This is a hero statement<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">main</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="testing-views-in-notebooks" class="level2">
+<h2 class="anchored" data-anchor-id="testing-views-in-notebooks">Testing views in notebooks</h2>
+<p>Because of the ASGI event loop it is currently impossible to run FastHTML inside a notebook. However, we can still test the output of our views. To do this, we leverage Starlette, an ASGI toolkit that FastHTML uses.</p>
+<div id="cell-38" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># First we instantiate our app, in this case we remove the</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># default headers to reduce the size of the output.</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(default_hdrs<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Setting up the Starlette test client</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> starlette.testclient <span class="im">import</span> TestClient</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> TestClient(app)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Usage example</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/"</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get():</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">"FastHTML is awesome"</span>, </span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        P(<span class="st">"The fastest way to create web apps in Python"</span>))</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client.get(<span class="st">"/"</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;!doctype html&gt;
+ &lt;html&gt;
+   &lt;head&gt;
+&lt;title&gt;FastHTML is awesome&lt;/title&gt;   &lt;/head&gt;
+   &lt;body&gt;
+&lt;main class="container"&gt;       &lt;h1&gt;FastHTML is awesome&lt;/h1&gt;
+       &lt;p&gt;The fastest way to create web apps in Python&lt;/p&gt;
+&lt;/main&gt;   &lt;/body&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+</section>
+<section id="forms" class="level2">
+<h2 class="anchored" data-anchor-id="forms">Forms</h2>
+<p>To validate data coming from users, first define a dataclass representing the data you want to check. Here’s an example representing a signup form.</p>
+<div id="cell-41" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Profile: email:<span class="bu">str</span><span class="op">;</span> phone:<span class="bu">str</span><span class="op">;</span> age:<span class="bu">int</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Create an FT component representing an empty version of that form. Don’t pass in any value to fill the form, that gets handled later.</p>
+<div id="cell-43" class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>profile_form <span class="op">=</span> Form(method<span class="op">=</span><span class="st">"post"</span>, action<span class="op">=</span><span class="st">"/profile"</span>)(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>        Fieldset(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>            Label(<span class="st">'Email'</span>, Input(name<span class="op">=</span><span class="st">"email"</span>)),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>            Label(<span class="st">"Phone"</span>, Input(name<span class="op">=</span><span class="st">"phone"</span>)),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>            Label(<span class="st">"Age"</span>, Input(name<span class="op">=</span><span class="st">"age"</span>)),</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        Button(<span class="st">"Save"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"submit"</span>),</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>profile_form</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<div class="sourceCode" id="cb20"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">form</span><span class="ot"> enctype</span><span class="op">=</span><span class="st">"multipart/form-data"</span><span class="ot"> method</span><span class="op">=</span><span class="st">"post"</span><span class="ot"> action</span><span class="op">=</span><span class="st">"/profile"</span><span class="dt">&gt;&lt;</span><span class="kw">fieldset</span><span class="dt">&gt;&lt;</span><span class="kw">label</span><span class="dt">&gt;</span>Email      <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> name</span><span class="op">=</span><span class="st">"email"</span><span class="dt">&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">label</span><span class="dt">&gt;</span>Phone      <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> name</span><span class="op">=</span><span class="st">"phone"</span><span class="dt">&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">label</span><span class="dt">&gt;</span>Age      <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> name</span><span class="op">=</span><span class="st">"age"</span><span class="dt">&gt;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;/</span><span class="kw">fieldset</span><span class="dt">&gt;&lt;</span><span class="kw">button</span><span class="ot"> type</span><span class="op">=</span><span class="st">"submit"</span><span class="dt">&gt;</span>Save<span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;&lt;/</span><span class="kw">form</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>Once the dataclass and form function are completed, we can add data to the form. To do that, instantiate the profile dataclass:</p>
+<div id="cell-45" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>profile <span class="op">=</span> Profile(email<span class="op">=</span><span class="st">'john@example.com'</span>, phone<span class="op">=</span><span class="st">'123456789'</span>, age<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>profile</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Profile(email='john@example.com', phone='123456789', age=5)</code></pre>
+</div>
+</div>
+<p>Then add that data to the <code>profile_form</code> using FastHTML’s <a href="https://AnswerDotAI.github.io/fasthtml/api/components.html#fill_form"><code>fill_form</code></a> class:</p>
+<div id="cell-47" class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fill_form(profile_form, profile)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<div class="sourceCode" id="cb24"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">form</span><span class="ot"> enctype</span><span class="op">=</span><span class="st">"multipart/form-data"</span><span class="ot"> method</span><span class="op">=</span><span class="st">"post"</span><span class="ot"> action</span><span class="op">=</span><span class="st">"/profile"</span><span class="dt">&gt;&lt;</span><span class="kw">fieldset</span><span class="dt">&gt;&lt;</span><span class="kw">label</span><span class="dt">&gt;</span>Email      <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> name</span><span class="op">=</span><span class="st">"email"</span><span class="ot"> value</span><span class="op">=</span><span class="st">"john@example.com"</span><span class="dt">&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">label</span><span class="dt">&gt;</span>Phone      <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> name</span><span class="op">=</span><span class="st">"phone"</span><span class="ot"> value</span><span class="op">=</span><span class="st">"123456789"</span><span class="dt">&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">label</span><span class="dt">&gt;</span>Age      <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> name</span><span class="op">=</span><span class="st">"age"</span><span class="ot"> value</span><span class="op">=</span><span class="st">"5"</span><span class="dt">&gt;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;/</span><span class="kw">fieldset</span><span class="dt">&gt;&lt;</span><span class="kw">button</span><span class="ot"> type</span><span class="op">=</span><span class="st">"submit"</span><span class="dt">&gt;</span>Save<span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;&lt;/</span><span class="kw">form</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<section id="forms-with-views" class="level3">
+<h3 class="anchored" data-anchor-id="forms-with-views">Forms with views</h3>
+<p>The usefulness of FastHTML forms becomes more apparent when they are combined with FastHTML views. We’ll show how this works by using the test client from above. First, let’s create a SQlite database:</p>
+<div id="cell-50" class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>db <span class="op">=</span> Database(<span class="st">"profiles.db"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>profiles <span class="op">=</span> db.create(Profile, pk<span class="op">=</span><span class="st">"email"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we insert a record into the database:</p>
+<div id="cell-52" class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>profiles.insert(profile)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Profile(email='john@example.com', phone='123456789', age=5)</code></pre>
+</div>
+</div>
+<p>And we can then demonstrate in the code that form is filled and displayed to the user.</p>
+<div id="cell-54" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-26"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-26-1"><a href="#annotated-cell-26-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/profile/</span><span class="sc">{email}</span><span class="st">"</span>)</span>
+<span id="annotated-cell-26-2"><a href="#annotated-cell-26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> profile(email:<span class="bu">str</span>):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-26" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-26-3" class="code-annotation-target"><a href="#annotated-cell-26-3" aria-hidden="true" tabindex="-1"></a>    profile <span class="op">=</span> profiles[email]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-26" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-26-4" class="code-annotation-target"><a href="#annotated-cell-26-4" aria-hidden="true" tabindex="-1"></a>    filled_profile_form <span class="op">=</span> fill_form(profile_form, profile)</span>
+<span id="annotated-cell-26-5"><a href="#annotated-cell-26-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="ss">f'Profile for </span><span class="sc">{</span>profile<span class="sc">.</span>email<span class="sc">}</span><span class="ss">'</span>, filled_profile_form)</span>
+<span id="annotated-cell-26-6"><a href="#annotated-cell-26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-26-7"><a href="#annotated-cell-26-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client.get(<span class="ss">f"/profile/john@example.com"</span>).text)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-26" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-26" data-code-lines="3" data-code-annotation="1">Fetch the profile using the profile table’s <code>email</code> primary key</span>
+</dd>
+<dt data-target-cell="annotated-cell-26" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-26" data-code-lines="4" data-code-annotation="2">Fill the form for display.</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;!doctype html&gt;
+ &lt;html&gt;
+   &lt;head&gt;
+&lt;title&gt;Profile for john@example.com&lt;/title&gt;   &lt;/head&gt;
+   &lt;body&gt;
+&lt;main class="container"&gt;       &lt;h1&gt;Profile for john@example.com&lt;/h1&gt;
+&lt;form enctype="multipart/form-data" method="post" action="/profile"&gt;&lt;fieldset&gt;&lt;label&gt;Email             &lt;input name="email" value="john@example.com"&gt;
+&lt;/label&gt;&lt;label&gt;Phone             &lt;input name="phone" value="123456789"&gt;
+&lt;/label&gt;&lt;label&gt;Age             &lt;input name="age" value="5"&gt;
+&lt;/label&gt;&lt;/fieldset&gt;&lt;button type="submit"&gt;Save&lt;/button&gt;&lt;/form&gt;&lt;/main&gt;   &lt;/body&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+<p>And now let’s demonstrate making a change to the data.</p>
+<div id="cell-57" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-27"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-27-1"><a href="#annotated-cell-27-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/profile"</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-27-2" class="code-annotation-target"><a href="#annotated-cell-27-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(profile: Profile):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-27-3" class="code-annotation-target"><a href="#annotated-cell-27-3" aria-hidden="true" tabindex="-1"></a>    profiles.update(profile)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-27-4" class="code-annotation-target"><a href="#annotated-cell-27-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> RedirectResponse(url<span class="op">=</span><span class="ss">f"/profile/</span><span class="sc">{</span>profile<span class="sc">.</span>email<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-27-5"><a href="#annotated-cell-27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-27-6"><a href="#annotated-cell-27-6" aria-hidden="true" tabindex="-1"></a>new_data <span class="op">=</span> <span class="bu">dict</span>(email<span class="op">=</span><span class="st">'john@example.com'</span>, phone<span class="op">=</span><span class="st">'7654321'</span>, age<span class="op">=</span><span class="dv">25</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-27-7" class="code-annotation-target"><a href="#annotated-cell-27-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client.post(<span class="st">"/profile"</span>, data<span class="op">=</span>new_data).text)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-27" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-27" data-code-lines="2" data-code-annotation="1">We use the <code>Profile</code> dataclass definition to set the type for the incoming <code>profile</code> content. This validates the field types for the incoming data</span>
+</dd>
+<dt data-target-cell="annotated-cell-27" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-27" data-code-lines="3" data-code-annotation="2">Taking our validated data, we updated the profiles table</span>
+</dd>
+<dt data-target-cell="annotated-cell-27" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-27" data-code-lines="4" data-code-annotation="3">We redirect the user back to their profile view</span>
+</dd>
+<dt data-target-cell="annotated-cell-27" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-27" data-code-lines="7" data-code-annotation="4">The display is of the profile form view showing the changes in data.</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code> &lt;!doctype html&gt;
+ &lt;html&gt;
+   &lt;head&gt;
+&lt;title&gt;Profile for john@example.com&lt;/title&gt;   &lt;/head&gt;
+   &lt;body&gt;
+&lt;main class="container"&gt;       &lt;h1&gt;Profile for john@example.com&lt;/h1&gt;
+&lt;form enctype="multipart/form-data" method="post" action="/profile"&gt;&lt;fieldset&gt;&lt;label&gt;Email             &lt;input name="email" value="john@example.com"&gt;
+&lt;/label&gt;&lt;label&gt;Phone             &lt;input name="phone" value="7654321"&gt;
+&lt;/label&gt;&lt;label&gt;Age             &lt;input name="age" value="25"&gt;
+&lt;/label&gt;&lt;/fieldset&gt;&lt;button type="submit"&gt;Save&lt;/button&gt;&lt;/form&gt;&lt;/main&gt;   &lt;/body&gt;
+ &lt;/html&gt;
+</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="strings-and-conversion-order" class="level2">
+<h2 class="anchored" data-anchor-id="strings-and-conversion-order">Strings and conversion order</h2>
+<p>The general rules for rendering are: - <code>__ft__</code> method will be called (for default components like <code>P</code>, <code>H2</code>, etc. or if you define your own components) - If you pass a string, it will be escaped - On other python objects, <code>str()</code> will be called</p>
+<p>As a consequence, if you want to include plain HTML tags directly into e.g.&nbsp;a <code>Div()</code> they will get escaped by default (as a security measure to avoid code injections). This can be avoided by using <code>NotStr()</code>, a convenient way to reuse python code that returns already HTML. If you use pandas, you can use <code>pandas.DataFrame.to_html()</code> to get a nice table. To include the output a FastHTML, wrap it in <code>NotStr()</code>, like <code>Div(NotStr(df.to_html()))</code>.</p>
+<p>Above we saw how a dataclass behaves with the <code>__ft__</code> method defined. On a plain dataclass, <code>str()</code> will be called (but not escaped).</p>
+<div id="cell-61" class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Hero:</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    title: <span class="bu">str</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    statement: <span class="bu">str</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&nbsp;rendering the dataclass with the default method</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>Main(</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    Hero(<span class="st">"&lt;h1&gt;Hello World&lt;/h1&gt;"</span>, <span class="st">"This is a hero statement"</span>)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<div class="sourceCode" id="cb31"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">main</span><span class="dt">&gt;</span>Hero(title='<span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Hello World<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span>', statement='This is a hero statement')<span class="dt">&lt;/</span><span class="kw">main</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="cell-62" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This will display the HTML as text on your page</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>Div(<span class="st">"Let's include some HTML here: &lt;div&gt;Some HTML&lt;/div&gt;"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<div class="sourceCode" id="cb33"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="dt">&gt;</span>Let<span class="dv">&amp;#x27;</span>s include some HTML here: <span class="dv">&amp;lt;</span>div<span class="dv">&amp;gt;</span>Some HTML<span class="dv">&amp;lt;</span>/div<span class="dv">&amp;gt;</span><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="cell-63" class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep the string untouched, will be rendered on the page</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>Div(NotStr(<span class="st">"&lt;div&gt;&lt;h1&gt;Some HTML&lt;/h1&gt;&lt;/div&gt;"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<div class="sourceCode" id="cb35"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="dt">&gt;&lt;</span><span class="kw">div</span><span class="dt">&gt;&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Some HTML<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;&lt;/</span><span class="kw">div</span><span class="dt">&gt;&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="custom-exception-handlers" class="level2">
+<h2 class="anchored" data-anchor-id="custom-exception-handlers">Custom exception handlers</h2>
+<p>FastHTML allows customization of exception handlers, but does so gracefully. What this means is by default it includes all the <code>&lt;html&gt;</code> tags needed to display attractive content. Try it out!</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> not_found(req, exc): <span class="cf">return</span> Titled(<span class="st">"404: I don't exist!"</span>)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>exception_handlers <span class="op">=</span> {<span class="dv">404</span>: not_found}</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(exception_handlers<span class="op">=</span>exception_handlers)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/'</span>)</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get():</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (Titled(<span class="st">"Home page"</span>, P(A(href<span class="op">=</span><span class="st">"/oops"</span>)(<span class="st">"Click to generate 404 error"</span>))))</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>serve()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We can also use lambda to make things more terse:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>exception_handlers<span class="op">=</span>{</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">404</span>: <span class="kw">lambda</span> req, exc: Titled(<span class="st">"404: I don't exist!"</span>),</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">418</span>: <span class="kw">lambda</span> req, exc: Titled(<span class="st">"418: I'm a teapot!"</span>)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(exception_handlers<span class="op">=</span>exception_handlers)</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/'</span>)</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get():</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (Titled(<span class="st">"Home page"</span>, P(A(href<span class="op">=</span><span class="st">"/oops"</span>)(<span class="st">"Click to generate 404 error"</span>))))</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>serve()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="cookies" class="level2">
+<h2 class="anchored" data-anchor-id="cookies">Cookies</h2>
+<p>We can set cookies using the <code>cookie()</code> function. In our example, we’ll create a <code>timestamp</code> cookie.</p>
+<div id="cell-68" class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> HTML</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-69" class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/settimestamp"</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(req):</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    now <span class="op">=</span> datetime.now()</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> P(<span class="ss">f'Set to </span><span class="sc">{</span>now<span class="sc">}</span><span class="ss">'</span>), cookie(<span class="st">'now'</span>, datetime.now())</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>HTML(client.get(<span class="st">'/settimestamp'</span>).text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+ 
+ 
+   
+<title>FastHTML page</title>   
+   
+     <p>Set to 2024-09-26 15:33:48.141869</p>
+   
+ 
+</div>
+</div>
+<p>Now let’s get it back using the same name for our parameter as the cookie name.</p>
+<div id="cell-71" class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/gettimestamp'</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(now:parsed_date): <span class="cf">return</span> <span class="ss">f'Cookie was set at time </span><span class="sc">{</span>now<span class="sc">.</span>time()<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>client.get(<span class="st">'/gettimestamp'</span>).text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>'Cookie was set at time 15:33:48.141903'</code></pre>
+</div>
+</div>
+</section>
+<section id="sessions" class="level2">
+<h2 class="anchored" data-anchor-id="sessions">Sessions</h2>
+<p>For convenience and security, FastHTML has a mechanism for storing small amounts of data in the user’s browser. We can do this by adding a <code>session</code> argument to routes. FastHTML sessions are Python dictionaries, and we can leverage to our benefit. The example below shows how to concisely set and get sessions.</p>
+<div id="cell-74" class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/adder/</span><span class="sc">{num}</span><span class="st">'</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(session, num: <span class="bu">int</span>):</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    session.setdefault(<span class="st">'sum'</span>, <span class="dv">0</span>)</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    session[<span class="st">'sum'</span>] <span class="op">=</span> session.get(<span class="st">'sum'</span>) <span class="op">+</span> num</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Response(<span class="ss">f'The sum is </span><span class="sc">{</span>session[<span class="st">"sum"</span>]<span class="sc">}</span><span class="ss">.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="toasts-also-known-as-messages" class="level2">
+<h2 class="anchored" data-anchor-id="toasts-also-known-as-messages">Toasts (also known as Messages)</h2>
+<p>Toasts, sometimes called “Messages” are small notifications usually in colored boxes used to notify users that something has happened. Toasts can be of four types:</p>
+<ul>
+<li>info</li>
+<li>success</li>
+<li>warning</li>
+<li>error</li>
+</ul>
+<p>Examples toasts might include:</p>
+<ul>
+<li>“Payment accepted”</li>
+<li>“Data submitted”</li>
+<li>“Request approved”</li>
+</ul>
+<p>Toasts require the use of the <code>setup_toasts()</code> function plus every view needs these two features:</p>
+<ul>
+<li>The session argument</li>
+<li>Must return FT components</li>
+</ul>
+<div class="sourceCode" id="annotated-cell-37"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-37" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-37-1" class="code-annotation-target"><a href="#annotated-cell-37-1" aria-hidden="true" tabindex="-1"></a>setup_toasts(app)</span>
+<span id="annotated-cell-37-2"><a href="#annotated-cell-37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-37-3"><a href="#annotated-cell-37-3" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/toasting'</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-37" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-37-4" class="code-annotation-target"><a href="#annotated-cell-37-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get(session):</span>
+<span id="annotated-cell-37-5"><a href="#annotated-cell-37-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Normally one toast is enough, this allows us to see</span></span>
+<span id="annotated-cell-37-6"><a href="#annotated-cell-37-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># different toast types in action.</span></span>
+<span id="annotated-cell-37-7"><a href="#annotated-cell-37-7" aria-hidden="true" tabindex="-1"></a>    add_toast(session, <span class="ss">f"Toast is being cooked"</span>, <span class="st">"info"</span>)</span>
+<span id="annotated-cell-37-8"><a href="#annotated-cell-37-8" aria-hidden="true" tabindex="-1"></a>    add_toast(session, <span class="ss">f"Toast is ready"</span>, <span class="st">"success"</span>)</span>
+<span id="annotated-cell-37-9"><a href="#annotated-cell-37-9" aria-hidden="true" tabindex="-1"></a>    add_toast(session, <span class="ss">f"Toast is getting a bit crispy"</span>, <span class="st">"warning"</span>)</span>
+<span id="annotated-cell-37-10"><a href="#annotated-cell-37-10" aria-hidden="true" tabindex="-1"></a>    add_toast(session, <span class="ss">f"Toast is burning!"</span>, <span class="st">"error"</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-37" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-37-11" class="code-annotation-target"><a href="#annotated-cell-37-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">"I like toast"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-37" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-37" data-code-lines="1" data-code-annotation="1"><code>setup_toasts</code> is a helper function that adds toast dependencies. Usually this would be declared right after <code>fast_app()</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-37" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-37" data-code-lines="4" data-code-annotation="2">Toasts require sessions</span>
+</dd>
+<dt data-target-cell="annotated-cell-37" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-37" data-code-lines="11" data-code-annotation="3">Views with Toasts must return FT components.</span>
+</dd>
+</dl>
+</section>
+<section id="authentication-and-authorization" class="level2">
+<h2 class="anchored" data-anchor-id="authentication-and-authorization">Authentication and authorization</h2>
+<p>In FastHTML the tasks of authentication and authorization are handled with Beforeware. Beforeware are functions that run before the route handler is called. They are useful for global tasks like ensuring users are authenticated or have permissions to access a view.</p>
+<p>First, we write a function that accepts a request and session arguments:</p>
+<div id="cell-79" class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Status code 303 is a redirect that can change POST to GET,</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="co"># so it's appropriate for a login page.</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>login_redir <span class="op">=</span> RedirectResponse(<span class="st">'/login'</span>, status_code<span class="op">=</span><span class="dv">303</span>)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> user_auth_before(req, sess):</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The `auth` key in the request scope is automatically provided</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># to any handler which requests it, and can not be injected</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># by the user using query params, cookies, etc, so it should</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># be secure to use.    </span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    auth <span class="op">=</span> req.scope[<span class="st">'auth'</span>] <span class="op">=</span> sess.get(<span class="st">'auth'</span>, <span class="va">None</span>)</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If the session key is not there, it redirects to the login page.</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> auth: <span class="cf">return</span> login_redir</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we pass our <code>user_auth_before</code> function as the first argument into a <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#beforeware"><code>Beforeware</code></a> class. We also pass a list of regular expressions to the <code>skip</code> argument, designed to allow users to still get to the home and login pages.</p>
+<div id="cell-81" class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>beforeware <span class="op">=</span> Beforeware(</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    user_auth_before,</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    skip<span class="op">=</span>[<span class="vs">r'/favicon\.ico'</span>, <span class="vs">r'/static/.*'</span>, <span class="vs">r'.*\.css'</span>, <span class="vs">r'.*\.js'</span>, <span class="st">'/login'</span>, <span class="st">'/'</span>]</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(before<span class="op">=</span>beforeware)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="server-sent-events-sse" class="level2">
+<h2 class="anchored" data-anchor-id="server-sent-events-sse">Server-sent events (SSE)</h2>
+<p>With <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events">server-sent events</a>, it’s possible for a server to send new data to a web page at any time, by pushing messages to the web page. Unlike WebSockets, SSE can only go in one direction: server to client. SSE is also part of the HTTP specification unlike WebSockets which uses its own specification.</p>
+<p>FastHTML introduces several tools for working with SSE which are covered in the example below. While concise, there’s a lot going on in this function so we’ve annotated it quite a bit.</p>
+<div id="cell-84" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-40"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-40-1"><a href="#annotated-cell-40-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="annotated-cell-40-2"><a href="#annotated-cell-40-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> asyncio <span class="im">import</span> sleep</span>
+<span id="annotated-cell-40-3"><a href="#annotated-cell-40-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="annotated-cell-40-4"><a href="#annotated-cell-40-4" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-40-5" class="code-annotation-target"><a href="#annotated-cell-40-5" aria-hidden="true" tabindex="-1"></a>hdrs<span class="op">=</span>(Script(src<span class="op">=</span><span class="st">"https://unpkg.com/htmx-ext-sse@2.2.1/sse.js"</span>),)</span>
+<span id="annotated-cell-40-6"><a href="#annotated-cell-40-6" aria-hidden="true" tabindex="-1"></a>app,rt <span class="op">=</span> fast_app(hdrs<span class="op">=</span>hdrs)</span>
+<span id="annotated-cell-40-7"><a href="#annotated-cell-40-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-40-8"><a href="#annotated-cell-40-8" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span></span>
+<span id="annotated-cell-40-9"><a href="#annotated-cell-40-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> index():</span>
+<span id="annotated-cell-40-10"><a href="#annotated-cell-40-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">"SSE Random Number Generator"</span>,</span>
+<span id="annotated-cell-40-11"><a href="#annotated-cell-40-11" aria-hidden="true" tabindex="-1"></a>        P(<span class="st">"Generate pairs of random numbers, as the list grows scroll downwards."</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-40-12" class="code-annotation-target"><a href="#annotated-cell-40-12" aria-hidden="true" tabindex="-1"></a>        Div(hx_ext<span class="op">=</span><span class="st">"sse"</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-40-13" class="code-annotation-target"><a href="#annotated-cell-40-13" aria-hidden="true" tabindex="-1"></a>            sse_connect<span class="op">=</span><span class="st">"/number-stream"</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-40-14" class="code-annotation-target"><a href="#annotated-cell-40-14" aria-hidden="true" tabindex="-1"></a>            hx_swap<span class="op">=</span><span class="st">"beforeend show:bottom"</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-40-15" class="code-annotation-target"><a href="#annotated-cell-40-15" aria-hidden="true" tabindex="-1"></a>            sse_swap<span class="op">=</span><span class="st">"message"</span>))</span>
+<span id="annotated-cell-40-16"><a href="#annotated-cell-40-16" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-40-17" class="code-annotation-target"><a href="#annotated-cell-40-17" aria-hidden="true" tabindex="-1"></a>shutdown_event <span class="op">=</span> signal_shutdown()</span>
+<span id="annotated-cell-40-18"><a href="#annotated-cell-40-18" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-40-19" class="code-annotation-target"><a href="#annotated-cell-40-19" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> number_generator():</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="8" onclick="event.preventDefault();">8</a><span id="annotated-cell-40-20" class="code-annotation-target"><a href="#annotated-cell-40-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="kw">not</span> shutdown_event.is_set():</span>
+<span id="annotated-cell-40-21"><a href="#annotated-cell-40-21" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> Article(random.randint(<span class="dv">1</span>, <span class="dv">100</span>))</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="9" onclick="event.preventDefault();">9</a><span id="annotated-cell-40-22" class="code-annotation-target"><a href="#annotated-cell-40-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">yield</span> sse_message(data)</span>
+<span id="annotated-cell-40-23"><a href="#annotated-cell-40-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">await</span> sleep(<span class="dv">1</span>)</span>
+<span id="annotated-cell-40-24"><a href="#annotated-cell-40-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-40-25"><a href="#annotated-cell-40-25" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">"/number-stream"</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-40" data-target-annotation="10" onclick="event.preventDefault();">10</a><span id="annotated-cell-40-26" class="code-annotation-target"><a href="#annotated-cell-40-26" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(): <span class="cf">return</span> EventStream(number_generator())</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-40" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="5" data-code-annotation="1">Import the HTMX SSE extension</span>
+</dd>
+<dt data-target-cell="annotated-cell-40" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="12" data-code-annotation="2">Tell HTMX to load the SSE extension</span>
+</dd>
+<dt data-target-cell="annotated-cell-40" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="13" data-code-annotation="3">Look at the <code>/number-stream</code> endpoint for SSE content</span>
+</dd>
+<dt data-target-cell="annotated-cell-40" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="14" data-code-annotation="4">When new items come in from the SSE endpoint, add them at the end of the current content within the div. If they go beyond the screen, scroll downwards</span>
+</dd>
+<dt data-target-cell="annotated-cell-40" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="15" data-code-annotation="5">Specify the name of the event. FastHTML’s default event name is “message”. Only change if you have more than one call to SSE endpoints within a view</span>
+</dd>
+<dt data-target-cell="annotated-cell-40" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="17" data-code-annotation="6">Set up the asyncio event loop</span>
+</dd>
+<dt data-target-cell="annotated-cell-40" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="19" data-code-annotation="7">Don’t forget to make this an <code>async</code> function!</span>
+</dd>
+<dt data-target-cell="annotated-cell-40" data-target-annotation="8">8</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="20" data-code-annotation="8">Iterate through the asyncio event loop</span>
+</dd>
+<dt data-target-cell="annotated-cell-40" data-target-annotation="9">9</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="22" data-code-annotation="9">We yield the data. Data ideally should be comprised of FT components as that plugs nicely into HTMX in the browser</span>
+</dd>
+<dt data-target-cell="annotated-cell-40" data-target-annotation="10">10</dt>
+<dd>
+<span data-code-cell="annotated-cell-40" data-code-lines="26" data-code-annotation="10">The endpoint view needs to be an async function that returns a <a href="https://AnswerDotAI.github.io/fasthtml/api/core.html#eventstream"><code>EventStream</code></a></span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="websockets" class="level2">
+<h2 class="anchored" data-anchor-id="websockets">Websockets</h2>
+<p>With websockets we can have bi-directional communications between a browser and client. Websockets are useful for things like chat and certain types of games. While websockets can be used for single direction messages from the server (i.e.&nbsp;telling users that a process is finished), that task is arguably better suited for SSE.</p>
+<p>FastHTML provides useful tools for adding websockets to your pages.</p>
+<div id="cell-88" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-41"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-41-1"><a href="#annotated-cell-41-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="annotated-cell-41-2"><a href="#annotated-cell-41-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> asyncio <span class="im">import</span> sleep</span>
+<span id="annotated-cell-41-3"><a href="#annotated-cell-41-3" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-41-4" class="code-annotation-target"><a href="#annotated-cell-41-4" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app(ws_hdr<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-41-5"><a href="#annotated-cell-41-5" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-41-6" class="code-annotation-target"><a href="#annotated-cell-41-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mk_inp(): <span class="cf">return</span> Input(<span class="bu">id</span><span class="op">=</span><span class="st">'msg'</span>, autofocus<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-41-7"><a href="#annotated-cell-41-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-41-8"><a href="#annotated-cell-41-8" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/'</span>)</span>
+<span id="annotated-cell-41-9"><a href="#annotated-cell-41-9" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> get(request):</span>
+<span id="annotated-cell-41-10"><a href="#annotated-cell-41-10" aria-hidden="true" tabindex="-1"></a>    cts <span class="op">=</span> Div(</span>
+<span id="annotated-cell-41-11"><a href="#annotated-cell-41-11" aria-hidden="true" tabindex="-1"></a>        Div(<span class="bu">id</span><span class="op">=</span><span class="st">'notifications'</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-41-12" class="code-annotation-target"><a href="#annotated-cell-41-12" aria-hidden="true" tabindex="-1"></a>        Form(mk_inp(), <span class="bu">id</span><span class="op">=</span><span class="st">'form'</span>, ws_send<span class="op">=</span><span class="va">True</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-41-13" class="code-annotation-target"><a href="#annotated-cell-41-13" aria-hidden="true" tabindex="-1"></a>        hx_ext<span class="op">=</span><span class="st">'ws'</span>, ws_connect<span class="op">=</span><span class="st">'/ws'</span>)</span>
+<span id="annotated-cell-41-14"><a href="#annotated-cell-41-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">'Websocket Test'</span>, cts)</span>
+<span id="annotated-cell-41-15"><a href="#annotated-cell-41-15" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-41-16" class="code-annotation-target"><a href="#annotated-cell-41-16" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> on_connect(send):</span>
+<span id="annotated-cell-41-17"><a href="#annotated-cell-41-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Connected!'</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-41-18" class="code-annotation-target"><a href="#annotated-cell-41-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> send(Div(<span class="st">'Hello, you have connected'</span>, <span class="bu">id</span><span class="op">=</span><span class="st">"notifications"</span>))</span>
+<span id="annotated-cell-41-19"><a href="#annotated-cell-41-19" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-41-20" class="code-annotation-target"><a href="#annotated-cell-41-20" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> on_disconnect(ws):</span>
+<span id="annotated-cell-41-21"><a href="#annotated-cell-41-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Disconnected!'</span>)</span>
+<span id="annotated-cell-41-22"><a href="#annotated-cell-41-22" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="8" onclick="event.preventDefault();">8</a><span id="annotated-cell-41-23" class="code-annotation-target"><a href="#annotated-cell-41-23" aria-hidden="true" tabindex="-1"></a><span class="at">@app.ws</span>(<span class="st">'/ws'</span>, conn<span class="op">=</span>on_connect, disconn<span class="op">=</span>on_disconnect)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="9" onclick="event.preventDefault();">9</a><span id="annotated-cell-41-24" class="code-annotation-target"><a href="#annotated-cell-41-24" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> ws(msg:<span class="bu">str</span>, send):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="10" onclick="event.preventDefault();">10</a><span id="annotated-cell-41-25" class="code-annotation-target"><a href="#annotated-cell-41-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> send(Div(<span class="st">'Hello '</span> <span class="op">+</span> msg, <span class="bu">id</span><span class="op">=</span><span class="st">"notifications"</span>))</span>
+<span id="annotated-cell-41-26"><a href="#annotated-cell-41-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> sleep(<span class="dv">2</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-41" data-target-annotation="11" onclick="event.preventDefault();">11</a><span id="annotated-cell-41-27" class="code-annotation-target"><a href="#annotated-cell-41-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Div(<span class="st">'Goodbye '</span> <span class="op">+</span> msg, <span class="bu">id</span><span class="op">=</span><span class="st">"notifications"</span>), mk_inp()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-41" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="4" data-code-annotation="1">To use websockets in FastHTML, you must instantiate the app with the <code>ws_hdr</code> set to <code>True</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="6" data-code-annotation="2">As we want to use websockets to reset the form, we define the <code>mk_input</code> function that can be called from multiple locations</span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="12" data-code-annotation="3">We create the form and mark it with the <code>ws_send</code> attribute, which is documented here in the <a href="https://v1.htmx.org/extensions/web-sockets/">HTMX websocket specification</a>. This tells HTMX to send a message to the nearest websocket based on the trigger for the form element, which for forms is pressing the <code>enter</code> key, an action considered to be a form submission</span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="13" data-code-annotation="4">This is where the HTMX extension is loaded (<code>hx_ext='ws'</code>) and the nearest websocket is defined (<code>ws_connect='/ws'</code>)</span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="16" data-code-annotation="5">When a websocket first connects we can optionally have it call a function that accepts a <code>send</code> argument. The <code>send</code> argument will push a message to the browser.</span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="18" data-code-annotation="6">Here we use the <code>send</code> function that was passed into the <code>on_connect</code> function to send a <code>Div</code> with an <code>id</code> of <code>notifications</code> that HTMX assigns to the element in the page that already has an <code>id</code> of <code>notifications</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="20" data-code-annotation="7">When a websocket disconnects we can call a function which takes no arguments. Typically the role of this function is to notify the server to take an action. In this case, we print a simple message to the console</span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="8">8</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="23" data-code-annotation="8">We use the <code>app.ws</code> decorator to mark that <code>/ws</code> is the route for our websocket. We also pass in the two optional <code>conn</code> and <code>disconn</code> parameters to this decorator. As a fun experiment, remove the <code>conn</code> and <code>disconn</code> arguments and see what happens</span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="9">9</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="24" data-code-annotation="9">Define the <code>ws</code> function as async. This is necessary for ASGI to be able to serve websockets. The function accepts two arguments, a <code>msg</code> that is user input from the browser, and a <code>send</code> function for pushing data back to the browser</span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="10">10</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="25" data-code-annotation="10">The <code>send</code> function is used here to send HTML back to the page. As the HTML has an <code>id</code> of <code>notifications</code>, HTMX will overwrite what is already on the page with the same ID</span>
+</dd>
+<dt data-target-cell="annotated-cell-41" data-target-annotation="11">11</dt>
+<dd>
+<span data-code-cell="annotated-cell-41" data-code-lines="27" data-code-annotation="11">The websocket function can also be used to return a value. In this case, it is a tuple of two HTML elements. HTMX will take the elements and replace them where appropriate. As both have <code>id</code> specified (<code>notifications</code> and <code>msg</code> respectively), they will replace their predecessor on the page.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="file-uploads" class="level2">
+<h2 class="anchored" data-anchor-id="file-uploads">File Uploads</h2>
+<p>A common task in web development is uploading files. This example is for uploading files to the hosting server, with information about the uploaded file presented to the user.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="File uploads in production can be dangerous">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+File uploads in production can be dangerous
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>File uploads can be the target of uabuse, accidental or intentional. That means users may attempt to upload files that are too large or present a security risk. This is especially of concern for public facing apps. File upload security is outside the scope of this tutorial, for now we suggest reading the <a href="https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html">OWASP File Upload Cheat Sheet</a>.</p>
+</div>
+</div>
+<div id="cell-92" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-42"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-42-1"><a href="#annotated-cell-42-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="annotated-cell-42-2"><a href="#annotated-cell-42-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="annotated-cell-42-3"><a href="#annotated-cell-42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-42-4"><a href="#annotated-cell-42-4" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app()</span>
+<span id="annotated-cell-42-5"><a href="#annotated-cell-42-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-42-6"><a href="#annotated-cell-42-6" aria-hidden="true" tabindex="-1"></a>upload_dir <span class="op">=</span> Path(<span class="st">"filez"</span>)</span>
+<span id="annotated-cell-42-7"><a href="#annotated-cell-42-7" aria-hidden="true" tabindex="-1"></a>upload_dir.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-42-8"><a href="#annotated-cell-42-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-42-9"><a href="#annotated-cell-42-9" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/'</span>)</span>
+<span id="annotated-cell-42-10"><a href="#annotated-cell-42-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get():</span>
+<span id="annotated-cell-42-11"><a href="#annotated-cell-42-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">"File Upload Demo"</span>,</span>
+<span id="annotated-cell-42-12"><a href="#annotated-cell-42-12" aria-hidden="true" tabindex="-1"></a>        Div(cls<span class="op">=</span><span class="st">'grid'</span>)(</span>
+<span id="annotated-cell-42-13"><a href="#annotated-cell-42-13" aria-hidden="true" tabindex="-1"></a>            Article(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-42" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-42-14" class="code-annotation-target"><a href="#annotated-cell-42-14" aria-hidden="true" tabindex="-1"></a>                Form(hx_post<span class="op">=</span><span class="st">"/upload"</span>, hx_target<span class="op">=</span><span class="st">"#result-one"</span>)(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-42" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-42-15" class="code-annotation-target"><a href="#annotated-cell-42-15" aria-hidden="true" tabindex="-1"></a>                    Input(<span class="bu">type</span><span class="op">=</span><span class="st">"file"</span>, name<span class="op">=</span><span class="st">"file"</span>),</span>
+<span id="annotated-cell-42-16"><a href="#annotated-cell-42-16" aria-hidden="true" tabindex="-1"></a>                    Button(<span class="st">"Upload"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"submit"</span>, cls<span class="op">=</span><span class="st">'secondary'</span>),</span>
+<span id="annotated-cell-42-17"><a href="#annotated-cell-42-17" aria-hidden="true" tabindex="-1"></a>                ),</span>
+<span id="annotated-cell-42-18"><a href="#annotated-cell-42-18" aria-hidden="true" tabindex="-1"></a>                Div(<span class="bu">id</span><span class="op">=</span><span class="st">"result-one"</span>)</span>
+<span id="annotated-cell-42-19"><a href="#annotated-cell-42-19" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-42-20"><a href="#annotated-cell-42-20" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-42-21"><a href="#annotated-cell-42-21" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-42-22"><a href="#annotated-cell-42-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-42-23"><a href="#annotated-cell-42-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> FileMetaDataCard(<span class="bu">file</span>):</span>
+<span id="annotated-cell-42-24"><a href="#annotated-cell-42-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Article(</span>
+<span id="annotated-cell-42-25"><a href="#annotated-cell-42-25" aria-hidden="true" tabindex="-1"></a>        Header(H3(<span class="bu">file</span>.filename)),</span>
+<span id="annotated-cell-42-26"><a href="#annotated-cell-42-26" aria-hidden="true" tabindex="-1"></a>        Ul(</span>
+<span id="annotated-cell-42-27"><a href="#annotated-cell-42-27" aria-hidden="true" tabindex="-1"></a>            Li(<span class="st">'Size: '</span>, <span class="bu">file</span>.size),            </span>
+<span id="annotated-cell-42-28"><a href="#annotated-cell-42-28" aria-hidden="true" tabindex="-1"></a>            Li(<span class="st">'Content Type: '</span>, <span class="bu">file</span>.content_type),</span>
+<span id="annotated-cell-42-29"><a href="#annotated-cell-42-29" aria-hidden="true" tabindex="-1"></a>            Li(<span class="st">'Headers: '</span>, <span class="bu">file</span>.headers),</span>
+<span id="annotated-cell-42-30"><a href="#annotated-cell-42-30" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-42-31"><a href="#annotated-cell-42-31" aria-hidden="true" tabindex="-1"></a>    )    </span>
+<span id="annotated-cell-42-32"><a href="#annotated-cell-42-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-42-33"><a href="#annotated-cell-42-33" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/upload'</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-42" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-42-34" class="code-annotation-target"><a href="#annotated-cell-42-34" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> post(<span class="bu">file</span>: UploadFile):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-42" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-42-35" class="code-annotation-target"><a href="#annotated-cell-42-35" aria-hidden="true" tabindex="-1"></a>    card <span class="op">=</span> FileMetaDataCard(<span class="bu">file</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-42" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-42-36" class="code-annotation-target"><a href="#annotated-cell-42-36" aria-hidden="true" tabindex="-1"></a>    filebuffer <span class="op">=</span> <span class="cf">await</span> <span class="bu">file</span>.read()</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-42" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-42-37" class="code-annotation-target"><a href="#annotated-cell-42-37" aria-hidden="true" tabindex="-1"></a>    (upload_dir <span class="op">/</span> <span class="bu">file</span>.filename).write_bytes(filebuffer)</span>
+<span id="annotated-cell-42-38"><a href="#annotated-cell-42-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> card</span>
+<span id="annotated-cell-42-39"><a href="#annotated-cell-42-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-42-40"><a href="#annotated-cell-42-40" aria-hidden="true" tabindex="-1"></a>serve()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-42" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-42" data-code-lines="14" data-code-annotation="1">Every form rendered with the <a href="https://AnswerDotAI.github.io/fasthtml/api/xtend.html#form"><code>Form</code></a> FT component defaults to <code>enctype="multipart/form-data"</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-42" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-42" data-code-lines="15" data-code-annotation="2">Don’t forget to set the <code>Input</code> FT Component’s type to <code>file</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-42" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-42" data-code-lines="34" data-code-annotation="3">The upload view should receive a <a href="https://www.starlette.io/requests/#request-files">Starlette UploadFile</a> type. You can add other form variables</span>
+</dd>
+<dt data-target-cell="annotated-cell-42" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-42" data-code-lines="35" data-code-annotation="4">We can access the metadata of the card (filename, size, content_type, headers), a quick and safe process</span>
+</dd>
+<dt data-target-cell="annotated-cell-42" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-42" data-code-lines="36" data-code-annotation="5">In order to access the contents contained within a file we use the <code>await</code> method to read() it. As files may be quite large or contain bad data, this is a seperate step from accessing metadata</span>
+</dd>
+<dt data-target-cell="annotated-cell-42" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-42" data-code-lines="37" data-code-annotation="6">This step shows how to use Python’s built-in <code>pathlib.Path</code> library to write the file to disk.</span>
+</dd>
+</dl>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/AnswerDotAI\.github\.io\/fasthtml");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
