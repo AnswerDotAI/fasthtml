@@ -51,7 +51,7 @@ def render_toasts(sess):
                hx_swap_oob="afterbegin:body")
 
 def toast_after(resp, req, sess):
-    if sk in sess and (not resp or isinstance(resp, (tuple,FT))): req.injects.append(render_toasts(sess))
+    if sk in sess and (not resp or isinstance(resp, (tuple,FT,FtResponse))): req.injects.append(render_toasts(sess))
 
 def setup_toasts(app):
     app.hdrs += (Style(toast_css), Script(toast_js, type="module"))
