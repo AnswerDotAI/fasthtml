@@ -144,6 +144,9 @@ tutorials, notebooks, libraries, and components:
 - [Creating Custom FastHTML Tags for Markdown
   Rendering](https://isaac-flath.github.io/website/posts/boots/FasthtmlTutorial.html)
   by Isaac Flath
+- [How to Build a Simple Login System in
+  FastHTML](https://blog.mariusvach.com/posts/login-fasthtml) by Marius
+  Vach
 - Your tutorial here!
 
 Finally, join the FastHTML community to ask questions, share your work,
