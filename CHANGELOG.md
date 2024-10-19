@@ -2,6 +2,20 @@
 
 <!-- do not remove -->
 
+## 0.6.14
+
+### New Features
+
+- Replace experimental `Pusher` with experimental `setup_ws` and `ws_client` ([#522](https://github.com/AnswerDotAI/fasthtml/issues/522))
+- Add experimental `with_sid()` ([#521](https://github.com/AnswerDotAI/fasthtml/issues/521))
+- Ensure FT children are tuples
+- Adding mermaidJS for mermaid graphs ([#518](https://github.com/AnswerDotAI/fasthtml/pull/518)), thanks to [@ImtiazKhanDS](https://github.com/ImtiazKhanDS)
+
+### Bugs Squashed
+
+- Uploading a single file on a multiple file field requires try/except ([#513](https://github.com/AnswerDotAI/fasthtml/issues/513))
+
+
 ## 0.6.13
 
 ### New Features
