@@ -73,21 +73,22 @@ def _get_htmx(h):
     return HtmxHeaders(**res)
 
 # %% ../nbs/api/00_core.ipynb
-def _mk_list(t, v): return [t(o) for o in v]
+def _mk_list(t, v): return [t(o) for o in listify(v)]
 
 # %% ../nbs/api/00_core.ipynb
 fh_cfg = AttrDict(indent=True)
 
 # %% ../nbs/api/00_core.ipynb
-def _fix_anno(t):
+def _fix_anno(t, o):
     "Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"
     origin = get_origin(t)
     if origin is Union or origin is UnionType or origin in (list,List):
         t = first(o for o in get_args(t) if o!=type(None))
     d = {bool: str2bool, int: str2int, date: str2date, UploadFile: noop}
     res = d.get(t, t)
-    if origin in (list,List): return partial(_mk_list, res)
-    return lambda o: res(o[-1]) if isinstance(o,(list,tuple)) else res(o)
+    if origin in (list,List): return _mk_list(res, o)
+    if not isinstance(o, (str,list,tuple)): return o
+    return res(o[-1]) if isinstance(o,(list,tuple)) else res(o)
 
 # %% ../nbs/api/00_core.ipynb
 def _form_arg(k, v, d):
@@ -97,7 +98,7 @@ def _form_arg(k, v, d):
     # This is the type we want to cast `v` to
     anno = d.get(k, None)
     if not anno: return v
-    return _fix_anno(anno)(v)
+    return _fix_anno(anno, v)
 
 # %% ../nbs/api/00_core.ipynb
 @dataclass
@@ -195,9 +196,8 @@ async def _find_p(req, arg:str, p:Parameter):
     # If we have a default, return that if we have no value
     if res in (empty,None): res = p.default
     # We can cast str and list[str] to types; otherwise just return what we have
-    if not isinstance(res, (list,str)) or anno is empty: return res
-    anno = _fix_anno(anno)
-    try: return anno(res)
+    if anno is empty: return res
+    try: return _fix_anno(anno, res)
     except ValueError: raise HTTPException(404, req.url.path) from None
 
 async def _wrap_req(req, params):
@@ -241,8 +241,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
     if res is empty or res is None: res = p.default
     # We can cast str and list[str] to types; otherwise just return what we have
     if not isinstance(res, (list,str)) or anno is empty: return res
-    anno = _fix_anno(anno)
-    return [anno(o) for o in res] if isinstance(res,list) else anno(res)
+    return [_fix_anno(anno, o) for o in res] if isinstance(res,list) else _fix_anno(anno, res)
 
 def _wrap_ws(ws, data, params):
     hdrs = {k.lower().replace('-','_'):v for k,v in data.pop('HEADERS', {}).items()}
