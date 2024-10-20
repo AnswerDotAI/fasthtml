@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.7.0
+
+### Breaking changes
+
+- `ws_hdr` and `cts_hdr` both removed from `FastHTML` and `fast_app`; replaced with `exts`, which takes a list of extension names (e.g. `exts='ws'`)
+
+### New Features
+
+- Unified syntax for common HTMX extensions ([#533](https://github.com/AnswerDotAI/fasthtml/issues/533))
+- Allow toasts to work with FtResponse ([#526](https://github.com/AnswerDotAI/fasthtml/pull/526)), thanks to [@tomasz-pankowski](https://github.com/tomasz-pankowski)
+
+
 ## 0.6.14
 
 ### New Features
