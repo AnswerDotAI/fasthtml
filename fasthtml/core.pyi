@@ -1,5 +1,5 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmxsrc', 'htmxwssrc', 'fhjsscr', 'htmxctsrc', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'str2int', 'str2date', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse']
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 import json, uuid, inspect, types, uvicorn, signal, asyncio, threading
 from fastcore.utils import *
 from fastcore.xml import *
@@ -18,6 +18,8 @@ from warnings import warn
 from dateutil import parser as dtparse
 from httpx import ASGITransport, AsyncClient
 from anyio import from_thread
+from uuid import uuid4
+from base64 import b85encode, b64encode
 from .starlette import *
 empty = Parameter.empty
 
@@ -50,19 +52,11 @@ class HtmxHeaders:
 def _get_htmx(h):
     ...
 
-def str2int(s) -> int:
-    """Convert `s` to an `int`"""
-    ...
-
 def _mk_list(t, v):
     ...
 fh_cfg = AttrDict(indent=True)
 
-def str2date(s: str) -> date:
-    """`date.fromisoformat` with empty string handling"""
-    ...
-
-def _fix_anno(t):
+def _fix_anno(t, o):
     """Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"""
     ...
 
@@ -228,10 +222,9 @@ class RouterX(Router):
 
     def add_ws(self, path: str, recv: callable, conn: callable=None, disconn: callable=None, name=None):
         ...
+htmx_exts = {'head-support': 'https://unpkg.com/htmx-ext-head-support@2.0.1/head-support.js', 'preload': 'https://unpkg.com/htmx-ext-preload@2.0.1/preload.js', 'class-tools': 'https://unpkg.com/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://unpkg.com/htmx-ext-loading-states@2.0.0/loading-states.js', 'multi-swap': 'https://unpkg.com/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://unpkg.com/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://unpkg.com/htmx-ext-remove-me@2.0.0/remove-me.js', 'ws': 'https://unpkg.com/htmx-ext-ws/ws.js', 'chunked-transfer': 'https://unpkg.com/htmx-ext-transfer-encoding-chunked/transfer-encoding-chunked.js'}
 htmxsrc = Script(src='https://unpkg.com/htmx.org@next/dist/htmx.min.js')
-htmxwssrc = Script(src='https://unpkg.com/htmx-ext-ws/ws.js')
 fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js')
-htmxctsrc = Script(src='https://unpkg.com/htmx-ext-transfer-encoding-chunked/transfer-encoding-chunked.js')
 surrsrc = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js')
 scopesrc = Script(src='https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js')
 viewport = Meta(name='viewport', content='width=device-width, initial-scale=1, viewport-fit=cover')
@@ -249,13 +242,13 @@ def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
 def _mk_locfunc(f, p):
     ...
 
-def def_hdrs(htmx=True, ct_hdr=False, ws_hdr=False, surreal=True):
+def def_hdrs(htmx=True, surreal=True):
     """Default headers for a FastHTML app"""
     ...
 
 class FastHTML(Starlette):
 
-    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, before=None, after=None, ws_hdr=False, ct_hdr=False, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', htmlkw=None, **bodykw):
+    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', htmlkw=None, **bodykw):
         ...
 
     def ws(self, path: str, conn=None, disconn=None, name=None):
@@ -309,8 +302,17 @@ class MiddlewareBase:
 class FtResponse:
     """Wrap an FT response with any Starlette `Response`"""
 
-    def __init__(self, content, status_code: int=200, headers=None, cls=HTMLResponse, media_type: str | None=None, background=None):
+    def __init__(self, content, status_code: int=200, headers=None, cls=HTMLResponse, media_type: str | None=None):
         ...
 
     def __response__(self, req):
         ...
+
+def unqid():
+    ...
+
+def _add_ids(s):
+    ...
+
+def setup_ws(app, f=noop):
+    ...

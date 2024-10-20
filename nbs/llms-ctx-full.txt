@@ -459,8 +459,7 @@ Main(
 ```
 
 ``` html
-<main>
-  <div class="hero">
+<main>  <div class="hero">
     <h1>Hello World</h1>
     <p>This is a hero statement</p>
   </div>
@@ -490,8 +489,7 @@ layout(
 ```
 
 ``` html
-<main class="dashboard">
-  <h1>Dashboard</h1>
+<main class="dashboard">  <h1>Dashboard</h1>
   <div>
     <ul>
       <li>0</li>
@@ -527,8 +525,7 @@ Main(
 ```
 
 ``` html
-<main>
-  <div class="hero">
+<main>  <div class="hero">
     <h1>Hello World</h1>
     <p>This is a hero statement</p>
   </div>
@@ -561,17 +558,13 @@ print(client.get("/").text)
 ```
 
      <!doctype html>
-
      <html>
        <head>
-         <title>FastHTML is awesome</title>
-       </head>
+    <title>FastHTML is awesome</title>   </head>
        <body>
-         <main class="container">
-           <h1>FastHTML is awesome</h1>
+    <main class="container">       <h1>FastHTML is awesome</h1>
            <p>The fastest way to create web apps in Python</p>
-         </main>
-       </body>
+    </main>   </body>
      </html>
 
 ## Forms
@@ -603,23 +596,10 @@ profile_form
 ```
 
 ``` html
-<form enctype="multipart/form-data" method="post" action="/profile">
-  <fieldset>
-    <label>
-Email
-      <input name="email">
-    </label>
-    <label>
-Phone
-      <input name="phone">
-    </label>
-    <label>
-Age
-      <input name="age">
-    </label>
-  </fieldset>
-  <button type="submit">Save</button>
-</form>
+<form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email      <input name="email">
+</label><label>Phone      <input name="phone">
+</label><label>Age      <input name="age">
+</label></fieldset><button type="submit">Save</button></form>
 ```
 
 Once the dataclass and form function are completed, we can add data to
@@ -641,23 +621,10 @@ fill_form(profile_form, profile)
 ```
 
 ``` html
-<form enctype="multipart/form-data" method="post" action="/profile">
-  <fieldset>
-    <label>
-Email
-      <input name="email" value="john@example.com">
-    </label>
-    <label>
-Phone
-      <input name="phone" value="123456789">
-    </label>
-    <label>
-Age
-      <input name="age" value="5">
-    </label>
-  </fieldset>
-  <button type="submit">Save</button>
-</form>
+<form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email      <input name="email" value="john@example.com">
+</label><label>Phone      <input name="phone" value="123456789">
+</label><label>Age      <input name="age" value="5">
+</label></fieldset><button type="submit">Save</button></form>
 ```
 
 ### Forms with views
@@ -700,33 +667,15 @@ Fill the form for display.
 
 
      <!doctype html>
-
      <html>
        <head>
-         <title>Profile for john@example.com</title>
-       </head>
+    <title>Profile for john@example.com</title>   </head>
        <body>
-         <main class="container">
-           <h1>Profile for john@example.com</h1>
-           <form enctype="multipart/form-data" method="post" action="/profile">
-             <fieldset>
-               <label>
-    Email
-                 <input name="email" value="john@example.com">
-               </label>
-               <label>
-    Phone
-                 <input name="phone" value="123456789">
-               </label>
-               <label>
-    Age
-                 <input name="age" value="5">
-               </label>
-             </fieldset>
-             <button type="submit">Save</button>
-           </form>
-         </main>
-       </body>
+    <main class="container">       <h1>Profile for john@example.com</h1>
+    <form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email             <input name="email" value="john@example.com">
+    </label><label>Phone             <input name="phone" value="123456789">
+    </label><label>Age             <input name="age" value="5">
+    </label></fieldset><button type="submit">Save</button></form></main>   </body>
      </html>
 
 And now let’s demonstrate making a change to the data.
@@ -757,33 +706,15 @@ The display is of the profile form view showing the changes in data.
 
 
      <!doctype html>
-
      <html>
        <head>
-         <title>Profile for john@example.com</title>
-       </head>
+    <title>Profile for john@example.com</title>   </head>
        <body>
-         <main class="container">
-           <h1>Profile for john@example.com</h1>
-           <form enctype="multipart/form-data" method="post" action="/profile">
-             <fieldset>
-               <label>
-    Email
-                 <input name="email" value="john@example.com">
-               </label>
-               <label>
-    Phone
-                 <input name="phone" value="7654321">
-               </label>
-               <label>
-    Age
-                 <input name="age" value="25">
-               </label>
-             </fieldset>
-             <button type="submit">Save</button>
-           </form>
-         </main>
-       </body>
+    <main class="container">       <h1>Profile for john@example.com</h1>
+    <form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email             <input name="email" value="john@example.com">
+    </label><label>Phone             <input name="phone" value="7654321">
+    </label><label>Age             <input name="age" value="25">
+    </label></fieldset><button type="submit">Save</button></form></main>   </body>
      </html>
 
 ## Strings and conversion order
@@ -901,12 +832,11 @@ HTML(client.get('/settimestamp').text)
 ```
 
  <!doctype html>
-&#10; <html>
+ <html>
    <head>
-     <title>FastHTML page</title>
-   </head>
+<title>FastHTML page</title>   </head>
    <body>
-     <p>Set to 2024-09-04 18:30:34.896373</p>
+     <p>Set to 2024-09-26 15:33:48.141869</p>
    </body>
  </html>
 
@@ -920,7 +850,7 @@ def get(now:parsed_date): return f'Cookie was set at time {now.time()}'
 client.get('/gettimestamp').text
 ```
 
-    'Cookie was set at time 18:30:34.896405'
+    'Cookie was set at time 15:33:48.141903'
 
 ## Sessions
 
@@ -1102,23 +1032,194 @@ Line 26
 The endpoint view needs to be an async function that returns a
 [`EventStream`](https://AnswerDotAI.github.io/fasthtml/api/core.html#eventstream)
 
+## Websockets
+
+With websockets we can have bi-directional communications between a
+browser and client. Websockets are useful for things like chat and
+certain types of games. While websockets can be used for single
+direction messages from the server (i.e. telling users that a process is
+finished), that task is arguably better suited for SSE.
+
+FastHTML provides useful tools for adding websockets to your pages.
+
+``` python
+from fasthtml.common import *
+from asyncio import sleep
+
+app, rt = fast_app(ws_hdr=True)
+
+def mk_inp(): return Input(id='msg', autofocus=True)
+
+@rt('/')
+async def get(request):
+    cts = Div(
+        Div(id='notifications'),
+        Form(mk_inp(), id='form', ws_send=True),
+        hx_ext='ws', ws_connect='/ws')
+    return Titled('Websocket Test', cts)
+
+async def on_connect(send):
+    print('Connected!')
+    await send(Div('Hello, you have connected', id="notifications"))
+
+async def on_disconnect(ws):
+    print('Disconnected!')
+
+@app.ws('/ws', conn=on_connect, disconn=on_disconnect)
+async def ws(msg:str, send):
+    await send(Div('Hello ' + msg, id="notifications"))
+    await sleep(2)
+    return Div('Goodbye ' + msg, id="notifications"), mk_inp()
+```
+
+Line 4  
+To use websockets in FastHTML, you must instantiate the app with the
+`ws_hdr` set to `True`
+
+Line 6  
+As we want to use websockets to reset the form, we define the `mk_input`
+function that can be called from multiple locations
+
+Line 12  
+We create the form and mark it with the `ws_send` attribute, which is
+documented here in the [HTMX websocket
+specification](https://v1.htmx.org/extensions/web-sockets/). This tells
+HTMX to send a message to the nearest websocket based on the trigger for
+the form element, which for forms is pressing the `enter` key, an action
+considered to be a form submission
+
+Line 13  
+This is where the HTMX extension is loaded (`hx_ext='ws'`) and the
+nearest websocket is defined (`ws_connect='/ws'`)
+
+Line 16  
+When a websocket first connects we can optionally have it call a
+function that accepts a `send` argument. The `send` argument will push a
+message to the browser.
+
+Line 18  
+Here we use the `send` function that was passed into the `on_connect`
+function to send a `Div` with an `id` of `notifications` that HTMX
+assigns to the element in the page that already has an `id` of
+`notifications`
+
+Line 20  
+When a websocket disconnects we can call a function which takes no
+arguments. Typically the role of this function is to notify the server
+to take an action. In this case, we print a simple message to the
+console
+
+Line 23  
+We use the `app.ws` decorator to mark that `/ws` is the route for our
+websocket. We also pass in the two optional `conn` and `disconn`
+parameters to this decorator. As a fun experiment, remove the `conn` and
+`disconn` arguments and see what happens
+
+Line 24  
+Define the `ws` function as async. This is necessary for ASGI to be able
+to serve websockets. The function accepts two arguments, a `msg` that is
+user input from the browser, and a `send` function for pushing data back
+to the browser
+
+Line 25  
+The `send` function is used here to send HTML back to the page. As the
+HTML has an `id` of `notifications`, HTMX will overwrite what is already
+on the page with the same ID
+
+Line 27  
+The websocket function can also be used to return a value. In this case,
+it is a tuple of two HTML elements. HTMX will take the elements and
+replace them where appropriate. As both have `id` specified
+(`notifications` and `msg` respectively), they will replace their
+predecessor on the page.
+
+## File Uploads
+
+A common task in web development is uploading files. This example is for
+uploading files to the hosting server, with information about the
+uploaded file presented to the user.
+
 <div>
 
-> **New content as of September 1, 2024**
+> **File uploads in production can be dangerous**
 >
-> - [Forms](../tutorials/quickstart_for_web_devs.html#forms)
-> - [Server-side Events
->   (SSE)](../tutorials/quickstart_for_web_devs.html#server-sent-events-sse)
->
-> We’re going to be adding more to this document, so check back
-> frequently for updates.
+> File uploads can be the target of abuse, accidental or intentional.
+> That means users may attempt to upload files that are too large or
+> present a security risk. This is especially of concern for public
+> facing apps. File upload security is outside the scope of this
+> tutorial, for now we suggest reading the [OWASP File Upload Cheat
+> Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html).
 
 </div>
 
-## Unwritten quickstart sections
+``` python
+from fasthtml.common import *
+from pathlib import Path
 
-- Websockets
-- Tables</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
+app, rt = fast_app()
+
+upload_dir = Path("filez")
+upload_dir.mkdir(exist_ok=True)
+
+@rt('/')
+def get():
+    return Titled("File Upload Demo",
+        Div(cls='grid')(
+            Article(
+                Form(hx_post="/upload", hx_target="#result-one")(
+                    Input(type="file", name="file"),
+                    Button("Upload", type="submit", cls='secondary'),
+                ),
+                Div(id="result-one")
+            )
+        )
+    )
+
+def FileMetaDataCard(file):
+    return Article(
+        Header(H3(file.filename)),
+        Ul(
+            Li('Size: ', file.size),            
+            Li('Content Type: ', file.content_type),
+            Li('Headers: ', file.headers),
+        )
+    )    
+
+@rt('/upload')
+async def post(file: UploadFile):
+    card = FileMetaDataCard(file)
+    filebuffer = await file.read()
+    (upload_dir / file.filename).write_bytes(filebuffer)
+    return card
+
+serve()
+```
+
+Line 14  
+Every form rendered with the
+[`Form`](https://AnswerDotAI.github.io/fasthtml/api/xtend.html#form) FT
+component defaults to `enctype="multipart/form-data"`
+
+Line 15  
+Don’t forget to set the `Input` FT Component’s type to `file`
+
+Line 34  
+The upload view should receive a [Starlette
+UploadFile](https://www.starlette.io/requests/#request-files) type. You
+can add other form variables
+
+Line 35  
+We can access the metadata of the card (filename, size, content_type,
+headers), a quick and safe process
+
+Line 36  
+In order to access the contents contained within a file we use the
+`await` method to read() it. As files may be quite large or contain bad
+data, this is a seperate step from accessing metadata
+
+Line 37  
+This step shows how to use Python’s built-in `pathlib.Path` library to
+write the file to disk.</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
 title = "Reference"
 +++
 
@@ -1130,7 +1231,7 @@ title = "Reference"
 * [htmx Request Headers](#request_headers)
 * [htmx Response Headers](#response_headers)
 * [htmx Events](#events)
-* [htmx Extensions](https://extensions.htmx.org)
+* [htmx Extensions](/extensions)
 * [JavaScript API](#api)
 * [Configuration Options](#config)
 
@@ -1262,6 +1363,7 @@ All other attributes available in htmx.
 | [`htmx:beforeRequest`](@/events.md#htmx:beforeRequest)  | triggered before an AJAX request is made
 | [`htmx:beforeSwap`](@/events.md#htmx:beforeSwap)  | triggered before a swap is done, allows you to configure the swap
 | [`htmx:beforeSend`](@/events.md#htmx:beforeSend)  | triggered just before an ajax request is sent
+| [`htmx:beforeTransition`](@/events.md#htmx:beforeTransition)  | triggered before the [View Transition](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API) wrapped swap occurs
 | [`htmx:configRequest`](@/events.md#htmx:configRequest)  | triggered before the request, allows you to customize parameters, headers
 | [`htmx:confirm`](@/events.md#htmx:confirm)  | triggered after a trigger occurs on an element, allows you to cancel (or delay) issuing the AJAX request
 | [`htmx:historyCacheError`](@/events.md#htmx:historyCacheError)  | triggered on an error during cache writing
@@ -1307,7 +1409,7 @@ All other attributes available in htmx.
 | [`htmx.config`](@/api.md#config)  | A property that holds the current htmx config object
 | [`htmx.createEventSource`](@/api.md#createEventSource)  | A property holding the function to create SSE EventSource objects for htmx
 | [`htmx.createWebSocket`](@/api.md#createWebSocket)  | A property holding the function to create WebSocket objects for htmx
-| [`htmx.defineExtension()`](@/api.md#defineExtension)  | Defines an htmx [extension](https://extensions.htmx.org)
+| [`htmx.defineExtension()`](@/api.md#defineExtension)  | Defines an htmx [extension](https://htmx.org/extensions)
 | [`htmx.find()`](@/api.md#find)  | Finds a single element matching the selector
 | [`htmx.findAll()` `htmx.findAll(elt, selector)`](@/api.md#find)  | Finds all elements matching a given selector
 | [`htmx.logAll()`](@/api.md#logAll)  | Installs a logger that will log all htmx events
@@ -1319,7 +1421,7 @@ All other attributes available in htmx.
 | [`htmx.process()`](@/api.md#process)  | Processes the given element and its children, hooking up any htmx behavior
 | [`htmx.remove()`](@/api.md#remove)  | Removes the given element
 | [`htmx.removeClass()`](@/api.md#removeClass)  | Removes a class from the given element
-| [`htmx.removeExtension()`](@/api.md#removeExtension)  | Removes an htmx [extension](https://extensions.htmx.org)
+| [`htmx.removeExtension()`](@/api.md#removeExtension)  | Removes an htmx [extension](https://htmx.org/extensions)
 | [`htmx.swap()`](@/api.md#swap)  | Performs swapping (and settling) of HTML content
 | [`htmx.takeClass()`](@/api.md#takeClass)  | Takes a class from other elements for the given element
 | [`htmx.toggleClass()`](@/api.md#toggleClass)  | Toggles a class from the given element
@@ -1620,29 +1722,29 @@ Looking for stuff [we recommend doing in vanilla JS](#no-surreal)?
 * 🔗 `enable`
   * 🔥 `me().enable()`
   * Opposite of `disable()`
+* 🌐 `createElement` 🌗 `create_element`
+  * 🔥 `e_new = createElement("div"); me().prepend(e_new)`
+  * Alias of [document.createElement](https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement)
 * 🌐 `sleep`
   * 🔥 `await sleep(1000, ev => { alert(ev) })`
   * `async` version of `setTimeout`
   * Wonderful for animation timelines.
+* 🌐 `halt`
+  * 🔥 `halt(event)`
+  * When recieving an event, stop propagation, and prevent default actions (such as form submit).
+  * Wrapper for [stopPropagation](https://developer.mozilla.org/en-US/docs/Web/API/Event/stopPropagation) and [preventDefault](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault)
 * 🌐 `tick`
   * 🔥 `await tick()`
   * `await` version of `rAF` / `requestAnimationFrame`.
-  * Animation tick. Waits 1 frame.
-  * Great if you need to wait for events to propagate.
+  * Waits for 1 frame (browser paint).
+  * Useful to guarantee CSS properties are applied, and events have propagated.
 * 🌐 `rAF`
   * 🔥 `rAF(e => { return e })`
-  * Animation tick.  Fires when 1 frame has passed. Alias of [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)
-  * Great if you need to wait for events to propagate.
+  * Calls after 1 frame (browser paint). Alias of [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)
+  * Useful to guarantee CSS properties are applied, and events have propagated.
 * 🌐 `rIC`
   * 🔥 `rIC(e => { return e })`
-  * Great time to compute. Fires function when JS is idle. Alias of [requestIdleCallback](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback)
-* 🌐 `halt`
-  * 🔥 `halt(event)`
-  * Prevent default browser behaviors.
-  * Wrapper for [preventDefault](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault)
-* 🌐 `createElement` 🌗 `create_element`
-  * 🔥 `e_new = createElement("div"); me().prepend(e_new)`
-  * Alias of vanilla `document.createElement`
+  * Calls when Javascript is idle. Alias of [requestIdleCallback](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback)
 * 🌐 `onloadAdd` 🌗 `onload_add` 🌗 `addOnload` 🌗 `add_onload`
   * 🔥 `onloadAdd(_ => { alert("loaded!"); })`
   * 🔥 `<script>let e = me(); onloadAdd(_ => { me(e).on("click", ev => { alert("clicked") }) })</script>`
@@ -2342,12 +2444,6 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def __bool__(self)`
     - `def __init__(self, boosted, current_url, history_restore_request, prompt, request, target, trigger_name, trigger)`
 
-- `def str2int(s)`
-    Convert `s` to an `int`
-
-- `def str2date(s)`
-    `date.fromisoformat` with empty string handling
-
 - `@dataclass class HttpHeader`
     - `def __init__(self, k, v)`
 
@@ -2389,6 +2485,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def add_route(self, path, endpoint, methods, name, include_in_schema)`
     - `def add_ws(self, path, recv, conn, disconn, name)`
 
+- `def def_hdrs(htmx, ct_hdr, ws_hdr, surreal)`
+    Default headers for a FastHTML app
+
 - `class FastHTML`
     - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, before, after, ws_hdr, ct_hdr, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, htmlkw, **bodykw)`
     - `def ws(self, path, conn, disconn, name)`
@@ -2421,7 +2520,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `class FtResponse`
     Wrap an FT response with any Starlette `Response`
 
-    - `def __init__(self, content, status_code, headers, cls, media_type, background)`
+    - `def __init__(self, content, status_code, headers, cls, media_type)`
     - `def __response__(self, req)`
 
 ## fasthtml.fastapp
@@ -2430,9 +2529,6 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, ws_hdr, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
-
-- `def jupy_app(pico, hdrs, middleware, **kwargs)`
-    Same as `fast_app` but for Jupyter notebooks
 
 ## fasthtml.js
 
@@ -2449,6 +2545,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def HighlightJS(sel, langs, light, dark)`
     Implements browser-based syntax highlighting. Usage example [here](/tutorials/quickstart_for_web_devs.html#code-highlighting).
+
+- `def MermaidJS(sel, theme)`
+    Implements browser-based Mermaid diagram rendering.
 
 ## fasthtml.jupyter
 
@@ -2474,8 +2573,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def FastJupy(hdrs, middleware, **kwargs)`
     Same as FastHTML, but with Jupyter compatible middleware and headers added
 
-- `def HTMX(host, port)`
+- `def HTMX(path, host, port, iframe_height)`
     An iframe which displays the HTMX application in a notebook.
+
+- `def jupy_app(pico, hdrs, middleware, **kwargs)`
+    Same as `fast_app` but for Jupyter notebooks
 
 ## fasthtml.live_reload
 
@@ -2500,7 +2602,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
         >>> app = FastHTMLWithLiveReload()
 
         Run:
-            run_uv()
+            serve()
 
     - `def __init__(self, *args, **kwargs)`
 
@@ -2534,6 +2636,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `@patch def login_link(self, redirect_uri, scope, state)`
     Get a login link for this client
 
+- `def redir_url(request, redir_path, scheme)`
+    Get the redir url for the host in `request`
+
 - `@patch def parse_response(self, code, redirect_uri)`
     Get the token from the oauth2 server response
 
@@ -2547,7 +2652,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Call `retr_info` and then return id/subscriber value
 
 - `class OAuth`
-    - `def __init__(self, app, cli, skip, redir_path, logout_path, login_path)`
+    - `def __init__(self, app, cli, skip, redir_path, logout_path, login_path, https, http_patterns)`
     - `def redir_url(self, req)`
     - `def login_link(self, req, scope, state)`
     - `def login(self, info, state)`
@@ -2690,6 +2795,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def StyleX(fname, **kw)`
     A `style` element with contents read from `fname` and variables replaced from `kw`
+
+- `def Nbsp()`
+    A non-breaking space
 
 - `def Surreal(code)`
     Wrap `code` in `domReadyExecute` and set `m=me()` and `p=me('-')`

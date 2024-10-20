@@ -1,7 +1,7 @@
 from asyncio import sleep
 from fasthtml.common import *
 
-app = FastHTML(ws_hdr=True)
+app = FastHTML(exts='ws')
 rt = app.route
 
 def mk_inp(): return Input(id='msg')

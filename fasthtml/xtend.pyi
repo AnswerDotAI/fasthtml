@@ -1,11 +1,12 @@
 """Simple extensions to standard HTML components, such as adding sensible defaults"""
-__all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear']
+__all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear', 'with_sid']
 from dataclasses import dataclass, asdict
 from typing import Any
 from fastcore.utils import *
 from fastcore.xtras import partial_format
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
+from .core import *
 from .components import *
 try:
     from IPython import display
@@ -32,11 +33,11 @@ def CheckboxX(checked: bool=False, label=None, value='1', id=None, name=None, *,
     """A Checkbox optionally inside a Label, preceded by a `Hidden` with matching name"""
     ...
 
-def Script(code: str='', *, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=fastcore.xml.FT, **kwargs) -> FT:
+def Script(code: str='', *, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, auto_id=None, **kwargs) -> FT:
     """A Script tag that doesn't escape its code"""
     ...
 
-def Style(*c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=fastcore.xml.FT, **kwargs) -> FT:
+def Style(*c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, auto_id=None, **kwargs) -> FT:
     """A Style tag that doesn't escape its code"""
     ...
 
@@ -114,3 +115,6 @@ def Favicon(light_icon, dark_icon):
 def clear(id):
     ...
 sid_scr = Script('\nfunction uuid() {\n    return [...crypto.getRandomValues(new Uint8Array(10))].map(b=>b.toString(36)).join(\'\');\n}\n\nsessionStorage.setItem("sid", sessionStorage.getItem("sid") || uuid());\n\nhtmx.on("htmx:configRequest", (e) => {\n    const sid = sessionStorage.getItem("sid");\n    if (sid) {\n        const url = new URL(e.detail.path, window.location.origin);\n        url.searchParams.set(\'sid\', sid);\n        e.detail.path = url.pathname + url.search;\n    }\n});\n')
+
+def with_sid(app, dest, path='/'):
+    ...

@@ -54,12 +54,6 @@
     - `def __bool__(self)`
     - `def __init__(self, boosted, current_url, history_restore_request, prompt, request, target, trigger_name, trigger)`
 
-- `def str2int(s)`
-    Convert `s` to an `int`
-
-- `def str2date(s)`
-    `date.fromisoformat` with empty string handling
-
 - `@dataclass class HttpHeader`
     - `def __init__(self, k, v)`
 
@@ -101,11 +95,11 @@
     - `def add_route(self, path, endpoint, methods, name, include_in_schema)`
     - `def add_ws(self, path, recv, conn, disconn, name)`
 
-- `def def_hdrs(htmx, ct_hdr, ws_hdr, surreal)`
+- `def def_hdrs(htmx, surreal)`
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, before, after, ws_hdr, ct_hdr, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, htmlkw, **bodykw)`
+    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, htmlkw, **bodykw)`
     - `def ws(self, path, conn, disconn, name)`
         Add a websocket route at `path`
 
@@ -136,14 +130,14 @@
 - `class FtResponse`
     Wrap an FT response with any Starlette `Response`
 
-    - `def __init__(self, content, status_code, headers, cls, media_type, background)`
+    - `def __init__(self, content, status_code, headers, cls, media_type)`
     - `def __response__(self, req)`
 
 ## fasthtml.fastapp
 
 > The `fast_app` convenience wrapper
 
-- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, ws_hdr, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, **kwargs)`
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
 ## fasthtml.js
@@ -161,6 +155,9 @@
 
 - `def HighlightJS(sel, langs, light, dark)`
     Implements browser-based syntax highlighting. Usage example [here](/tutorials/quickstart_for_web_devs.html#code-highlighting).
+
+- `def MermaidJS(sel, theme)`
+    Implements browser-based Mermaid diagram rendering.
 
 ## fasthtml.jupyter
 
@@ -186,7 +183,7 @@
 - `def FastJupy(hdrs, middleware, **kwargs)`
     Same as FastHTML, but with Jupyter compatible middleware and headers added
 
-- `def HTMX(host, port, iframe_height)`
+- `def HTMX(path, host, port, iframe_height)`
     An iframe which displays the HTMX application in a notebook.
 
 - `def jupy_app(pico, hdrs, middleware, **kwargs)`
@@ -215,7 +212,7 @@
         >>> app = FastHTMLWithLiveReload()
 
         Run:
-            run_uv()
+            serve()
 
     - `def __init__(self, *args, **kwargs)`
 
@@ -249,6 +246,9 @@
 - `@patch def login_link(self, redirect_uri, scope, state)`
     Get a login link for this client
 
+- `def redir_url(request, redir_path, scheme)`
+    Get the redir url for the host in `request`
+
 - `@patch def parse_response(self, code, redirect_uri)`
     Get the token from the oauth2 server response
 
@@ -262,7 +262,7 @@
     Call `retr_info` and then return id/subscriber value
 
 - `class OAuth`
-    - `def __init__(self, app, cli, skip, redir_path, logout_path, login_path)`
+    - `def __init__(self, app, cli, skip, redir_path, logout_path, login_path, https, http_patterns)`
     - `def redir_url(self, req)`
     - `def login_link(self, req, scope, state)`
     - `def login(self, info, state)`

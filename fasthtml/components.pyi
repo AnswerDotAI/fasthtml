@@ -7,7 +7,7 @@ from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
 from fastcore.test import *
-from .core import fh_cfg
+from .core import fh_cfg, unqid
 import types, json
 try:
     from IPython import display
@@ -23,15 +23,17 @@ hx_attrs = 'get post put delete patch trigger target swap swap_oob include selec
 hx_attrs = [f'hx_{o}' for o in hx_attrs.split()]
 hx_attrs_annotations = {'hx_swap': Literal['innerHTML', 'outerHTML', 'afterbegin', 'beforebegin', 'beforeend', 'afterend', 'delete', 'none'] | str, 'hx_swap_oob': Literal['true', 'innerHTML', 'outerHTML', 'afterbegin', 'beforebegin', 'beforeend', 'afterend', 'delete', 'none'] | str, 'hx_push_url': Literal['true', 'false'] | str, 'hx_replace_url': Literal['true', 'false'] | str, 'hx_disabled_elt': Literal['this', 'next', 'previous'] | str, 'hx_history': Literal['false'] | str, 'hx_params': Literal['*', 'none'] | str, 'hx_replace_url': Literal['true', 'false'] | str, 'hx_validate': Literal['true', 'false']}
 hx_attrs_annotations |= {o: str for o in set(hx_attrs) - set(hx_attrs_annotations.keys())}
-hx_attrs_annotations = {k: Optional[v] for (k, v) in hx_attrs_annotations.items()}
+hx_attrs_annotations = {k: Optional[v] for k, v in hx_attrs_annotations.items()}
 hx_attrs = html_attrs + hx_attrs
 
 def attrmap_x(o):
     ...
 fh_cfg['attrmap'] = attrmap_x
 fh_cfg['valmap'] = valmap
+fh_cfg['ft_cls'] = FT
+fh_cfg['auto_id'] = False
 
-def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=FT, **kwargs):
+def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, auto_id=None, **kwargs):
     ...
 
 @use_kwargs(hx_attrs, keep=True)
