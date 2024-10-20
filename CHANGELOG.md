@@ -2,9 +2,7 @@
 
 <!-- do not remove -->
 
-
-
-## 0.7.0
+## 0.7.1
 
 ### Breaking changes
 
