@@ -4,10 +4,10 @@
 
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport',
-           'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders',
-           'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri',
-           'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'def_hdrs', 'FastHTML', 'serve',
-           'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+           'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders',
+           'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
+           'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'get_key', 'def_hdrs', 'FastHTML', 'serve',
+           'Client', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -35,10 +35,10 @@ from base64 import b85encode,b64encode
 
 from .starlette import *
 
-empty = Parameter.empty
-
 # %% ../nbs/api/00_core.ipynb
-def _sig(f): return signature_ex(f, True)
+def _params(f): return signature_ex(f, True).parameters
+
+empty = Parameter.empty
 
 # %% ../nbs/api/00_core.ipynb
 def parsed_date(s:str):
@@ -257,7 +257,7 @@ def _ws_endp(recv, conn=None, disconn=None):
     cls = type('WS_Endp', (WebSocketEndpoint,), {"encoding":"text"})
     
     async def _generic_handler(handler, ws, data=None):
-        wd = _wrap_ws(ws, loads(data) if data else {}, _sig(handler).parameters)
+        wd = _wrap_ws(ws, loads(data) if data else {}, _params(handler))
         resp = await _handle(handler, wd)
         if resp: await _send_ws(ws, resp)
 
@@ -288,13 +288,6 @@ def signal_shutdown():
 
     for sig in (signal.SIGINT, signal.SIGTERM): signal.signal(sig, signal_handler)
     return event
-
-# %% ../nbs/api/00_core.ipynb
-class WS_RouteX(WebSocketRoute):
-    def __init__(self, app, path:str, recv, conn:callable=None, disconn:callable=None, *,
-                 name=None, middleware=None):
-        super().__init__(path, _ws_endp(recv, conn, disconn), name=name, middleware=middleware)
-        self.methods = ['WS']
 
 # %% ../nbs/api/00_core.ipynb
 def uri(_arg, **kwargs):
@@ -419,52 +412,6 @@ async def _wrap_call(f, req, params):
     return await _handle(f, wreq)
 
 # %% ../nbs/api/00_core.ipynb
-class RouteX(Route):
-    def __init__(self, app, path:str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None):
-        self.f,self.sig,self._app = endpoint,_sig(endpoint),app
-        super().__init__(path, self._endp, methods=methods, name=name, include_in_schema=include_in_schema, middleware=middleware)
-
-    async def _endp(self, req):
-        resp = None
-        req.injects = []
-        req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (self._app.hdrs,self._app.ftrs,self._app.htmlkw,self._app.bodykw))
-        req.hdrs,req.ftrs = listify(req.hdrs),listify(req.ftrs)
-        for b in self._app.before:
-            if not resp:
-                if isinstance(b, Beforeware): bf,skip = b.f,b.skip
-                else: bf,skip = b,[]
-                if not any(re.fullmatch(r, req.url.path) for r in skip):
-                    resp = await _wrap_call(bf, req, _sig(bf).parameters)
-        if not resp: resp = await _wrap_call(self.f, req, self.sig.parameters)
-        for a in self._app.after:
-            _,*wreq = await _wrap_req(req, _sig(a).parameters)
-            nr = a(resp, *wreq)
-            if nr: resp = nr
-        return _resp(req, resp, self.sig.return_annotation)
-
-# %% ../nbs/api/00_core.ipynb
-class RouterX(Router):
-    def __init__(self, app, routes=None, redirect_slashes=True, default=None, *, middleware=None):
-        self._app = app
-        super().__init__(routes, redirect_slashes, default, app.on_startup, app.on_shutdown,
-                         lifespan=app.lifespan, middleware=middleware)
-    
-    def _add_route(self, route):
-        route.methods = [m.upper() for m in listify(route.methods)]
-        self.routes = [r for r in self.routes if not
-                       (r.path==route.path and r.name == route.name and
-                        ((route.methods is None) or (set(r.methods) == set(route.methods))))]
-        self.routes.append(route)
-
-    def add_route(self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
-        route = RouteX(self._app, path, endpoint=endpoint, methods=methods, name=name, include_in_schema=include_in_schema)
-        self._add_route(route)
-
-    def add_ws(self, path: str, recv: callable, conn:callable=None, disconn:callable=None, name=None):
-        route = WS_RouteX(self._app, path, recv=recv, conn=conn, disconn=disconn, name=name)
-        self._add_route(route)
-
-# %% ../nbs/api/00_core.ipynb
 htmx_exts = {
     "head-support": "https://unpkg.com/htmx-ext-head-support@2.0.1/head-support.js", 
     "preload": "https://unpkg.com/htmx-ext-preload@2.0.1/preload.js", 
@@ -523,6 +470,20 @@ def def_hdrs(htmx=True, surreal=True):
     return [charset, viewport] + hdrs
 
 # %% ../nbs/api/00_core.ipynb
+cors_allow = Middleware(CORSMiddleware, allow_credentials=True,
+                        allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+iframe_scr = Script("""
+    function sendmsg() {
+        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');
+    }
+    window.onload = function() {
+        sendmsg();
+        document.body.addEventListener('htmx:afterSettle',    sendmsg);
+        document.body.addEventListener('htmx:wsAfterMessage', sendmsg);
+    };""")
+
+# %% ../nbs/api/00_core.ipynb
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None,
@@ -536,6 +497,9 @@ class FastHTML(Starlette):
         htmlkw = htmlkw or {}
         if default_hdrs: hdrs = def_hdrs(htmx, surreal=surreal) + hdrs
         hdrs += [Script(src=ext) for ext in exts.values()]
+        if IN_NOTEBOOK:
+            hdrs.append(iframe_scr)
+            middleware.append(cors_allow)
         self.on_startup,self.on_shutdown,self.lifespan,self.hdrs,self.ftrs = on_startup,on_shutdown,lifespan,hdrs,ftrs
         self.before,self.after,self.htmlkw,self.bodykw = before,after,htmlkw,bodykw
         secret_key = get_key(secret_key, key_fname)
@@ -550,36 +514,78 @@ class FastHTML(Starlette):
             exception_handlers[404] = _not_found
         excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw) for k,v in exception_handlers.items()}
         super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
-        self.router = RouterX(self, routes)
-
-    def ws(self, path:str, conn=None, disconn=None, name=None):
-        "Add a websocket route at `path`"
-        def f(func=None):
-            self.router.add_ws(path, func or noop, conn=conn, disconn=disconn, name=name)
-            return func
-        return f
+    
+    def add_route(self, route):
+        route.methods = [m.upper() for m in listify(route.methods)]
+        self.router.routes = [r for r in self.router.routes if not
+                       (r.path==route.path and r.name == route.name and
+                        ((route.methods is None) or (set(r.methods) == set(route.methods))))]
+        self.router.routes.append(route)
 
 # %% ../nbs/api/00_core.ipynb
 all_meths = 'get post put delete patch head trace options'.split()
 
+# %% ../nbs/api/00_core.ipynb
+@patch
+def _endp(self:FastHTML, f):
+    sig = signature_ex(f, True)
+    async def _f(req):
+        resp = None
+        req.injects = []
+        req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (self.hdrs,self.ftrs,self.htmlkw,self.bodykw))
+        req.hdrs,req.ftrs = listify(req.hdrs),listify(req.ftrs)
+        for b in self.before:
+            if not resp:
+                if isinstance(b, Beforeware): bf,skip = b.f,b.skip
+                else: bf,skip = b,[]
+                if not any(re.fullmatch(r, req.url.path) for r in skip):
+                    resp = await _wrap_call(bf, req, _params(bf))
+        if not resp: resp = await _wrap_call(f, req, sig.parameters)
+        for a in self.after:
+            _,*wreq = await _wrap_req(req, _params(a))
+            nr = a(resp, *wreq)
+            if nr: resp = nr
+        return _resp(req, resp, sig.return_annotation)
+    return _f
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def _add_ws(self:FastHTML, func, path, conn, disconn, name, middleware):
+    endp = _ws_endp(func, conn, disconn)
+    route = WebSocketRoute(path, endpoint=endp, name=name, middleware=middleware)
+    route.methods = ['ws']
+    self.add_route(route)
+    return func
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def ws(self:FastHTML, path:str, conn=None, disconn=None, name=None, middleware=None):
+    "Add a websocket route at `path`"
+    def f(func=noop): return self._add_ws(func, path, conn, disconn, name=name, middleware=middleware)
+    return f
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def _add_route(self:FastHTML, func, path, methods, name, include_in_schema):
+    n,fn,p = name,func.__name__,None if callable(path) else path
+    if methods: m = [methods] if isinstance(methods,str) else methods
+    elif fn in all_meths and p is not None: m = [fn]
+    else: m = ['get','post']
+    if not n: n = fn
+    if not p: p = '/'+('' if fn=='index' else fn)
+    route = Route(p, endpoint=self._endp(func), methods=m, name=n, include_in_schema=include_in_schema)
+    self.add_route(route)
+    lf = _mk_locfunc(func, p)
+    lf.__routename__ = n
+    return lf
+
+# %% ../nbs/api/00_core.ipynb
 @patch
 def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True):
     "Add a route at `path`"
-    pathstr = None if callable(path) else path
-    def f(func):
-        n,fn,p = name,func.__name__,pathstr
-        if methods: m = [methods] if isinstance(methods,str) else methods
-        elif fn in all_meths and p is not None: m = [fn]
-        else: m = ['get','post']
-        if not n: n = fn
-        if not p: p = '/'+('' if fn=='index' else fn)
-        self.router.add_route(p, func, methods=m, name=n, include_in_schema=include_in_schema)
-        lf = _mk_locfunc(func, p)
-        lf.__routename__ = n
-        return lf
+    def f(func): return self._add_route(func, path, methods, name=name, include_in_schema=include_in_schema)
     return f(path) if callable(path) else f
 
-# %% ../nbs/api/00_core.ipynb
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
 # %% ../nbs/api/00_core.ipynb
@@ -615,6 +621,26 @@ class Client:
         with from_thread.start_blocking_portal() as portal: return portal.call(_request)
 
 for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o, partialmethod(Client._sync, o))
+
+# %% ../nbs/api/00_core.ipynb
+class APIRouter:
+    "Add routes to an app"
+    def __init__(self): self.routes,self.wss = [],[]
+
+    def __call__(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True):
+        "Add a route at `path`"
+        def f(func): return self.routes.append((func, path,methods,name,include_in_schema))
+        return f(path) if callable(path) else f
+
+    def to_app(self, app):
+        "Add routes to `app`"
+        for args in self.routes: app._add_route(*args)
+        for args in self.wss   : app._add_ws   (*args)
+
+    def ws(self:FastHTML, path:str, conn=None, disconn=None, name=None, middleware=None):
+        "Add a websocket route at `path`"
+        def f(func=noop): return self.wss.append((func, path, conn, disconn, name, middleware))
+        return f
 
 # %% ../nbs/api/00_core.ipynb
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):
