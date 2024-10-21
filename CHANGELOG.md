@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.8.0
+
+### Breaking changes
+
+- `jupy_app` and `FastJupy` removed; their functionality is now built into `fast_app` and `FastHTML` and enabled automatically in notebooks
+- `RouteX` and `RouterX` removed; use `FastHTML.add_route` instead
+
+### New Features
+
+- Add `APIRouter` ([#535](https://github.com/AnswerDotAI/fasthtml/issues/535))
+
+
 ## 0.7.1
 
 ### Breaking changes
