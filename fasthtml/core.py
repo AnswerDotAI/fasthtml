@@ -228,6 +228,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
     if isinstance(anno, type):
         if issubclass(anno, HtmxHeaders): return _get_htmx(hdrs)
         if issubclass(anno, Starlette): return ws.scope['app']
+        if issubclass(anno, WebSocket): return ws
     if anno is empty:
         if arg.lower()=='ws': return ws
         if arg.lower()=='scope': return dict2obj(ws.scope)
@@ -641,6 +642,9 @@ class APIRouter:
         "Add a websocket route at `path`"
         def f(func=noop): return self.wss.append((func, path, conn, disconn, name, middleware))
         return f
+
+# %% ../nbs/api/00_core.ipynb
+for o in all_meths: setattr(APIRouter, o, partialmethod(APIRouter.__call__, methods=o))
 
 # %% ../nbs/api/00_core.ipynb
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):
