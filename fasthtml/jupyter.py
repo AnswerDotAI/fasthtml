@@ -17,9 +17,9 @@ try: from IPython.display import HTML,Markdown,display
 except ImportError: pass
 
 # %% ../nbs/api/06_jupyter.ipynb
-def nb_serve(app, log_level="error", port=8000, **kwargs):
+def nb_serve(app, log_level="error", port=8000, host='0.0.0.0', **kwargs):
     "Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`"
-    server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, port=port, **kwargs))
+    server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, host=host, port=port, **kwargs))
     async def async_run_server(server): await server.serve()
     @startthread
     def run_server(): asyncio.run(async_run_server(server))
@@ -27,9 +27,9 @@ def nb_serve(app, log_level="error", port=8000, **kwargs):
     return server
 
 # %% ../nbs/api/06_jupyter.ipynb
-async def nb_serve_async(app, log_level="error", port=8000, **kwargs):
+async def nb_serve_async(app, log_level="error", port=8000, host='0.0.0.0', **kwargs):
     "Async version of `nb_serve`"
-    server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, port=port, **kwargs))
+    server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, host=host, port=port, **kwargs))
     asyncio.get_running_loop().create_task(server.serve())
     while not server.started: await asyncio.sleep(0.01)
     return server
@@ -76,7 +76,7 @@ document.body.addEventListener('htmx:configRequest', (event) => {
 # %% ../nbs/api/06_jupyter.ipynb
 class JupyUvi:
     "Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`"
-    def __init__(self, app, log_level="error", port=8000, start=True, **kwargs):
+    def __init__(self, app, log_level="error", host='0.0.0.0', port=8000, start=True, **kwargs):
         self.kwargs = kwargs
         store_attr(but='start')
         self.server = None
@@ -84,7 +84,7 @@ class JupyUvi:
         htmx_config_port(port)
 
     def start(self):
-        self.server = nb_serve(self.app, log_level=self.log_level, port=self.port, **self.kwargs)
+        self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
 
     def stop(self):
         self.server.should_exit = True
