@@ -458,7 +458,7 @@ def _mk_locfunc(f,p):
     class _lf:
         def __init__(self): update_wrapper(self, f)
         def __call__(self, *args, **kw): return f(*args, **kw)
-        def rt(self, **kw): return p + (f'?{urlencode(kw)}' if kw else '')
+        def to(self, **kw): return p + (f'?{urlencode(kw)}' if kw else '')
         def __str__(self): return p
     return _lf()
 
