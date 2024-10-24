@@ -10,9 +10,6 @@ import asyncio, socket, time, uvicorn
 from threading import Thread
 from fastcore.utils import *
 from .common import *
-from IPython.display import HTML,Markdown,IFrame,display
-from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware import Middleware
 from fastcore.parallel import startthread
 
 # %% ../nbs/api/06_jupyter.ipynb
@@ -71,6 +68,7 @@ class JupyUvi:
 # %% ../nbs/api/06_jupyter.ipynb
 def HTMX(path="", host='localhost', port=8000, iframe_height="auto"):
     "An iframe which displays the HTMX application in a notebook."
+    from IPython.display import HTML
     return HTML(f'<iframe src="http://{host}:{port}{str(path)}" style="width: 100%; height: {iframe_height}; border: none;" ' + """onload="{
         let frame = this;
         window.addEventListener('message', function(e) {
@@ -81,6 +79,7 @@ def HTMX(path="", host='localhost', port=8000, iframe_height="auto"):
 
 # %% ../nbs/api/06_jupyter.ipynb
 def ws_client(app, nm='', host='localhost', port=8000, ws_connect='/ws', frame=True, link=True, **kwargs):
+    from IPython.display import HTML,Markdown,display
     path = f'/{nm}'
     c = Main('', cls="container", id=unqid())
     @app.get(path)

@@ -21,9 +21,7 @@ LIVE_RELOAD_SCRIPT = """
 """
 
 
-async def live_reload_websocket(websocket):
-    await websocket.accept()
-
+async def live_reload_websocket(websocket): await websocket.accept()
 
 class FastHTMLWithLiveReload(FastHTML):
     """
@@ -59,7 +57,7 @@ class FastHTMLWithLiveReload(FastHTML):
                 reload_interval=kwargs.get("reload_interval", 1000),
             )
         )
-        
+
         # "hdrs" and "routes" can be missing, None, a list or a tuple.
         kwargs["hdrs"] = [*(kwargs.get("hdrs") or []), self.LIVE_RELOAD_HEADER]
         kwargs["routes"] = [*(kwargs.get("routes") or []), self.LIVE_RELOAD_ROUTE]
