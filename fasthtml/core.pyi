@@ -1,5 +1,5 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'WS_RouteX', 'uri', 'decode_uri', 'flat_tuple', 'Redirect', 'RouteX', 'RouterX', 'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'respond', 'Redirect', 'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 import json, uuid, inspect, types, uvicorn, signal, asyncio, threading
 from fastcore.utils import *
 from fastcore.xml import *
@@ -21,10 +21,10 @@ from anyio import from_thread
 from uuid import uuid4
 from base64 import b85encode, b64encode
 from .starlette import *
-empty = Parameter.empty
 
-def _sig(f):
+def _params(f):
     ...
+empty = Parameter.empty
 
 def parsed_date(s: str):
     """Convert `s` to a datetime"""
@@ -139,11 +139,6 @@ def EventStream(s):
 def signal_shutdown():
     ...
 
-class WS_RouteX(WebSocketRoute):
-
-    def __init__(self, app, path: str, recv, conn: callable=None, disconn: callable=None, *, name=None, middleware=None):
-        ...
-
 def uri(_arg, **kwargs):
     ...
 
@@ -177,6 +172,10 @@ def flat_tuple(o):
     """Flatten lists"""
     ...
 
+def respond(req, heads, bdy):
+    """Default FT response creation function"""
+    ...
+
 def _xt_cts(req, resp):
     ...
 
@@ -200,28 +199,6 @@ class Redirect:
 
 async def _wrap_call(f, req, params):
     ...
-
-class RouteX(Route):
-
-    def __init__(self, app, path: str, endpoint, *, methods=None, name=None, include_in_schema=True, middleware=None):
-        ...
-
-    async def _endp(self, req):
-        ...
-
-class RouterX(Router):
-
-    def __init__(self, app, routes=None, redirect_slashes=True, default=None, *, middleware=None):
-        ...
-
-    def _add_route(self, route):
-        ...
-
-    def add_route(self, path: str, endpoint: callable, methods=None, name=None, include_in_schema=True):
-        ...
-
-    def add_ws(self, path: str, recv: callable, conn: callable=None, disconn: callable=None, name=None):
-        ...
 htmx_exts = {'head-support': 'https://unpkg.com/htmx-ext-head-support@2.0.1/head-support.js', 'preload': 'https://unpkg.com/htmx-ext-preload@2.0.1/preload.js', 'class-tools': 'https://unpkg.com/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://unpkg.com/htmx-ext-loading-states@2.0.0/loading-states.js', 'multi-swap': 'https://unpkg.com/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://unpkg.com/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://unpkg.com/htmx-ext-remove-me@2.0.0/remove-me.js', 'ws': 'https://unpkg.com/htmx-ext-ws/ws.js', 'chunked-transfer': 'https://unpkg.com/htmx-ext-transfer-encoding-chunked/transfer-encoding-chunked.js'}
 htmxsrc = Script(src='https://unpkg.com/htmx.org@next/dist/htmx.min.js')
 fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js')
@@ -236,7 +213,7 @@ def get_key(key=None, fname='.sesskey'):
 def _list(o):
     ...
 
-def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw):
+def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw, respond):
     ...
 
 def _mk_locfunc(f, p):
@@ -245,17 +222,31 @@ def _mk_locfunc(f, p):
 def def_hdrs(htmx=True, surreal=True):
     """Default headers for a FastHTML app"""
     ...
+cors_allow = Middleware(CORSMiddleware, allow_credentials=True, allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])
+iframe_scr = Script(NotStr("\n    function sendmsg() {\n        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');\n    }\n    window.onload = function() {\n        sendmsg();\n        document.body.addEventListener('htmx:afterSettle',    sendmsg);\n        document.body.addEventListener('htmx:wsAfterMessage', sendmsg);\n    };"))
 
 class FastHTML(Starlette):
 
-    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', htmlkw=None, **bodykw):
+    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', respond=respond, htmlkw=None, **bodykw):
         ...
 
-    def ws(self, path: str, conn=None, disconn=None, name=None):
+    def add_route(self, route):
+        ...
+
+    def _endp(self, f, respond):
+        ...
+
+    def _add_ws(self, func, path, conn, disconn, name, middleware):
+        ...
+
+    def ws(self, path: str, conn=None, disconn=None, name=None, middleware=None):
         """Add a websocket route at `path`"""
         ...
 
-    def route(self, path: str=None, methods=None, name=None, include_in_schema=True):
+    def _add_route(self, func, path, methods, name, include_in_schema, respond):
+        ...
+
+    def route(self, path: str=None, methods=None, name=None, include_in_schema=True, respond=None):
         """Add a route at `path`"""
         ...
 
@@ -284,6 +275,26 @@ class Client:
         ...
 for o in ('get', 'post', 'delete', 'put', 'patch', 'options'):
     setattr(Client, o, partialmethod(Client._sync, o))
+
+class APIRouter:
+    """Add routes to an app"""
+
+    def __init__(self):
+        ...
+
+    def __call__(self: FastHTML, path: str=None, methods=None, name=None, include_in_schema=True, respond=respond):
+        """Add a route at `path`"""
+        ...
+
+    def to_app(self, app):
+        """Add routes to `app`"""
+        ...
+
+    def ws(self: FastHTML, path: str, conn=None, disconn=None, name=None, middleware=None):
+        """Add a websocket route at `path`"""
+        ...
+for o in all_meths:
+    setattr(APIRouter, o, partialmethod(APIRouter.__call__, methods=o))
 
 def cookie(key: str, value='', max_age=None, expires=None, path='/', domain=None, secure=False, httponly=False, samesite='lax'):
     """Create a 'set-cookie' `HttpHeader`"""

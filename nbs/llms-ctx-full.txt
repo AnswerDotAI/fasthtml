@@ -359,8 +359,7 @@ videos and other static media files. The default behavior is to look for
 these files in the root directory - typically we don’t do anything
 special to include them. We can change the default directory that is
 looked in for files by adding the `static_path` parameter to the
-[`fast_app`](https://AnswerDotAI.github.io/fasthtml/api/fastapp.html#fast_app)
-function.
+`fast_app` function.
 
 ``` python
 app, rt = fast_app(static_path='public')
@@ -913,7 +912,7 @@ Line 4
 Toasts require sessions
 
 Line 11  
-Views with Toasts must return FT components.
+Views with Toasts must return FT or FtResponse components.
 
 ## Authentication and authorization
 
@@ -1046,7 +1045,7 @@ FastHTML provides useful tools for adding websockets to your pages.
 from fasthtml.common import *
 from asyncio import sleep
 
-app, rt = fast_app(ws_hdr=True)
+app, rt = fast_app(exts='ws')
 
 def mk_inp(): return Input(id='msg', autofocus=True)
 
@@ -1073,8 +1072,8 @@ async def ws(msg:str, send):
 ```
 
 Line 4  
-To use websockets in FastHTML, you must instantiate the app with the
-`ws_hdr` set to `True`
+To use websockets in FastHTML, you must instantiate the app with `exts`
+set to ‘ws’
 
 Line 6  
 As we want to use websockets to reset the form, we define the `mk_input`
@@ -2465,11 +2464,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def EventStream(s)`
     Create a text/event-stream response from `s`
 
-- `class WS_RouteX`
-    - `def __init__(self, app, path, recv, conn, disconn)`
-
 - `def flat_tuple(o)`
     Flatten lists
+
+- `def respond(req, heads, bdy)`
+    Default FT response creation function
 
 - `class Redirect`
     Use HTMX or Starlette RedirectResponse as required to redirect to `loc`
@@ -2477,24 +2476,17 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def __init__(self, loc)`
     - `def __response__(self, req)`
 
-- `class RouteX`
-    - `def __init__(self, app, path, endpoint)`
-
-- `class RouterX`
-    - `def __init__(self, app, routes, redirect_slashes, default)`
-    - `def add_route(self, path, endpoint, methods, name, include_in_schema)`
-    - `def add_ws(self, path, recv, conn, disconn, name)`
-
-- `def def_hdrs(htmx, ct_hdr, ws_hdr, surreal)`
+- `def def_hdrs(htmx, surreal)`
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, before, after, ws_hdr, ct_hdr, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, htmlkw, **bodykw)`
-    - `def ws(self, path, conn, disconn, name)`
-        Add a websocket route at `path`
+    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, respond, htmlkw, **bodykw)`
+    - `def add_route(self, route)`
 
+- `@patch def ws(self, path, conn, disconn, name, middleware)`
+    Add a websocket route at `path`
 
-- `@patch def route(self, path, methods, name, include_in_schema)`
+- `@patch def route(self, path, methods, name, include_in_schema, respond)`
     Add a route at `path`
 
 - `def serve(appname, app, host, port, reload, reload_includes, reload_excludes)`
@@ -2504,6 +2496,20 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     A simple httpx ASGI client that doesn't require `async`
 
     - `def __init__(self, app, url)`
+
+- `class APIRouter`
+    Add routes to an app
+
+    - `def __init__(self)`
+    - `def __call__(self, path, methods, name, include_in_schema, respond)`
+        Add a route at `path`
+
+    - `def to_app(self, app)`
+        Add routes to `app`
+
+    - `def ws(self, path, conn, disconn, name, middleware)`
+        Add a websocket route at `path`
+
 
 - `def cookie(key, value, max_age, expires, path, domain, secure, httponly, samesite)`
     Create a 'set-cookie' `HttpHeader`
@@ -2527,7 +2533,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 > The `fast_app` convenience wrapper
 
-- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, ws_hdr, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, **kwargs)`
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, respond, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
 ## fasthtml.js
@@ -2551,6 +2557,8 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 ## fasthtml.jupyter
 
+> Use FastHTML in Jupyter notebooks
+
 - `def nb_serve(app, log_level, port, **kwargs)`
     Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
 
@@ -2570,14 +2578,8 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def start(self)`
     - `def stop(self)`
 
-- `def FastJupy(hdrs, middleware, **kwargs)`
-    Same as FastHTML, but with Jupyter compatible middleware and headers added
-
 - `def HTMX(path, host, port, iframe_height)`
     An iframe which displays the HTMX application in a notebook.
-
-- `def jupy_app(pico, hdrs, middleware, **kwargs)`
-    Same as `fast_app` but for Jupyter notebooks
 
 ## fasthtml.live_reload
 
@@ -2831,7 +2833,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 </doc></api><examples><doc title="Websockets application" desc="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
 from fasthtml.common import *
 
-app = FastHTML(ws_hdr=True)
+app = FastHTML(exts='ws')
 rt = app.route
 
 def mk_inp(): return Input(id='msg')

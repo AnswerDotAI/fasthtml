@@ -75,11 +75,11 @@
 - `def EventStream(s)`
     Create a text/event-stream response from `s`
 
-- `class WS_RouteX`
-    - `def __init__(self, app, path, recv, conn, disconn)`
-
 - `def flat_tuple(o)`
     Flatten lists
+
+- `def respond(req, heads, bdy)`
+    Default FT response creation function
 
 - `class Redirect`
     Use HTMX or Starlette RedirectResponse as required to redirect to `loc`
@@ -87,24 +87,17 @@
     - `def __init__(self, loc)`
     - `def __response__(self, req)`
 
-- `class RouteX`
-    - `def __init__(self, app, path, endpoint)`
-
-- `class RouterX`
-    - `def __init__(self, app, routes, redirect_slashes, default)`
-    - `def add_route(self, path, endpoint, methods, name, include_in_schema)`
-    - `def add_ws(self, path, recv, conn, disconn, name)`
-
 - `def def_hdrs(htmx, surreal)`
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, htmlkw, **bodykw)`
-    - `def ws(self, path, conn, disconn, name)`
-        Add a websocket route at `path`
+    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, respond, htmlkw, **bodykw)`
+    - `def add_route(self, route)`
 
+- `@patch def ws(self, path, conn, disconn, name, middleware)`
+    Add a websocket route at `path`
 
-- `@patch def route(self, path, methods, name, include_in_schema)`
+- `@patch def route(self, path, methods, name, include_in_schema, respond)`
     Add a route at `path`
 
 - `def serve(appname, app, host, port, reload, reload_includes, reload_excludes)`
@@ -114,6 +107,20 @@
     A simple httpx ASGI client that doesn't require `async`
 
     - `def __init__(self, app, url)`
+
+- `class APIRouter`
+    Add routes to an app
+
+    - `def __init__(self)`
+    - `def __call__(self, path, methods, name, include_in_schema, respond)`
+        Add a route at `path`
+
+    - `def to_app(self, app)`
+        Add routes to `app`
+
+    - `def ws(self, path, conn, disconn, name, middleware)`
+        Add a websocket route at `path`
+
 
 - `def cookie(key, value, max_age, expires, path, domain, secure, httponly, samesite)`
     Create a 'set-cookie' `HttpHeader`
@@ -137,7 +144,7 @@
 
 > The `fast_app` convenience wrapper
 
-- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, **kwargs)`
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, respond, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
 ## fasthtml.js
@@ -161,6 +168,8 @@
 
 ## fasthtml.jupyter
 
+> Use FastHTML in Jupyter notebooks
+
 - `def nb_serve(app, log_level, port, **kwargs)`
     Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
 
@@ -180,14 +189,8 @@
     - `def start(self)`
     - `def stop(self)`
 
-- `def FastJupy(hdrs, middleware, **kwargs)`
-    Same as FastHTML, but with Jupyter compatible middleware and headers added
-
 - `def HTMX(path, host, port, iframe_height)`
     An iframe which displays the HTMX application in a notebook.
-
-- `def jupy_app(pico, hdrs, middleware, **kwargs)`
-    Same as `fast_app` but for Jupyter notebooks
 
 ## fasthtml.live_reload
 
