@@ -66,7 +66,8 @@ def attrmap_x(o):
 fh_cfg['attrmap']=attrmap_x
 fh_cfg['valmap' ]=valmap
 fh_cfg['ft_cls' ]=FT
-fh_cfg['auto_id' ]=False
+fh_cfg['auto_id']=False
+fh_cfg['auto_name']=True
 
 # %% ../nbs/api/01_components.ipynb
 def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, auto_id=None, **kwargs):
@@ -80,7 +81,7 @@ def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=Non
     kwargs['id'] = id.id if isinstance(id,FT) else id
     kwargs['cls'],kwargs['title'],kwargs['style'] = cls,title,style
     tag,c,kw = ft(tag, *c, attrmap=attrmap, valmap=valmap, **kwargs).list
-    if tag in named and id and 'name' not in kw: kw['name'] = kw['id']
+    if fh_cfg['auto_name'] and tag in named and id and 'name' not in kw: kw['name'] = kw['id']
     return ft_cls(tag,c,kw, void_=tag in voids)
 
 # %% ../nbs/api/01_components.ipynb
