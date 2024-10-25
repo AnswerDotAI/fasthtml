@@ -498,7 +498,7 @@ class FastHTML(Starlette):
                  before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
-                 respond=respond, htmlkw=None, **bodykw):
+                 respond=respond, htmlkw=None, nb_hdrs=True, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         exts = {k:htmx_exts[k] for k in exts}
@@ -507,6 +507,8 @@ class FastHTML(Starlette):
         hdrs += [Script(src=ext) for ext in exts.values()]
         if IN_NOTEBOOK:
             hdrs.append(iframe_scr)
+            from IPython.display import display,HTML
+            if nb_hdrs: display(HTML(to_xml(tuple(hdrs))))
             middleware.append(cors_allow)
         self.on_startup,self.on_shutdown,self.lifespan,self.hdrs,self.ftrs = on_startup,on_shutdown,lifespan,hdrs,ftrs
         self.respond,self.before,self.after,self.htmlkw,self.bodykw = respond,before,after,htmlkw,bodykw

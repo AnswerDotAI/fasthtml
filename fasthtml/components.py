@@ -35,7 +35,7 @@ except ImportError: display=None
 def show(ft,*rest):
     "Renders FT Components into HTML within a Jupyter notebook."
     if rest: ft = (ft,)+rest
-    return display.HTML(to_xml(ft))
+    display.display(display.HTML(to_xml(ft)))
 
 # %% ../nbs/api/01_components.ipynb
 named = set('a button form frame iframe img input map meta object param select textarea'.split())
@@ -77,15 +77,17 @@ def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=Non
     if valmap  is None: valmap =fh_cfg.valmap
     if auto_id is None: auto_id = fh_cfg.auto_id
     if auto_id and not id: id = unqid()
-    kwargs['id'],kwargs['cls'],kwargs['title'],kwargs['style'] = id,cls,title,style
+    kwargs['id'] = id.id if isinstance(id,FT) else id
+    kwargs['cls'],kwargs['title'],kwargs['style'] = cls,title,style
     tag,c,kw = ft(tag, *c, attrmap=attrmap, valmap=valmap, **kwargs).list
     if tag in named and id and 'name' not in kw: kw['name'] = kw['id']
     return ft_cls(tag,c,kw, void_=tag in voids)
 
 # %% ../nbs/api/01_components.ipynb
 @use_kwargs(hx_attrs, keep=True)
-def ft_hx(tag: str, *c, target_id=None, hx_vals=None, **kwargs):
+def ft_hx(tag: str, *c, target_id=None, hx_vals=None, hx_target=None, **kwargs):
     if hx_vals: kwargs['hx_vals'] = json.dumps(hx_vals) if isinstance (hx_vals,dict) else hx_vals
+    if hx_target: kwargs['hx_target'] = '#'+hx_target.id if isinstance(hx_target,FT) else hx_target
     if target_id: kwargs['hx_target'] = '#'+target_id
     return ft_html(tag, *c, **kwargs)
 
