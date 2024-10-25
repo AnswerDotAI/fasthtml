@@ -11,7 +11,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'FtResponse', 'unqid', 'setup_ws']
 
 # %% ../nbs/api/00_core.ipynb
-import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
+import json,uuid,inspect,types,uvicorn,signal,asyncio,threading,inspect
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -353,10 +353,11 @@ def _to_xml(req, resp, indent):
 def flat_tuple(o):
     "Flatten lists"
     result = []
-    if not isinstance(o,(tuple,list)): o=[o]
+    _typs = (tuple,list,map,filter,range,types.GeneratorType)
+    if not isinstance(o,_typs): o=[o]
     o = list(o)
     for item in o:
-        if isinstance(item, (list,tuple)): result.extend(item)
+        if isinstance(item, _typs): result.extend(list(item))
         else: result.append(item)
     return tuple(result)
 
@@ -374,7 +375,6 @@ def respond(req, heads, bdy):
 
 # %% ../nbs/api/00_core.ipynb
 def _xt_cts(req, resp):
-    resp = flat_tuple(resp)
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
@@ -398,6 +398,7 @@ def _is_ft_resp(resp): return isinstance(resp, (list,tuple,HttpHeader,FT)) or ha
 # %% ../nbs/api/00_core.ipynb
 def _resp(req, resp, cls=empty):
     if not resp: resp=()
+    resp = flat_tuple(resp)
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if cls in (Any,FT): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
@@ -598,7 +599,7 @@ def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body
 
 # %% ../nbs/api/00_core.ipynb
 @patch
-def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
+def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=None):
     "Add a route at `path`"
     def f(func): return self._add_route(func, path, methods, name=name, include_in_schema=include_in_schema, body_wrap=body_wrap)
     return f(path) if callable(path) else f
