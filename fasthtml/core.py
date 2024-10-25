@@ -350,14 +350,16 @@ def _to_xml(req, resp, indent):
     return to_xml(resp, indent)
 
 # %% ../nbs/api/00_core.ipynb
+_iter_typs = (tuple,list,map,filter,range,types.GeneratorType)
+
+# %% ../nbs/api/00_core.ipynb
 def flat_tuple(o):
     "Flatten lists"
     result = []
-    _typs = (tuple,list,map,filter,range,types.GeneratorType)
-    if not isinstance(o,_typs): o=[o]
+    if not isinstance(o,_iter_typs): o=[o]
     o = list(o)
     for item in o:
-        if isinstance(item, _typs): result.extend(list(item))
+        if isinstance(item, _iter_typs): result.extend(list(item))
         else: result.append(item)
     return tuple(result)
 
@@ -370,11 +372,14 @@ def noop_body(c, req):
 def respond(req, heads, bdy):
     "Default FT response creation function"
     body_wrap = getattr(req, 'body_wrap', noop_body)
-    body = Body(body_wrap(bdy, req), *flat_xt(req.ftrs), **req.bodykw)
+    params = inspect.signature(body_wrap).parameters
+    bw_args = (bdy, req) if len(params)>1 else (bdy,)
+    body = Body(body_wrap(*bw_args), *flat_xt(req.ftrs), **req.bodykw)
     return Html(Head(*heads, *flat_xt(req.hdrs)), body, **req.htmlkw)
 
 # %% ../nbs/api/00_core.ipynb
 def _xt_cts(req, resp):
+    resp = flat_tuple(resp)
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     http_hdrs = {o.k:str(o.v) for o in http_hdrs}
@@ -393,12 +398,11 @@ def _xt_resp(req, resp):
     return HTMLResponse(cts, headers=http_hdrs, background=tasks)
 
 # %% ../nbs/api/00_core.ipynb
-def _is_ft_resp(resp): return isinstance(resp, (list,tuple,HttpHeader,FT)) or hasattr(resp, '__ft__')
+def _is_ft_resp(resp): return isinstance(resp, _iter_typs+(HttpHeader,FT)) or hasattr(resp, '__ft__')
 
 # %% ../nbs/api/00_core.ipynb
 def _resp(req, resp, cls=empty):
     if not resp: resp=()
-    resp = flat_tuple(resp)
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if cls in (Any,FT): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
