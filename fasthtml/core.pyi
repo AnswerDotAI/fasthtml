@@ -1,5 +1,5 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'respond', 'Redirect', 'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 import json, uuid, inspect, types, uvicorn, signal, asyncio, threading
 from fastcore.utils import *
 from fastcore.xml import *
@@ -172,6 +172,10 @@ def flat_tuple(o):
     """Flatten lists"""
     ...
 
+def noop_body(c, req):
+    """Default Body wrap function which just returns the content"""
+    ...
+
 def respond(req, heads, bdy):
     """Default FT response creation function"""
     ...
@@ -213,7 +217,7 @@ def get_key(key=None, fname='.sesskey'):
 def _list(o):
     ...
 
-def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw, respond):
+def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw, body_wrap):
     ...
 
 def _mk_locfunc(f, p):
@@ -227,13 +231,13 @@ iframe_scr = Script(NotStr("\n    function sendmsg() {\n        window.parent.po
 
 class FastHTML(Starlette):
 
-    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', respond=respond, htmlkw=None, **bodykw):
+    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', body_wrap=noop_body, htmlkw=None, nb_hdrs=True, **bodykw):
         ...
 
     def add_route(self, route):
         ...
 
-    def _endp(self, f, respond):
+    def _endp(self, f, body_wrap):
         ...
 
     def _add_ws(self, func, path, conn, disconn, name, middleware):
@@ -243,10 +247,10 @@ class FastHTML(Starlette):
         """Add a websocket route at `path`"""
         ...
 
-    def _add_route(self, func, path, methods, name, include_in_schema, respond):
+    def _add_route(self, func, path, methods, name, include_in_schema, body_wrap):
         ...
 
-    def route(self, path: str=None, methods=None, name=None, include_in_schema=True, respond=None):
+    def route(self, path: str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
         """Add a route at `path`"""
         ...
 
@@ -282,7 +286,7 @@ class APIRouter:
     def __init__(self):
         ...
 
-    def __call__(self: FastHTML, path: str=None, methods=None, name=None, include_in_schema=True, respond=respond):
+    def __call__(self: FastHTML, path: str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
         """Add a route at `path`"""
         ...
 

@@ -6,9 +6,9 @@
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport',
            'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders',
            'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
-           'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'respond', 'Redirect', 'get_key', 'def_hdrs',
-           'FastHTML', 'serve', 'Client', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse',
-           'unqid', 'setup_ws']
+           'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key',
+           'def_hdrs', 'FastHTML', 'serve', 'Client', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase',
+           'FtResponse', 'unqid', 'setup_ws']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading
@@ -361,9 +361,16 @@ def flat_tuple(o):
     return tuple(result)
 
 # %% ../nbs/api/00_core.ipynb
+def noop_body(c, req):
+    "Default Body wrap function which just returns the content"
+    return c
+
+# %% ../nbs/api/00_core.ipynb
 def respond(req, heads, bdy):
     "Default FT response creation function"
-    return Html(Head(*heads, *flat_xt(req.hdrs)), Body(bdy, *flat_xt(req.ftrs), **req.bodykw), **req.htmlkw)
+    body_wrap = getattr(req, 'body_wrap', noop_body)
+    body = Body(body_wrap(bdy, req), *flat_xt(req.ftrs), **req.bodykw)
+    return Html(Head(*heads, *flat_xt(req.hdrs)), body, **req.htmlkw)
 
 # %% ../nbs/api/00_core.ipynb
 def _xt_cts(req, resp):
@@ -377,8 +384,7 @@ def _xt_cts(req, resp):
     hdr_tags = 'title','meta','link','style','base'
     heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
-        if not heads: heads = [Title('FastHTML page')]
-        resp = req.respond(req, heads, bdy)
+        resp = respond(req, heads or [Title('FastHTML page')], bdy)
     return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs, ts
 
 # %% ../nbs/api/00_core.ipynb
@@ -452,10 +458,10 @@ def get_key(key=None, fname='.sesskey'):
 def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) else [o]
 
 # %% ../nbs/api/00_core.ipynb
-def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw, respond):
+def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw, body_wrap):
     async def _f(req, exc):
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (hdrs, ftrs, htmlkw, bodykw))
-        req.respond = respond
+        req.body_wrap = body_wrap
         res = await _handle(f, (req, exc))
         return _resp(req, res)
     return _f
@@ -498,7 +504,7 @@ class FastHTML(Starlette):
                  before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
-                 respond=respond, htmlkw=None, nb_hdrs=True, **bodykw):
+                 body_wrap=noop_body, htmlkw=None, nb_hdrs=True, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         exts = {k:htmx_exts[k] for k in exts}
@@ -511,7 +517,7 @@ class FastHTML(Starlette):
             if nb_hdrs: display(HTML(to_xml(tuple(hdrs))))
             middleware.append(cors_allow)
         self.on_startup,self.on_shutdown,self.lifespan,self.hdrs,self.ftrs = on_startup,on_shutdown,lifespan,hdrs,ftrs
-        self.respond,self.before,self.after,self.htmlkw,self.bodykw = respond,before,after,htmlkw,bodykw
+        self.body_wrap,self.before,self.after,self.htmlkw,self.bodykw = body_wrap,before,after,htmlkw,bodykw
         secret_key = get_key(secret_key, key_fname)
         if sess_cls:
             sess = Middleware(sess_cls, secret_key=secret_key,session_cookie=session_cookie,
@@ -522,7 +528,7 @@ class FastHTML(Starlette):
         if 404 not in exception_handlers: 
             def _not_found(req, exc): return  Response('404 Not Found', status_code=404)  
             exception_handlers[404] = _not_found
-        excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw, respond=respond) for k,v in exception_handlers.items()}
+        excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw, body_wrap=body_wrap) for k,v in exception_handlers.items()}
         super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
     
     def add_route(self, route):
@@ -537,7 +543,7 @@ all_meths = 'get post put delete patch head trace options'.split()
 
 # %% ../nbs/api/00_core.ipynb
 @patch
-def _endp(self:FastHTML, f, respond):
+def _endp(self:FastHTML, f, body_wrap):
     sig = signature_ex(f, True)
     async def _f(req):
         resp = None
@@ -550,7 +556,7 @@ def _endp(self:FastHTML, f, respond):
                 else: bf,skip = b,[]
                 if not any(re.fullmatch(r, req.url.path) for r in skip):
                     resp = await _wrap_call(bf, req, _params(bf))
-        req.respond = respond
+        req.body_wrap = body_wrap
         if not resp: resp = await _wrap_call(f, req, sig.parameters)
         for a in self.after:
             _,*wreq = await _wrap_req(req, _params(a))
@@ -577,14 +583,14 @@ def ws(self:FastHTML, path:str, conn=None, disconn=None, name=None, middleware=N
 
 # %% ../nbs/api/00_core.ipynb
 @patch
-def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, respond):
+def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body_wrap):
     n,fn,p = name,func.__name__,None if callable(path) else path
     if methods: m = [methods] if isinstance(methods,str) else methods
     elif fn in all_meths and p is not None: m = [fn]
     else: m = ['get','post']
     if not n: n = fn
     if not p: p = '/'+('' if fn=='index' else fn)
-    route = Route(p, endpoint=self._endp(func, respond or self.respond), methods=m, name=n, include_in_schema=include_in_schema)
+    route = Route(p, endpoint=self._endp(func, body_wrap or self.body_wrap), methods=m, name=n, include_in_schema=include_in_schema)
     self.add_route(route)
     lf = _mk_locfunc(func, p)
     lf.__routename__ = n
@@ -592,9 +598,9 @@ def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, resp
 
 # %% ../nbs/api/00_core.ipynb
 @patch
-def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, respond=None):
+def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
     "Add a route at `path`"
-    def f(func): return self._add_route(func, path, methods, name=name, include_in_schema=include_in_schema, respond=respond)
+    def f(func): return self._add_route(func, path, methods, name=name, include_in_schema=include_in_schema, body_wrap=body_wrap)
     return f(path) if callable(path) else f
 
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
@@ -638,9 +644,9 @@ class APIRouter:
     "Add routes to an app"
     def __init__(self): self.routes,self.wss = [],[]
 
-    def __call__(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, respond=respond):
+    def __call__(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
         "Add a route at `path`"
-        def f(func): return self.routes.append((func, path,methods,name,include_in_schema,respond))
+        def f(func): return self.routes.append((func, path,methods,name,include_in_schema,body_wrap))
         return f(path) if callable(path) else f
 
     def to_app(self, app):

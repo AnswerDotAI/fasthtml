@@ -1134,9 +1134,9 @@ predecessor on the page.
 
 ## File Uploads
 
-A common task in web development is uploading files. This example is for
-uploading files to the hosting server, with information about the
-uploaded file presented to the user.
+A common task in web development is uploading files. This examples below
+are for uploading files to the hosting server, with information about
+the uploaded file presented to the user.
 
 <div>
 
@@ -1151,6 +1151,8 @@ uploaded file presented to the user.
 
 </div>
 
+### Single File Uploads
+
 ``` python
 from fasthtml.common import *
 from pathlib import Path
@@ -1163,14 +1165,12 @@ upload_dir.mkdir(exist_ok=True)
 @rt('/')
 def get():
     return Titled("File Upload Demo",
-        Div(cls='grid')(
-            Article(
-                Form(hx_post="/upload", hx_target="#result-one")(
-                    Input(type="file", name="file"),
-                    Button("Upload", type="submit", cls='secondary'),
-                ),
-                Div(id="result-one")
-            )
+        Article(
+            Form(hx_post=upload, hx_target="#result-one")(
+                Input(type="file", name="file"),
+                Button("Upload", type="submit", cls='secondary'),
+            ),
+            Div(id="result-one")
         )
     )
 
@@ -1184,8 +1184,8 @@ def FileMetaDataCard(file):
         )
     )    
 
-@rt('/upload')
-async def post(file: UploadFile):
+@rt
+async def upload(file: UploadFile):
     card = FileMetaDataCard(file)
     filebuffer = await file.read()
     (upload_dir / file.filename).write_bytes(filebuffer)
@@ -1194,22 +1194,111 @@ async def post(file: UploadFile):
 serve()
 ```
 
-Line 14  
+Line 13  
 Every form rendered with the
 [`Form`](https://AnswerDotAI.github.io/fasthtml/api/xtend.html#form) FT
 component defaults to `enctype="multipart/form-data"`
 
-Line 15  
+Line 14  
 Don’t forget to set the `Input` FT Component’s type to `file`
 
-Line 34  
+Line 32  
 The upload view should receive a [Starlette
 UploadFile](https://www.starlette.io/requests/#request-files) type. You
 can add other form variables
 
+Line 33  
+We can access the metadata of the card (filename, size, content_type,
+headers), a quick and safe process. We set that to the card variable
+
+Line 34  
+In order to access the contents contained within a file we use the
+`await` method to read() it. As files may be quite large or contain bad
+data, this is a seperate step from accessing metadata
+
+Line 35  
+This step shows how to use Python’s built-in `pathlib.Path` library to
+write the file to disk.
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://unpkg.com/htmx.org@next/dist/htmx.min.js"></script><script src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js"></script><script src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js"></script><script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
+<style>:root { --pico-font-size: 100%; }</style>
+<script>
+    function sendmsg() {
+        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');
+    }
+    window.onload = function() {
+        sendmsg();
+        document.body.addEventListener('htmx:afterSettle',    sendmsg);
+        document.body.addEventListener('htmx:wsAfterMessage', sendmsg);
+    };</script>
+
+### Multiple File Uploads
+
+``` python
+from fasthtml.common import *
+from pathlib import Path
+
+app, rt = fast_app()
+
+upload_dir = Path("filez")
+upload_dir.mkdir(exist_ok=True)
+
+@rt('/')
+def get():
+    return Titled("Multiple File Upload Demo",
+        Article(
+            Form(hx_post=upload_many, hx_target="#result-many")(
+                Input(type="file", name="files", multiple=True),
+                Button("Upload", type="submit", cls='secondary'),
+            ),
+            Div(id="result-many")
+        )
+    )
+
+def FileMetaDataCard(file):
+    return Article(
+        Header(H3(file.filename)),
+        Ul(
+            Li('Size: ', file.size),            
+            Li('Content Type: ', file.content_type),
+            Li('Headers: ', file.headers),
+        )
+    )    
+
+@rt
+async def upload_many(files: list[UploadFile]):
+    cards = []
+    for file in files:
+        cards.append(FileMetaDataCard(file))
+        filebuffer = await file.read()
+        (upload_dir / file.filename).write_bytes(filebuffer)
+    return cards
+
+serve()
+```
+
+Line 13  
+Every form rendered with the
+[`Form`](https://AnswerDotAI.github.io/fasthtml/api/xtend.html#form) FT
+component defaults to `enctype="multipart/form-data"`
+
+Line 14  
+Don’t forget to set the `Input` FT Component’s type to `file` and assign
+the multiple attribute to `True`
+
+Line 32  
+The upload view should receive a `list` containing the [Starlette
+UploadFile](https://www.starlette.io/requests/#request-files) type. You
+can add other form variables
+
+Line 34  
+Iterate through the files
+
 Line 35  
 We can access the metadata of the card (filename, size, content_type,
-headers), a quick and safe process
+headers), a quick and safe process. We add that to the cards variable
 
 Line 36  
 In order to access the contents contained within a file we use the
@@ -1218,7 +1307,21 @@ data, this is a seperate step from accessing metadata
 
 Line 37  
 This step shows how to use Python’s built-in `pathlib.Path` library to
-write the file to disk.</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
+write the file to disk.
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://unpkg.com/htmx.org@next/dist/htmx.min.js"></script><script src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js"></script><script src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js"></script><script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
+<style>:root { --pico-font-size: 100%; }</style>
+<script>
+    function sendmsg() {
+        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');
+    }
+    window.onload = function() {
+        sendmsg();
+        document.body.addEventListener('htmx:afterSettle',    sendmsg);
+        document.body.addEventListener('htmx:wsAfterMessage', sendmsg);
+    };</script></doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
 title = "Reference"
 +++
 
@@ -2480,7 +2583,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, respond, htmlkw, **bodykw)`
+    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, respond, htmlkw, nb_hdrs, **bodykw)`
     - `def add_route(self, route)`
 
 - `@patch def ws(self, path, conn, disconn, name, middleware)`
@@ -2559,10 +2662,10 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 > Use FastHTML in Jupyter notebooks
 
-- `def nb_serve(app, log_level, port, **kwargs)`
+- `def nb_serve(app, log_level, port, host, **kwargs)`
     Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
 
-- `def nb_serve_async(app, log_level, port, **kwargs)`
+- `def nb_serve_async(app, log_level, port, host, **kwargs)`
     Async version of `nb_serve`
 
 - `def is_port_free(port, host)`
@@ -2574,7 +2677,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `class JupyUvi`
     Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
 
-    - `def __init__(self, app, log_level, port, start, **kwargs)`
+    - `def __init__(self, app, log_level, host, port, start, **kwargs)`
     - `def start(self)`
     - `def stop(self)`
 

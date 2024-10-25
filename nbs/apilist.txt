@@ -78,6 +78,9 @@
 - `def flat_tuple(o)`
     Flatten lists
 
+- `def noop_body(c, req)`
+    Default Body wrap function which just returns the content
+
 - `def respond(req, heads, bdy)`
     Default FT response creation function
 
@@ -91,13 +94,13 @@
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, respond, htmlkw, **bodykw)`
+    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, **bodykw)`
     - `def add_route(self, route)`
 
 - `@patch def ws(self, path, conn, disconn, name, middleware)`
     Add a websocket route at `path`
 
-- `@patch def route(self, path, methods, name, include_in_schema, respond)`
+- `@patch def route(self, path, methods, name, include_in_schema, body_wrap)`
     Add a route at `path`
 
 - `def serve(appname, app, host, port, reload, reload_includes, reload_excludes)`
@@ -112,7 +115,7 @@
     Add routes to an app
 
     - `def __init__(self)`
-    - `def __call__(self, path, methods, name, include_in_schema, respond)`
+    - `def __call__(self, path, methods, name, include_in_schema, body_wrap)`
         Add a route at `path`
 
     - `def to_app(self, app)`
@@ -144,7 +147,7 @@
 
 > The `fast_app` convenience wrapper
 
-- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, respond, **kwargs)`
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
 ## fasthtml.js
@@ -170,10 +173,10 @@
 
 > Use FastHTML in Jupyter notebooks
 
-- `def nb_serve(app, log_level, port, **kwargs)`
+- `def nb_serve(app, log_level, port, host, **kwargs)`
     Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
 
-- `def nb_serve_async(app, log_level, port, **kwargs)`
+- `def nb_serve_async(app, log_level, port, host, **kwargs)`
     Async version of `nb_serve`
 
 - `def is_port_free(port, host)`
@@ -185,7 +188,7 @@
 - `class JupyUvi`
     Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
 
-    - `def __init__(self, app, log_level, port, start, **kwargs)`
+    - `def __init__(self, app, log_level, host, port, start, **kwargs)`
     - `def start(self)`
     - `def stop(self)`
 
