@@ -509,7 +509,7 @@ class FastHTML(Starlette):
                  before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
-                 body_wrap=noop_body, htmlkw=None, nb_hdrs=True, **bodykw):
+                 body_wrap=noop_body, htmlkw=None, nb_hdrs=False, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         exts = {k:htmx_exts[k] for k in exts}

@@ -60,7 +60,7 @@ def fast_app(
         reload_interval:Optional[int]=1000, # Time between reload attempts in ms
         static_path:str=".",  # Where the static file route points to, defaults to root dir
         body_wrap:callable=noop_body, # FT wrapper for body contents
-        nb_hdrs:bool=True, # If in notebook include headers inject headers in notebook DOM?
+        nb_hdrs:bool=False, # If in notebook include headers inject headers in notebook DOM?
         **kwargs)->Any:
     "Create a FastHTML or FastHTMLWithLiveReload app."
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
