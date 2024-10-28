@@ -131,18 +131,21 @@ def _is_body(anno): return issubclass(anno, (dict,ns)) or _annotations(anno)
 # %% ../nbs/api/00_core.ipynb
 def _formitem(form, k):
     "Return single item `k` from `form` if len 1, otherwise return list"
+    if isinstance(form, dict): return form[k]
     o = form.getlist(k)
     return o[0] if len(o) == 1 else o if o else None
 
 # %% ../nbs/api/00_core.ipynb
 def form2dict(form: FormData) -> dict:
     "Convert starlette form data to a dict"
+    if isinstance(form, dict): return form
     return {k: _formitem(form, k) for k in form}
 
 # %% ../nbs/api/00_core.ipynb
 async def parse_form(req: Request) -> FormData:
     "Starlette errors on empty multipart forms, so this checks for that situation"
     ctype = req.headers.get("Content-Type", "")
+    if ctype=='application/json': return await req.json()
     if not ctype.startswith("multipart/form-data"): return await req.form()
     try: boundary = ctype.split("boundary=")[1].strip()
     except IndexError: raise HTTPException(400, "Invalid form-data: no boundary")
@@ -156,8 +159,7 @@ async def _from_body(req, p):
     anno = p.annotation
     # Get the fields and types of type `anno`, if available
     d = _annotations(anno)
-    if req.headers.get('content-type', None)=='application/json': data = await req.json()
-    else: data = form2dict(await parse_form(req))
+    data = form2dict(await parse_form(req))
     if req.query_params: data = {**data, **dict(req.query_params)}
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
