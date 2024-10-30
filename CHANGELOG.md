@@ -2,6 +2,30 @@
 
 <!-- do not remove -->
 
+## 0.8.1
+
+### Breaking changes
+
+- Rename `.rt` method to `.to` ([#539](https://github.com/AnswerDotAI/fasthtml/issues/539))
+
+### New Features
+
+- Support json request key parameters ([#555](https://github.com/AnswerDotAI/fasthtml/issues/555))
+- Add `fh_cfg["auto_name"]` option ([#548](https://github.com/AnswerDotAI/fasthtml/issues/548))
+- Allow generators etc as responses ([#547](https://github.com/AnswerDotAI/fasthtml/issues/547))
+- Add experimental `body_wrap` attr to `FastHTML` ([#546](https://github.com/AnswerDotAI/fasthtml/issues/546))
+- Auto-add headers to notebook in `FastHTML` ([#544](https://github.com/AnswerDotAI/fasthtml/issues/544))
+- Allow FT components to be used directly as id and `hx_target` values [#544](https://github.com/AnswerDotAI/fasthtml/issues/544))
+- Add `host` param to JupyUvi, defaulting to "0.0.0.0" ([#543](https://github.com/AnswerDotAI/fasthtml/issues/543))
+- In-jupyter HTMX web apps! ([#541](https://github.com/AnswerDotAI/fasthtml/issues/541))
+- Add HTTP verb methods to `APIRouter` ([#538](https://github.com/AnswerDotAI/fasthtml/issues/538))
+- Support `WebSocket` type annotation in `app.ws` handlers ([#538](https://github.com/AnswerDotAI/fasthtml/issues/538))
+
+### Bugs Squashed
+
+- Add `nb_hdrs` to `fast_app` ([#551](https://github.com/AnswerDotAI/fasthtml/pull/551)), thanks to [@Isaac-Flath](https://github.com/Isaac-Flath)
+
+
 ## 0.8.0
 
 ### Breaking changes
