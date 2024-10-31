@@ -91,15 +91,24 @@ class JupyUvi:
         wait_port_free(self.port)
 
 # %% ../nbs/api/06_jupyter.ipynb
-def HTMX(path="", host='localhost', port=8000, iframe_height="auto"):
+def HTMX(path="", app=None, host='localhost', port=8000, height="auto", link=False, iframe=True):
     "An iframe which displays the HTMX application in a notebook."
-    return HTML(f'<iframe src="http://{host}:{port}{str(path)}" style="width: 100%; height: {iframe_height}; border: none;" ' + """onload="{
+    if isinstance(path, (FT,tuple)):
+        route = f'/{unqid()}'
+        res = path
+        app.get(route)(lambda: res)
+        path = route
+    if isinstance(height, int): height = f"{height}px"
+    scr = """{
         let frame = this;
         window.addEventListener('message', function(e) {
             if (e.source !== frame.contentWindow) return; // Only proceed if the message is from this iframe
             if (e.data.height) frame.style.height = (e.data.height+1) + 'px';
         }, false);
-    }" allow="accelerometer; autoplay; camera; clipboard-read; clipboard-write; display-capture; encrypted-media; fullscreen; gamepad; geolocation; gyroscope; hid; identity-credentials-get; idle-detection; magnetometer; microphone; midi; payment; picture-in-picture; publickey-credentials-get; screen-wake-lock; serial; usb; web-share; xr-spatial-tracking"></iframe> """)
+    }""" if height == "auto" else ""
+    if link: display(HTML(f'<a href="http://{host}:{port}{path}" target="_blank">Open in new tab</a>'))
+    if iframe:
+        return HTML(f'<iframe src="http://{host}:{port}{path}" style="width: 100%; height: {height}; border: none;" onload="{scr}" ' + """allow="accelerometer; autoplay; camera; clipboard-read; clipboard-write; display-capture; encrypted-media; fullscreen; gamepad; geolocation; gyroscope; hid; identity-credentials-get; idle-detection; magnetometer; microphone; midi; payment; picture-in-picture; publickey-credentials-get; screen-wake-lock; serial; usb; web-share; xr-spatial-tracking"></iframe> """)
 
 # %% ../nbs/api/06_jupyter.ipynb
 def ws_client(app, nm='', host='localhost', port=8000, ws_connect='/ws', frame=True, link=True, **kwargs):
