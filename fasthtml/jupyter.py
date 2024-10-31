@@ -93,7 +93,8 @@ class JupyUvi:
 # %% ../nbs/api/06_jupyter.ipynb
 def HTMX(path="", app=None, host='localhost', port=8000, height="auto", link=False, iframe=True):
     "An iframe which displays the HTMX application in a notebook."
-    if isinstance(path, (FT,tuple)):
+    if isinstance(path, (FT,tuple,Safe)):
+        assert app, 'Need an app to render a component'
         route = f'/{unqid()}'
         res = path
         app.get(route)(lambda: res)
