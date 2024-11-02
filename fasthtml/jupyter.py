@@ -56,7 +56,7 @@ def wait_port_free(port, host='localhost', max_wait=3):
 # %% ../nbs/api/06_jupyter.ipynb
 def show(*s):
     "Same as fasthtml.components.show, but also adds `htmx.process()`"
-    if IN_NOTEBOOK: return _show(*s, Script('htmx.process(document.body)'))
+    if IN_NOTEBOOK: return _show(*s, Script('if (window.htmx) htmx.process(document.body)'))
     return _show(*s)
 
 # %% ../nbs/api/06_jupyter.ipynb

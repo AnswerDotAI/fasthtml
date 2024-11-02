@@ -75,7 +75,6 @@ htmx.onLoad(hljs.highlightAll);""" % sel
             jsd(*hjs, f'highlight.min.js'),
             jsd(*hjc, 'highlightjs-copy.min.js'),
             jsd(*hjc, 'highlightjs-copy.min.css', typ='css'),
-            light_media('.hljs-copy-button {background-color: #2d2b57;}'),
             *langjs, Script(src, type='module')]
 
 # %% ../nbs/api/03_js.ipynb
