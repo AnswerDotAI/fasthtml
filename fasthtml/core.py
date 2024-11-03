@@ -6,7 +6,7 @@
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport',
            'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders',
            'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
-           'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key',
+           'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key', 'qp',
            'def_hdrs', 'FastHTML', 'serve', 'Client', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase',
            'FtResponse', 'unqid', 'setup_ws']
 
@@ -474,13 +474,10 @@ def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw, body_wrap):
     return _f
 
 # %% ../nbs/api/00_core.ipynb
-def _mk_locfunc(f,p):
-    class _lf:
-        def __init__(self): update_wrapper(self, f)
-        def __call__(self, *args, **kw): return f(*args, **kw)
-        def to(self, **kw): return p + (f'?{urlencode(kw)}' if kw else '')
-        def __str__(self): return p
-    return _lf()
+def qp(p:str, **kw) -> str:
+    "Add query parameters to path p"
+    kw = {k:('' if v in (False,None) else v) for k,v in kw.items()}
+    return p + ('?' + urlencode(kw,doseq=True) if kw else '')
 
 # %% ../nbs/api/00_core.ipynb
 def def_hdrs(htmx=True, surreal=True):
@@ -587,6 +584,15 @@ def ws(self:FastHTML, path:str, conn=None, disconn=None, name=None, middleware=N
     "Add a websocket route at `path`"
     def f(func=noop): return self._add_ws(func, path, conn, disconn, name=name, middleware=middleware)
     return f
+
+# %% ../nbs/api/00_core.ipynb
+def _mk_locfunc(f,p):
+    class _lf:
+        def __init__(self): update_wrapper(self, f)
+        def __call__(self, *args, **kw): return f(*args, **kw)
+        def to(self, **kw): return qp(p, **kw)
+        def __str__(self): return p
+    return _lf()
 
 # %% ../nbs/api/00_core.ipynb
 @patch
