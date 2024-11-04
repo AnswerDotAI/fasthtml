@@ -239,6 +239,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
         if arg.lower()=='htmx': return _get_htmx(hdrs)
         if arg.lower()=='app': return ws.scope['app']
         if arg.lower()=='send': return partial(_send_ws, ws)
+        if 'session'.startswith(arg.lower()): return ws.scope.get('session', {})
         return None
     res = data.get(arg, None)
     if res is empty or res is None: res = hdrs.get(arg, None)
