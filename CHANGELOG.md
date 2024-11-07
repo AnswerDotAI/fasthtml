@@ -2,6 +2,16 @@
 
 <!-- do not remove -->
 
+## 0.9.1
+
+### New Features
+
+- Add oauth `error_path` ([#570](https://github.com/AnswerDotAI/fasthtml/pull/570)), thanks to [@comhar](https://github.com/comhar)
+- Add `qp` to create routes with query params ([#560](https://github.com/AnswerDotAI/fasthtml/issues/560))
+- `render_rt()` function enables automatic rendering of FT components in notebook ([#558](https://github.com/AnswerDotAI/fasthtml/issues/558))
+- In `HTMX()` `height` is now fixed if passed, and `FT` components can be rendered instead of paths ([#557](https://github.com/AnswerDotAI/fasthtml/issues/557))
+
+
 ## 0.9.0
 
 ### Breaking changes
