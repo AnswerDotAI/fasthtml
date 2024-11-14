@@ -35,7 +35,7 @@ async def nb_serve_async(app, log_level="error", port=8000, host='0.0.0.0', **kw
     return server
 
 # %% ../nbs/api/06_jupyter.ipynb
-def is_port_free(port, host='localhost'):
+def is_port_free(port, host='0.0.0.0'):
     "Check if `port` is free on `host`"
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -46,7 +46,7 @@ def is_port_free(port, host='localhost'):
     finally: sock.close()
 
 # %% ../nbs/api/06_jupyter.ipynb
-def wait_port_free(port, host='localhost', max_wait=3):
+def wait_port_free(port, host='0.0.0.0', max_wait=3):
     "Wait for `port` to be free on `host`"
     start_time = time.time()
     while not is_port_free(port):
