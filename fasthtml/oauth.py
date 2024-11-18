@@ -142,10 +142,10 @@ class OAuth:
         if not skip: skip = [redir_path,error_path,login_path]
         store_attr()
         def before(req, session):
-            token = session.pop('token', None)
             auth = req.scope['auth'] = session.get('auth')
-            if not auth: return RedirectResponse(self.login_path, status_code=303)
-
+            if not auth: return self.redir_login(session)
+            res = self.check_invalid(req, session, auth)
+            if res: return res
         app.before.append(Beforeware(before, skip=skip))
 
         @app.get(redir_path)
@@ -154,25 +154,24 @@ class OAuth:
             scheme = 'http' if url_match(req.url,self.http_patterns) or not self.https else 'https'
             base_url = f"{scheme}://{req.url.netloc}"
             info = AttrDictDefault(cli.retr_info(code, base_url+redir_path))
-            if not self._chk_auth(req, info, session): return RedirectResponse(self.login_path, status_code=303)
-            return self.login(info, state, session=session)
+            ident = info.get(self.cli.id_key)
+            if not ident: return self.redir_login(session)
+            res = self.get_auth(info, ident, session, state)
+            if not res:   return self.redir_login(session)
+            req.scope['auth'] = session['auth'] = ident
+            return res
 
         @app.get(logout_path)
         def logout(session):
             session.pop('auth', None)
             return self.logout(session)
 
+    def redir_login(self, session): return RedirectResponse(self.login_path, status_code=303)
     def redir_url(self, req):
         scheme = 'http' if url_match(req.url,self.http_patterns) or not self.https else 'https'
         return redir_url(req, self.redir_path, scheme)
 
     def login_link(self, req, scope=None, state=None): return self.cli.login_link(self.redir_url(req), scope=scope, state=state)
-
-    def login(self, info, state, session): raise NotImplementedError()
-    def logout(self, session): return RedirectResponse(self.login_path, status_code=303)
-    def chk_auth(self, info, ident, session): raise NotImplementedError()
-    def _chk_auth(self, req, info, session):
-        ident = info.get(self.cli.id_key)
-        if not ident and self.chk_auth(info, ident, session): return print('failed', info)
-        req.scope['auth'] = session['auth'] = ident
-        return True
+    def check_invalid(self, req, session, auth): return False
+    def logout(self, session): return self.redir_login(session)
+    def get_auth(self, info, ident, session, state): raise NotImplementedError()
