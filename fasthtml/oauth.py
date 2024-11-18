@@ -142,10 +142,9 @@ class OAuth:
         if not skip: skip = [redir_path,error_path,login_path]
         store_attr()
         def before(req, session):
+            token = session.pop('token', None)
             auth = req.scope['auth'] = session.get('auth')
             if not auth: return RedirectResponse(self.login_path, status_code=303)
-            info = AttrDictDefault(cli.get_info(auth))
-            if not self._chk_auth(info, session): return RedirectResponse(self.login_path, status_code=303)
 
         app.before.append(Beforeware(before, skip=skip))
 
@@ -155,8 +154,7 @@ class OAuth:
             scheme = 'http' if url_match(req.url,self.http_patterns) or not self.https else 'https'
             base_url = f"{scheme}://{req.url.netloc}"
             info = AttrDictDefault(cli.retr_info(code, base_url+redir_path))
-            if not self._chk_auth(info, session): return RedirectResponse(self.login_path, status_code=303)
-            session['auth'] = cli.token['access_token']
+            if not self._chk_auth(req, info, session): return RedirectResponse(self.login_path, status_code=303)
             return self.login(info, state, session=session)
 
         @app.get(logout_path)
@@ -164,14 +162,17 @@ class OAuth:
             session.pop('auth', None)
             return self.logout(session)
 
-    def redir_url(self, req): 
+    def redir_url(self, req):
         scheme = 'http' if url_match(req.url,self.http_patterns) or not self.https else 'https'
         return redir_url(req, self.redir_path, scheme)
+
     def login_link(self, req, scope=None, state=None): return self.cli.login_link(self.redir_url(req), scope=scope, state=state)
 
     def login(self, info, state, session): raise NotImplementedError()
     def logout(self, session): return RedirectResponse(self.login_path, status_code=303)
     def chk_auth(self, info, ident, session): raise NotImplementedError()
-    def _chk_auth(self, info, session):
+    def _chk_auth(self, req, info, session):
         ident = info.get(self.cli.id_key)
-        return ident and self.chk_auth(info, ident, session)
+        if not ident and self.chk_auth(info, ident, session): return print('failed', info)
+        req.scope['auth'] = session['auth'] = ident
+        return True
