@@ -2,6 +2,19 @@
 
 <!-- do not remove -->
 
+## 0.10.0
+
+### Breaking changes
+
+- The OAuth API is now simplified to only require `chk_auth`, and no longer uses `login`. `chk_auth` should either return `False` (meaning not authenticated) or a `RedirectResponse`. After authentication, the `auth` parameter will be provided to handlers, which will have the oauth ID.
+
+### New Features
+
+- Simplify OAuth API ([#580](https://github.com/AnswerDotAI/fasthtml/issues/580))
+- Include session param in websockets handlers ([#563](https://github.com/AnswerDotAI/fasthtml/pull/563)), thanks to [@callmephilip](https://github.com/callmephilip)
+- Add path to jupy HTMX ([#503](https://github.com/AnswerDotAI/fasthtml/issues/503))
+
+
 ## 0.9.1
 
 ### New Features
