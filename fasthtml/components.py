@@ -191,7 +191,12 @@ def html2ft(html, attr1st=False):
         onlychild = not cts or (len(cts)==1 and isinstance(cts[0],str))
         j = ', ' if onlychild else f',\n{spc}'
         inner = j.join(filter(None, cs+attrs))
-        if onlychild: return f'{tag_name}({inner})'
+        if onlychild:
+            if not attr1st: return f'{tag_name}({inner})'
+            else:
+                # respect attr1st setting
+                attrs = ', '.join(filter(None, attrs))
+                return f'{tag_name}({attrs})({cs[0]})'
         if not attr1st or not attrs: return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*indent})' 
         inner_cs = j.join(filter(None, cs))
         inner_attrs = ', '.join(filter(None, attrs))
