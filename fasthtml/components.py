@@ -189,17 +189,23 @@ def html2ft(html, attr1st=False):
         cts = elm.contents
         cs = [repr(c.strip()) if isinstance(c, str) else _parse(c, lvl+1)
               for c in cts if str(c).strip()]
-        attrs = []
+        attrs, exotic_attrs  = [], {}
         for key, value in sorted(elm.attrs.items(), key=lambda x: x[0]=='class'):
             if isinstance(value,(tuple,list)): value = " ".join(value)
-            key = rev_map.get(key, key)
-            attrs.append(f'{key.replace("-", "_")}={value!r}'
-                         if _re_h2x_attr_key.match(key) else f'**{{{key!r}:{value!r}}}')
+            key, value = rev_map.get(key, key), value or True
+            if _re_h2x_attr_key.match(key): attrs.append(f'{key.replace("-", "_")}={value!r}')
+            else: exotic_attrs[key] = value
+        if exotic_attrs: attrs.append(f'**{exotic_attrs!r}')
         spc = " "*lvl*indent
         onlychild = not cts or (len(cts)==1 and isinstance(cts[0],str))
         j = ', ' if onlychild else f',\n{spc}'
         inner = j.join(filter(None, cs+attrs))
-        if onlychild: return f'{tag_name}({inner})'
+        if onlychild:
+            if not attr1st: return f'{tag_name}({inner})'
+            else:
+                # respect attr1st setting
+                attrs = ', '.join(filter(None, attrs))
+                return f'{tag_name}({attrs})({cs[0] if cs else ""})'
         if not attr1st or not attrs: return f'{tag_name}(\n{spc}{inner}\n{" "*(lvl-1)*indent})' 
         inner_cs = j.join(filter(None, cs))
         inner_attrs = ', '.join(filter(None, attrs))
