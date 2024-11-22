@@ -121,7 +121,10 @@ def _fill_item(item, obj):
     if val is not None and not 'skip' in attr:
         if tag=='input':
             if attr.get('type', '') == 'checkbox':
-                if val: attr['checked'] = '1'
+                if isinstance(val, list):
+                    if attr['value'] in val: attr['checked'] = '1'
+                    else: attr.pop('checked', '')
+                elif val: attr['checked'] = '1'
                 else: attr.pop('checked', '')
             elif attr.get('type', '') == 'radio':
                 if val and val == attr['value']: attr['checked'] = '1'
@@ -129,8 +132,13 @@ def _fill_item(item, obj):
             else: attr['value'] = val
         if tag=='textarea': cs=(val,)
         if tag == 'select':
-            option = next((o for o in cs if o.tag=='option' and o.get('value')==val), None)
-            if option: option.selected = '1'
+            if isinstance(val, list):
+                for opt in cs:
+                    if opt.tag == 'option' and opt.get('value') in val:
+                        opt.selected = '1'
+            else:
+                option = next((o for o in cs if o.tag=='option' and o.get('value')==val), None)
+                if option: option.selected = '1'
     return FT(tag,cs,attr,void_=item.void_)
 
 # %% ../nbs/api/01_components.ipynb
