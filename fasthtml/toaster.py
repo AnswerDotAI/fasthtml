@@ -31,27 +31,31 @@ toast_css = """
 .fh-toast-error { background-color: #F44336; }
 """
 
-toast_js = """
-export function proc_htmx(sel, func) {{
-  htmx.onLoad(elt => {{
+def ToastJs(duration:float):
+    duration = int(1000*duration)
+    src = """
+export function proc_htmx(sel, func) {
+  htmx.onLoad(elt => {
     const elements = any(sel, elt, false);
     if (elt.matches && elt.matches(sel)) elements.unshift(elt);
     elements.forEach(func);
-  }});
-}}
-proc_htmx('.fh-toast-container', async function(toast) {{
+  });
+}
+proc_htmx('.fh-toast-container', async function(toast) {
     await sleep(100);
     toast.style.opacity = '0.8';
-    await sleep({duration});
+    await sleep(%s);
     toast.style.opacity = '0';
     await sleep(300);
     toast.remove();
-}});
+});
 
-proc_htmx('.fh-toast-dismiss', function(elem) {{ 
-    elem.addEventListener('click', (e) => {{ e.target.parentElement.remove() }}); 
-}});
+proc_htmx('.fh-toast-dismiss', function(elem) { 
+    elem.addEventListener('click', (e) => { e.target.parentElement.remove() }); 
+});
 """
+    return Script(src % (duration,), type="module")
+
 
 def add_toast(sess, message, typ="info"):
     assert typ in ("info", "success", "warning", "error"), '`typ` not in ("info", "success", "warning", "error")'
@@ -65,5 +69,5 @@ def toast_after(resp, req, sess):
     if sk in sess and (not resp or isinstance(resp, (tuple,FT,FtResponse))): req.injects.append(render_toasts(sess))
 
 def setup_toasts(app, duration:float=10.):
-    app.hdrs += (Style(toast_css), Script(toast_js.format(duration=1000*duration), type="module"))
+    app.hdrs += (Style(toast_css), ToastJs(duration))
     app.after.append(toast_after)
