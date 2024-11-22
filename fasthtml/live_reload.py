@@ -4,24 +4,25 @@ from fasthtml.basics import FastHTML, Script
 __all__ = ["FastHTMLWithLiveReload"]
 
 
-LIVE_RELOAD_SCRIPT = """
-    (function() {{
-        var socket = new WebSocket(`ws://${{window.location.host}}/live-reload`);
-        var maxReloadAttempts = {reload_attempts};
-        var reloadInterval = {reload_interval}; // time between reload attempts in ms
-        socket.onclose = function() {{
+def LiveReloadJs(reload_attempts:int=1, reload_interval:float=1000., **kwargs):
+    src = """
+    (function() {
+        var socket = new WebSocket(`ws://${window.location.host}/live-reload`);
+        var maxReloadAttempts = %s;
+        var reloadInterval = %s; // time between reload attempts in ms
+        socket.onclose = function() {
             let reloadAttempts = 0;
-            const intervalFn = setInterval(function(){{
+            const intervalFn = setInterval(function(){
                 window.location.reload();
                 reloadAttempts++;
                 if (reloadAttempts === maxReloadAttempts) clearInterval(intervalFn);
-            }}, reloadInterval);
-        }}
-    }})();
+            }, reloadInterval);
+        }
+    })();
 """
+    return Script(src % (reload_attempts, reload_interval))
 
-
-async def live_reload_websocket(websocket): await websocket.accept()
+async def live_reload_ws(websocket): await websocket.accept()
 
 class FastHTMLWithLiveReload(FastHTML):
     """
@@ -47,19 +48,8 @@ class FastHTMLWithLiveReload(FastHTML):
         Run:
             serve()
     """
-    LIVE_RELOAD_ROUTE = WebSocketRoute("/live-reload", endpoint=live_reload_websocket)
-
     def __init__(self, *args, **kwargs):
-        # Create the live reload script to be injected into the webpage
-        self.LIVE_RELOAD_HEADER = Script(
-            LIVE_RELOAD_SCRIPT.format(
-                reload_attempts=kwargs.get("reload_attempts", 1),
-                reload_interval=kwargs.get("reload_interval", 1000),
-            )
-        )
-
         # "hdrs" and "routes" can be missing, None, a list or a tuple.
-        kwargs["hdrs"] = [*(kwargs.get("hdrs") or []), self.LIVE_RELOAD_HEADER]
-        kwargs["routes"] = [*(kwargs.get("routes") or []), self.LIVE_RELOAD_ROUTE]
+        kwargs["hdrs"] = [*(kwargs.get("hdrs") or []), LiveReloadJs(**kwargs)]
+        kwargs["routes"] = [*(kwargs.get("routes") or []), WebSocketRoute("/live-reload", endpoint=live_reload_ws)]
         super().__init__(*args, **kwargs)
-
