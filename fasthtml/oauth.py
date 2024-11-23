@@ -90,21 +90,19 @@ class DiscordAppClient(_AppClient):
 # %% ../nbs/api/08_oauth.ipynb
 class Auth0AppClient(_AppClient):
     "A `WebApplicationClient` for Auth0 OAuth2"
-    def __init__(self, domain, client_id, client_secret, code=None, scope=None, https=True, redirect_uri="", **kwargs):
-        self.redirect_uri,self.https,self.domain = redirect_uri,https,domain
+    def __init__(self, domain, client_id, client_secret, code=None, scope=None, redirect_uri="", **kwargs):
+        self.redirect_uri,self.domain = redirect_uri,domain
         config = self._fetch_openid_config()
         self.base_url,self.token_url,self.info_url = config["authorization_endpoint"],config["token_endpoint"],config["userinfo_endpoint"]
-        super().__init__(client_id, client_secret, code=code, scope=scope, https=https, redirect_uri=redirect_uri, **kwargs)
+        super().__init__(client_id, client_secret, code=code, scope=scope, redirect_uri=redirect_uri, **kwargs)
 
     def _fetch_openid_config(self):
         r = httpx.get(f"https://{self.domain}/.well-known/openid-configuration")
         r.raise_for_status()
         return r.json()
 
-    def redir_url(self, req): return redir_url(req, self.redirect_uri, "https" if self.https else "http")
-
     def login_link(self, req):
-        d = dict(response_type="code", client_id=self.client_id, scope=self.scope, redirect_uri=self.redir_url(req))
+        d = dict(response_type="code", client_id=self.client_id, scope=self.scope, redirect_uri=redir_url(req, self.redirect_uri))
         return f"{self.base_url}?{urlencode(d)}"
 
 # %% ../nbs/api/08_oauth.ipynb
@@ -118,7 +116,7 @@ def login_link(self:WebApplicationClient, redirect_uri, scope=None, state=None):
 # %% ../nbs/api/08_oauth.ipynb
 def redir_url(request, redir_path, scheme=None):
     "Get the redir url for the host in `request`"
-    scheme = 'http' if request.url.hostname == 'localhost' else 'https'
+    scheme = 'http' if request.url.hostname in ("localhost", "127.0.0.1") else 'https'
     return f"{scheme}://{request.url.netloc}{redir_path}"
 
 # %% ../nbs/api/08_oauth.ipynb
