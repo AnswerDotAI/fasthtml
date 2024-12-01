@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.10.1
+
+### New Features
+
+- Add `Auth0AppClient`, thanks to 78wesley ([#589](https://github.com/AnswerDotAI/fasthtml/issues/589))
+- configurable toast duration ([#587](https://github.com/AnswerDotAI/fasthtml/pull/587)), thanks to [@comhar](https://github.com/comhar)
+
 
 ## 0.10.0
 
