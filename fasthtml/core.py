@@ -7,8 +7,8 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders',
            'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
            'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key', 'qp',
-           'def_hdrs', 'FastHTML', 'serve', 'Client', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase',
-           'FtResponse', 'unqid', 'setup_ws']
+           'def_hdrs', 'FastHTML', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param',
+           'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading,inspect
@@ -654,21 +654,52 @@ class Client:
 for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o, partialmethod(Client._sync, o))
 
 # %% ../nbs/api/00_core.ipynb
+class RouteFuncs:
+    def __init__(self): super().__setattr__('_funcs', {})
+    def __setattr__(self, name, value): self._funcs[name] = value
+    def __getattr__(self, name): 
+        if name in all_meths: raise KeyError("Route functions with HTTP Names are not accessible here")
+        return self._funcs[name]
+    def __dir__(self): return list(self._funcs.keys())
+
+# %% ../nbs/api/00_core.ipynb
 class APIRouter:
     "Add routes to an app"
-    def __init__(self): self.routes,self.wss = [],[]
+    def __init__(self, prefix:str|None=None): 
+        self.routes,self.wss = [],[]
+        self.rt_funcs = RouteFuncs()  # Store wrapped functions for discoverability
+        self.prefix = prefix if prefix else ""
 
-    def __call__(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
+    def _wrap_func(self, func, path=None):
+        name = func.__name__
+    
+        class _lf:
+            def __init__(s): update_wrapper(s, func)
+            def __call__(s, *args, **kw): return func(*args, **kw)
+            def to(s, **kw): return qp(path, **kw)
+            def __str__(s): return path
+        
+        wrapped = _lf()
+        wrapped.__routename__ = name
+        # If you are using the def get or def post method names, this approach is not supported
+        if name not in all_meths: setattr(self.rt_funcs, name, wrapped)
+        return wrapped
+
+    def __call__(self, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
         "Add a route at `path`"
-        def f(func): return self.routes.append((func, path,methods,name,include_in_schema,body_wrap))
+        def f(func):
+            p = self.prefix + ("/" + ('' if path.__name__=='index' else func.__name__) if callable(path) else path)
+            wrapped = self._wrap_func(func, p)
+            self.routes.append((func, p, methods, name, include_in_schema, body_wrap))
+            return wrapped
         return f(path) if callable(path) else f
 
     def to_app(self, app):
         "Add routes to `app`"
         for args in self.routes: app._add_route(*args)
-        for args in self.wss   : app._add_ws   (*args)
-
-    def ws(self:FastHTML, path:str, conn=None, disconn=None, name=None, middleware=None):
+        for args in self.wss: app._add_ws(*args)
+        
+    def ws(self, path:str, conn=None, disconn=None, name=None, middleware=None):
         "Add a websocket route at `path`"
         def f(func=noop): return self.wss.append((func, path, conn, disconn, name, middleware))
         return f
