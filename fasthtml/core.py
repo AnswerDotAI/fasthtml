@@ -667,19 +667,12 @@ class APIRouter:
     "Add routes to an app"
     def __init__(self, prefix:str|None=None): 
         self.routes,self.wss = [],[]
-        self.rt_funcs = RouteFuncs()  # Store wrapped functions for discoverability
+        self.rt_funcs = RouteFuncs()  # Store wrapped route function for discoverability
         self.prefix = prefix if prefix else ""
 
     def _wrap_func(self, func, path=None):
         name = func.__name__
-    
-        class _lf:
-            def __init__(s): update_wrapper(s, func)
-            def __call__(s, *args, **kw): return func(*args, **kw)
-            def to(s, **kw): return qp(path, **kw)
-            def __str__(s): return path
-        
-        wrapped = _lf()
+        wrapped = _mk_locfunc(func, path)
         wrapped.__routename__ = name
         # If you are using the def get or def post method names, this approach is not supported
         if name not in all_meths: setattr(self.rt_funcs, name, wrapped)
@@ -701,7 +694,7 @@ class APIRouter:
         
     def ws(self, path:str, conn=None, disconn=None, name=None, middleware=None):
         "Add a websocket route at `path`"
-        def f(func=noop): return self.wss.append((func, path, conn, disconn, name, middleware))
+        def f(func=noop): return self.wss.append((func, f"{self.prefix}{path}", conn, disconn, name, middleware))
         return f
 
 # %% ../nbs/api/00_core.ipynb
