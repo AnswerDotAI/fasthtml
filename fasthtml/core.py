@@ -686,6 +686,10 @@ class APIRouter:
             self.routes.append((func, p, methods, name, include_in_schema, body_wrap))
             return wrapped
         return f(path) if callable(path) else f
+    
+    def __getattr__(self, name):
+        try: return self.rt_funcs.__getattr__(name)
+        except KeyError: return object.__getattribute__(self, name)
 
     def to_app(self, app):
         "Add routes to `app`"
