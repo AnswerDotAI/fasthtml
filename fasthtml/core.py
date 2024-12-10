@@ -658,8 +658,9 @@ class RouteFuncs:
     def __init__(self): super().__setattr__('_funcs', {})
     def __setattr__(self, name, value): self._funcs[name] = value
     def __getattr__(self, name): 
-        if name in all_meths: raise KeyError("Route functions with HTTP Names are not accessible here")
-        return self._funcs[name]
+        if name in all_meths: raise AttributeError("Route functions with HTTP Names are not accessible here")
+        try: return self._funcs[name]
+        except KeyError: raise AttributeError(f"No route named {name} found in route functions")
     def __dir__(self): return list(self._funcs.keys())
 
 # %% ../nbs/api/00_core.ipynb
