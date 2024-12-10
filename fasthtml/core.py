@@ -688,7 +688,7 @@ class APIRouter:
         return f(path) if callable(path) else f
     
     def __getattr__(self, name):
-        try: return self.rt_funcs.__getattr__(name)
+        try: return getattr(self.rt_funcs, name)
         except KeyError: return object.__getattribute__(self, name)
 
     def to_app(self, app):
