@@ -689,7 +689,7 @@ class APIRouter:
     
     def __getattr__(self, name):
         try: return getattr(self.rt_funcs, name)
-        except KeyError: return object.__getattribute__(self, name)
+        except AttributeError: return super().__getattr__(self, name)
 
     def to_app(self, app):
         "Add routes to `app`"
