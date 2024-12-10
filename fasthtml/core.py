@@ -441,15 +441,15 @@ htmx_exts = {
     "multi-swap": "https://unpkg.com/htmx-ext-multi-swap@2.0.0/multi-swap.js", 
     "path-deps": "https://unpkg.com/htmx-ext-path-deps@2.0.0/path-deps.js", 
     "remove-me": "https://unpkg.com/htmx-ext-remove-me@2.0.0/remove-me.js",
-    "ws": "https://unpkg.com/htmx-ext-ws/ws.js",
-    "chunked-transfer": "https://unpkg.com/htmx-ext-transfer-encoding-chunked/transfer-encoding-chunked.js"
+    "ws": "https://unpkg.com/htmx-ext-ws@2.0.1/ws.js",
+    "chunked-transfer": "https://unpkg.com/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js"
 }
 
 # %% ../nbs/api/00_core.ipynb
-htmxsrc   = Script(src="https://unpkg.com/htmx.org@next/dist/htmx.min.js")
-fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js")
-surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
-scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
+htmxsrc   = Script(src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.min.js")
+fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.min.js")
+surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.min.js")
+scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.min.js")
 viewport  = Meta(name="viewport", content="width=device-width, initial-scale=1, viewport-fit=cover")
 charset   = Meta(charset="utf-8")
 
