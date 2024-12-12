@@ -50,7 +50,6 @@ hx_attrs_annotations = {
     "hx_disabled_elt": Literal["this", "next", "previous"] | str, 
     "hx_history": Literal["false"] | str,
     "hx_params": Literal["*", "none"] | str,
-    "hx_replace_url": Literal["true", "false"] | str, 
     "hx_validate": Literal["true", "false"],
 }
 hx_attrs_annotations |= {o: str for o in set(hx_attrs) - set(hx_attrs_annotations.keys())}
