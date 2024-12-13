@@ -23,7 +23,7 @@ def light_media(
 def dark_media(
         css: str # CSS to be included in the dark media query
     ):
-    "Render dark media for nught mode views"
+    "Render dark media for night mode views"
     return Style('@media (prefers-color-scheme:  dark) {%s}' %css)
 
 # %% ../nbs/api/03_js.ipynb
@@ -56,7 +56,7 @@ def KatexMarkdownJS(
 
 # %% ../nbs/api/03_js.ipynb
 def HighlightJS(
-        sel='pre code', # CSS selector for code elements. Default is industry standard, be careful before adjusting it
+        sel='pre code:not([data-highlighted="yes"])', # CSS selector for code elements. Default is industry standard, be careful before adjusting it
         langs:str|list|tuple='python',  # Language(s) to highlight
         light='atom-one-light',  # Light theme
         dark='atom-one-dark'  # Dark theme
