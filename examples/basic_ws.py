@@ -24,5 +24,9 @@ async def ws(msg:str, send):
     await sleep(2)
     return Div('Goodbye ' + msg, id=nid), mk_inp()
 
+@app.ws('/stream', conn=on_connect, disconn=on_disconnect)
+async def ws_stream(ws, data):
+    print(data)
+
 serve()
 
