@@ -392,7 +392,8 @@ def _xt_cts(req, resp):
     hdr_tags = 'title','meta','link','style','base'
     heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
-        resp = respond(req, heads or [Title(req.app.title)], bdy)
+        title = [] if any(getattr(o, 'tag', '')=='title' for o in heads) else [Title(req.app.title)]
+        resp = respond(req, [*heads, *title], bdy)
     return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs, ts
 
 # %% ../nbs/api/00_core.ipynb
