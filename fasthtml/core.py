@@ -392,7 +392,7 @@ def _xt_cts(req, resp):
     hdr_tags = 'title','meta','link','style','base'
     heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
     if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
-        resp = respond(req, heads or [Title('FastHTML page')], bdy)
+        resp = respond(req, heads or [Title(req.app.title)], bdy)
     return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs, ts
 
 # %% ../nbs/api/00_core.ipynb
@@ -504,13 +504,14 @@ iframe_scr = Script(NotStr("""
 
 # %% ../nbs/api/00_core.ipynb
 class FastHTML(Starlette):
-    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None,
+    def __init__(self, debug=False, routes=None, middleware=None, title: str = "FastHTML page", exception_handlers=None,
                  on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None,
                  before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
                  body_wrap=noop_body, htmlkw=None, nb_hdrs=False, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
+        self.title = title
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         exts = {k:htmx_exts[k] for k in exts}
         htmlkw = htmlkw or {}
