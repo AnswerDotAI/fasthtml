@@ -666,10 +666,11 @@ class RouteFuncs:
 # %% ../nbs/api/00_core.ipynb
 class APIRouter:
     "Add routes to an app"
-    def __init__(self, prefix:str|None=None): 
+    def __init__(self, prefix:str|None=None, body_wrap=noop_body): 
         self.routes,self.wss = [],[]
         self.rt_funcs = RouteFuncs()  # Store wrapped route function for discoverability
         self.prefix = prefix if prefix else ""
+        self.body_wrap = body_wrap
 
     def _wrap_func(self, func, path=None):
         name = func.__name__
@@ -679,12 +680,12 @@ class APIRouter:
         if name not in all_meths: setattr(self.rt_funcs, name, wrapped)
         return wrapped
 
-    def __call__(self, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
+    def __call__(self, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=None):
         "Add a route at `path`"
         def f(func):
             p = self.prefix + ("/" + ('' if path.__name__=='index' else func.__name__) if callable(path) else path)
             wrapped = self._wrap_func(func, p)
-            self.routes.append((func, p, methods, name, include_in_schema, body_wrap))
+            self.routes.append((func, p, methods, name, include_in_schema, body_wrap or self.body_wrap))
             return wrapped
         return f(path) if callable(path) else f
     
@@ -694,7 +695,9 @@ class APIRouter:
 
     def to_app(self, app):
         "Add routes to `app`"
-        for args in self.routes: app._add_route(*args)
+        for args in self.routes: 
+            print(args)
+            app._add_route(*args)
         for args in self.wss: app._add_ws(*args)
         
     def ws(self, path:str, conn=None, disconn=None, name=None, middleware=None):
