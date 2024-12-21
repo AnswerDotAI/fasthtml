@@ -695,9 +695,7 @@ class APIRouter:
 
     def to_app(self, app):
         "Add routes to `app`"
-        for args in self.routes: 
-            print(args)
-            app._add_route(*args)
+        for args in self.routes: app._add_route(*args)
         for args in self.wss: app._add_ws(*args)
         
     def ws(self, path:str, conn=None, disconn=None, name=None, middleware=None):
