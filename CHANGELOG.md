@@ -2,6 +2,19 @@
 
 <!-- do not remove -->
 
+## 0.10.2
+
+### New Features
+
+- Adds `body_wrap` bits to APIRouter ([#612](https://github.com/AnswerDotAI/fasthtml/pull/612)), thanks to [@ohmeow](https://github.com/ohmeow)
+- Fix/add default title ([#604](https://github.com/AnswerDotAI/fasthtml/pull/604)), thanks to [@banditburai](https://github.com/banditburai)
+- upgrade to htmx@2.0.4, fasthtml-js@1.0.12, etc to latest version ([#603](https://github.com/AnswerDotAI/fasthtml/pull/603)), thanks to [@pratapvardhan](https://github.com/pratapvardhan)
+- Optimise highlightjs usage ([#602](https://github.com/AnswerDotAI/fasthtml/pull/602)), thanks to [@curtis-allan](https://github.com/curtis-allan)
+- Use explicit version numbers in cdn links ([#599](https://github.com/AnswerDotAI/fasthtml/pull/599)), thanks to [@curtis-allan](https://github.com/curtis-allan)
+- Made route functions accesible from an instance of APIRouter as well … ([#598](https://github.com/AnswerDotAI/fasthtml/pull/598)), thanks to [@ohmeow](https://github.com/ohmeow)
+- Improved APIRouter to allow for prefixs and discrovery ([#594](https://github.com/AnswerDotAI/fasthtml/pull/594)), thanks to [@ohmeow](https://github.com/ohmeow)
+
+
 ## 0.10.1
 
 ### New Features
