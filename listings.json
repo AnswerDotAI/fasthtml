@@ -1,0 +1,11 @@
+[
+  {
+    "listing": "/tutorials/index.html",
+    "items": [
+      "/tutorials/by_example.html",
+      "/tutorials/quickstart_for_web_devs.html",
+      "/tutorials/e2e.html",
+      "/tutorials/jupyter_and_fasthtml.html"
+    ]
+  }
+]
