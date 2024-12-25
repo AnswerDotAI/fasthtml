@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from .starlette import *
 from fastcore.utils import *
 from fastcore.xml import *
-from sqlite_minutils import Database
+from apswutils import Database
 from fastlite import *
 from .basics import *
 from .pico import *
