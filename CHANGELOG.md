@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.10.3
+
+### Bugs Squashed
+
+- Update sqlite-minutils to apswutils in fasthtml.common
+
+
 ## 0.10.2
 
 ### New Features
