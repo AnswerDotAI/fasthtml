@@ -734,7 +734,7 @@ def reg_re_param(m, s):
 # %% ../nbs/api/00_core.ipynb
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
-reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|html|map")
+reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|html|map|pdf")
 
 @patch
 def static_route_exts(self:FastHTML, prefix='/', static_path='.', exts='static'):
