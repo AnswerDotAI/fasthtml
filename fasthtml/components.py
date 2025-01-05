@@ -38,6 +38,18 @@ def show(ft,*rest):
     display.display(display.HTML(to_xml(ft)))
 
 # %% ../nbs/api/01_components.ipynb
+@patch
+def __str__(self:FT): return self.id if self.id else object.__str__(self)
+
+# %% ../nbs/api/01_components.ipynb
+@patch
+def __radd__(self:FT, b): return f'{b}{self}'
+
+# %% ../nbs/api/01_components.ipynb
+@patch
+def __add__(self:FT, b): return f'{self}{b}'
+
+# %% ../nbs/api/01_components.ipynb
 named = set('a button form frame iframe img input map meta object param select textarea'.split())
 html_attrs = 'id cls title style accesskey contenteditable dir draggable enterkeyhint hidden inert inputmode lang popover spellcheck tabindex translate'.split()
 hx_attrs = 'get post put delete patch trigger target swap swap_oob include select select_oob indicator push_url confirm disable replace_url vals disabled_elt ext headers history history_elt indicator inherit params preserve prompt replace_url request sync validate'
@@ -69,14 +81,14 @@ fh_cfg['auto_id']=False
 fh_cfg['auto_name']=True
 
 # %% ../nbs/api/01_components.ipynb
-def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, auto_id=None, **kwargs):
+def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, **kwargs):
     ds,c = partition(c, risinstance(dict))
     for d in ds: kwargs = {**kwargs, **d}
     if ft_cls is None: ft_cls = fh_cfg.ft_cls
     if attrmap is None: attrmap=fh_cfg.attrmap
     if valmap  is None: valmap =fh_cfg.valmap
-    if auto_id is None: auto_id = fh_cfg.auto_id
-    if auto_id and not id: id = unqid()
+    if not id and fh_cfg.auto_id: id = True
+    if id and isinstance(id,bool): id = unqid()
     kwargs['id'] = id.id if isinstance(id,FT) else id
     kwargs['cls'],kwargs['title'],kwargs['style'] = cls,title,style
     tag,c,kw = ft(tag, *c, attrmap=attrmap, valmap=valmap, **kwargs).list
