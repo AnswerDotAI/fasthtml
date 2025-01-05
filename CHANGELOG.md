@@ -2,6 +2,19 @@
 
 <!-- do not remove -->
 
+## 0.11.0
+
+### Breaking changes
+
+-  FT components now stringify as their id if they have one
+
+### New Features
+
+- Create unique route names for nested functions ([#622](https://github.com/AnswerDotAI/fasthtml/issues/622))
+- Pass `id=True` when creating a component to get an auto unique id ([#622](https://github.com/AnswerDotAI/fasthtml/issues/622))
+- Add `+` to FT components ([#622](https://github.com/AnswerDotAI/fasthtml/issues/622))
+
+
 ## 0.10.3
 
 ### Bugs Squashed
