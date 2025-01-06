@@ -7,8 +7,8 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders',
            'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
            'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key', 'qp',
-           'def_hdrs', 'FastHTML', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param',
-           'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+           'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie',
+           'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,uvicorn,signal,asyncio,threading,inspect
@@ -598,9 +598,14 @@ def _mk_locfunc(f,p):
     return _lf()
 
 # %% ../nbs/api/00_core.ipynb
+def nested_name(f):
+    "Get name of function `f` using '_' to join nested function names"
+    return f.__qualname__.replace('.<locals>.', '_')
+
+# %% ../nbs/api/00_core.ipynb
 @patch
 def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body_wrap):
-    n,fn,p = name,func.__name__,None if callable(path) else path
+    n,fn,p = name,nested_name(func),None if callable(path) else path
     if methods: m = [methods] if isinstance(methods,str) else methods
     elif fn in all_meths and p is not None: m = [fn]
     else: m = ['get','post']
