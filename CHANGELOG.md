@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.12.0
+
+### Breaking changes
+
+- Update fastlite dep to 0.1.1 ([#626](https://github.com/AnswerDotAI/fasthtml/issues/626))
+  - This version of fastlite uses apsw, instead of the stdlib's sqlite3.
+
+
 ## 0.11.0
 
 ### Breaking changes
