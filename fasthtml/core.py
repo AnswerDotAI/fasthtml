@@ -523,7 +523,8 @@ class FastHTML(Starlette):
             from IPython.display import display,HTML
             if nb_hdrs: display(HTML(to_xml(tuple(hdrs))))
             middleware.append(cors_allow)
-        self.on_startup,self.on_shutdown,self.lifespan,self.hdrs,self.ftrs = on_startup,on_shutdown,lifespan,hdrs,ftrs
+        on_startup,on_shutdown = listify(on_startup) or None,listify(on_shutdown) or None
+        self.lifespan,self.hdrs,self.ftrs = lifespan,hdrs,ftrs
         self.body_wrap,self.before,self.after,self.htmlkw,self.bodykw = body_wrap,before,after,htmlkw,bodykw
         secret_key = get_key(secret_key, key_fname)
         if sess_cls:
