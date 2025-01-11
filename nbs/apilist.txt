@@ -90,15 +90,21 @@
     - `def __init__(self, loc)`
     - `def __response__(self, req)`
 
+- `def qp(p, **kw)`
+    Add query parameters to path p
+
 - `def def_hdrs(htmx, surreal)`
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, **bodykw)`
+    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, **bodykw)`
     - `def add_route(self, route)`
 
 - `@patch def ws(self, path, conn, disconn, name, middleware)`
     Add a websocket route at `path`
+
+- `def nested_name(f)`
+    Get name of function `f` using '_' to join nested function names
 
 - `@patch def route(self, path, methods, name, include_in_schema, body_wrap)`
     Add a route at `path`
@@ -111,13 +117,20 @@
 
     - `def __init__(self, app, url)`
 
+- `class RouteFuncs`
+    - `def __init__(self)`
+    - `def __setattr__(self, name, value)`
+    - `def __getattr__(self, name)`
+    - `def __dir__(self)`
+
 - `class APIRouter`
     Add routes to an app
 
-    - `def __init__(self)`
+    - `def __init__(self, prefix, body_wrap)`
     - `def __call__(self, path, methods, name, include_in_schema, body_wrap)`
         Add a route at `path`
 
+    - `def __getattr__(self, name)`
     - `def to_app(self, app)`
         Add routes to `app`
 
@@ -147,7 +160,7 @@
 
 > The `fast_app` convenience wrapper
 
-- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, **kwargs)`
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
 ## fasthtml.js
@@ -158,7 +171,7 @@
     Render light media for day mode views
 
 - `def dark_media(css)`
-    Render dark media for nught mode views
+    Render dark media for night mode views
 
 - `def MarkdownJS(sel)`
     Implements browser-based markdown rendering.
@@ -192,7 +205,7 @@
     - `def start(self)`
     - `def stop(self)`
 
-- `def HTMX(path, host, port, iframe_height)`
+- `def HTMX(path, app, host, port, height, link, iframe)`
     An iframe which displays the HTMX application in a notebook.
 
 ## fasthtml.live_reload
@@ -249,6 +262,12 @@
     - `def login_link(self)`
     - `def parse_response(self, code)`
 
+- `class Auth0AppClient`
+    A `WebApplicationClient` for Auth0 OAuth2
+
+    - `def __init__(self, domain, client_id, client_secret, code, scope, redirect_uri, **kwargs)`
+    - `def login_link(self, req)`
+
 - `@patch def login_link(self, redirect_uri, scope, state)`
     Get a login link for this client
 
@@ -268,12 +287,13 @@
     Call `retr_info` and then return id/subscriber value
 
 - `class OAuth`
-    - `def __init__(self, app, cli, skip, redir_path, logout_path, login_path, https, http_patterns)`
+    - `def __init__(self, app, cli, skip, redir_path, error_path, logout_path, login_path, https, http_patterns)`
+    - `def redir_login(self, session)`
     - `def redir_url(self, req)`
     - `def login_link(self, req, scope, state)`
-    - `def login(self, info, state)`
+    - `def check_invalid(self, req, session, auth)`
     - `def logout(self, session)`
-    - `def chk_auth(self, info, ident, session)`
+    - `def get_auth(self, info, ident, session, state)`
 
 ## fasthtml.pico
 

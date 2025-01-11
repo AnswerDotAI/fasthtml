@@ -1,6 +1,6 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key', 'def_hdrs', 'FastHTML', 'serve', 'Client', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
-import json, uuid, inspect, types, uvicorn, signal, asyncio, threading
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+import json, uuid, inspect, types, uvicorn, signal, asyncio, threading, inspect
 from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs_dict
@@ -167,6 +167,7 @@ def _apply_ft(o):
 
 def _to_xml(req, resp, indent):
     ...
+_iter_typs = (tuple, list, map, filter, range, types.GeneratorType)
 
 def flat_tuple(o):
     """Flatten lists"""
@@ -203,9 +204,9 @@ class Redirect:
 
 async def _wrap_call(f, req, params):
     ...
-htmx_exts = {'head-support': 'https://unpkg.com/htmx-ext-head-support@2.0.1/head-support.js', 'preload': 'https://unpkg.com/htmx-ext-preload@2.0.1/preload.js', 'class-tools': 'https://unpkg.com/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://unpkg.com/htmx-ext-loading-states@2.0.0/loading-states.js', 'multi-swap': 'https://unpkg.com/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://unpkg.com/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://unpkg.com/htmx-ext-remove-me@2.0.0/remove-me.js', 'ws': 'https://unpkg.com/htmx-ext-ws/ws.js', 'chunked-transfer': 'https://unpkg.com/htmx-ext-transfer-encoding-chunked/transfer-encoding-chunked.js'}
-htmxsrc = Script(src='https://unpkg.com/htmx.org@next/dist/htmx.min.js')
-fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js')
+htmx_exts = {'head-support': 'https://unpkg.com/htmx-ext-head-support@2.0.3/head-support.js', 'preload': 'https://unpkg.com/htmx-ext-preload@2.1.0/preload.js', 'class-tools': 'https://unpkg.com/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://unpkg.com/htmx-ext-loading-states@2.0.0/loading-states.js', 'multi-swap': 'https://unpkg.com/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://unpkg.com/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://unpkg.com/htmx-ext-remove-me@2.0.0/remove-me.js', 'ws': 'https://unpkg.com/htmx-ext-ws@2.0.2/ws.js', 'chunked-transfer': 'https://unpkg.com/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js'}
+htmxsrc = Script(src='https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js')
+fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js')
 surrsrc = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js')
 scopesrc = Script(src='https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js')
 viewport = Meta(name='viewport', content='width=device-width, initial-scale=1, viewport-fit=cover')
@@ -220,7 +221,8 @@ def _list(o):
 def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw, body_wrap):
     ...
 
-def _mk_locfunc(f, p):
+def qp(p: str, **kw) -> str:
+    """Add query parameters to path p"""
     ...
 
 def def_hdrs(htmx=True, surreal=True):
@@ -231,7 +233,7 @@ iframe_scr = Script(NotStr("\n    function sendmsg() {\n        window.parent.po
 
 class FastHTML(Starlette):
 
-    def __init__(self, debug=False, routes=None, middleware=None, exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', body_wrap=noop_body, htmlkw=None, nb_hdrs=True, **bodykw):
+    def __init__(self, debug=False, routes=None, middleware=None, title: str='FastHTML page', exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', body_wrap=noop_body, htmlkw=None, nb_hdrs=False, **bodykw):
         ...
 
     def add_route(self, route):
@@ -250,7 +252,7 @@ class FastHTML(Starlette):
     def _add_route(self, func, path, methods, name, include_in_schema, body_wrap):
         ...
 
-    def route(self, path: str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
+    def route(self, path: str=None, methods=None, name=None, include_in_schema=True, body_wrap=None):
         """Add a route at `path`"""
         ...
 
@@ -262,6 +264,13 @@ class FastHTML(Starlette):
         """Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')"""
         ...
 all_meths = 'get post put delete patch head trace options'.split()
+
+def _mk_locfunc(f, p):
+    ...
+
+def nested_name(f):
+    """Get name of function `f` using '_' to join nested function names"""
+    ...
 for o in all_meths:
     setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
@@ -280,21 +289,41 @@ class Client:
 for o in ('get', 'post', 'delete', 'put', 'patch', 'options'):
     setattr(Client, o, partialmethod(Client._sync, o))
 
-class APIRouter:
-    """Add routes to an app"""
+class RouteFuncs:
 
     def __init__(self):
         ...
 
-    def __call__(self: FastHTML, path: str=None, methods=None, name=None, include_in_schema=True, body_wrap=noop_body):
+    def __setattr__(self, name, value):
+        ...
+
+    def __getattr__(self, name):
+        ...
+
+    def __dir__(self):
+        ...
+
+class APIRouter:
+    """Add routes to an app"""
+
+    def __init__(self, prefix: str | None=None, body_wrap=noop_body):
+        ...
+
+    def _wrap_func(self, func, path=None):
+        ...
+
+    def __call__(self, path: str=None, methods=None, name=None, include_in_schema=True, body_wrap=None):
         """Add a route at `path`"""
+        ...
+
+    def __getattr__(self, name):
         ...
 
     def to_app(self, app):
         """Add routes to `app`"""
         ...
 
-    def ws(self: FastHTML, path: str, conn=None, disconn=None, name=None, middleware=None):
+    def ws(self, path: str, conn=None, disconn=None, name=None, middleware=None):
         """Add a websocket route at `path`"""
         ...
 for o in all_meths:
@@ -307,7 +336,7 @@ def cookie(key: str, value='', max_age=None, expires=None, path='/', domain=None
 def reg_re_param(m, s):
     ...
 reg_re_param('path', '.*?')
-reg_re_param('static', 'ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|html|map')
+reg_re_param('static', 'ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|html|map|pdf')
 
 class MiddlewareBase:
 

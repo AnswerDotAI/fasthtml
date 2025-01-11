@@ -60,8 +60,9 @@ write a properly formed web page. You’ll soon see the power of this
 approach.
 
 Line 9  
-The `serve()` utility configures and runs FastHTML using a library
-called `uvicorn`.
+The
+[`serve()`](https://AnswerDotAI.github.io/fasthtml/api/core.html#serve)
+utility configures and runs FastHTML using a library called `uvicorn`.
 
 Run the code:
 
@@ -346,8 +347,9 @@ Line 7
 This will generate an HTML `<link>` tag for sourcing the css for Sakura.
 
 Line 8  
-If you want an inline styles, the `Style()` function will put the result
-into the HTML.
+If you want an inline styles, the
+[`Style()`](https://AnswerDotAI.github.io/fasthtml/api/xtend.html#style)
+function will put the result into the HTML.
 
 ## Other Static Media File Locations
 
@@ -633,7 +635,7 @@ combined with FastHTML views. We’ll show how this works by using the
 test client from above. First, let’s create a SQlite database:
 
 ``` python
-db = Database("profiles.db")
+db = database("profiles.db")
 profiles = db.create(Profile, pk="email")
 ```
 
@@ -813,8 +815,9 @@ serve()
 
 ## Cookies
 
-We can set cookies using the `cookie()` function. In our example, we’ll
-create a `timestamp` cookie.
+We can set cookies using the
+[`cookie()`](https://AnswerDotAI.github.io/fasthtml/api/core.html#cookie)
+function. In our example, we’ll create a `timestamp` cookie.
 
 ``` python
 from datetime import datetime
@@ -913,6 +916,11 @@ Toasts require sessions
 
 Line 11  
 Views with Toasts must return FT or FtResponse components.
+
+💡 `setup_toasts` takes a `duration` input that allows you to specify
+how long a toast will be visible before disappearing. For example
+`setup_toasts(duration=5)` sets the toasts duration to 5 seconds. By
+default toasts disappear after 10 seconds.
 
 ## Authentication and authorization
 
@@ -1134,7 +1142,7 @@ predecessor on the page.
 
 ## File Uploads
 
-A common task in web development is uploading files. This examples below
+A common task in web development is uploading files. The examples below
 are for uploading files to the hosting server, with information about
 the uploaded file presented to the user.
 
@@ -1220,20 +1228,6 @@ Line 35
 This step shows how to use Python’s built-in `pathlib.Path` library to
 write the file to disk.
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script src="https://unpkg.com/htmx.org@next/dist/htmx.min.js"></script><script src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js"></script><script src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js"></script><script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
-<style>:root { --pico-font-size: 100%; }</style>
-<script>
-    function sendmsg() {
-        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');
-    }
-    window.onload = function() {
-        sendmsg();
-        document.body.addEventListener('htmx:afterSettle',    sendmsg);
-        document.body.addEventListener('htmx:wsAfterMessage', sendmsg);
-    };</script>
-
 ### Multiple File Uploads
 
 ``` python
@@ -1307,21 +1301,7 @@ data, this is a seperate step from accessing metadata
 
 Line 37  
 This step shows how to use Python’s built-in `pathlib.Path` library to
-write the file to disk.
-
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script src="https://unpkg.com/htmx.org@next/dist/htmx.min.js"></script><script src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.4/fasthtml.js"></script><script src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js"></script><script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
-<style>:root { --pico-font-size: 100%; }</style>
-<script>
-    function sendmsg() {
-        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');
-    }
-    window.onload = function() {
-        sendmsg();
-        document.body.addEventListener('htmx:afterSettle',    sendmsg);
-        document.body.addEventListener('htmx:wsAfterMessage', sendmsg);
-    };</script></doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
+write the file to disk.</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
 title = "Reference"
 +++
 
@@ -1483,6 +1463,7 @@ All other attributes available in htmx.
 | [`htmx:prompt`](@/events.md#htmx:prompt)  | triggered after a prompt is shown
 | [`htmx:pushedIntoHistory`](@/events.md#htmx:pushedIntoHistory)  | triggered after an url is pushed into history
 | [`htmx:responseError`](@/events.md#htmx:responseError)  | triggered when an HTTP response error (non-`200` or `300` response code) occurs
+| [`htmx:sendAbort`](@/events.md#htmx:sendAbort)  | triggered when a request is aborted
 | [`htmx:sendError`](@/events.md#htmx:sendError)  | triggered when a network error prevents an HTTP request from happening
 | [`htmx:sseError`](@/events.md#htmx:sseError)  | triggered when an error occurs with a SSE source
 | [`htmx:sseOpen`](/events#htmx:sseOpen)  | triggered when a SSE source is opened
@@ -1562,6 +1543,7 @@ listed below:
 | `htmx.config.wsReconnectDelay`        | defaults to `full-jitter`                                                                                                                                                  |
 | `htmx.config.wsBinaryType`            | defaults to `blob`, the [the type of binary data](https://developer.mozilla.org/docs/Web/API/WebSocket/binaryType) being received over the WebSocket connection            |
 | `htmx.config.disableSelector`         | defaults to `[hx-disable], [data-hx-disable]`, htmx will not process elements with this attribute on it or a parent                                                        |
+| `htmx.config.disableInheritance`      | defaults to `false`. If it is set to `true`, the inheritance of attributes is completely disabled and you can explicitly specify the inheritance with the [hx-inherit](@/attributes/hx-inherit.md) attribute.
 | `htmx.config.withCredentials`         | defaults to `false`, allow cross-site Access-Control requests using credentials such as cookies, authorization headers or TLS client certificates                          |
 | `htmx.config.timeout`                 | defaults to 0, the number of milliseconds a request can take before automatically being terminated                                                                         |
 | `htmx.config.scrollBehavior`          | defaults to 'instant', the scroll behavior when using the [show](@/attributes/hx-swap.md#scrolling-scroll-show) modifier with `hx-swap`. The allowed values are `instant` (scrolling should happen instantly in a single jump), `smooth` (scrolling should animate smoothly) and `auto` (scroll behavior is determined by the computed value of [scroll-behavior](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior)). |
@@ -2062,23 +2044,25 @@ Or, 🌐 CDN: `<script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@ma
 
 Use whatever you'd like, but there's a few advantages with this approach over Tailwind, Twind, UnoCSS:
 
-* No more [repeating styles](https://tailwindcss.com/docs/reusing-styles) on child elements (..no [@apply](https://tailwindcss.com/docs/reusing-styles#extracting-classes-with-apply), no `[&>thing]` per style). It's just CSS!
-* No endless visual noise on every `<div>`. Use a local `<style>` per group.
+* No [repeated styles](https://tailwindcss.com/docs/reusing-styles) on child elements (..no [@apply](https://tailwindcss.com/docs/reusing-styles#extracting-classes-with-apply), no `[&>thing]` on each style).
+* No repeated prefixes for media queries, hover, focus, etc.
+* No visual noise on every `<div>`. Use a local `<style>` per group.
+* Share syntax between local and external styles. It's just CSS.
+* Regain your "inspect, play with styles, paste" workflow in your web browser!
+* No suffering from lost syntax highlighting on properties and units.
 * No high risk of eventually requiring a build step.
 * No chance of [deprecations](https://windicss.org/posts/sunsetting.html). 16 lines is infinitely maintainable.
-* Get the ultra-fast "inspect, play with styles, paste" workflow back.
-* No suffering from missing syntax highlighting on properties and units.
 * No suffering from FOUC (a flash of unstyled content).
 * Zero friction movement of styles between inline and `.css` files. Just replace `me`
-* No special tooling or plugins to install. Universal vanilla CSS. 
+* No special tooling or plugins to install.
 
 ## ⚡ Workflow Tips
 
 * Flat, 1 selector per line can be very short like Tailwind. See the examples.
 * Use just plain CSS variables in your design system.
 * Use the short `@media` queries for responsive design.
-  * Mobile First (flow: **above** breakpoint): **🟢 None** `sm` `md` `lg` `xl` `xx` 🏁
-  * Desktop First (flow: **below** breakpoint): 🏁 `xs-` `sm-` `md-` `lg-` `xl-` **🟢 None**
+  * Mobile First (flow: **above** breakpoint): **🟢 None (xs)** `sm` `md` `lg` `xl` `xx` 🏁
+  * Desktop First (flow: **below** breakpoint): 🏁 `xs-` `sm-` `md-` `lg-` `xl-` **🟢 None (xx)**
   * 🟢 = No breakpoint. Default. See the [Live Example](https://gnat.github.io/css-scope-inline/example.html)!
   * Based on [Tailwind](https://tailwindcss.com/docs/responsive-design) breakpoints. We use `xx` not `2xl` to not break CSS highlighters.
   * Unlike Tailwind, you can [nest your @media styles](https://developer.chrome.com/articles/css-nesting/#nesting-media)!
@@ -2093,8 +2077,8 @@ Tailwind verbosity goes up with more child elements.
     <style>
         me { background: red; }
         me div { background: green; }
-        me div[n1] { background: yellow; }
-        me div[n2] { background: blue; }
+        me [n1] { background: yellow; }
+        me [n2] { background: blue; }
     </style>
     red
     <div>green</div>
@@ -2570,6 +2554,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def flat_tuple(o)`
     Flatten lists
 
+- `def noop_body(c, req)`
+    Default Body wrap function which just returns the content
+
 - `def respond(req, heads, bdy)`
     Default FT response creation function
 
@@ -2579,17 +2566,23 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def __init__(self, loc)`
     - `def __response__(self, req)`
 
+- `def qp(p, **kw)`
+    Add query parameters to path p
+
 - `def def_hdrs(htmx, surreal)`
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, respond, htmlkw, nb_hdrs, **bodykw)`
+    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, **bodykw)`
     - `def add_route(self, route)`
 
 - `@patch def ws(self, path, conn, disconn, name, middleware)`
     Add a websocket route at `path`
 
-- `@patch def route(self, path, methods, name, include_in_schema, respond)`
+- `def nested_name(f)`
+    Get name of function `f` using '_' to join nested function names
+
+- `@patch def route(self, path, methods, name, include_in_schema, body_wrap)`
     Add a route at `path`
 
 - `def serve(appname, app, host, port, reload, reload_includes, reload_excludes)`
@@ -2600,13 +2593,20 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
     - `def __init__(self, app, url)`
 
+- `class RouteFuncs`
+    - `def __init__(self)`
+    - `def __setattr__(self, name, value)`
+    - `def __getattr__(self, name)`
+    - `def __dir__(self)`
+
 - `class APIRouter`
     Add routes to an app
 
-    - `def __init__(self)`
-    - `def __call__(self, path, methods, name, include_in_schema, respond)`
+    - `def __init__(self, prefix, body_wrap)`
+    - `def __call__(self, path, methods, name, include_in_schema, body_wrap)`
         Add a route at `path`
 
+    - `def __getattr__(self, name)`
     - `def to_app(self, app)`
         Add routes to `app`
 
@@ -2636,7 +2636,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 > The `fast_app` convenience wrapper
 
-- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, respond, **kwargs)`
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
 ## fasthtml.js
@@ -2647,7 +2647,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Render light media for day mode views
 
 - `def dark_media(css)`
-    Render dark media for nught mode views
+    Render dark media for night mode views
 
 - `def MarkdownJS(sel)`
     Implements browser-based markdown rendering.
@@ -2681,7 +2681,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def start(self)`
     - `def stop(self)`
 
-- `def HTMX(path, host, port, iframe_height)`
+- `def HTMX(path, app, host, port, height, link, iframe)`
     An iframe which displays the HTMX application in a notebook.
 
 ## fasthtml.live_reload
@@ -2738,6 +2738,12 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def login_link(self)`
     - `def parse_response(self, code)`
 
+- `class Auth0AppClient`
+    A `WebApplicationClient` for Auth0 OAuth2
+
+    - `def __init__(self, domain, client_id, client_secret, code, scope, redirect_uri, **kwargs)`
+    - `def login_link(self, req)`
+
 - `@patch def login_link(self, redirect_uri, scope, state)`
     Get a login link for this client
 
@@ -2757,12 +2763,13 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Call `retr_info` and then return id/subscriber value
 
 - `class OAuth`
-    - `def __init__(self, app, cli, skip, redir_path, logout_path, login_path, https, http_patterns)`
+    - `def __init__(self, app, cli, skip, redir_path, error_path, logout_path, login_path, https, http_patterns)`
+    - `def redir_login(self, session)`
     - `def redir_url(self, req)`
     - `def login_link(self, req, scope, state)`
-    - `def login(self, info, state)`
+    - `def check_invalid(self, req, session, auth)`
     - `def logout(self, session)`
-    - `def chk_auth(self, info, ident, session)`
+    - `def get_auth(self, info, ident, session, state)`
 
 ## fasthtml.pico
 

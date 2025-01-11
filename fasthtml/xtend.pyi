@@ -33,11 +33,11 @@ def CheckboxX(checked: bool=False, label=None, value='1', id=None, name=None, *,
     """A Checkbox optionally inside a Label, preceded by a `Hidden` with matching name"""
     ...
 
-def Script(code: str='', *, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, auto_id=None, **kwargs) -> FT:
+def Script(code: str='', *, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, **kwargs) -> FT:
     """A Script tag that doesn't escape its code"""
     ...
 
-def Style(*c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, auto_id=None, **kwargs) -> FT:
+def Style(*c, id=None, cls=None, title=None, style=None, attrmap=None, valmap=None, ft_cls=None, **kwargs) -> FT:
     """A Style tag that doesn't escape its code"""
     ...
 
