@@ -11,7 +11,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 
 # %% ../nbs/api/00_core.ipynb
-import json,uuid,inspect,types,uvicorn,signal,asyncio,threading,inspect
+import json,uuid,inspect,types,signal,asyncio,threading,inspect
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -644,6 +644,7 @@ def serve(
     if not appname:
         if glb.get('__name__')=='__main__': appname = Path(glb.get('__file__', '')).stem
         elif code.co_name=='main' and bk.f_back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
+    import uvicorn
     if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
         print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
