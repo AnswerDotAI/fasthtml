@@ -184,13 +184,13 @@ def respond(req, heads, bdy):
 def _xt_cts(req, resp):
     ...
 
-def _xt_resp(req, resp):
+def _xt_resp(req, resp, status_code):
     ...
 
 def _is_ft_resp(resp):
     ...
 
-def _resp(req, resp, cls=empty):
+def _resp(req, resp, cls=empty, status_code=200):
     ...
 
 class Redirect:
@@ -218,7 +218,7 @@ def get_key(key=None, fname='.sesskey'):
 def _list(o):
     ...
 
-def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw, body_wrap):
+def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
     ...
 
 def qp(p: str, **kw) -> str:
