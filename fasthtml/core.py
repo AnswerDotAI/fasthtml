@@ -260,7 +260,7 @@ async def _send_ws(ws, resp):
 
 def _ws_endp(recv, conn=None, disconn=None):
     cls = type('WS_Endp', (WebSocketEndpoint,), {"encoding":"text"})
-    
+
     async def _generic_handler(handler, ws, data=None):
         wd = _wrap_ws(ws, loads(data) if data else {}, _params(handler))
         resp = await _handle(handler, wd)
@@ -299,7 +299,7 @@ def uri(_arg, **kwargs):
     return f"{quote(_arg)}/{urlencode(kwargs, doseq=True)}"
 
 # %% ../nbs/api/00_core.ipynb
-def decode_uri(s): 
+def decode_uri(s):
     arg,_,kw = s.partition('/')
     return unquote(arg), {k:v[0] for k,v in parse_qs(kw).items()}
 
@@ -329,7 +329,7 @@ def _url_for(req, t):
     if callable(t): t = t.__routename__
     kw = {}
     if t.find('/')>-1 and (t.find('?')<0 or t.find('/')<t.find('?')): t,kw = decode_uri(t)
-    t,m,q = t.partition('?')    
+    t,m,q = t.partition('?')
     return f"{req.url_path_for(t, **kw)}{m}{q}"
 
 def _find_targets(req, resp):
@@ -397,28 +397,28 @@ def _xt_cts(req, resp):
     return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs, ts
 
 # %% ../nbs/api/00_core.ipynb
-def _xt_resp(req, resp):
+def _xt_resp(req, resp, status_code):
     cts,http_hdrs,tasks = _xt_cts(req, resp)
-    return HTMLResponse(cts, headers=http_hdrs, background=tasks)
+    return HTMLResponse(cts, status_code=status_code, headers=http_hdrs, background=tasks)
 
 # %% ../nbs/api/00_core.ipynb
 def _is_ft_resp(resp): return isinstance(resp, _iter_typs+(HttpHeader,FT)) or hasattr(resp, '__ft__')
 
 # %% ../nbs/api/00_core.ipynb
-def _resp(req, resp, cls=empty):
+def _resp(req, resp, cls=empty, status_code=200):
     if not resp: resp=()
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if cls in (Any,FT): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
-    if cls is not empty: return cls(resp)
-    if isinstance(resp, Response): return resp
-    if _is_ft_resp(resp): return _xt_resp(req, resp)
+    if cls is not empty: return cls(resp, status_code=status_code)
+    if isinstance(resp, Response): return resp # respect manually set status_code
+    if _is_ft_resp(resp): return _xt_resp(req, resp, status_code)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:
         resp = str(resp)
         cls = HTMLResponse
-    return cls(resp)
+    return cls(resp, status_code=status_code)
 
 # %% ../nbs/api/00_core.ipynb
 class Redirect:
@@ -467,12 +467,12 @@ def get_key(key=None, fname='.sesskey'):
 def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) else [o]
 
 # %% ../nbs/api/00_core.ipynb
-def _wrap_ex(f, hdrs, ftrs, htmlkw, bodykw, body_wrap):
+def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
     async def _f(req, exc):
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (hdrs, ftrs, htmlkw, bodykw))
         req.body_wrap = body_wrap
         res = await _handle(f, (req, exc))
-        return _resp(req, res)
+        return _resp(req, res, status_code=status_code)
     return _f
 
 # %% ../nbs/api/00_core.ipynb
@@ -533,12 +533,12 @@ class FastHTML(Starlette):
                               https_only=sess_https_only, domain=sess_domain)
             middleware.append(sess)
         exception_handlers = ifnone(exception_handlers, {})
-        if 404 not in exception_handlers: 
-            def _not_found(req, exc): return  Response('404 Not Found', status_code=404)  
+        if 404 not in exception_handlers:
+            def _not_found(req, exc): return  Response('404 Not Found', status_code=404)
             exception_handlers[404] = _not_found
-        excs = {k:_wrap_ex(v, hdrs, ftrs, htmlkw, bodykw, body_wrap=body_wrap) for k,v in exception_handlers.items()}
+        excs = {k:_wrap_ex(v, k, hdrs, ftrs, htmlkw, bodykw, body_wrap=body_wrap) for k,v in exception_handlers.items()}
         super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
-    
+
     def add_route(self, route):
         route.methods = [m.upper() for m in listify(route.methods)]
         self.router.routes = [r for r in self.router.routes if not
@@ -636,7 +636,7 @@ def serve(
         reload=True, # Default is to reload the app upon code changes
         reload_includes:list[str]|str|None=None, # Additional files to watch for changes
         reload_excludes:list[str]|str|None=None # Files to ignore for changes
-        ): 
+        ):
     "Run the app in an async server, with live reload set as the default."
     bk = inspect.currentframe().f_back
     glb = bk.f_globals
@@ -665,7 +665,7 @@ for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o
 class RouteFuncs:
     def __init__(self): super().__setattr__('_funcs', {})
     def __setattr__(self, name, value): self._funcs[name] = value
-    def __getattr__(self, name): 
+    def __getattr__(self, name):
         if name in all_meths: raise AttributeError("Route functions with HTTP Names are not accessible here")
         try: return self._funcs[name]
         except KeyError: raise AttributeError(f"No route named {name} found in route functions")
@@ -674,7 +674,7 @@ class RouteFuncs:
 # %% ../nbs/api/00_core.ipynb
 class APIRouter:
     "Add routes to an app"
-    def __init__(self, prefix:str|None=None, body_wrap=noop_body): 
+    def __init__(self, prefix:str|None=None, body_wrap=noop_body):
         self.routes,self.wss = [],[]
         self.rt_funcs = RouteFuncs()  # Store wrapped route function for discoverability
         self.prefix = prefix if prefix else ""
@@ -696,7 +696,7 @@ class APIRouter:
             self.routes.append((func, p, methods, name, include_in_schema, body_wrap or self.body_wrap))
             return wrapped
         return f(path) if callable(path) else f
-    
+
     def __getattr__(self, name):
         try: return getattr(self.rt_funcs, name)
         except AttributeError: return super().__getattr__(self, name)
@@ -705,7 +705,7 @@ class APIRouter:
         "Add routes to `app`"
         for args in self.routes: app._add_route(*args)
         for args in self.wss: app._add_ws(*args)
-        
+
     def ws(self, path:str, conn=None, disconn=None, name=None, middleware=None):
         "Add a websocket route at `path`"
         def f(func=noop): return self.wss.append((func, f"{self.prefix}{path}", conn, disconn, name, middleware))
@@ -769,7 +769,7 @@ class FtResponse:
     def __init__(self, content, status_code:int=200, headers=None, cls=HTMLResponse, media_type:str|None=None):
         self.content,self.status_code,self.headers = content,status_code,headers
         self.cls,self.media_type = cls,media_type
-    
+
     def __response__(self, req):
         cts,httphdrs,tasks = _xt_cts(req, self.content)
         headers = {**(self.headers or {}), **httphdrs}
