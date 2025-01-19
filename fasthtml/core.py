@@ -478,7 +478,14 @@ def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
 # %% ../nbs/api/00_core.ipynb
 def qp(p:str, **kw) -> str:
     "Add query parameters to path p"
-    kw = {k:('' if v in (False,None) else v) for k,v in kw.items()}
+    kw = {k:('' if v in (False,None) else v) for k,v in kw.items()}    
+    _mods = []
+    for k,v in kw.items(): 
+        _substr=f"{{{k}}}"
+        if _substr in p:
+            _mods.append(k)
+            p = p.replace(_substr,str(v))
+    kw = {k:v for k,v in kw.items() if k not in _mods}
     return p + ('?' + urlencode(kw,doseq=True) if kw else '')
 
 # %% ../nbs/api/00_core.ipynb
