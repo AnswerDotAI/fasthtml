@@ -153,3 +153,51 @@ Finally, join the FastHTML community to ask questions, share your work,
 and learn from others:
 
 - [Discord](https://discord.gg/qcXvcxMhdP)
+
+## Other languages and related projects
+
+If you’re not a Python user, or are keen to try out a new language,
+we’ll list here other projects that have a similar approach to FastHTML.
+(Please reach out if you know of any other projects that you’d like to
+see added.)
+
+- [htmgo](https://htmgo.dev/) (Go): “*htmgo is a lightweight pure go way
+  to build interactive websites / web applications using go & htmx. By
+  combining the speed & simplicity of go + hypermedia attributes (htmx)
+  to add interactivity to websites, all conveniently wrapped in pure go,
+  you can build simple, fast, interactive websites without touching
+  javascript. All compiled to a single deployable binary*”
+
+If you’re just interested in functional HTML components, rather than a
+full HTMX server solution, consider:
+
+- [fastcore.xml.FT](https://fastcore.fast.ai/xml.html): This is actually
+  what FastHTML uses behind the scenes
+- [htpy](https://htpy.dev/): Similar to
+  [`fastcore.xml.FT`](https://fastcore.fast.ai/xml.html#ft), but with a
+  somewhat different syntax
+- [elm-html](https://package.elm-lang.org/packages/elm/html/latest/):
+  Elm’s built-in HTML library with a type-safe functional approach
+- [hiccup](https://github.com/weavejester/hiccup): Popular library for
+  representing HTML in Clojure using vectors
+- [hiccl](https://github.com/garlic0x1/hiccl): HTML generation library
+  for Common Lisp inspired by Clojure’s Hiccup
+- [Falco.Markup](https://github.com/pimbrouwers/Falco): F# HTML DSL and
+  web framework with type-safe HTML generation
+- [Lucid](https://github.com/chrisdone/lucid): Type-safe HTML generation
+  for Haskell using monad transformers
+- [dream-html](https://github.com/aantron/dream): Part of the Dream web
+  framework for OCaml, provides type-safe HTML templating
+
+For other hypermedia application platforms, not based on HTMX, take a
+look at:
+
+- [Hotwire/Turbo](https://turbo.hotwired.dev/): Rails-oriented framework
+  that similarly uses HTML-over-the-wire
+- [LiveView](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html):
+  Phoenix framework’s solution for building interactive web apps with
+  minimal JavaScript
+- [Unpoly](https://unpoly.com/): Another HTML-over-the-wire framework
+  with progressive enhancement
+- [Livewire](https://laravel-livewire.com/): Laravel’s take on building
+  dynamic interfaces with minimal JavaScript
