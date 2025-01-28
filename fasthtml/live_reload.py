@@ -3,24 +3,42 @@ from fasthtml.basics import FastHTML, Script
 
 __all__ = ["FastHTMLWithLiveReload"]
 
-
-def LiveReloadJs(reload_attempts:int=1, reload_interval:float=1000., **kwargs):
+def LiveReloadJs(reload_attempts:int=10, reload_interval:float=1000., server_check_attempts:int=20, **kwargs):
     src = """
-    (function() {
-        var socket = new WebSocket(`ws://${window.location.host}/live-reload`);
-        var maxReloadAttempts = %s;
-        var reloadInterval = %s; // time between reload attempts in ms
-        socket.onclose = function() {
-            let reloadAttempts = 0;
-            const intervalFn = setInterval(function(){
-                window.location.reload();
-                reloadAttempts++;
-                if (reloadAttempts === maxReloadAttempts) clearInterval(intervalFn);
-            }, reloadInterval);
-        }
+    (() => {
+        const checkServer = () => 
+            fetch(window.location.href)
+                .then(r => r.ok)
+                .catch(() => false);
+
+        const connect = () => {
+            const ws = new WebSocket(`ws://${window.location.host}/live-reload`);
+            let attempts = 0;
+            
+            ws.onclose = () => {
+                console.log('LiveReload disconnected, checking server...');
+                const check = setInterval(async () => {
+                    if (attempts++ >= %d) {
+                        clearInterval(check);
+                        fetch('/live-reload-failed', {method: 'POST'})
+                            .then(() => location.reload());
+                        return;
+                    }
+                    
+                    if (await checkServer()) {
+                        clearInterval(check);
+                        location.reload();
+                    } else {
+                        console.log('Server not ready, retrying...');
+                    }
+                }, %d);
+            };
+        };
+        
+        connect();
     })();
-"""
-    return Script(src % (reload_attempts, reload_interval))
+    """
+    return Script(src % (server_check_attempts, reload_interval))
 
 async def live_reload_ws(websocket): await websocket.accept()
 
