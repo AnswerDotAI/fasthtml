@@ -4,7 +4,7 @@
 
 # %% auto 0
 __all__ = ['nb_serve', 'nb_serve_async', 'is_port_free', 'wait_port_free', 'show', 'render_ft', 'htmx_config_port', 'JupyUvi',
-           'HTMX', 'ws_client']
+           'JupyUviAsync', 'HTMX', 'ws_client']
 
 # %% ../nbs/api/06_jupyter.ipynb
 import asyncio, socket, time, uvicorn
@@ -87,6 +87,19 @@ class JupyUvi:
 
     def start(self):
         self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
+
+    def stop(self):
+        self.server.should_exit = True
+        wait_port_free(self.port)
+
+# %% ../nbs/api/06_jupyter.ipynb
+class JupyUviAsync(JupyUvi):
+    "Start and stop an async Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`"
+    def __init__(self, app, log_level="error", host='0.0.0.0', port=8000, **kwargs):
+        super().__init__(app, log_level=log_level, host=host, port=port, start=False, **kwargs)
+
+    async def start(self):
+        self.server = await nb_serve_async(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
 
     def stop(self):
         self.server.should_exit = True
