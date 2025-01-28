@@ -285,13 +285,13 @@ def EventStream(s):
 
 # %% ../nbs/api/00_core.ipynb
 def signal_shutdown():
+    from uvicorn.main import Server
     event = asyncio.Event()
-    def signal_handler(signum, frame):
+    @patch
+    def handle_exit(self:Server, *args, **kwargs):
         event.set()
-        signal.signal(signum, signal.SIG_DFL)
-        os.kill(os.getpid(), signum)
-
-    for sig in (signal.SIGINT, signal.SIGTERM): signal.signal(sig, signal_handler)
+        self.force_exit = True
+        self._orig_handle_exit(*args, **kwargs)
     return event
 
 # %% ../nbs/api/00_core.ipynb
