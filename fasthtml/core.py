@@ -478,15 +478,17 @@ def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
 # %% ../nbs/api/00_core.ipynb
 def qp(p:str, **kw) -> str:
     "Add query parameters to path p"
-    kw = {k:('' if v in (False,None) else v) for k,v in kw.items()}    
-    _mods = []
-    for k,v in kw.items(): 
-        _substr=f"{{{k}}}"
-        if _substr in p:
-            _mods.append(k)
-            p = p.replace(_substr,str(v))
-    kw = {k:v for k,v in kw.items() if k not in _mods}
-    return p + ('?' + urlencode(kw,doseq=True) if kw else '')
+    kw = {k.split(':')[0]:v for k,v in kw.items()}
+    for k,v in kw.copy().items(): # Go through all params
+        for pat in [f"{{{k}}}", f"{{{k}:"]: 
+            if pat in p: # if it matches this particular pattern
+                # Put it in the path
+                p = p.replace(p[p.find(pat):p.find("}", p.find(pat))+1], str(v))
+                # Remove it from the query params dict
+                kw.pop(k) 
+                break
+    # Add any query params that are left
+    return p + ('?' + urlencode({k:'' if v in (False,None) else v for k,v in kw.items()},doseq=True) if kw else '')
 
 # %% ../nbs/api/00_core.ipynb
 def def_hdrs(htmx=True, surreal=True):
