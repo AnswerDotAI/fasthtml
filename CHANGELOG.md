@@ -2,6 +2,20 @@
 
 <!-- do not remove -->
 
+## 0.12.1
+
+### New Features
+
+- Add JupyUviAsync ([#640](https://github.com/AnswerDotAI/fasthtml/issues/640))
+- Handling for query or url params in qp/to ([#638](https://github.com/AnswerDotAI/fasthtml/pull/638)), thanks to [@Isaac-Flath](https://github.com/Isaac-Flath)
+- Add pdf extension to static routes ([#616](https://github.com/AnswerDotAI/fasthtml/pull/616)), thanks to [@pydanny](https://github.com/pydanny)
+
+### Bugs Squashed
+
+- `HTML` tag from fastcore.xml is shadowed ([#634](https://github.com/AnswerDotAI/fasthtml/issues/634))
+- Exception Handlers Return 200 Status Code Instead of Original Error Code ([#633](https://github.com/AnswerDotAI/fasthtml/issues/633))
+
+
 ## 0.12.0
 
 ### Breaking changes
