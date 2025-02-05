@@ -1,6 +1,6 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
-import json, uuid, inspect, types, uvicorn, signal, asyncio, threading, inspect
+import json, uuid, inspect, types, signal, asyncio, threading, inspect
 from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs_dict
@@ -222,7 +222,7 @@ def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
     ...
 
 def qp(p: str, **kw) -> str:
-    """Add query parameters to path p"""
+    """Add parameters kw to path p"""
     ...
 
 def def_hdrs(htmx=True, surreal=True):

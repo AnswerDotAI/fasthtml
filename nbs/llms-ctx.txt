@@ -60,9 +60,8 @@ write a properly formed web page. You’ll soon see the power of this
 approach.
 
 Line 9  
-The
-[`serve()`](https://AnswerDotAI.github.io/fasthtml/api/core.html#serve)
-utility configures and runs FastHTML using a library called `uvicorn`.
+The [`serve()`](https://docs.fastht.ml/api/core.html#serve) utility
+configures and runs FastHTML using a library called `uvicorn`.
 
 Run the code:
 
@@ -103,10 +102,9 @@ the image below:
 
 ## A Minimal Charting Application
 
-The
-[`Script`](https://AnswerDotAI.github.io/fasthtml/api/xtend.html#script)
-function allows you to include JavaScript. You can use Python to
-generate parts of your JS or JSON like this:
+The [`Script`](https://docs.fastht.ml/api/xtend.html#script) function
+allows you to include JavaScript. You can use Python to generate parts
+of your JS or JSON like this:
 
 ``` python
 import json
@@ -348,14 +346,13 @@ This will generate an HTML `<link>` tag for sourcing the css for Sakura.
 
 Line 8  
 If you want an inline styles, the
-[`Style()`](https://AnswerDotAI.github.io/fasthtml/api/xtend.html#style)
-function will put the result into the HTML.
+[`Style()`](https://docs.fastht.ml/api/xtend.html#style) function will
+put the result into the HTML.
 
 ## Other Static Media File Locations
 
-As you saw,
-[`Script`](https://AnswerDotAI.github.io/fasthtml/api/xtend.html#script)
-and `Link` are specific to the most common static media use cases in web
+As you saw, [`Script`](https://docs.fastht.ml/api/xtend.html#script) and
+`Link` are specific to the most common static media use cases in web
 apps: including JavaScript, CSS, and images. But it also works with
 videos and other static media files. The default behavior is to look for
 these files in the root directory - typically we don’t do anything
@@ -614,7 +611,7 @@ profile
     Profile(email='john@example.com', phone='123456789', age=5)
 
 Then add that data to the `profile_form` using FastHTML’s
-[`fill_form`](https://AnswerDotAI.github.io/fasthtml/api/components.html#fill_form)
+[`fill_form`](https://docs.fastht.ml/api/components.html#fill_form)
 class:
 
 ``` python
@@ -816,8 +813,8 @@ serve()
 ## Cookies
 
 We can set cookies using the
-[`cookie()`](https://AnswerDotAI.github.io/fasthtml/api/core.html#cookie)
-function. In our example, we’ll create a `timestamp` cookie.
+[`cookie()`](https://docs.fastht.ml/api/core.html#cookie) function. In
+our example, we’ll create a `timestamp` cookie.
 
 ``` python
 from datetime import datetime
@@ -947,10 +944,9 @@ def user_auth_before(req, sess):
 ```
 
 Now we pass our `user_auth_before` function as the first argument into a
-[`Beforeware`](https://AnswerDotAI.github.io/fasthtml/api/core.html#beforeware)
-class. We also pass a list of regular expressions to the `skip`
-argument, designed to allow users to still get to the home and login
-pages.
+[`Beforeware`](https://docs.fastht.ml/api/core.html#beforeware) class.
+We also pass a list of regular expressions to the `skip` argument,
+designed to allow users to still get to the home and login pages.
 
 ``` python
 beforeware = Beforeware(
@@ -1037,7 +1033,7 @@ that plugs nicely into HTMX in the browser
 
 Line 26  
 The endpoint view needs to be an async function that returns a
-[`EventStream`](https://AnswerDotAI.github.io/fasthtml/api/core.html#eventstream)
+[`EventStream`](https://docs.fastht.ml/api/core.html#eventstream)
 
 ## Websockets
 
@@ -1204,8 +1200,8 @@ serve()
 
 Line 13  
 Every form rendered with the
-[`Form`](https://AnswerDotAI.github.io/fasthtml/api/xtend.html#form) FT
-component defaults to `enctype="multipart/form-data"`
+[`Form`](https://docs.fastht.ml/api/xtend.html#form) FT component
+defaults to `enctype="multipart/form-data"`
 
 Line 14  
 Don’t forget to set the `Input` FT Component’s type to `file`
@@ -1275,8 +1271,8 @@ serve()
 
 Line 13  
 Every form rendered with the
-[`Form`](https://AnswerDotAI.github.io/fasthtml/api/xtend.html#form) FT
-component defaults to `enctype="multipart/form-data"`
+[`Form`](https://docs.fastht.ml/api/xtend.html#form) FT component
+defaults to `enctype="multipart/form-data"`
 
 Line 14  
 Don’t forget to set the `Input` FT Component’s type to `file` and assign
@@ -2567,7 +2563,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def __response__(self, req)`
 
 - `def qp(p, **kw)`
-    Add query parameters to path p
+    Add parameters kw to path p
 
 - `def def_hdrs(htmx, surreal)`
     Default headers for a FastHTML app
@@ -2678,6 +2674,13 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
 
     - `def __init__(self, app, log_level, host, port, start, **kwargs)`
+    - `def start(self)`
+    - `def stop(self)`
+
+- `class JupyUviAsync`
+    Start and stop an async Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+    - `def __init__(self, app, log_level, host, port, **kwargs)`
     - `def start(self)`
     - `def stop(self)`
 

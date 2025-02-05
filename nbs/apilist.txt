@@ -91,7 +91,7 @@
     - `def __response__(self, req)`
 
 - `def qp(p, **kw)`
-    Add query parameters to path p
+    Add parameters kw to path p
 
 - `def def_hdrs(htmx, surreal)`
     Default headers for a FastHTML app
@@ -202,6 +202,13 @@
     Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
 
     - `def __init__(self, app, log_level, host, port, start, **kwargs)`
+    - `def start(self)`
+    - `def stop(self)`
+
+- `class JupyUviAsync`
+    Start and stop an async Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+    - `def __init__(self, app, log_level, host, port, **kwargs)`
     - `def start(self)`
     - `def stop(self)`
 
