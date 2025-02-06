@@ -38,7 +38,7 @@ Things to remember when writing FastHTML apps:
 - [MiniDataAPI Spec](https://docs.fastht.ml/explains/minidataapi.html.md): Explanation of the MiniDataAPI specification, which allows us to use the same API for many different database engines.
 - [OAuth](https://docs.fastht.ml/explains/oauth.html.md): Tutorial and explanation of how to use OAuth in FastHTML apps.
 - [Routes](https://docs.fastht.ml/explains/routes.html.md): Explanation of how routes work in FastHTML.
-- [WebSockets](https://docs.fastht.ml/explains/websockets.html): Explanation of websockets and how they work in FastHTML.
+- [WebSockets](https://docs.fastht.ml/explains/websockets.html.md): Explanation of websockets and how they work in FastHTML.
 - [Custom Components](https://docs.fastht.ml/ref/defining_xt_component.html.md): Explanation of how to create custom components in FastHTML.
 - [Handling Handlers](https://docs.fastht.ml/ref/handlers.html.md): Explanation of how to request and response handlers work in FastHTML as routes.
-- [Live Reloading](https://docs.fastht.ml/ref/live_reload.html): Explanation of how to use live reloading for FastHTML development.
+- [Live Reloading](https://docs.fastht.ml/ref/live_reload.html.md): Explanation of how to use live reloading for FastHTML development.
