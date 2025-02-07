@@ -180,9 +180,11 @@ def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **k
 
 # %% ../nbs/api/02_xtend.ipynb
 @delegates(ft_hx, keep=True)
-def Titled(title:str="FastHTML app", *args, cls="container", **kwargs)->FT:
+def Titled(
+    title:str="FastHTML app", *args, cls="container", titled_h1=True, **kwargs)->FT:
     "An HTML partial containing a `Title`, and `H1`, and any provided children"
-    return Title(title), Main(H1(title), *args, cls=cls, **kwargs)
+    main_title = H1(title) if titled_h1 else None
+    return Title(title), Main(main_title, *args, cls=cls, **kwargs)
 
 # %% ../nbs/api/02_xtend.ipynb
 def Socials(title, site_name, description, image, url=None, w=1200, h=630, twitter_site=None, creator=None, card='summary'):
