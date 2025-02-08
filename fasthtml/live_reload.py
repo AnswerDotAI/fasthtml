@@ -3,23 +3,24 @@ from fasthtml.basics import FastHTML, Script
 
 __all__ = ["FastHTMLWithLiveReload"]
 
-
-def LiveReloadJs(reload_attempts:int=1, reload_interval:float=1000., **kwargs):
+def LiveReloadJs(reload_attempts:int=20, reload_interval:int=1000, **kwargs):
     src = """
-    (function() {
-        var socket = new WebSocket(`ws://${window.location.host}/live-reload`);
-        var maxReloadAttempts = %s;
-        var reloadInterval = %s; // time between reload attempts in ms
-        socket.onclose = function() {
-            let reloadAttempts = 0;
-            const intervalFn = setInterval(function(){
-                window.location.reload();
-                reloadAttempts++;
-                if (reloadAttempts === maxReloadAttempts) clearInterval(intervalFn);
-            }, reloadInterval);
-        }
+    (() => {
+        let attempts = 0;
+        const connect = () => {
+            const socket = new WebSocket(`ws://${window.location.host}/live-reload`);
+            socket.onopen = async() => {
+                const res = await fetch(window.location.href);
+                if (res.ok) { 
+                    attempts ? window.location.reload() : console.log('LiveReload connected'); 
+                }};
+            socket.onclose = () => {
+                !attempts++ ? connect() : setTimeout(() => { connect() }, %d);
+                if (attempts > %d) window.location.reload();
+            }};
+        connect();
     })();
-"""
+    """
     return Script(src % (reload_attempts, reload_interval))
 
 async def live_reload_ws(websocket): await websocket.accept()
