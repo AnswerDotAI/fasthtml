@@ -5,7 +5,7 @@
 # %% auto 0
 __all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces',
            'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow',
-           'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear', 'with_sid']
+           'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'YouTubeEmbed', 'Favicon', 'clear', 'with_sid']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
@@ -206,6 +206,31 @@ def Socials(title, site_name, description, image, url=None, w=1200, h=630, twitt
     if twitter_site is not None: res.append(Meta(name='twitter:site',    content=twitter_site))
     if creator      is not None: res.append(Meta(name='twitter:creator', content=creator))
     return tuple(res)
+
+# %% ../nbs/api/02_xtend.ipynb
+def YouTubeEmbed(video_id:str, *, width:int=560, height:int=315, start_time:int=0, no_controls:bool=False, title:str="YouTube video player", cls:str="", **kwargs):
+    """Embed a YouTube video"""
+    if not video_id or not isinstance(video_id, str):
+        raise ValueError("A valid YouTube video ID is required")
+    params = []
+    if start_time>0: params.append(f"start={start_time}")
+    if no_controls: params.append("controls=0")
+    query_string = "?" + "&".join(params) if params else ""
+    print(f"https://www.youtube.com/embed/{video_id}{query_string}")
+    return Div(
+        Iframe(
+            width=width,
+            height=height,
+            src=f"https://www.youtube.com/embed/{video_id}{query_string}",
+            title=title,
+            frameborder="0",
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+            referrerpolicy="strict-origin-when-cross-origin",
+            allowfullscreen='',
+            **kwargs
+        ),
+        cls=cls
+    )
 
 # %% ../nbs/api/02_xtend.ipynb
 def Favicon(light_icon, dark_icon):
