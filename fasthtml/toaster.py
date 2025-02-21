@@ -3,27 +3,29 @@ from fasthtml.core import *
 from fasthtml.components import *
 from fasthtml.xtend import *
 
-tcid = 'fh-toast-container'
+tcid = "fh-toast-container"
 sk = "toasts"
 toast_css = """
-.fh-toast-container {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000;
-    display: flex; flex-direction: column; align-items: center; width: 100%;
-    pointer-events: none; opacity: 0; transition: opacity 0.3s ease-in-out;
+#fh-toast-container {
+    position: fixed; inset: 20px 0; z-index: 1000;
+    display: flex; flex-direction: column; align-items: stretch;
+    gap: 10px; pointer-events: none; max-width: 80%; margin: 0 auto;
 }
 .fh-toast {
     background-color: #333; color: white;
-    padding: 12px 28px 12px 20px; border-radius: 4px; margin-bottom: 10px;
-    max-width: 80%; width: auto; text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: relative;
+    padding: 12px 28px 12px 20px; border-radius: 4px;
+    text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0.9; position: relative;
+    transition: opacity 150ms ease-in-out; &.htmx-swapping { opacity: 0; }
+    @starting-style { opacity: 0.2; };
 }
 .fh-toast-dismiss {
-    position:absolute; top:0.2em; right:0.4em;
-    line-height:1em; padding: 0 0.2em 0.2em 0.2em; border-radius:inherit; 
-    transform:scaleY(0.8); transform:scaleX(1.); 
-    pointer-events:auto; cursor:pointer; 
-    background-color:inherit; color:inherit; filter:brightness(0.85);
+    position: absolute; top: .2em; right: .4em;
+    line-height: 1rem; padding: 0 .2em .2em .2em;
+    border-radius: 15%; filter:drop-shadow(0 0 1px black);
+    background: inherit; color:inherit; pointer-events: auto;
+    transition: filter 150ms ease-in-out;
+    filter:brightness(0.8); &:hover { filter:brightness(0.9); }
 }
 .fh-toast-info { background-color: #2196F3; }
 .fh-toast-success { background-color: #4CAF50; }
@@ -31,43 +33,30 @@ toast_css = """
 .fh-toast-error { background-color: #F44336; }
 """
 
-def ToastJs(duration:float):
-    duration = int(1000*duration)
-    src = """
-export function proc_htmx(sel, func) {
-  htmx.onLoad(elt => {
-    const elements = any(sel, elt, false);
-    if (elt.matches && elt.matches(sel)) elements.unshift(elt);
-    elements.forEach(func);
-  });
-}
-proc_htmx('.fh-toast-container', async function(toast) {
-    await sleep(100);
-    toast.style.opacity = '0.8';
-    await sleep(%s);
-    toast.style.opacity = '0';
-    await sleep(300);
-    toast.remove();
-});
+def ToastCtn(toasts=[]):
+    return Div(*toasts, id=tcid, hx_swap_oob="afterbegin")
 
-proc_htmx('.fh-toast-dismiss', function(elem) { 
-    elem.addEventListener('click', (e) => { e.target.parentElement.remove() }); 
-});
-"""
-    return Script(src % (duration,), type="module")
+def Toast(message: str, typ: str = "info", dismiss: bool = False, duration:int=5000):
+    x_btn = Button('x', cls="fh-toast-dismiss", hx_swap="delete swap:150ms",
+                    hx_get=True, hx_target=f"closest .fh-toast") if dismiss else None
+    return Div(message, x_btn, cls=f"fh-toast fh-toast-{typ}", hx_trigger=f"load delay:{duration}ms", hx_swap=f"delete swap:150ms", hx_get=True)
 
-
-def add_toast(sess, message, typ="info"):
+def add_toast(sess, message: str, typ: str = "info", dismiss: bool = False, duration:int=5000):
     assert typ in ("info", "success", "warning", "error"), '`typ` not in ("info", "success", "warning", "error")'
-    sess.setdefault(sk, []).append((message, typ))
+    sess.setdefault(sk, []).append((message, typ, dismiss, duration))
+
 
 def render_toasts(sess):
-    toasts = [Div(msg, Span('x', cls='fh-toast-dismiss'), cls=f"fh-toast fh-toast-{typ}") for msg,typ in sess.pop(sk, [])]
-    return Div(Div(*toasts, cls="fh-toast-container"), hx_swap_oob="afterbegin:body")
+    toasts = [Toast(msg, typ, dismiss, duration) for msg, typ, dismiss, duration in sess.pop(sk, [])]
+    return ToastCtn(toasts)
+
 
 def toast_after(resp, req, sess):
-    if sk in sess and (not resp or isinstance(resp, (tuple,FT,FtResponse))): req.injects.append(render_toasts(sess))
+    if sk in sess and (not resp or isinstance(resp, (tuple, FT, FtResponse))):
+        req.injects.append(render_toasts(sess))
 
-def setup_toasts(app, duration:float=10.):
-    app.hdrs += (Style(toast_css), ToastJs(duration))
+
+def setup_toasts(app):
+    app.ftrs.append(ToastCtn())
+    app.hdrs += (Style(toast_css),)
     app.after.append(toast_after)
