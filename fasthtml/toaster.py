@@ -1,5 +1,4 @@
 from fastcore.xml import FT
-from functools import partial
 from fasthtml.core import *
 from fasthtml.components import *
 from fasthtml.xtend import *
@@ -54,11 +53,11 @@ def render_toasts(sess):
 
 def toast_after(resp, req, sess):
     if sk in sess and (not resp or isinstance(resp, (tuple, FT, FtResponse))):
-        sess['toast_duration'] = req.app.state.toast_duration  # Get duration from app state
+        sess['toast_duration'] = req.app.state.toast_duration
         req.injects.append(render_toasts(sess))
 
 def setup_toasts(app, duration=5000):
     app.ftrs.append(ToastCtn())
-    app.state.toast_duration = duration  # Store duration in app state
+    app.state.toast_duration = duration
     app.hdrs += (Style(toast_css),)
     app.after.append(toast_after)
