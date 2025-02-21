@@ -1,4 +1,5 @@
 from fastcore.xml import FT
+from functools import partial
 from fasthtml.core import *
 from fasthtml.components import *
 from fasthtml.xtend import *
@@ -41,22 +42,23 @@ def Toast(message: str, typ: str = "info", dismiss: bool = False, duration:int=5
                     hx_get=True, hx_target=f"closest .fh-toast") if dismiss else None
     return Div(message, x_btn, cls=f"fh-toast fh-toast-{typ}", hx_trigger=f"load delay:{duration}ms", hx_swap=f"delete swap:150ms", hx_get=True)
 
-def add_toast(sess, message: str, typ: str = "info", dismiss: bool = False, duration:int=5000):
+def add_toast(sess, message: str, typ: str = "info", dismiss: bool = False):
     assert typ in ("info", "success", "warning", "error"), '`typ` not in ("info", "success", "warning", "error")'
-    sess.setdefault(sk, []).append((message, typ, dismiss, duration))
+    sess.setdefault(sk, []).append((message, typ, dismiss))
 
 
 def render_toasts(sess):
-    toasts = [Toast(msg, typ, dismiss, duration) for msg, typ, dismiss, duration in sess.pop(sk, [])]
+    toasts = [Toast(msg, typ, dismiss, sess['toast_duration']) 
+              for msg, typ, dismiss in sess.pop(sk, [])]
     return ToastCtn(toasts)
-
 
 def toast_after(resp, req, sess):
     if sk in sess and (not resp or isinstance(resp, (tuple, FT, FtResponse))):
+        sess['toast_duration'] = req.app.state.toast_duration  # Get duration from app state
         req.injects.append(render_toasts(sess))
 
-
-def setup_toasts(app):
+def setup_toasts(app, duration=5000):
     app.ftrs.append(ToastCtn())
+    app.state.toast_duration = duration  # Store duration in app state
     app.hdrs += (Style(toast_css),)
     app.after.append(toast_after)
