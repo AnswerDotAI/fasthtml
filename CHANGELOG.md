@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.4
+
+### New Features
+
+- Add Google Credentials helpers ([#661](https://github.com/AnswerDotAI/fasthtml/issues/661))
+
+
 ## 0.12.3
 
 ### New Features
