@@ -1,0 +1,483 @@
+# fasthtml Module Documentation
+
+## fasthtml.authmw
+
+- `class BasicAuthMiddleware`
+    - `def __init__(self, app, cb, skip)`
+    - `def __call__(self, scope, receive, send)`
+    - `def authenticate(self, conn)`
+
+## fasthtml.cli
+
+- `@call_parse def railway_link()`
+    Link the current directory to the current project's Railway service
+
+- `@call_parse def railway_deploy(name, mount)`
+    Deploy a FastHTML app to Railway
+
+## fasthtml.components
+
+> `ft_html` and `ft_hx` functions to add some conveniences to `ft`, along with a full set of basic HTML components, and functions to work with forms and `FT` conversion
+
+- `def show(ft, *rest)`
+    Renders FT Components into HTML within a Jupyter notebook.
+
+- `def File(fname)`
+    Use the unescaped text in file `fname` directly
+
+- `def fill_form(form, obj)`
+    Fills named items in `form` using attributes in `obj`
+
+- `def fill_dataclass(src, dest)`
+    Modifies dataclass in-place and returns it
+
+- `def find_inputs(e, tags, **kw)`
+    Recursively find all elements in `e` with `tags` and attrs matching `kw`
+
+- `def html2ft(html, attr1st)`
+    Convert HTML to an `ft` expression
+
+- `def sse_message(elm, event)`
+    Convert element `elm` into a format suitable for SSE streaming
+
+## fasthtml.core
+
+> The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses.
+
+- `def parsed_date(s)`
+    Convert `s` to a datetime
+
+- `def snake2hyphens(s)`
+    Convert `s` from snake case to hyphenated and capitalised
+
+- `@dataclass class HtmxHeaders`
+    - `def __bool__(self)`
+    - `def __init__(self, boosted, current_url, history_restore_request, prompt, request, target, trigger_name, trigger)`
+
+- `@dataclass class HttpHeader`
+    - `def __init__(self, k, v)`
+
+- `@use_kwargs_dict(**htmx_resps) def HtmxResponseHeaders(**kwargs)`
+    HTMX response headers
+
+- `def form2dict(form)`
+    Convert starlette form data to a dict
+
+- `def parse_form(req)`
+    Starlette errors on empty multipart forms, so this checks for that situation
+
+- `def flat_xt(lst)`
+    Flatten lists
+
+- `class Beforeware`
+    - `def __init__(self, f, skip)`
+
+- `def EventStream(s)`
+    Create a text/event-stream response from `s`
+
+- `def flat_tuple(o)`
+    Flatten lists
+
+- `def noop_body(c, req)`
+    Default Body wrap function which just returns the content
+
+- `def respond(req, heads, bdy)`
+    Default FT response creation function
+
+- `class Redirect`
+    Use HTMX or Starlette RedirectResponse as required to redirect to `loc`
+
+    - `def __init__(self, loc)`
+    - `def __response__(self, req)`
+
+- `def qp(p, **kw)`
+    Add parameters kw to path p
+
+- `def def_hdrs(htmx, surreal)`
+    Default headers for a FastHTML app
+
+- `class FastHTML`
+    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, **bodykw)`
+    - `def add_route(self, route)`
+
+- `@patch def ws(self, path, conn, disconn, name, middleware)`
+    Add a websocket route at `path`
+
+- `def nested_name(f)`
+    Get name of function `f` using '_' to join nested function names
+
+- `@patch def route(self, path, methods, name, include_in_schema, body_wrap)`
+    Add a route at `path`
+
+- `def serve(appname, app, host, port, reload, reload_includes, reload_excludes)`
+    Run the app in an async server, with live reload set as the default.
+
+- `class Client`
+    A simple httpx ASGI client that doesn't require `async`
+
+    - `def __init__(self, app, url)`
+
+- `class RouteFuncs`
+    - `def __init__(self)`
+    - `def __setattr__(self, name, value)`
+    - `def __getattr__(self, name)`
+    - `def __dir__(self)`
+
+- `class APIRouter`
+    Add routes to an app
+
+    - `def __init__(self, prefix, body_wrap)`
+    - `def __call__(self, path, methods, name, include_in_schema, body_wrap)`
+        Add a route at `path`
+
+    - `def __getattr__(self, name)`
+    - `def to_app(self, app)`
+        Add routes to `app`
+
+    - `def ws(self, path, conn, disconn, name, middleware)`
+        Add a websocket route at `path`
+
+
+- `def cookie(key, value, max_age, expires, path, domain, secure, httponly, samesite)`
+    Create a 'set-cookie' `HttpHeader`
+
+- `@patch def static_route_exts(self, prefix, static_path, exts)`
+    Add a static route at URL path `prefix` with files from `static_path` and `exts` defined by `reg_re_param()`
+
+- `@patch def static_route(self, ext, prefix, static_path)`
+    Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')
+
+- `class MiddlewareBase`
+    - `def __call__(self, scope, receive, send)`
+
+- `class FtResponse`
+    Wrap an FT response with any Starlette `Response`
+
+    - `def __init__(self, content, status_code, headers, cls, media_type)`
+    - `def __response__(self, req)`
+
+## fasthtml.fastapp
+
+> The `fast_app` convenience wrapper
+
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
+    Create a FastHTML or FastHTMLWithLiveReload app.
+
+## fasthtml.js
+
+> Basic external Javascript lib wrappers
+
+- `def light_media(css)`
+    Render light media for day mode views
+
+- `def dark_media(css)`
+    Render dark media for night mode views
+
+- `def MarkdownJS(sel)`
+    Implements browser-based markdown rendering.
+
+- `def HighlightJS(sel, langs, light, dark)`
+    Implements browser-based syntax highlighting. Usage example [here](/tutorials/quickstart_for_web_devs.html#code-highlighting).
+
+- `def MermaidJS(sel, theme)`
+    Implements browser-based Mermaid diagram rendering.
+
+## fasthtml.jupyter
+
+> Use FastHTML in Jupyter notebooks
+
+- `def nb_serve(app, log_level, port, host, **kwargs)`
+    Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+- `def nb_serve_async(app, log_level, port, host, **kwargs)`
+    Async version of `nb_serve`
+
+- `def is_port_free(port, host)`
+    Check if `port` is free on `host`
+
+- `def wait_port_free(port, host, max_wait)`
+    Wait for `port` to be free on `host`
+
+- `class JupyUvi`
+    Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+    - `def __init__(self, app, log_level, host, port, start, **kwargs)`
+    - `def start(self)`
+    - `def stop(self)`
+
+- `class JupyUviAsync`
+    Start and stop an async Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+    - `def __init__(self, app, log_level, host, port, **kwargs)`
+    - `def start(self)`
+    - `def stop(self)`
+
+- `def HTMX(path, app, host, port, height, link, iframe)`
+    An iframe which displays the HTMX application in a notebook.
+
+## fasthtml.live_reload
+
+- `class FastHTMLWithLiveReload`
+    `FastHTMLWithLiveReload` enables live reloading.
+    This means that any code changes saved on the server will automatically
+    trigger a reload of both the server and browser window.
+
+    How does it work?
+      - a websocket is created at `/live-reload`
+      - a small js snippet `LIVE_RELOAD_SCRIPT` is injected into each webpage
+      - this snippet connects to the websocket at `/live-reload` and listens for an `onclose` event
+      - when the `onclose` event is detected the browser is reloaded
+
+    Why do we listen for an `onclose` event?
+      When code changes are saved the server automatically reloads if the --reload flag is set.
+      The server reload kills the websocket connection. The `onclose` event serves as a proxy
+      for "developer has saved some changes".
+
+    Usage
+        >>> from fasthtml.common import *
+        >>> app = FastHTMLWithLiveReload()
+
+        Run:
+            serve()
+
+    - `def __init__(self, *args, **kwargs)`
+
+## fasthtml.oauth
+
+> Basic scaffolding for handling OAuth
+
+- `class GoogleAppClient`
+    A `WebApplicationClient` for Google oauth2
+
+    - `def __init__(self, client_id, client_secret, code, scope, **kwargs)`
+    - `@classmethod def from_file(cls, fname, code, scope, **kwargs)`
+
+- `class GitHubAppClient`
+    A `WebApplicationClient` for GitHub oauth2
+
+    - `def __init__(self, client_id, client_secret, code, scope, **kwargs)`
+
+- `class HuggingFaceClient`
+    A `WebApplicationClient` for HuggingFace oauth2
+
+    - `def __init__(self, client_id, client_secret, code, scope, state, **kwargs)`
+
+- `class DiscordAppClient`
+    A `WebApplicationClient` for Discord oauth2
+
+    - `def __init__(self, client_id, client_secret, is_user, perms, scope, **kwargs)`
+    - `def login_link(self)`
+    - `def parse_response(self, code)`
+
+- `class Auth0AppClient`
+    A `WebApplicationClient` for Auth0 OAuth2
+
+    - `def __init__(self, domain, client_id, client_secret, code, scope, redirect_uri, **kwargs)`
+    - `def login_link(self, req)`
+
+- `@patch def login_link(self, redirect_uri, scope, state, **kwargs)`
+    Get a login link for this client
+
+- `def redir_url(request, redir_path, scheme)`
+    Get the redir url for the host in `request`
+
+- `@patch def parse_response(self, code, redirect_uri)`
+    Get the token from the oauth2 server response
+
+- `@patch def get_info(self, token)`
+    Get the info for authenticated user
+
+- `@patch def retr_info(self, code, redirect_uri)`
+    Combines `parse_response` and `get_info`
+
+- `@patch def retr_id(self, code, redirect_uri)`
+    Call `retr_info` and then return id/subscriber value
+
+- `class OAuth`
+    - `def __init__(self, app, cli, skip, redir_path, error_path, logout_path, login_path, https, http_patterns)`
+    - `def redir_login(self, session)`
+    - `def redir_url(self, req)`
+    - `def login_link(self, req, scope, state)`
+    - `def check_invalid(self, req, session, auth)`
+    - `def logout(self, session)`
+    - `def get_auth(self, info, ident, session, state)`
+
+- `@patch def save(self, fname)`
+    Save credentials to `fname`
+
+- `def load_creds(fname)`
+    Load credentials from `fname`
+
+- `@patch def creds(self)`
+    Create `Credentials` from the client, refreshing if needed
+
+## fasthtml.pico
+
+> Basic components for generating Pico CSS tags
+
+- `@delegates(ft_hx, keep=True) def Card(*c, **kwargs)`
+    A PicoCSS Card, implemented as an Article with optional Header and Footer
+
+- `@delegates(ft_hx, keep=True) def Group(*c, **kwargs)`
+    A PicoCSS Group, implemented as a Fieldset with role 'group'
+
+- `@delegates(ft_hx, keep=True) def Search(*c, **kwargs)`
+    A PicoCSS Search, implemented as a Form with role 'search'
+
+- `@delegates(ft_hx, keep=True) def Grid(*c, **kwargs)`
+    A PicoCSS Grid, implemented as child Divs in a Div with class 'grid'
+
+- `@delegates(ft_hx, keep=True) def DialogX(*c, **kwargs)`
+    A PicoCSS Dialog, with children inside a Card
+
+- `@delegates(ft_hx, keep=True) def Container(*args, **kwargs)`
+    A PicoCSS Container, implemented as a Main with class 'container'
+
+## fasthtml.svg
+
+> Simple SVG FT elements
+
+- `def Svg(*args, **kwargs)`
+    An SVG tag; xmlns is added automatically, and viewBox defaults to height and width if not provided
+
+- `@delegates(ft_hx) def ft_svg(tag, *c, **kwargs)`
+    Create a standard `FT` element with some SVG-specific attrs
+
+- `@delegates(ft_svg) def Rect(width, height, x, y, fill, stroke, stroke_width, rx, ry, **kwargs)`
+    A standard SVG `rect` element
+
+- `@delegates(ft_svg) def Circle(r, cx, cy, fill, stroke, stroke_width, **kwargs)`
+    A standard SVG `circle` element
+
+- `@delegates(ft_svg) def Ellipse(rx, ry, cx, cy, fill, stroke, stroke_width, **kwargs)`
+    A standard SVG `ellipse` element
+
+- `def transformd(translate, scale, rotate, skewX, skewY, matrix)`
+    Create an SVG `transform` kwarg dict
+
+- `@delegates(ft_svg) def Line(x1, y1, x2, y2, stroke, w, stroke_width, **kwargs)`
+    A standard SVG `line` element
+
+- `@delegates(ft_svg) def Polyline(*args, **kwargs)`
+    A standard SVG `polyline` element
+
+- `@delegates(ft_svg) def Polygon(*args, **kwargs)`
+    A standard SVG `polygon` element
+
+- `@delegates(ft_svg) def Text(*args, **kwargs)`
+    A standard SVG `text` element
+
+- `class PathFT`
+    - `def M(self, x, y)`
+        Move to.
+
+    - `def L(self, x, y)`
+        Line to.
+
+    - `def H(self, x)`
+        Horizontal line to.
+
+    - `def V(self, y)`
+        Vertical line to.
+
+    - `def Z(self)`
+        Close path.
+
+    - `def C(self, x1, y1, x2, y2, x, y)`
+        Cubic Bézier curve.
+
+    - `def S(self, x2, y2, x, y)`
+        Smooth cubic Bézier curve.
+
+    - `def Q(self, x1, y1, x, y)`
+        Quadratic Bézier curve.
+
+    - `def T(self, x, y)`
+        Smooth quadratic Bézier curve.
+
+    - `def A(self, rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y)`
+        Elliptical Arc.
+
+
+- `def SvgOob(*args, **kwargs)`
+    Wraps an SVG shape as required for an HTMX OOB swap
+
+- `def SvgInb(*args, **kwargs)`
+    Wraps an SVG shape as required for an HTMX inband swap
+
+## fasthtml.xtend
+
+> Simple extensions to standard HTML components, such as adding sensible defaults
+
+- `@delegates(ft_hx, keep=True) def A(*c, **kwargs)`
+    An A tag; `href` defaults to '#' for more concise use with HTMX
+
+- `@delegates(ft_hx, keep=True) def AX(txt, hx_get, target_id, hx_swap, href, **kwargs)`
+    An A tag with just one text child, allowing hx_get, target_id, and hx_swap to be positional params
+
+- `@delegates(ft_hx, keep=True) def Form(*c, **kwargs)`
+    A Form tag; identical to plain `ft_hx` version except default `enctype='multipart/form-data'`
+
+- `@delegates(ft_hx, keep=True) def Hidden(value, id, **kwargs)`
+    An Input of type 'hidden'
+
+- `@delegates(ft_hx, keep=True) def CheckboxX(checked, label, value, id, name, **kwargs)`
+    A Checkbox optionally inside a Label, preceded by a `Hidden` with matching name
+
+- `@delegates(ft_html, keep=True) def Script(code, **kwargs)`
+    A Script tag that doesn't escape its code
+
+- `@delegates(ft_html, keep=True) def Style(*c, **kwargs)`
+    A Style tag that doesn't escape its code
+
+- `def double_braces(s)`
+    Convert single braces to double braces if next to special chars or newline
+
+- `def undouble_braces(s)`
+    Convert double braces to single braces if next to special chars or newline
+
+- `def loose_format(s, **kw)`
+    String format `s` using `kw`, without being strict about braces outside of template params
+
+- `def ScriptX(fname, src, nomodule, type, _async, defer, charset, crossorigin, integrity, **kw)`
+    A `script` element with contents read from `fname`
+
+- `def replace_css_vars(css, pre, **kwargs)`
+    Replace `var(--)` CSS variables with `kwargs` if name prefix matches `pre`
+
+- `def StyleX(fname, **kw)`
+    A `style` element with contents read from `fname` and variables replaced from `kw`
+
+- `def Nbsp()`
+    A non-breaking space
+
+- `def Surreal(code)`
+    Wrap `code` in `domReadyExecute` and set `m=me()` and `p=me('-')`
+
+- `def On(code, event, sel, me)`
+    An async surreal.js script block event handler for `event` on selector `sel,p`, making available parent `p`, event `ev`, and target `e`
+
+- `def Prev(code, event)`
+    An async surreal.js script block event handler for `event` on previous sibling, with same vars as `On`
+
+- `def Now(code, sel)`
+    An async surreal.js script block on selector `me(sel)`
+
+- `def AnyNow(sel, code)`
+    An async surreal.js script block on selector `any(sel)`
+
+- `def run_js(js, id, **kw)`
+    Run `js` script, auto-generating `id` based on name of caller if needed, and js-escaping any `kw` params
+
+- `def jsd(org, repo, root, path, prov, typ, ver, esm, **kwargs)`
+    jsdelivr `Script` or CSS `Link` tag, or URL
+
+- `@delegates(ft_hx, keep=True) def Titled(title, *args, **kwargs)`
+    An HTML partial containing a `Title`, and `H1`, and any provided children
+
+- `def Socials(title, site_name, description, image, url, w, h, twitter_site, creator, card)`
+    OG and Twitter social card headers
+
+- `def Favicon(light_icon, dark_icon)`
+    Light and dark favicon headers
+
