@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.12.2
+
+### New Features
+
+- oauth `login_link` `access_type` ([#660](https://github.com/AnswerDotAI/fasthtml/issues/660))
+
+### Bugs Squashed
+
+- Toast container duplication fix ([#657](https://github.com/AnswerDotAI/fasthtml/pull/657)), thanks to [@curtis-allan](https://github.com/curtis-allan)
+
+
 ## 0.12.1
 
 ### New Features
