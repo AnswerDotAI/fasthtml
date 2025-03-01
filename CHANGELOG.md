@@ -2,11 +2,11 @@
 
 <!-- do not remove -->
 
-## 0.12.2
+## 0.12.3
 
 ### New Features
 
-- oauth `login_link` `access_type` ([#660](https://github.com/AnswerDotAI/fasthtml/issues/660))
+- oauth `login_link` kwargs ([#660](https://github.com/AnswerDotAI/fasthtml/issues/660))
 
 ### Bugs Squashed
 
