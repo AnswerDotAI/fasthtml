@@ -107,7 +107,7 @@ class Auth0AppClient(_AppClient):
 
 # %% ../nbs/api/08_oauth.ipynb
 @patch
-def login_link(self:WebApplicationClient, redirect_uri, scope=None, state=None):
+def login_link(self:WebApplicationClient, redirect_uri, scope=None, state=None, access_type="online"):
     "Get a login link for this client"
     if not scope: scope=self.scope
     if not state: state=getattr(self, 'state', None)
