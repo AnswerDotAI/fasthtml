@@ -4,7 +4,7 @@
 
 # %% auto 0
 __all__ = ['http_patterns', 'GoogleAppClient', 'GitHubAppClient', 'HuggingFaceClient', 'DiscordAppClient', 'Auth0AppClient',
-           'redir_url', 'url_match', 'OAuth']
+           'redir_url', 'url_match', 'OAuth', 'load_creds']
 
 # %% ../nbs/api/08_oauth.ipynb
 from .common import *
@@ -194,3 +194,37 @@ class OAuth:
     def check_invalid(self, req, session, auth): return False
     def logout(self, session): return self.redir_login(session)
     def get_auth(self, info, ident, session, state): raise NotImplementedError()
+
+# %% ../nbs/api/08_oauth.ipynb
+try:
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
+except ImportError:
+    Request=None
+    class Credentials: pass
+
+# %% ../nbs/api/08_oauth.ipynb
+@patch
+def update(self:Credentials):
+    "Refresh the credentials if they are expired, and return them"
+    if self.expired: self.refresh(Request())
+    return self
+
+# %% ../nbs/api/08_oauth.ipynb
+@patch
+def save(self:Credentials, fname):
+    "Save credentials to `fname`"
+    save_pickle(fname, self)
+
+# %% ../nbs/api/08_oauth.ipynb
+def load_creds(fname):
+    "Load credentials from `fname`"
+    return load_pickle(fname).update()
+
+# %% ../nbs/api/08_oauth.ipynb
+@patch
+def creds(self:GoogleAppClient):
+    "Create `Credentials` from the client, refreshing if needed"
+    return Credentials(token=self.access_token, refresh_token=self.refresh_token, 
+        token_uri=self.token_url, client_id=self.client_id,
+        client_secret=self.client_secret, scopes=self.scope).update()
