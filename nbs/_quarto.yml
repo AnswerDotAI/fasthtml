@@ -23,7 +23,7 @@ website:
   twitter-card:
     creator: "@jeremyphoward"
     site: "@answerdotai"
-    image: https://docs.fastht.ml/og-image.png
+    image: https://fastht.ml/docs/og-image.png
   open-graph: true
   repo-actions: [issue]
   navbar:
@@ -35,7 +35,7 @@ website:
       - text: "Home"
         href: https://fastht.ml
       - text: "Learn"
-        href: https://about.fastht.ml
+        href: https://fastht.ml/about
     right:
       - icon: github
         href: "https://github.com/answerdotai/fasthtml"
