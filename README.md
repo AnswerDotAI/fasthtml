@@ -20,7 +20,7 @@ functionality maps 1:1 directly to HTML and HTTP, but allows them to be
 encapsulated using good software engineering practices—so you’ll need to
 understand these foundations to use this library fully. To understand
 how and why this works, please read this first:
-[about.fastht.ml](https://about.fastht.ml/).
+[fastht.ml/about](https://fastht.ml/about).
 
 ## Installation
 
@@ -90,7 +90,7 @@ ChatGPT, Claude, and Copilot won’t give useful answers about it. To fix
 that problem, we’ve provided an LLM-friendly guide that teaches them how
 to use FastHTML. To use it, add this link for your AI helper to use:
 
-- [/llms-ctx.txt](https://docs.fastht.ml/llms-ctx.txt)
+- [/llms-ctx.txt](https://fastht.ml/docs/llms-ctx.txt)
 
 This example is in a format based on recommendations from Anthropic for
 use with [Claude
@@ -112,9 +112,9 @@ for other models as needed.
 
 Start with the official sources to learn more about FastHTML:
 
-- [About](https://about.fastht.ml): Learn about the core ideas behind
+- [About](https://fastht.ml/about): Learn about the core ideas behind
   FastHTML
-- [Documentation](https://docs.fastht.ml): Learn from examples how to
+- [Documentation](https://fastht.ml/docs): Learn from examples how to
   write FastHTML code
 - [Idiomatic
   app](https://github.com/AnswerDotAI/fasthtml/blob/main/examples/adv_app.py):
@@ -138,7 +138,7 @@ repo’s notebooks and the official FastHTML examples repo:
 Then explore the small but growing third-party ecosystem of FastHTML
 tutorials, notebooks, libraries, and components:
 
-- [FastHTML Gallery](https://gallery.fastht.ml): Learn from minimal
+- [FastHTML Gallery](https://fastht.ml/gallery): Learn from minimal
   examples of components (ie chat bubbles, click-to-edit, infinite
   scroll, etc)
 - [Creating Custom FastHTML Tags for Markdown
