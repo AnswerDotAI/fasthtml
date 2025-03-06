@@ -133,6 +133,9 @@ def success(sess, checkout_sid:str):
             P(f"Transaction ID: {payment.checkout_session_id}"),
             A("Back to Home", href="/")))
 
+
+
+# %% Stripe.ipynb
 @rt("/cancel")
 def cancel():
     return Titled(
