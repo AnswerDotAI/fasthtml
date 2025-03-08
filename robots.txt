@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://fastht.ml/docs/sitemap.xml

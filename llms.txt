@@ -1,0 +1,44 @@
+# FastHTML
+
+> FastHTML is a python library which brings together Starlette, Uvicorn, HTMX, and fastcore's `FT` "FastTags" into a library for creating server-rendered hypermedia applications. The `FastHTML` class itself inherits from `Starlette`, and adds decorator-based routing with many additions, Beforeware, automatic `FT` to HTML rendering, and much more.
+
+Things to remember when writing FastHTML apps:
+
+- Although parts of its API are inspired by FastAPI, it is *not* compatible with FastAPI syntax and is not targeted at creating API services
+- FastHTML includes support for Pico CSS and the fastlite sqlite library, although using both are optional; sqlalchemy can be used directly or via the fastsql library, and any CSS framework can be used. Support for the Surreal and css-scope-inline libraries are also included, but both are optional
+- FastHTML is compatible with JS-native web components and any vanilla JS library, but not with React, Vue, or Svelte
+- Use `serve()` for running uvicorn (`if __name__ == "__main__"` is not needed since it's automatic)
+- When a title is needed with a response, use `Titled`; note that that already wraps children in `Container`, and already includes both the meta title as well as the H1 element.
+
+## Docs
+
+- [FastHTML quick start](https://fastht.ml/docstutorials/quickstart_for_web_devs.html.md): A brief overview of many FastHTML features
+- [HTMX reference](https://raw.githubusercontent.com/bigskysoftware/htmx/master/www/content/reference.md): Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options
+- [Surreal](https://raw.githubusercontent.com/AnswerDotAI/surreal/main/README.md): Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions
+- [CSS Scope Inline](https://raw.githubusercontent.com/gnat/css-scope-inline/main/README.md): A JS library which allow `me` to be used in CSS selectors, by using a `MutationObserver` to monitor the DOM
+- [Starlette quick guide](https://gist.githubusercontent.com/jph00/e91192e9bdc1640f5421ce3c904f2efb/raw/61a2774912414029edaf1a55b506f0e283b93c46/starlette-quick.md): A quick overview of some Starlette features useful to FastHTML devs.
+
+## API
+
+- [API List](https://fastht.ml/docs/apilist.txt): A succint list of all functions and methods in fasthtml.
+
+## Examples
+
+- [Websockets application](https://raw.githubusercontent.com/AnswerDotAI/fasthtml/main/examples/basic_ws.py): Very brief example of using websockets with HTMX and FastHTML
+- [Todo list application](https://raw.githubusercontent.com/AnswerDotAI/fasthtml/main/examples/adv_app.py): Detailed walk-thru of a complete CRUD app in FastHTML showing idiomatic use of FastHTML and HTMX patterns.
+
+## Optional
+
+- [Starlette full documentation](https://gist.githubusercontent.com/jph00/809e4a4808d4510be0e3dc9565e9cbd3/raw/9b717589ca44cedc8aaf00b2b8cacef922964c0f/starlette-sml.md): A subset of the Starlette documentation useful for FastHTML development.
+- [JS App Walkthrough](https://fastht.ml/docs/tutorials/e2e.html.md): An end-to-end walkthrough of a complete FastHTML app, including deployment to railway.
+- [FastHTML by Example](https://fastht.ml/docs/tutorials/by_example.html.md): A collection of 4 FastHTML apps showcasing idiomatic use of FastHTML and HTMX patterns.
+- [Using Jupyter to write FastHTML](https://fastht.ml/docs/tutorials/jupyter_and_fasthtml.html.md): A guide to developing FastHTML apps inside Jupyter notebooks.
+- [FT Components](https://fastht.ml/docs/explains/explaining_xt_components.html.md): Explanation of the `FT` components, which are a way to write HTML in a Pythonic way.
+- [FAQ](https://fastht.ml/docs/explains/faq.html.md): Answers to common questions about FastHTML.
+- [MiniDataAPI Spec](https://fastht.ml/docs/explains/minidataapi.html.md): Explanation of the MiniDataAPI specification, which allows us to use the same API for many different database engines.
+- [OAuth](https://fastht.ml/docs/explains/oauth.html.md): Tutorial and explanation of how to use OAuth in FastHTML apps.
+- [Routes](https://fastht.ml/docs/explains/routes.html.md): Explanation of how routes work in FastHTML.
+- [WebSockets](https://fastht.ml/docs/explains/websockets.html.md): Explanation of websockets and how they work in FastHTML.
+- [Custom Components](https://fastht.ml/docs/ref/defining_xt_component.html.md): Explanation of how to create custom components in FastHTML.
+- [Handling Handlers](https://fastht.ml/docs/ref/handlers.html.md): Explanation of how to request and response handlers work in FastHTML as routes.
+- [Live Reloading](https://fastht.ml/docs/ref/live_reload.html.md): Explanation of how to use live reloading for FastHTML development.
