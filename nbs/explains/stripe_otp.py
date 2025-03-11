@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['DOMAIN_URL', 'app_nm', 'price_list', 'price', 'bware', 'app', 'rt', 'WEBHOOK_SECRET', 'db', 'payments',
            'create_price', 'archive_price', 'before', 'home', 'create_checkout_session', 'Payment', 'post', 'success',
-           'cancel']
+           'cancel', 'refund', 'account_management']
 
 # %% Stripe.ipynb
 from fasthtml.common import *
@@ -60,7 +60,8 @@ def home(sess):
         "Buy Now", 
         Div(H2("Demo Product - $19.99"),
             P(f"Welcome, {auth}"),
-            Button("Buy Now", hx_post="/create-checkout-session", hx_swap="none")))
+            Button("Buy Now", hx_post="/create-checkout-session", hx_swap="none"),
+            A("View Account", href="/account")))
 
 # %% Stripe.ipynb
 @rt("/create-checkout-session", methods=["POST"])
@@ -114,12 +115,22 @@ async def post(req):
                 metadata=str(event_data.metadata))
             payments.insert(payment)
             print(f"Payment recorded for user: {event_data.customer_email}")
+            
+    # Do not worry about refunds yet, we will cover how to do this later in the tutorial
+    elif event and event.type == "charge.refunded":
+        event_data = event.data.object
+        payment_intent_id = event_data.payment_intent
+        sessions = stripe.checkout.Session.list(payment_intent=payment_intent_id)
+        if sessions and sessions.data:
+            checkout_sid = sessions.data[0].id
+            payments.update(Payment(checkout_session_id= checkout_sid, payment_status="refunded"))
+            print(f"Refund recorded for payment: {checkout_sid}")
 
 # %% Stripe.ipynb
 @rt("/success")
 def success(sess, checkout_sid:str):    
     # Get payment record from database (saved in the webhook)
-    payment = payments.fetchone("checkout_session_id=?", (checkout_sid,))
+    payment = payments[checkout_sid]
 
     if not payment or payment.payment_status != 'paid': 
         return Titled("Error", P("Payment not found"))
@@ -133,8 +144,6 @@ def success(sess, checkout_sid:str):
             P(f"Transaction ID: {payment.checkout_session_id}"),
             A("Back to Home", href="/")))
 
-
-
 # %% Stripe.ipynb
 @rt("/cancel")
 def cancel():
@@ -142,6 +151,61 @@ def cancel():
         "Cancelled",
         Div(H2("Payment Cancelled"),
             P("Your payment was cancelled."),
+            A("Back to Home", href="/")))
+
+# %% Stripe.ipynb
+@rt("/refund", methods=["POST"])
+async def refund(sess, checkout_sid:str):
+    # Get payment record from database
+    payment = payments[checkout_sid]
+    
+    if not payment or payment.payment_status != 'paid':
+        return P("Error: Payment not found or not eligible for refund")
+    
+    try:
+        # Get the payment intent ID from the checkout session
+        checkout_session = stripe.checkout.Session.retrieve(checkout_sid)
+        
+        # Process the refund
+        refund = stripe.Refund.create(payment_intent=checkout_session.payment_intent, reason="requested_by_customer")
+        
+        # Update payment status in database
+        payments.update(Payment(checkout_session_id= checkout_sid, payment_status="refunded"))
+        
+        return Div(
+            P("Refund processed successfully!"),
+            P(f"Refund ID: {refund.id}"))
+    
+    except Exception as e: return P(f"Refund failed: {str(e)}")
+
+# %% Stripe.ipynb
+@rt("/account")
+def account_management(sess):
+    user_email = sess['auth']
+    user_payments = payments("email=?", (user_email,))
+    # Create table rows for each payment
+    payment_rows = []
+    for payment in user_payments:
+        action_button = ""
+        if payment.payment_status == 'paid':
+            action_button = Button("Request Refund", hx_post=f"/refund?checkout_sid={payment.checkout_session_id}",hx_target="#refund-status")
+        elif payment.payment_status == 'refunded': action_button = "Refunded"
+        
+        # Add row to table
+        payment_rows.append(
+            Tr(*map(Td, (payment.created_at, payment.amount, payment.payment_status, action_button))))
+    
+    # Create payment history table
+    payment_history = Table(
+        Thead(Tr(*map(Th, ("Date", "Amount", "Status", "Action")))),
+        Tbody(*payment_rows))
+    
+    return Titled(
+        "Account Management",
+        Div(H2(f"Account: {user_email}"),
+            H3("Payment History"),
+            payment_history,
+            Div(id="refund-status"),  # Target for refund status messages
             A("Back to Home", href="/")))
 
 # %% Stripe.ipynb
