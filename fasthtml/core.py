@@ -775,12 +775,13 @@ class MiddlewareBase:
 # %% ../nbs/api/00_core.ipynb
 class FtResponse:
     "Wrap an FT response with any Starlette `Response`"
-    def __init__(self, content, status_code:int=200, headers=None, cls=HTMLResponse, media_type:str|None=None):
+    def __init__(self, content, status_code:int=200, headers=None, cls=HTMLResponse, media_type:str|None=None, background: BackgroundTask | None = None):
         self.content,self.status_code,self.headers = content,status_code,headers
-        self.cls,self.media_type = cls,media_type
+        self.cls,self.media_type,self.background = cls,media_type,background
 
     def __response__(self, req):
         cts,httphdrs,tasks = _xt_cts(req, self.content)
+        tasks = getattr(self, 'background', tasks)
         headers = {**(self.headers or {}), **httphdrs}
         return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=tasks)
 
