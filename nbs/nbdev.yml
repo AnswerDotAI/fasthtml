@@ -3,7 +3,7 @@ project:
 
 website:
   title: "fasthtml"
-  site-url: "https://fastht.ml/docs/"
+  site-url: "https://answerdotai.github.io/fasthtml/"
   description: "The fastest way to create an HTML app"
   repo-branch: main
   repo-url: "https://github.com/AnswerDotAI/fasthtml"

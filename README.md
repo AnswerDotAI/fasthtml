@@ -90,7 +90,7 @@ ChatGPT, Claude, and Copilot won’t give useful answers about it. To fix
 that problem, we’ve provided an LLM-friendly guide that teaches them how
 to use FastHTML. To use it, add this link for your AI helper to use:
 
-- [/llms-ctx.txt](https://fastht.ml/docs/llms-ctx.txt)
+- [/llms-ctx.txt](https://answerdotai.github.io/fasthtml/llms-ctx.txt)
 
 This example is in a format based on recommendations from Anthropic for
 use with [Claude
@@ -114,7 +114,7 @@ Start with the official sources to learn more about FastHTML:
 
 - [About](https://fastht.ml/about): Learn about the core ideas behind
   FastHTML
-- [Documentation](https://fastht.ml/docs): Learn from examples how to
+- [Documentation](https://answerdotai.github.io/fasthtml): Learn from examples how to
   write FastHTML code
 - [Idiomatic
   app](https://github.com/AnswerDotAI/fasthtml/blob/main/examples/adv_app.py):
