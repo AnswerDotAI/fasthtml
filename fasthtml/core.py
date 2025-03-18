@@ -781,7 +781,7 @@ class FtResponse:
 
     def __response__(self, req):
         cts,httphdrs,tasks = _xt_cts(req, self.content)
-        tasks = getattr(self, 'background', tasks)
+        if not tasks.tasks: tasks = self.background
         headers = {**(self.headers or {}), **httphdrs}
         return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=tasks)
 
