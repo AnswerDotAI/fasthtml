@@ -16,14 +16,15 @@ toast_css = """
     padding: 12px 28px 12px 20px; border-radius: 4px;
     text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     opacity: 0.9; position: relative;
-    transition: opacity 150ms ease-in-out; &.htmx-swapping { opacity: 0; }
+    & > * { pointer-events: auto; }
+    transition: opacity 150ms ease-in-out;
     @starting-style { opacity: 0.2; };
 }
 .fh-toast-dismiss {
     position: absolute; top: .2em; right: .4em;
     line-height: 1rem; padding: 0 .2em .2em .2em;
     border-radius: 15%; filter:drop-shadow(0 0 1px black);
-    background: inherit; color:inherit; pointer-events: auto;
+    background: inherit; color:inherit;
     transition: filter 150ms ease-in-out;
     filter:brightness(0.8); &:hover { filter:brightness(0.9); }
 }
@@ -37,14 +38,12 @@ def ToastCtn(toasts=[]):
     return Div(*toasts, id=tcid, hx_swap_oob="afterbegin")
 
 def Toast(message: str, typ: str = "info", dismiss: bool = False, duration:int=5000):
-    x_btn = Button('x', cls="fh-toast-dismiss", hx_swap="delete swap:150ms",
-                    hx_get=True, hx_target=f"closest .fh-toast") if dismiss else None
-    return Div(message, x_btn, cls=f"fh-toast fh-toast-{typ}", hx_trigger=f"load delay:{duration}ms", hx_swap=f"delete swap:150ms", hx_get=True)
+    x_btn = Button('x', cls="fh-toast-dismiss", onclick="htmx.remove(this?.parentElement);") if dismiss else None
+    return Div(P(message), x_btn, cls=f"fh-toast fh-toast-{typ}", hx_on_transitionend="setTimeout(() => this?.remove(), %d);" % duration)
 
 def add_toast(sess, message: str, typ: str = "info", dismiss: bool = False):
     assert typ in ("info", "success", "warning", "error"), '`typ` not in ("info", "success", "warning", "error")'
     sess.setdefault(sk, []).append((message, typ, dismiss))
-
 
 def render_toasts(sess):
     toasts = [Toast(msg, typ, dismiss, sess['toast_duration']) 
