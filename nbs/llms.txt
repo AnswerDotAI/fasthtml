@@ -39,6 +39,6 @@ Things to remember when writing FastHTML apps:
 - [OAuth](https://answerdotai.github.io/fasthtml/explains/oauth.html.md): Tutorial and explanation of how to use OAuth in FastHTML apps.
 - [Routes](https://answerdotai.github.io/fasthtml/explains/routes.html.md): Explanation of how routes work in FastHTML.
 - [WebSockets](https://answerdotai.github.io/fasthtml/explains/websockets.html.md): Explanation of websockets and how they work in FastHTML.
-- [Custom Components](https://answerdotai.github.io/fasthtml/ref/defining_xt_component.html.md): Explanation of how to create custom components in FastHTML.
+- [Custom Components](https://answerdotai.github.io/fasthtml/ref/defining_xt_component.md): Explanation of how to create custom components in FastHTML.
 - [Handling Handlers](https://answerdotai.github.io/fasthtml/ref/handlers.html.md): Explanation of how to request and response handlers work in FastHTML as routes.
 - [Live Reloading](https://answerdotai.github.io/fasthtml/ref/live_reload.html.md): Explanation of how to use live reloading for FastHTML development.
