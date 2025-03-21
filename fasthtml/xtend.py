@@ -217,19 +217,11 @@ def YouTubeEmbed(video_id:str, *, width:int=560, height:int=315, start_time:int=
     if no_controls: params.append("controls=0")
     query_string = "?" + "&".join(params) if params else ""
     return Div(
-        Iframe(
-            width=width,
-            height=height,
-            src=f"https://www.youtube.com/embed/{video_id}{query_string}",
-            title=title,
-            frameborder="0",
+        Iframe(width=width, height=height, src=f"https://www.youtube.com/embed/{video_id}{query_string}", title=title, frameborder="0",
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
-            referrerpolicy="strict-origin-when-cross-origin",
-            allowfullscreen='',
-            **kwargs
+            referrerpolicy="strict-origin-when-cross-origin", allowfullscreen='', **kwargs
         ),
-        cls=cls
-    )
+        cls=cls)
 
 # %% ../nbs/api/02_xtend.ipynb
 def Favicon(light_icon, dark_icon):
