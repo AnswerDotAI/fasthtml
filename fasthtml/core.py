@@ -174,6 +174,7 @@ async def _find_p(req, arg:str, p:Parameter):
         if issubclass(anno, Request): return req
         if issubclass(anno, HtmxHeaders): return _get_htmx(req.headers)
         if issubclass(anno, Starlette): return req.scope['app']
+        if _is_body(anno) and 'session'.startswith(arg.lower()): return req.scope.get('session', {})
         if _is_body(anno): return await _from_body(req, p)
     # If there's no annotation, check for special names
     if anno is empty:
