@@ -216,7 +216,6 @@ def YouTubeEmbed(video_id:str, *, width:int=560, height:int=315, start_time:int=
     if start_time>0: params.append(f"start={start_time}")
     if no_controls: params.append("controls=0")
     query_string = "?" + "&".join(params) if params else ""
-    print(f"https://www.youtube.com/embed/{video_id}{query_string}")
     return Div(
         Iframe(
             width=width,
