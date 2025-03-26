@@ -2,6 +2,21 @@
 
 <!-- do not remove -->
 
+## 0.12.5
+
+### New Features
+
+- Add additional static file types `zip tgz gz csv mp3 wav ogg flac aac doc docx xls xlsx ppt pptx epub mobi bmp tiff avi mov wmv mkv json xml yaml yml rar 7z tar bz2 htm xhtml apk dmg exe msi swf iso json` ([#678](https://github.com/AnswerDotAI/fasthtml/issues/678))
+- Add YouTube embed FastHTML component ([#654](https://github.com/AnswerDotAI/fasthtml/pull/654)), thanks to [@dgwyer](https://github.com/dgwyer)
+- Handle type hints on session ([#651](https://github.com/AnswerDotAI/fasthtml/pull/651)), thanks to [@henriwoodcock](https://github.com/henriwoodcock)
+
+### Bugs Squashed
+
+- Add missing monsterui dev dependency ([#685](https://github.com/AnswerDotAI/fasthtml/pull/685)), thanks to [@pydanny](https://github.com/pydanny)
+- Toast bug fixes ([#684](https://github.com/AnswerDotAI/fasthtml/pull/684)), thanks to [@curtis-allan](https://github.com/curtis-allan)
+- Toast container duplication fix ([#657](https://github.com/AnswerDotAI/fasthtml/pull/657)), thanks to [@curtis-allan](https://github.com/curtis-allan)
+
+
 ## 0.12.4
 
 ### New Features
