@@ -7,8 +7,6 @@ from monsterui.all import *
 
 db = database(':memory:')
 
-
-
 class User: name:str; pwd:str
 
 class Todo:
@@ -44,7 +42,13 @@ beforeware = Beforeware(
     user_auth_before,
     skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', r'.*\.js', '/login']
 )
-app, rt = fast_app(hdrs=Theme.blue.headers()+[SortableJS('.sortable'),],before=beforeware)
+
+def _not_found(req, exc): return Titled('Oh no!', Div('We could not find that page :('))
+
+
+app, rt = fast_app(hdrs=Theme.blue.headers()+[SortableJS('.sortable'),],
+                   exception_handlers={404: _not_found},
+                   before=beforeware)
 
 # Authentication
 login_redir = Redirect('/login')
@@ -80,7 +84,7 @@ def logout(sess):
 def index(auth):
     top = Grid(Div(A('logout', href=logout), style='text-align: right'))
     new_inp = Input(id="new-title", name="title", placeholder="New Todo")
-    add = Form(Group(new_inp, Button("Add")),
+    add = Form(Group(DivLAligned(new_inp, Button("Add", cls=ButtonT.primary))),
                hx_post=add_todo, target_id='todo-list', hx_swap="afterbegin")
     frm = Form(*db.todos(order_by='priority'),
                id='todo-list', cls='sortable', hx_post=reorder, hx_trigger="end")
