@@ -53,7 +53,7 @@ login_redir = Redirect('/login')
 def get():
     frm = Form(
         LabelInput("Name", name='name'),
-        LabelInput("Password", name='pwd'),
+        LabelInput("Password", name='pwd', type='password'),
         Button('login'),
         action='/login', method='post')
     return Titled("Login", frm, cls=ContainerT.sm)
