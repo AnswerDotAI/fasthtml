@@ -7,6 +7,8 @@ from monsterui.all import *
 
 db = database(':memory:')
 
+
+
 class User: name:str; pwd:str
 
 class Todo:
@@ -42,7 +44,7 @@ beforeware = Beforeware(
     user_auth_before,
     skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', r'.*\.js', '/login']
 )
-app, rt = fast_app(hdrs=Theme.blue.headers(),before=beforeware)
+app, rt = fast_app(hdrs=Theme.blue.headers()+[SortableJS('.sortable'),],before=beforeware)
 
 # Authentication
 login_redir = Redirect('/login')
@@ -68,7 +70,7 @@ def post(login:Login, sess):
     sess['auth'] = u.name
     return Redirect('/')
 
-@app.get("/logout")
+@rt
 def logout(sess):
     del sess['auth']
     return login_redir    
@@ -81,7 +83,7 @@ def index(auth):
     add = Form(Group(new_inp, Button("Add")),
                hx_post=add_todo, target_id='todo-list', hx_swap="afterbegin")
     frm = Form(*db.todos(order_by='priority'),
-               id='todo-list', cls='sortable', hx_post="/reorder", hx_trigger="end")
+               id='todo-list', cls='sortable', hx_post=reorder, hx_trigger="end")
 
     card = Card(Ul(frm), header=add, footer=Div(id='current-todo'))
     return Titled(f"{auth}'s Todo list", Container(top, card))
@@ -91,7 +93,17 @@ def add_todo(todo:Todo, auth):
     new_inp =  LabelInput('Title', id="new-title", name="title", placeholder="New Todo", hx_swap_oob='true')
     # `insert` returns the inserted todo, which is appended to the start of the list, because we used
     # `hx_swap='afterbegin'` when creating the todo list form.
-    return db.todos.insert(todo), new_inp    
+    return db.todos.insert(todo), new_inp
+
+@rt
+def reorder(id:list[int]):
+    for i,id_ in enumerate(id): db.todos.update({'priority':i}, id_)
+    # HTMX by default replaces the inner HTML of the calling element, which in this case is the todo list form.
+    # Therefore, we return the list of todos, now in the correct order, which will be auto-converted to FT for us.
+    # In this case, it's not strictly necessary, because sortable.js has already reorder the DOM elements.
+    # However, by returning the updated data, we can be assured that there aren't sync issues between the DOM
+    # and the server.
+    return tuple(db.todos(order_by='priority'))
 
 
 serve()
