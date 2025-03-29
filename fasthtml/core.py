@@ -131,7 +131,7 @@ def _is_body(anno): return issubclass(anno, (dict,ns)) or _annotations(anno)
 # %% ../nbs/api/00_core.ipynb
 def _formitem(form, k):
     "Return single item `k` from `form` if len 1, otherwise return list"
-    if isinstance(form, dict): return form[k]
+    if isinstance(form, dict): return form.get(k)
     o = form.getlist(k)
     return o[0] if len(o) == 1 else o if o else None
 
