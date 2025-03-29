@@ -1,5 +1,5 @@
 """Simple extensions to standard HTML components, such as adding sensible defaults"""
-__all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'Favicon', 'clear', 'with_sid']
+__all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'YouTubeEmbed', 'Favicon', 'clear', 'with_sid']
 from dataclasses import dataclass, asdict
 from typing import Any
 from fastcore.utils import *
@@ -106,6 +106,10 @@ def Titled(title: str='FastHTML app', *args, cls='container', target_id=None, hx
 
 def Socials(title, site_name, description, image, url=None, w=1200, h=630, twitter_site=None, creator=None, card='summary'):
     """OG and Twitter social card headers"""
+    ...
+
+def YouTubeEmbed(video_id: str, *, width: int=560, height: int=315, start_time: int=0, no_controls: bool=False, title: str='YouTube video player', cls: str='', **kwargs):
+    """Embed a YouTube video"""
     ...
 
 def Favicon(light_icon, dark_icon):

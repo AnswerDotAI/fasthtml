@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.12.6
+
+- update `_formitem` so that it doesn't raise `KeyError` ([#694](https://github.com/AnswerDotAI/fasthtml/pull/694)), thanks to [@comhar](https://github.com/comhar)
+
+
 ## 0.12.5
 
 ### New Features

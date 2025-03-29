@@ -2,7 +2,7 @@
 
 d = { 'settings': { 'branch': 'main',
                 'doc_baseurl': '/',
-                'doc_host': 'https://answerdotai.github.io/fasthtml',
+                'doc_host': 'https://docs.fastht.ml',
                 'git_url': 'https://github.com/AnswerDotAI/fasthtml',
                 'lib_path': 'fasthtml'},
   'syms': { 'fasthtml.authmw': {},
