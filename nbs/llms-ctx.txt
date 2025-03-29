@@ -4,875 +4,425 @@
 - FastHTML includes support for Pico CSS and the fastlite sqlite library, although using both are optional; sqlalchemy can be used directly or via the fastsql library, and any CSS framework can be used. Support for the Surreal and css-scope-inline libraries are also included, but both are optional
 - FastHTML is compatible with JS-native web components and any vanilla JS library, but not with React, Vue, or Svelte
 - Use `serve()` for running uvicorn (`if __name__ == "__main__"` is not needed since it's automatic)
-- When a title is needed with a response, use `Titled`; note that that already wraps children in `Container`, and already includes both the meta title as well as the H1 element.<docs><doc title="FastHTML quick start" desc="A brief overview of many FastHTML features">---
-description: A fast introduction to FastHTML for experienced web developers.
-order: 3
-output-file: quickstart_for_web_devs.html
-title: Web Devs Quickstart
-
----
+- When a title is needed with a response, use `Titled`; note that that already wraps children in `Container`, and already includes both the meta title as well as the H1 element.<docs><doc title="FastHTML concise guide" desc="A brief overview of idiomatic FastHTML apps"># Concise reference
 
 
 
-
-## Installation
-
-```bash
-pip install python-fasthtml
-````
+``` python
+from fasthtml.common import *
+```
 
 ## A Minimal Application
 
 A minimal FastHTML application looks something like this:
 
-``` {.python filename="main.py" code-line-numbers="true"}
-from fasthtml.common import *  # <1>
-
-app, rt = fast_app()  # <2>
-
-@rt("/")  # <3>
-def get():  # <4>
-    return Titled("FastHTML", P("Let's do this!"))  # <5>
-
-serve()  # <6>
-```
-
-1. We import what we need for rapid development! A carefully-curated set of FastHTML functions and other Python objects is brought into our global namespace for convenience.
-2. We instantiate a FastHTML app with the `fast_app()` utility function. This provides a number of really useful defaults that we'll take advantage of later in the tutorial. 
-3. We use the `rt()` decorator to tell FastHTML what to return when a user visits `/` in their browser.
-4. We connect this route to HTTP GET requests by defining a view function called `get()`.
-5. A tree of Python function calls that return all the HTML required to write a properly formed web page. You'll soon see the power of this approach.
-6. The [`serve()`](https://docs.fastht.ml/api/core.html#serve) utility configures and runs FastHTML using a library called `uvicorn`.
-
-Run the code:
-
-```bash
-python main.py
-```
-
-The terminal will look like this:
-
-```bash
-INFO:     Uvicorn running on http://0.0.0.0:5001 (Press CTRL+C to quit)
-INFO:     Started reloader process [58058] using WatchFiles
-INFO:     Started server process [58060]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-```
-
-Confirm FastHTML is running by opening your web browser to [127.0.0.1:5001](http://127.0.0.1:5001). You should see something like the image below:
-
-![](quickstart-web-dev/quickstart-fasthtml.png)
-
-::: {.callout-note}
-While some linters and developers will complain about the wildcard import, it is by design here and perfectly safe. FastHTML is very deliberate about the objects it exports in `fasthtml.common`. If it bothers you, you can import the objects you need individually, though it will make the code more verbose and less readable.
-
-If you want to learn more about how FastHTML handles imports, we cover that [here](https://fastht.ml/explains/faq.html#why-use-import).
-:::
-
-## A Minimal Charting Application
-
-The [`Script`](https://docs.fastht.ml/api/xtend.html#script) function allows you to include JavaScript. You can use Python to generate parts of your JS or JSON like this:
-
-```python
-import json
-from fasthtml.common import * 
-
-app, rt = fast_app(hdrs=(Script(src="https://cdn.plot.ly/plotly-2.32.0.min.js"),))
-
-data = json.dumps({
-    "data": [{"x": [1, 2, 3, 4],"type": "scatter"},
-            {"x": [1, 2, 3, 4],"y": [16, 5, 11, 9],"type": "scatter"}],
-    "title": "Plotly chart in FastHTML ",
-    "description": "This is a demo dashboard",
-    "type": "scatter"
-})
-
-
-@rt("/")
-def get():
-  return Titled("Chart Demo", Div(id="myDiv"),
-    Script(f"var data = {data}; Plotly.newPlot('myDiv', data);"))
-
-serve()
-```
-
-## Debug Mode
-
-When we can't figure out a bug in FastHTML, we can run it in `DEBUG` mode. When an error is thrown, the error screen is displayed in the browser. This error setting should never be used in a deployed app.
-
-```python
+``` python
+# This is a meta-package which includes all of the key symbols from FastHTML and Starlette 
 from fasthtml.common import *
-
-app, rt = fast_app(debug=True)  # <1>
-
-@rt("/")
-def get():
-    1/0  # <2>
-    return Titled("FastHTML Error!", P("Let's error!"))
-
+# This returns the FastHTML application object as well as a shortcut to `app.route`
+app,rt = fast_app()
+# Passing a path to `rt` is optional. If not passed, the function name is the route ('/foo') here.
+# By default, both GET and POST HTTP methods are handled.
+# Type annotated params are passed as query params unless a path param is defined (which it isn't here)
+@rt
+def foo(name:str):
+    # `Title` and `P` here are "fasttags". Fasttags are direct m-expression mappings of HTML tags to Python functions with positional and named parameters. All standard HTML tags are included in the common wildcard import.
+    # When a tuple is returned, this returns concatenated HTML partials. HTMX by default will use a title HTML partial to set the current page name. 
+    # FastHTML will automatically return a complete HTML document with appropriate headers if a normal HTTP request is received. For an HTMX request, however, just the partials are returned.
+    return Title("FastHTML"), H1("My web app"), P(f"Let's do this, {name}!")
+# By default with `serve` uvicorn hosts on port 5001. `if __name__` etc is *not* needed since `serve` has this check internally.
 serve()
 ```
 
-1. `debug=True` sets debug mode on. 
-2. Python throws an error when it tries to divide an integer by zero.
+To run this web app:
 
-## Routing
+``` bash
+python main.py  # access via localhost:5001
+```
 
-FastHTML builds upon FastAPI's friendly decorator pattern for specifying URLs, with extra features:
+fasttags can be considered as m-expressions, with some simple sugar
+added. Positional parameters map to children, and named parameters map
+to attributes. Aliases must be used for Python reserved words.
 
-```{.python filename="main.py" code-line-numbers="true"}
+``` python
+tags = Title("FastHTML"), H1("My web app"), P(f"Let's do this!", cls="myclass")
+tags
+```
+
+    (title(('FastHTML',),{}),
+     h1(('My web app',),{}),
+     p(("Let's do this!",),{'class': 'myclass'}))
+
+This example demonstrates key aspects of how FastHTML components handle
+attributes:
+
+``` python
+Label(
+    "Choose an option", 
+    Select(
+        Option("one", value="1", selected=True),  # True renders just the attribute name
+        Option("two", value=2, selected=False),   # Non-string values are converted to strings. False omits the attribute entirely
+        cls="selector", id="counter",             # 'cls' becomes 'class'
+        **{'@click':"alert('Clicked');"},         # Dict unpacking for attributes with special characters
+    ),
+    _for="counter",                               # '_for' becomes 'for' (can also use 'fr')
+)
+```
+
+You can create new FT components by importing the new component from
+`fasthtml.components`. If the component doesn’t exist within that
+module, FastHTML will create it.
+
+``` python
+from fasthtml.components import Some_never_before_used_tag
+
+Some_never_before_used_tag()
+```
+
+``` html
+<some-never-before-used-tag></some-never-before-used-tag>
+```
+
+When creating a response, FastHTML will automatically render tags using
+the `to_xml` function.
+
+``` python
+to_xml(tags)
+```
+
+    '<title>FastHTML</title>\n<h1>My web app</h1>\n<p class="myclass">Let&#x27;s do this!</p>\n'
+
+The [`Script`](https://docs.fastht.ml/api/xtend.html#script) function
+allows you to include JavaScript. You can use Python to generate parts
+of your JS or JSON like this:
+
+``` python
+# In future snippets this import will not be shown, but is required
 from fasthtml.common import * 
-
-app, rt = fast_app()
-
-@rt("/")  # <1>
-def get():
-  return Titled("FastHTML", P("Let's do this!"))
-
-@rt("/hello")  # <2>
-def get():
-  return Titled("Hello, world!")
-
+app,rt = fast_app(hdrs=[Script(src="https://cdn.plot.ly/plotly-2.32.0.min.js")])
+# `index` is a special function name which maps to the `/` route. 
+@rt
+def index():
+    data = {'somedata':'fill me in…'}
+    # `Titled` is a function which returns a title tag and an h1 tag with the 1st param, along with all other params as HTML in a `Main` parent element
+    return Titled("Chart Demo", Div(id="myDiv"), Script(f"var data = {data}; Plotly.newPlot('myDiv', data);"))
+# In future snippets `serve() will not be shown, but is required
 serve()
 ```
 
-1. The "/" URL on line 5 is the home of a project. This would be accessed at [127.0.0.1:5001](http://127.0.0.1:5001).
-2. "/hello" URL on line 9 will be found by the project if the user visits [127.0.0.1:5001/hello](http://127.0.0.1:5001/hello).
+Route details can be specified as decorator parameters.
 
-::: {.callout-tip}
-It looks like `get()` is being defined twice, but that's not the case. Each function decorated with `rt` is totally separate, and is injected into the router. We're not calling them in the module's  namespace (`locals()`). Rather, we're loading them into the routing mechanism using the `rt` decorator.
-:::
-
-You can do more! Read on to learn what we can do to make parts of the URL dynamic.
-
-## Variables in URLs
-
-You can add variable sections to a URL by marking them with `{variable_name}`. Your function then receives the `{variable_name}` as a keyword argument, but only if it is the correct type. Here's an example:
-
-```{.python filename="main.py" code-line-numbers="true"}
-from fasthtml.common import * 
-
-app, rt = fast_app()
-
-@rt("/{name}/{age}")  # <1>
-def get(name: str, age: int):  # <2>
-  return Titled(f"Hello {name.title()}, age {age}")  # <3>
-
-serve()
-```
-
-1. We specify two variable names, `name` and `age`.
-2. We define two function arguments named identically to the variables. You will note that we specify the Python types to be passed.
-3. We use these functions in our project.
-
-
-Try it out by going to this address: [127.0.0.1:5001/uma/5](http://127.0.0.1:5001/uma/5). You should get a page that says,
-
-> "Hello Uma, age 5".
-
-
-### What happens if we enter incorrect data?
-
-The [127.0.0.1:5001/uma/5](http://127.0.0.1:5001/uma/5) URL works because `5` is an integer. If we enter something that is not, such as [127.0.0.1:5001/uma/five](http://127.0.0.1:5001/uma/five), then FastHTML will return an error instead of a web page.
-
-::: {.callout-note}
-### FastHTML URL routing supports more complex types
-
-The two examples we provide here use Python's built-in `str` and `int` types, but you can use your own types, including more complex ones such as those defined by libraries like [attrs](https://pypi.org/project/attrs/), [pydantic](https://pypi.org/project/pydantic/), and even [sqlmodel](https://pypi.org/project/sqlmodel/). 
-:::
-
-## HTTP Methods
-
-FastHTML matches function names to HTTP methods. So far the URL routes we've defined have been for HTTP GET methods, the most common method for web pages.
-
-Form submissions often are sent as HTTP POST. When dealing with more dynamic web page designs, also known as Single Page Apps (SPA for short), the need can arise for other methods such as HTTP PUT and HTTP DELETE. The way FastHTML handles this is by changing the function name.
-
-```{.python filename="main.py" code-line-numbers="true"}
-from fasthtml.common import * 
-
-app, rt = fast_app()
-
-@rt("/")  
-def get(): # <1>
-  return Titled("HTTP GET", P("Handle GET"))
-
-@rt("/")  
-def post(): # <2>
-  return Titled("HTTP POST", P("Handle POST"))
-
-serve()
-```
-
-1. On line 6 because the `get()` function name is used, this will handle HTTP GETs going to the `/` URI.
-2. On line 10 because the `post()` function name is used, this will handle HTTP POSTs going to the `/` URI.
-
-## CSS Files and Inline Styles
-
-Here we modify default headers to demonstrate how to use the [Sakura CSS microframework](https://github.com/oxalorg/sakura) instead of FastHTML's default of Pico CSS.
-
-```{.python filename="main.py" code-line-numbers="true"}
-from fasthtml.common import * 
-
+``` python
+# In future snippets we'll skip showing the `fast_app` call if it has no params
 app, rt = fast_app(
-    pico=False,  # <1>
+    pico=False, # The Pico CSS framework is included by default, so pass `false` to disable it if needed.
+    # These are added to the `head` part of the page for non-HTMX requests.
     hdrs=(
         Link(rel='stylesheet', href='assets/normalize.min.css', type='text/css'),
-        Link(rel='stylesheet', href='assets/sakura.css', type='text/css'),  # <2>
-        Style("p {color: red;}")  # <3>
-))
-
-@app.get("/")
-def home():
-    return Titled("FastHTML",
-        P("Let's do this!"),
-    )
-
-serve()
+        Link(rel='stylesheet', href='assets/sakura.css', type='text/css'),
+        Style("p {color: red;}",
+        # by default, all standard static extensions are served statically from the web app dir, which can be modified using `static_path`
+        static_path='public')
+)
+# Path parameter parsing is handled by Starlette, so all of the same functionality and syntax is supported.
+# However, it is more idiomatic to use query parameters in FastHTML where possible.
+@rt("/hello/{name}", method="GET")
+def somefunc(name:str): return Titled(f"Hello, {name}!")
 ```
 
-1. By setting `pico` to `False`, FastHTML will not include `pico.min.css`.
-2. This will generate an HTML `<link>` tag for sourcing the css for Sakura.
-3. If you want an inline styles, the [`Style()`](https://docs.fastht.ml/api/xtend.html#style) function will put the result into the HTML.
+Instead of returning a FastTag or tuple of FastTags, standard Starlette
+response types can also be returned in which case they are used directly
+in the same way that Starlette does.
 
-## Other Static Media File Locations
-
-As you saw, [`Script`](https://docs.fastht.ml/api/xtend.html#script) and `Link` are specific to the most common static media use cases in web apps: including JavaScript, CSS, and images. But it also works with videos and other static media files. The default behavior is to look for these files in the root directory - typically we don't do anything special to include them. We can change the default directory that is looked in for files by adding the `static_path` parameter to the `fast_app` function.
-
-```python
-app, rt = fast_app(static_path='public')
-```
-
-FastHTML also allows us to define a route that uses `FileResponse` to serve the file at a specified path. This is useful for serving images, videos, and other media files from a different directory without having to change the paths of many files. So if we move the directory containing the media files, we only need to change the path in one place. In the example below, we call images from a directory called `public`.
-
-```python
+``` python
 @rt("/{fname:path}.{ext:static}")
-async def get(fname:str, ext:str): 
-    return FileResponse(f'public/{fname}.{ext}')
+async def get(fname:str, ext:str):  return FileResponse(f'public/{fname}.{ext}')
 ```
 
-## Rendering Markdown
-
-```python
-from fasthtml.common import *
-
+``` python
+# `MarkdownJS` and `HighlightJS` are available via concise functions
 hdrs = (MarkdownJS(), HighlightJS(langs=['python', 'javascript', 'html', 'css']), )
-
 app, rt = fast_app(hdrs=hdrs)
-
-content = """
-Here are some _markdown_ elements.
-
-- This is a list item
-- This is another list item
-- And this is a third list item
-
-**Fenced code blocks work here.**
-"""
-
-@rt('/')
-def get(req):
-    return Titled("Markdown rendering example", Div(content,cls="marked"))
-
+@rt
+def index(req): return Titled("Markdown rendering example",
+                              # This will be markdown rendered to HTML
+                              Div("*hi* there",cls="marked"),
+                              # This will be syntax highlighted
+                              Pre(Code("def foo(): pass")))
 serve()
 ```
 
-## Code highlighting
+Returning a JSON serializable dict from a handler will cause the handler
+to return JSON.
 
-Here's how to highlight code without any markdown configuration.
+`ft` components (“fasttags”) can be combined by defining them as a
+function.
 
-```python
-from fasthtml.common import *
-
-# Add the HighlightJS built-in header
-hdrs = (HighlightJS(langs=['python', 'javascript', 'html', 'css']),)
-
-app, rt = fast_app(hdrs=hdrs)
-
-code_example = """
-import datetime
-import time
-
-for i in range(10):
-    print(f"{datetime.datetime.now()}")
-    time.sleep(1)
-"""
-
-@rt('/')
-def get(req):
-    return Titled("Markdown rendering example",
-        Div(
-            # The code example needs to be surrounded by
-            # Pre & Code elements
-            Pre(Code(code_example))
-    ))
-
-serve()
+``` python
+def Hero(title, statement): return Div(H1(title),P(statement), cls="hero")
+to_xml(Hero("Hello World", "This is a hero statement"))
 ```
 
-## Defining new `ft` components
+    '<div class="hero">\n  <h1>Hello World</h1>\n  <p>This is a hero statement</p>\n</div>\n'
 
-We can build our own `ft` components and combine them with other components. The simplest method is defining them as a function.
+Classes with `__ft__` defined are rendered using that method.
 
-::: {#cell-28 .cell}
-``` {.python .cell-code}
-from fasthtml.common import *
-```
-:::
-
-
-::: {#cell-29 .cell}
-``` {.python .cell-code}
-def hero(title, statement):
-    return Div(H1(title),P(statement), cls="hero")
-
-# usage example
-Main(
-    hero("Hello World", "This is a hero statement")
-)
-```
-
-::: {.cell-output .cell-output-display .cell-output-markdown}
-```html
-<main>  <div class="hero">
-    <h1>Hello World</h1>
-    <p>This is a hero statement</p>
-  </div>
-</main>
-```
-:::
-:::
-
-
-### Pass through components
-
-For when we need to define a new component that allows zero-to-many components to be nested within them, we lean on Python's `*args` and `**kwargs` mechanism. Useful for creating page layout controls.
-
-::: {#cell-32 .cell}
-``` {.python .cell-code}
-def layout(*args, **kwargs):
-    """Dashboard layout for all our dashboard views"""
-    return Main(
-        H1("Dashboard"),
-        Div(*args, **kwargs),
-        cls="dashboard",
-    )
-
-# usage example
-layout(
-    Ul(*[Li(o) for o in range(3)]),
-    P("Some content", cls="description"),
-)
-```
-
-::: {.cell-output .cell-output-display .cell-output-markdown}
-```html
-<main class="dashboard">  <h1>Dashboard</h1>
-  <div>
-    <ul>
-      <li>0</li>
-      <li>1</li>
-      <li>2</li>
-    </ul>
-    <p class="description">Some content</p>
-  </div>
-</main>
-```
-:::
-:::
-
-
-### Dataclasses as ft components
-
-While functions are easy to read, for more complex components some might find it easier to use a dataclass.
-
-::: {#cell-35 .cell}
-``` {.python .cell-code}
+``` python
 from dataclasses import dataclass
 
-@dataclass
-class Hero:
-    title: str
-    statement: str
+class FtTest:
+    def __ft__(self): return P('test')
     
-    def __ft__(self):
-        """ The __ft__ method renders the dataclass at runtime."""
-        return Div(H1(self.title),P(self.statement), cls="hero")
-    
-# usage example
-Main(
-    Hero("Hello World", "This is a hero statement")
-)
+to_xml(FtTest())
 ```
 
-::: {.cell-output .cell-output-display .cell-output-markdown}
-```html
-<main>  <div class="hero">
-    <h1>Hello World</h1>
-    <p>This is a hero statement</p>
-  </div>
-</main>
-```
-:::
-:::
+    '<p>test</p>\n'
 
-
-## Testing views in notebooks
-
-Because of the ASGI event loop it is currently impossible to run FastHTML inside a notebook. However, we can still test the output of our views. To do this, we leverage Starlette, an ASGI toolkit that FastHTML uses.
-
-::: {#cell-38 .cell}
-``` {.python .cell-code}
-# First we instantiate our app, in this case we remove the
-# default headers to reduce the size of the output.
-app, rt = fast_app(default_hdrs=False)
-
-# Setting up the Starlette test client
-from starlette.testclient import TestClient
-client = TestClient(app)
-
-# Usage example
-@rt("/")
-def get():
-    return Titled("FastHTML is awesome", 
-        P("The fastest way to create web apps in Python"))
-
-print(client.get("/").text)
-```
-
-::: {.cell-output .cell-output-stdout}
-```
- <!doctype html>
- <html>
-   <head>
-<title>FastHTML is awesome</title>   </head>
-   <body>
-<main class="container">       <h1>FastHTML is awesome</h1>
-       <p>The fastest way to create web apps in Python</p>
-</main>   </body>
- </html>
-
-```
-:::
-:::
-
-
-## Forms
-
-To validate data coming from users, first define a dataclass representing the data you want to check. Here's an example representing a signup form.
-
-::: {#cell-41 .cell}
-``` {.python .cell-code}
+``` python
 from dataclasses import dataclass
+```
 
+``` python
+app,rt = fast_app()
+```
+
+When a route handler function is used as a fasttag attribute (such as
+`href`, `hx_get`, or `action`) it is converted to that route’s path.
+[`fill_form`](https://docs.fastht.ml/api/components.html#fill_form) is
+used to copy an object’s matching attrs into matching-name form fields.
+
+``` python
 @dataclass
 class Profile: email:str; phone:str; age:int
-```
-:::
+email = 'john@example.com'
+profiles = {email: Profile(email=email, phone='123456789', age=5)}
+@rt
+def profile(email:str): return fill_form(profile_form, profiles[email])
 
-
-Create an FT component representing an empty version of that form. Don't pass in any value to fill the form, that gets handled later.
-
-::: {#cell-43 .cell}
-``` {.python .cell-code}
-profile_form = Form(method="post", action="/profile")(
+profile_form = Form(method="post", action=profile)(
         Fieldset(
             Label('Email', Input(name="email")),
             Label("Phone", Input(name="phone")),
-            Label("Age", Input(name="age")),
-        ),
-        Button("Save", type="submit"),
-    )
-profile_form
+            Label("Age", Input(name="age"))),
+        Button("Save", type="submit"))
 ```
 
-::: {.cell-output .cell-output-display .cell-output-markdown}
-```html
-<form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email      <input name="email">
-</label><label>Phone      <input name="phone">
-</label><label>Age      <input name="age">
-</label></fieldset><button type="submit">Save</button></form>
-```
-:::
-:::
+A `to` method is added to route functions, which returns a route path
+with params as query params.
 
-
-Once the dataclass and form function are completed, we can add data to the form. To do that, instantiate the profile dataclass:
-
-::: {#cell-45 .cell}
-``` {.python .cell-code}
-profile = Profile(email='john@example.com', phone='123456789', age=5)
-profile
+``` python
+path = profile.to(email="john@example.com")
+path
 ```
 
-::: {.cell-output .cell-output-display}
-```
-Profile(email='john@example.com', phone='123456789', age=5)
-```
-:::
-:::
+    '/profile?email=john%40example.com'
 
+The `url_for` method of the request object can be used to generate URLs
+for named routes. It takes the route name as its first argument,
+followed by any path parameters needed for that route. Useful for
+generating absolute URLs, ensuring that the correct host and scheme are
+included, even if the application is accessed through different domains
+or protocols.
 
-Then add that data to the `profile_form` using FastHTML's [`fill_form`](https://docs.fastht.ml/api/components.html#fill_form) class:
+The `url_path_for` method of the application can be used to generate URL
+paths for named routes. Unlike `url_for`, it returns only the path
+component of the URL, without the scheme or host.
 
-::: {#cell-47 .cell}
-``` {.python .cell-code}
-fill_form(profile_form, profile)
-```
+We can use `TestClient` for testing.
 
-::: {.cell-output .cell-output-display .cell-output-markdown}
-```html
-<form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email      <input name="email" value="john@example.com">
-</label><label>Phone      <input name="phone" value="123456789">
-</label><label>Age      <input name="age" value="5">
-</label></fieldset><button type="submit">Save</button></form>
-```
-:::
-:::
-
-
-### Forms with views
-
-The usefulness of FastHTML forms becomes more apparent when they are combined with FastHTML views. We'll show how this works by using the test client from above. First, let's create a SQlite database:
-
-::: {#cell-50 .cell}
-``` {.python .cell-code}
-db = database("profiles.db")
-profiles = db.create(Profile, pk="email")
-```
-:::
-
-
-Now we insert a record into the database:
-
-::: {#cell-52 .cell}
-``` {.python .cell-code}
-profiles.insert(profile)
+``` python
+from starlette.testclient import TestClient
 ```
 
-::: {.cell-output .cell-output-display}
-```
-Profile(email='john@example.com', phone='123456789', age=5)
-```
-:::
-:::
-
-
-And we can then demonstrate in the code that form is filled and displayed to the user.
-
-::: {#cell-54 .cell}
-``` {.python .cell-code}
-@rt("/profile/{email}")
-def profile(email:str):
-    profile = profiles[email]  # <1>
-    filled_profile_form = fill_form(profile_form, profile) # <2>
-    return Titled(f'Profile for {profile.email}', filled_profile_form)
-
-print(client.get(f"/profile/john@example.com").text)
+``` python
+client = TestClient(app)
+htmx_req = {'HX-Request':'1'}
+print(client.get(path, headers=htmx_req).text)
 ```
 
-::: {.cell-output .cell-output-stdout}
-```
- <!doctype html>
- <html>
-   <head>
-<title>Profile for john@example.com</title>   </head>
-   <body>
-<main class="container">       <h1>Profile for john@example.com</h1>
-<form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email             <input name="email" value="john@example.com">
-</label><label>Phone             <input name="phone" value="123456789">
-</label><label>Age             <input name="age" value="5">
-</label></fieldset><button type="submit">Save</button></form></main>   </body>
- </html>
+    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: GET http://testserver/profile?email=john%40example.com "HTTP/1.1 200 OK"
 
-```
-:::
-:::
+    <form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email       <input name="email" value="john@example.com">
+    </label><label>Phone       <input name="phone" value="123456789">
+    </label><label>Age       <input name="age" value="5">
+    </label></fieldset><button type="submit">Save</button></form>
 
+When a dataclass, namedtuple, etc. is used as a type annotation, the
+form body will be unpacked into matching attribute names automatically.
 
-1. Fetch the profile using the profile table's `email` primary key 
-2. Fill the form for display.
-
-And now let's demonstrate making a change to the data. 
-
-::: {#cell-57 .cell}
-``` {.python .cell-code}
-@rt("/profile")
-def post(profile: Profile): # <1>
-    profiles.update(profile) # <2>
-    return RedirectResponse(url=f"/profile/{profile.email}") # <3>
+``` python
+@rt
+def edit_profile(profile: Profile):
+    profiles[email]=profile
+    return RedirectResponse(url=path)
 
 new_data = dict(email='john@example.com', phone='7654321', age=25)
-print(client.post("/profile", data=new_data).text)  # <4>
+print(client.post("/edit_profile", data=new_data, headers=htmx_req).text)
 ```
 
-::: {.cell-output .cell-output-stdout}
-```
- <!doctype html>
- <html>
-   <head>
-<title>Profile for john@example.com</title>   </head>
-   <body>
-<main class="container">       <h1>Profile for john@example.com</h1>
-<form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email             <input name="email" value="john@example.com">
-</label><label>Phone             <input name="phone" value="7654321">
-</label><label>Age             <input name="age" value="25">
-</label></fieldset><button type="submit">Save</button></form></main>   </body>
- </html>
+    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: POST http://testserver/edit_profile "HTTP/1.1 307 Temporary Redirect"
+    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: POST http://testserver/profile?email=john%40example.com "HTTP/1.1 200 OK"
 
-```
-:::
-:::
+    <form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email       <input name="email" value="john@example.com">
+    </label><label>Phone       <input name="phone" value="7654321">
+    </label><label>Age       <input name="age" value="25">
+    </label></fieldset><button type="submit">Save</button></form>
 
+The general rules for rendering are: - `__ft__` method will be called
+(for default components like `P`, `H2`, etc. or if you define your own
+components) - If you pass a string, it will be escaped - On other python
+objects, `str()` will be called
 
-1. We use the `Profile` dataclass definition to set the type for the incoming `profile` content. This validates the field types for the incoming data
-2. Taking our validated data, we updated the profiles table
-3. We redirect the user back to their profile view
-4. The display is of the profile form view showing the changes in data. 
+As a consequence, if you want to include plain HTML tags directly into
+e.g. a `Div()` they will get escaped by default (as a security measure
+to avoid code injections). This can be avoided by using `Safe(...)`, e.g
+to show a data frame use `Div(NotStr(df.to_html()))`.
 
-## Strings and conversion order
+FastHTML allows customization of exception handlers.
 
-The general rules for rendering are: 
-- `__ft__` method will be called (for default components like `P`, `H2`, etc. or if you define your own components)
-- If you pass a string, it will be escaped
-- On other python objects, `str()` will be called
-
-As a consequence, if you want to include plain HTML tags directly into e.g. a `Div()` they will get escaped by default (as a security measure to avoid code injections). This can be avoided by using `NotStr()`, a convenient way to reuse python code that returns already HTML. If you use pandas, you can use `pandas.DataFrame.to_html()` to get a nice table. To include the output a FastHTML, wrap it in `NotStr()`, like `Div(NotStr(df.to_html()))`.
-
-Above we saw how a dataclass behaves with the `__ft__` method defined. On a plain dataclass, `str()` will be called (but not escaped).
-
-::: {#cell-61 .cell}
-``` {.python .cell-code}
-from dataclasses import dataclass
-
-@dataclass
-class Hero:
-    title: str
-    statement: str
-        
-# rendering the dataclass with the default method
-Main(
-    Hero("<h1>Hello World</h1>", "This is a hero statement")
-)
-```
-
-::: {.cell-output .cell-output-display .cell-output-markdown}
-```html
-<main>Hero(title='<h1>Hello World</h1>', statement='This is a hero statement')</main>
-```
-:::
-:::
-
-
-::: {#cell-62 .cell}
-``` {.python .cell-code}
-# This will display the HTML as text on your page
-Div("Let's include some HTML here: <div>Some HTML</div>")
-```
-
-::: {.cell-output .cell-output-display .cell-output-markdown}
-```html
-<div>Let&#x27;s include some HTML here: &lt;div&gt;Some HTML&lt;/div&gt;</div>
-
-```
-:::
-:::
-
-
-::: {#cell-63 .cell}
-``` {.python .cell-code}
-# Keep the string untouched, will be rendered on the page
-Div(NotStr("<div><h1>Some HTML</h1></div>"))
-```
-
-::: {.cell-output .cell-output-display .cell-output-markdown}
-```html
-<div><div><h1>Some HTML</h1></div></div>
-
-```
-:::
-:::
-
-
-## Custom exception handlers
-
-FastHTML allows customization of exception handlers, but does so gracefully. What this means is by default it includes all the `<html>` tags needed to display attractive content. Try it out!
-
-```python
-from fasthtml.common import *
-
+``` python
 def not_found(req, exc): return Titled("404: I don't exist!")
-
 exception_handlers = {404: not_found}
-
 app, rt = fast_app(exception_handlers=exception_handlers)
-
-@rt('/')
-def get():
-    return (Titled("Home page", P(A(href="/oops")("Click to generate 404 error"))))
-
-serve()
 ```
 
-We can also use lambda to make things more terse:
+We can set cookies using the
+[`cookie()`](https://docs.fastht.ml/api/core.html#cookie) function.
 
-```python
-from fasthtml.common import *
-
-exception_handlers={
-    404: lambda req, exc: Titled("404: I don't exist!"),
-    418: lambda req, exc: Titled("418: I'm a teapot!")
-}
-
-app, rt = fast_app(exception_handlers=exception_handlers)
-
-@rt('/')
-def get():
-    return (Titled("Home page", P(A(href="/oops")("Click to generate 404 error"))))
-
-serve()
+``` python
+@rt
+def setcook(): return P(f'Setting a cookie'), cookie('mycookie', 'foobar')
+print(client.get('/setcook', headers=htmx_req).text)
 ```
 
-## Cookies
+    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: GET http://testserver/setcook "HTTP/1.1 200 OK"
 
-We can set cookies using the [`cookie()`](https://docs.fastht.ml/api/core.html#cookie) function. In our example, we'll create a `timestamp` cookie.
+     <p>Setting a cookie</p>
 
-::: {#cell-68 .cell}
-``` {.python .cell-code}
-from datetime import datetime
-from IPython.display import HTML
-```
-:::
-
-
-::: {#cell-69 .cell}
-``` {.python .cell-code}
-@rt("/settimestamp")
-def get(req):
-    now = datetime.now()
-    return P(f'Set to {now}'), cookie('now', datetime.now())
-
-HTML(client.get('/settimestamp').text)
+``` python
+@rt
+def getcook(mycookie:str): return f'Cookie was {mycookie}'
+# Note that if handlers return text, instead of fasttags, then a plain text response is automatically created
+print(client.get('/getcook').text)
 ```
 
-::: {.cell-output .cell-output-display}
+    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: GET http://testserver/getcook "HTTP/1.1 200 OK"
 
-```{=html}
- <!doctype html>
- <html>
-   <head>
-<title>FastHTML page</title>   </head>
-   <body>
-     <p>Set to 2024-09-26 15:33:48.141869</p>
-   </body>
- </html>
+    Cookie was foobar
+
+FastHTML provide access to Starlette’s request object automatically
+using special `request` parameter name (or any prefix of that name).
+
+``` python
+@rt
+def headers(req): return req.headers['host']
 ```
 
-:::
-:::
+FastHTML provides access to Starlette’s session middleware automatically
+using the special `session` parameter name (or any prefix of that name).
 
+Enums can be used to constrain the values accepted for a route
+parameter.
 
-Now let's get it back using the same name for our parameter as the cookie name.
-
-::: {#cell-71 .cell}
-``` {.python .cell-code}
-@rt('/gettimestamp')
-def get(now:parsed_date): return f'Cookie was set at time {now.time()}'
-
-client.get('/gettimestamp').text
+``` python
+names = str_enum('names', 'Alice', 'Bev', 'Charlie')
 ```
 
-::: {.cell-output .cell-output-display}
+``` python
+@rt
+def adder(sess, nm: names):
+    sess.setdefault('attendees', '')
+    sess['attendees'] = sess.get('attendees') + f', {nm}'
+    return Response(f'The attentees are {sess["attendees"]}.')
 ```
-'Cookie was set at time 15:33:48.141903'
+
+Handler functions can return the
+[`HtmxResponseHeaders`](https://docs.fastht.ml/api/core.html#htmxresponseheaders)
+object to set HTMX-specific response headers.
+
+``` python
+@rt
+def htmlredirect(app): return HtmxResponseHeaders(location="http://example.org")
 ```
-:::
-:::
 
+[`APIRouter`](https://docs.fastht.ml/api/core.html#apirouter) lets you
+organize routes across multiple files in a FastHTML app, with an
+optional `prefix` parameter that prepends to all routes in that router
+(e.g., `prefix=/products` makes all routes start with `/products`).
 
-## Sessions
+``` python
+# products.py
+ar = APIRouter(prefix="/products")
 
-For convenience and security, FastHTML has a mechanism for storing small amounts of data in the user's browser. We can do this by adding a `session` argument to routes. FastHTML sessions are Python dictionaries, and we can leverage to our benefit. The example below shows how to concisely set and get sessions.
+@ar("/all")
+def all_products(req):
+    return Div(
+        "Welcome to the Products Page! Click the button below to look at the details for product 42",
+        Div(
+            Button("Details",hx_get=req.url_for("details", pid=42),hx_target="#products_list",hx_swap="outerHTML",),
+        ),
+        id="products_list",
+    )
 
-::: {#cell-74 .cell}
-``` {.python .cell-code}
-@rt('/adder/{num}')
-def get(session, num: int):
-    session.setdefault('sum', 0)
-    session['sum'] = session.get('sum') + num
-    return Response(f'The sum is {session["sum"]}.')
+@ar.get("/", name="details")
+def details(pid: int): return f"Here are the product details for ID: {pid}"
 ```
-:::
 
+Adding the products’
+[`APIRouter`](https://docs.fastht.ml/api/core.html#apirouter) to the
+`app`:
 
-## Toasts (also known as Messages)
+``` python
+# main.py
+from products import ar
 
-Toasts, sometimes called "Messages" are small notifications usually in colored boxes used to notify users that something has happened. Toasts can be of four types:
+app, rt = fast_app()
+ar.to_app(app)
+
+@rt
+def index():
+    return Div(
+        "Products",
+        hx_get=ar.rt_funcs.all_products,
+        hx_swap="outerHTML",
+    )
+```
+
+Toasts can be of four types:
 
 - info
 - success
 - warning
 - error
 
-Examples toasts might include:
-
-- "Payment accepted"
-- "Data submitted"
-- "Request approved"
-
- Toasts require the use of the `setup_toasts()` function plus every view needs these two features:
+Toasts require the use of the `setup_toasts()` function, plus every
+handler needs:
 
 - The session argument
 - Must return FT components
 
-```python
-setup_toasts(app) # <1>
+``` python
+setup_toasts(app)
 
-@rt('/toasting')
-def get(session):  # <2>
-    # Normally one toast is enough, this allows us to see
-    # different toast types in action.
-    add_toast(session, f"Toast is being cooked", "info")
-    add_toast(session, f"Toast is ready", "success")
-    add_toast(session, f"Toast is getting a bit crispy", "warning")
-    add_toast(session, f"Toast is burning!", "error")
-    return Titled("I like toast") # <3>
+@rt
+def toasting(session):
+    add_toast(session, f"cooked", "info")
+    add_toast(session, f"ready", "success")
+    return Titled("toaster")
 ```
 
-1. `setup_toasts` is a helper function that adds toast dependencies. Usually this would be declared right after `fast_app()`
-2. Toasts require sessions
-3. Views with Toasts must return FT or FtResponse components.
+`setup_toasts(duration)` allows you to specify how long a toast will be
+visible before disappearing.10 seconds.
 
-💡 `setup_toasts` takes a `duration` input that allows you to specify how long a toast will be visible before disappearing. For example `setup_toasts(duration=5)` sets the toasts duration to 5 seconds. By default toasts disappear after 10 seconds.
+Authentication and authorization are handled with Beforeware, which
+functions that run before the route handler is called.
 
-## Authentication and authorization
-
-In FastHTML the tasks of authentication and authorization are handled with Beforeware.  Beforeware are functions that run before the route handler is called. They are useful for global tasks like ensuring users are authenticated or have permissions to access a view.
-
-First, we write a function that accepts a request and session arguments:
-
-::: {#cell-79 .cell}
-``` {.python .cell-code}
-# Status code 303 is a redirect that can change POST to GET,
-# so it's appropriate for a login page.
-login_redir = RedirectResponse('/login', status_code=303)
-
+``` python
 def user_auth_before(req, sess):
-    # The `auth` key in the request scope is automatically provided
-    # to any handler which requests it, and can not be injected
-    # by the user using query params, cookies, etc, so it should
-    # be secure to use.    
+    # `auth` key in the request scope is automatically provided to any handler which requests it and can not be injected
     auth = req.scope['auth'] = sess.get('auth', None)
-    # If the session key is not there, it redirects to the login page.
-    if not auth: return login_redir
-```
-:::
+    if not auth: return RedirectResponse('/login', status_code=303)
 
-
-Now we pass our `user_auth_before` function as the first argument into a [`Beforeware`](https://docs.fastht.ml/api/core.html#beforeware) class. We also pass a list of regular expressions to the `skip` argument, designed to allow users to still get to the home and login pages.
-
-::: {#cell-81 .cell}
-``` {.python .cell-code}
 beforeware = Beforeware(
     user_auth_before,
     skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', r'.*\.js', '/login', '/']
@@ -880,221 +430,713 @@ beforeware = Beforeware(
 
 app, rt = fast_app(before=beforeware)
 ```
-:::
 
+FastHTML introduces several tools for working with SSE which are covered
+in the example below. While concise, there’s a lot going on in this
+function so we’ve annotated it quite a bit.
 
-## Server-sent events (SSE)
-
-With [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events), it's possible for a server to send new data to a web page at any time, by pushing messages to the web page. Unlike WebSockets, SSE can only go in one direction: server to client. SSE is also part of the HTTP specification unlike WebSockets which uses its own specification. 
-
-FastHTML introduces several tools for working with SSE which are covered in the example below. While concise, there's a lot going on in this function so we've annotated it quite a bit.
-
-::: {#cell-84 .cell}
-``` {.python .cell-code}
+``` python
 import random
-from asyncio import sleep
-from fasthtml.common import *
+```
 
-hdrs=(Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js"),) # <1>
+FastHTML supports the HTMX SSE extension.
+
+``` python
+hdrs=(Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js"),)
 app,rt = fast_app(hdrs=hdrs)
 
 @rt
-def index():
-    return Titled("SSE Random Number Generator",
-        P("Generate pairs of random numbers, as the list grows scroll downwards."),
-        Div(hx_ext="sse", # <2>
-            sse_connect="/number-stream", # <3>
-            hx_swap="beforeend show:bottom", # <4>
-            sse_swap="message")) # <5>
+def index(): return Div(hx_ext="sse", sse_connect="/numstream", hx_swap="beforeend show:bottom", sse_swap="message")
 
-shutdown_event = signal_shutdown() # <6>
+# `signal_shutdown()` gets an event that is set on shutdown
+shutdown_event = signal_shutdown()
 
-async def number_generator(): # <7>
-    while not shutdown_event.is_set(): # <8>
+async def number_generator():
+    while not shutdown_event.is_set():
         data = Article(random.randint(1, 100))
-        yield sse_message(data)  # <9>
-        await sleep(1)
+        yield sse_message(data)
 
-@rt("/number-stream")
-async def get(): return EventStream(number_generator()) # <10>
+@rt
+async def numstream(): return EventStream(number_generator())
 ```
-:::
 
+FastHTML provides useful tools for HTMX’s websockets extension.
 
-1. Import the HTMX SSE extension 
-2. Tell HTMX to load the SSE extension
-3. Look at the `/number-stream` endpoint for SSE content
-4. When new items come in from the SSE endpoint, add them at the end of the current content within the div. If they go beyond the screen, scroll downwards
-5. Specify the name of the event. FastHTML's default event name is "message". Only change if you have more than one call to SSE endpoints within a view
-6. Set up the asyncio event loop
-7. Don't forget to make this an `async` function!
-8. Iterate through the asyncio event loop
-9. We yield the data. Data ideally should be comprised of FT components as that plugs nicely into HTMX in the browser
-10. The endpoint view needs to be an async function that returns a [`EventStream`](https://docs.fastht.ml/api/core.html#eventstream)
+``` python
+app, rt = fast_app(exts='ws')
 
+def mk_inp(): return Input(id='msg', autofocus=True)
 
-## Websockets
-
-With websockets we can have bi-directional communications between a browser and client. Websockets are useful for things like chat and certain types of games. While websockets can be used for single direction messages from the server (i.e. telling users that a process is finished), that task is arguably better suited for SSE.
-
-FastHTML provides useful tools for adding websockets to your pages.
-
-::: {#cell-88 .cell}
-``` {.python .cell-code}
-from fasthtml.common import *
-from asyncio import sleep
-
-app, rt = fast_app(exts='ws') # <1>
-
-def mk_inp(): return Input(id='msg', autofocus=True) # <2>
-
-@rt('/')
-async def get(request):
+@rt
+async def index(request):
+    # `ws_send` tells HTMX to send a message to the nearest websocket based on the trigger for the form element
     cts = Div(
         Div(id='notifications'),
-        Form(mk_inp(), id='form', ws_send=True), # <3>
-        hx_ext='ws', ws_connect='/ws') # <4>
+        Form(mk_inp(), id='form', ws_send=True),
+        hx_ext='ws', ws_connect='/ws')
     return Titled('Websocket Test', cts)
 
-async def on_connect(send): # <5>
-    print('Connected!')
-    await send(Div('Hello, you have connected', id="notifications")) # <6>
+async def on_connect(send): await send(Div('Hello, you have connected', id="notifications"))
+async def on_disconnect(ws): print('Disconnected!')
 
-async def on_disconnect(ws): # <7>
-    print('Disconnected!')
-
-@app.ws('/ws', conn=on_connect, disconn=on_disconnect) # <8>
-async def ws(msg:str, send): # <9>
-    await send(Div('Hello ' + msg, id="notifications")) # <10>
-    await sleep(2)
-    return Div('Goodbye ' + msg, id="notifications"), mk_inp() # <11>
+@app.ws('/ws', conn=on_connect, disconn=on_disconnect)
+async def ws(msg:str, send):
+    # websocket hander returns/sends are treated as OOB swaps
+    await send(Div('Hello ' + msg, id="notifications"))
+    return Div('Goodbye ' + msg, id="notifications"), mk_inp()
 ```
-:::
-
-
-1. To use websockets in FastHTML, you must instantiate the app with `exts` set to 'ws'
-2. As we want to use websockets to reset the form, we define the `mk_input` function that can be called from multiple locations
-3. We create the form and mark it with the `ws_send` attribute, which is documented here in the [HTMX websocket specification](https://v1.htmx.org/extensions/web-sockets/). This tells HTMX to send a message to the nearest websocket based on the trigger for the form element, which for forms is pressing the `enter` key, an action considered to be a form submission
-4. This is where the HTMX extension is loaded (`hx_ext='ws'`) and the nearest websocket is defined (`ws_connect='/ws'`)
-5. When a websocket first connects we can optionally have it call a function that accepts a `send` argument. The `send` argument will push a message to the browser.
-6. Here we use the `send` function that was passed into the `on_connect` function to send a `Div` with an `id` of `notifications` that HTMX assigns to the element in the page that already has an `id` of `notifications`
-7. When a websocket disconnects we can call a function which takes no arguments. Typically the role of this function is to notify the server to take an action. In this case, we print a simple message to the console
-8. We use the `app.ws` decorator to mark that `/ws` is the route for our websocket. We also pass in the two optional `conn` and `disconn` parameters to this decorator. As a fun experiment, remove the `conn` and `disconn` arguments and see what happens
-9. Define the `ws` function as async. This is necessary for ASGI to be able to serve websockets. The function accepts two arguments, a `msg` that is user input from the browser, and a `send` function for pushing data back to the browser
-10. The `send` function is used here to send HTML back to the page. As the HTML has an `id` of `notifications`, HTMX will overwrite what is already on the page with the same ID
-11. The websocket function can also be used to return a value. In this case, it is a tuple of two HTML elements. HTMX will take the elements and replace them where appropriate. As both have `id` specified (`notifications` and `msg` respectively), they will replace their predecessor on the page.
-
-## File Uploads
-
-A common task in web development is uploading files. The examples below are for uploading files to the hosting server, with information about the uploaded file presented to the user.
-
-:::{.callout-warning title='File uploads in production can be dangerous'}
-File uploads can be the target of abuse, accidental or intentional. That means users may attempt to upload files that are too large or present a security risk. This is especially of concern for public facing apps. File upload security is outside the scope of this tutorial, for now we suggest reading the [OWASP File Upload Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html).
-:::
 
 ### Single File Uploads
 
-```python
-from fasthtml.common import *
-from pathlib import Path
+[`Form`](https://docs.fastht.ml/api/xtend.html#form) defaults to
+“multipart/form-data”. A Starlette UploadFile is passed to the handler.
 
-app, rt = fast_app()
-
+``` python
 upload_dir = Path("filez")
-upload_dir.mkdir(exist_ok=True)
-
-@rt('/')
-def get():
-    return Titled("File Upload Demo",
-        Article(
-            Form(hx_post=upload, hx_target="#result-one")( # <1>
-                Input(type="file", name="file"), # <2>
-                Button("Upload", type="submit", cls='secondary'),
-            ),
-            Div(id="result-one")
-        )
-    )
-
-def FileMetaDataCard(file):
-    return Article(
-        Header(H3(file.filename)),
-        Ul(
-            Li('Size: ', file.size),            
-            Li('Content Type: ', file.content_type),
-            Li('Headers: ', file.headers),
-        )
-    )    
 
 @rt
-async def upload(file: UploadFile): # <3>
-    card = FileMetaDataCard(file)  # <4>
-    filebuffer = await file.read()  # <5>
-    (upload_dir / file.filename).write_bytes(filebuffer) # <6>
-    return card
-
-serve()
-```
-
-1. Every form rendered with the [`Form`](https://docs.fastht.ml/api/xtend.html#form) FT component defaults to `enctype="multipart/form-data"`
-2. Don't forget to set the `Input` FT Component's type to `file`
-3. The upload view should receive a [Starlette UploadFile](https://www.starlette.io/requests/#request-files) type. You can add other form variables
-4. We can access the metadata of the card (filename, size, content_type, headers), a quick and safe process. We set that to the card variable
-5. In order to access the contents contained within a file we use the `await` method to read() it. As files may be quite large or contain bad data, this is a seperate step from accessing metadata
-6. This step shows how to use Python's built-in [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path) library to write the file to disk.
-
-### Multiple File Uploads
-
-```python
-from fasthtml.common import *
-from pathlib import Path
-
-app, rt = fast_app()
-
-upload_dir = Path("filez")
-upload_dir.mkdir(exist_ok=True)
-
-@rt('/')
-def get():
-    return Titled("Multiple File Upload Demo",
-        Article(
-            Form(hx_post=upload_many, hx_target="#result-many")( # <1>
-                Input(type="file", name="files", multiple=True), # <2>
-                Button("Upload", type="submit", cls='secondary'),
-            ),
-            Div(id="result-many")
-        )
+def index():
+    return (
+        Form(hx_post=upload, hx_target="#result")(
+            Input(type="file", name="file"),
+            Button("Upload", type="submit")),
+        Div(id="result")
     )
 
-def FileMetaDataCard(file):
-    return Article(
-        Header(H3(file.filename)),
-        Ul(
-            Li('Size: ', file.size),            
-            Li('Content Type: ', file.content_type),
-            Li('Headers: ', file.headers),
-        )
-    )    
-
 @rt
-async def upload_many(files: list[UploadFile]): # <3>
-    cards = []
-    for file in files:  # <4>
-        cards.append(FileMetaDataCard(file))  # <5>
-        filebuffer = await file.read()  # <6>
-        (upload_dir / file.filename).write_bytes(filebuffer) # <7>
-    return cards
-
-serve()
+async def upload(file: UploadFile):
+    filebuffer = await file.read()
+    (upload_dir / file.filename).write_bytes(filebuffer)
+    return P('Size: ', file.size)
 ```
 
-1. Every form rendered with the [`Form`](https://docs.fastht.ml/api/xtend.html#form) FT component defaults to `enctype="multipart/form-data"`
-2. Don't forget to set the `Input` FT Component's type to `file` and assign the multiple attribute to `True`
-3. The upload view should receive a `list` containing the [Starlette UploadFile](https://www.starlette.io/requests/#request-files) type. You can add other form variables
-4. Iterate through the files
-5. We can access the metadata of the card (filename, size, content_type, headers), a quick and safe process. We add that to the cards variable
-6. In order to access the contents contained within a file we use the `await` method to read() it. As files may be quite large or contain bad data, this is a seperate step from accessing metadata
-7. This step shows how to use Python's built-in [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path) library to write the file to disk.
-</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
+For multi-file, use `Input(..., multiple=True)`, and a type annotation
+of `list[UploadFile]` in the handler.
+
+## Fastlite
+
+Fastlite and the MiniDataAPI specification it’s built on are a
+CRUD-oriented API for working with SQLite. APSW and apswutils is used to
+connect to SQLite, optimized for speed and clean error handling.
+
+``` python
+from fastlite import *
+```
+
+``` python
+db = database(':memory:') # or database('data/app.db')
+```
+
+Tables are normally constructed with classes, field types are specified
+as type hints.
+
+``` python
+class Book: isbn: str; title: str; pages: int; userid: int
+# The transform arg instructs fastlite to change the db schema when fields change.
+# Create only creates a table if the table doesn't exist.
+books = db.create(Book, pk='isbn', transform=True)
+                
+class User: id: int; name: str; active: bool = True
+# If no pk is provided, id is used as the primary key.
+users = db.create(User, transform=True)
+```
+
+### Fastlite CRUD operations
+
+Every operation in fastlite returns a fastcore flexiclass or a list of
+flexiclasses.
+
+Creating records:
+
+``` python
+for name in ['Charlie', 'Braden', 'Alma', 'Amara', 'Alex']: user = users.insert(name=name,active=False)
+user
+```
+
+    User(id=5, name='Alex', active=0)
+
+Listing all records:
+
+``` python
+users()
+```
+
+    [User(id=1, name='Charlie', active=0),
+     User(id=2, name='Braden', active=0),
+     User(id=3, name='Alma', active=0),
+     User(id=4, name='Amara', active=0),
+     User(id=5, name='Alex', active=0)]
+
+Limit, offset, and order the results:
+
+``` python
+users(order_by='name', limit=2, offset=1)
+```
+
+    [User(id=3, name='Alma', active=0), User(id=4, name='Amara', active=0)]
+
+Filter on the results:
+
+``` python
+users(where="name='Alma'")
+```
+
+    [User(id=3, name='Alma', active=0)]
+
+Placeholder for avoiding injection attacks:
+
+``` python
+users("name=?", where_args=('Alma',))
+```
+
+    [User(id=3, name='Alma', active=0)]
+
+Fetching a single record using the pk inside square brackets returns a
+flexiclass:
+
+``` python
+users[user.id]
+```
+
+    User(id=5, name='Alex', active=0)
+
+Test if a record exists by using `in` keyword on primary key:
+
+``` python
+1 in users
+```
+
+    True
+
+Updates return the updated record.
+
+``` python
+user.name='Lauren'
+user.active=True
+users.update(user)
+```
+
+    User(id=5, name='Lauren', active=1)
+
+`.xtra()` to constrain queries:
+
+``` python
+users.xtra(active=True)
+users()
+```
+
+    [User(id=5, name='Lauren', active=1)]
+
+Deletes return the table:
+
+``` python
+users.delete(user.id)
+```
+
+    <Table user (id, name, active)>
+
+NotFoundError is raised by square bracket searches, updates, and
+deletes.
+
+``` python
+try: users['Amy']
+except NotFoundError: print('User not found')
+```
+
+    User not found
+
+## MonsterUI
+
+Adds the Tailwind-based libraries FrankenUI and DaisyUI to FastHTML.
+Follows semantic HTML patterns when possible. A minimal app:
+
+``` python
+from monsterui.all import *
+
+app, rt = fast_app(hdrs=Theme.blue.headers()) # Use MonsterUI blue theme
+
+@rt
+def index():
+    socials = (('github','https://github.com/AnswerDotAI/MonsterUI'),
+               ('twitter','https://twitter.com/isaac_flath/'),
+               ('linkedin','https://www.linkedin.com/in/isaacflath/'))
+    return Titled("Your First App",
+        Card(
+            H1("Welcome!"),
+            P("Your first MonsterUI app", cls=TextPresets.muted_sm),
+            # DivLAigned and UkIconLink are non-semantic MonsterUI FT Components
+            footer=DivLAligned(*[UkIconLink(icon,href=url) for icon,url in socials])))
+```
+
+MonsterUI components are based on Franken UI/shadcn, which uses
+Tailwind:
+
+``` python
+Grid(
+    Card(H4("First Card")),
+    Card(H4("Second Card")))
+```
+
+``` html
+<div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+  <div class="uk-card ">
+    <div class="uk-card-body space-y-6">
+      <h4 class="uk-h4 ">First Card</h4>
+    </div>
+  </div>
+  <div class="uk-card ">
+    <div class="uk-card-body space-y-6">
+      <h4 class="uk-h4 ">Second Card</h4>
+    </div>
+  </div>
+</div>
+```
+
+List of all MonsterUI FastTags:
+
+``` python
+from monsterui import all as monster
+import inspect
+from IPython.display import Markdown, display
+```
+
+``` python
+def isft(o): return o[0].isupper()
+def ftsig(o): 
+    try: return f'- {o}{inspect.signature(getattr(monster, o))}'
+    except TypeError: return ''
+
+fts = L(dir(monster)).filter(isft).map(ftsig)
+display(Markdown('\n'.join(fts)))
+```
+
+- AT(\*values)
+
+- Abbr(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  title: str = None, \*\*kwargs) -\> fastcore.xml.FT
+
+- Address(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Alert(\*c, cls=’’, \*\*kwargs) -\> fastcore.xml.FT
+
+- AlertT(\*values)
+
+- Article(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- ArticleMeta(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- ArticleTitle(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- BackgroundT(\*values)
+
+- Blockquote(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple =
+  (), \*\*kwargs) -\> fastcore.xml.FT
+
+- Button(\*c: Union\[str, fastcore.xml.FT\], cls: Union\[str,
+  enum.Enum\] = \<ButtonT.default: ‘uk-btn-default’\>, submit=True,
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- ButtonT(\*values)
+
+- Caption(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Card(\*c, header: Union\[fastcore.xml.FT,
+  Iterable\[fastcore.xml.FT\]\] = None, footer: Union\[fastcore.xml.FT,
+  Iterable\[fastcore.xml.FT\]\] = None, body_cls=‘space-y-6’,
+  header_cls=(), footer_cls=(), cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- CardBody(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- CardContainer(\*c, cls=\<CardT.default: ‘uk-card-default’\>,
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- CardFooter(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- CardHeader(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- CardT(\*values)
+
+- CardTitle(\*c, cls=(), \*\*kwargs)
+
+- Center(\*c, vertical: bool = True, horizontal: bool = True, cls=(),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- CheckboxX(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- Cite(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- CodeBlock(\*c: str, cls: enum.Enum | str | tuple = (), code_cls:
+  enum.Enum | str | tuple = (), \*\*kwargs) -\> fastcore.xml.FT
+
+- CodeSpan(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- Container(\*c, cls=(‘mt-5’, \<ContainerT.xl: ‘uk-container-xl’\>),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- ContainerT(\*values)
+
+- Data(\*c: fastcore.xml.FT | str, value: str = None, cls: enum.Enum |
+  str | tuple = (), \*\*kwargs) -\> fastcore.xml.FT
+
+- Del(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Details(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Dfn(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- DiceBearAvatar(seed_name: str, h: int = 20, w: int = 20)
+
+- DivCentered(\*c, cls=‘space-y-4’, vstack=True, \*\*kwargs) -\>
+  fastcore.xml.FT
+
+- DivFullySpaced(\*c, cls=‘w-full’, \*\*kwargs)
+
+- DivHStacked(\*c, cls=‘space-x-4’, \*\*kwargs) -\> fastcore.xml.FT
+
+- DivLAligned(\*c, cls=‘space-x-4’, \*\*kwargs) -\> fastcore.xml.FT
+
+- DivRAligned(\*c, cls=‘space-x-4’, \*\*kwargs) -\> fastcore.xml.FT
+
+- DivVStacked(\*c, cls=‘space-y-4’, \*\*kwargs) -\> fastcore.xml.FT
+
+- Divider(\*c, cls=(‘my-4’, \<DividerT.icon: ‘uk-divider-icon’\>),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- DividerLine(lwidth=2, y_space=4)
+
+- DividerSplit(\*c, cls=(), line_cls=(), text_cls=())
+
+- DividerT(\*values)
+
+- DropDownNavContainer(\*li, cls=\<NavT.primary: ‘uk-nav-primary’\>,
+  parent=True, uk_nav=False, uk_dropdown=True, \*\*kwargs) -\>
+  fastcore.xml.FT
+
+- Em(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- FastHTML(\*args, pico=False, debug=False, routes=None,
+  middleware=None, title: str = ‘FastHTML page’,
+  exception_handlers=None, on_startup=None, on_shutdown=None,
+  lifespan=None, hdrs=None, ftrs=None, exts=None, before=None,
+  after=None, surreal=True, htmx=True, default_hdrs=True,
+  sess_cls=\<class ‘starlette.middleware.sessions.SessionMiddleware’\>,
+  secret_key=None, session_cookie=‘session\_’, max_age=31536000,
+  sess_path=‘/’, same_site=‘lax’, sess_https_only=False,
+  sess_domain=None, key_fname=‘.sesskey’,
+  body_wrap=<function noop_body>, htmlkw=None, nb_hdrs=False)
+
+- Fieldset(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- Figure(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- FlexT(\*values)
+
+- Form(\*c, cls=‘space-y-3’, \*\*kwargs) -\> fastcore.xml.FT
+
+- FormLabel(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- GenericLabelInput(label: str | fastcore.xml.FT, lbl_cls=’‘,
+  input_cls=’‘, container=functools.partial(<function ft>, ’div’,
+  void\_=False), cls=’’, id=None, input_fn=<function noop>, \*\*kwargs)
+
+- Grid(\*div, cols_min: int = 1, cols_max: int = 4, cols_sm: int = None,
+  cols_md: int = None, cols_lg: int = None, cols_xl: int = None, cols:
+  int = None, cls=‘gap-4’, \*\*kwargs) -\> fastcore.xml.FT
+
+- H1(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- H2(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- H3(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- H4(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- H5(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- H6(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- I(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Input(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- Ins(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Kbd(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Label(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- LabelCheckboxX(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
+  container=functools.partial(<function ft>, ’div’, void\_=False),
+  cls=‘flex items-center space-x-2’, id=’’, \*\*kwargs) -\>
+  fastcore.xml.FT
+
+- LabelInput(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
+  cls=’space-y-2’, id=’’, \*\*kwargs) -\> fastcore.xml.FT
+
+- LabelRadio(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
+  container=functools.partial(<function ft>, ’div’, void\_=False),
+  cls=‘flex items-center space-x-2’, id=’’, \*\*kwargs) -\>
+  fastcore.xml.FT
+
+- LabelRange(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
+  cls=’space-y-6’, id=’‘, value=’’, min=None, max=None, step=None,
+  label_range=True, \*, container=functools.partial(<function ft>,
+  ‘div’, void\_=False)) -\> fastcore.xml.FT
+
+- LabelSelect(\*option, label: str | fastcore.xml.FT, lbl_cls=’‘,
+  input_cls=’‘, container=functools.partial(<function ft>, ’div’,
+  void\_=False), cls=‘space-y-2’, id=’’, \*\*kwargs)
+
+- LabelSwitch(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
+  cls=’space-x-2’, id=’’, \*, container=functools.partial(<function ft>,
+  ‘div’, void\_=False)) -\> fastcore.xml.FT
+
+- LabelT(\*values)
+
+- LabelTextArea(label: str | fastcore.xml.FT, value=’‘, lbl_cls=’‘,
+  input_cls=’‘, cls=’space-y-2’, id=’’, \*\*kwargs) -\> fastcore.xml.FT
+
+- Legend(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- LiStep(\*c, cls=’’, data_content=None, \*\*kwargs) -\> fastcore.xml.FT
+
+- LightboxContainer(\*lightboxitem, data_uk_lightbox=‘counter: true’,
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- LightboxItem(\*c, href, data_alt=None, data_caption=None, cls=’’,
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- ListT(\*values)
+
+- Loading(cls=(\<LoadingT.bars: ‘loading-bars’\>, \<LoadingT.lg:
+  ‘loading-large’\>), htmx_indicator=False, \*\*kwargs) -\>
+  fastcore.xml.FT
+
+- LoadingT(\*values)
+
+- Mark(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Meter(\*c: fastcore.xml.FT | str, value: float = None, min: float =
+  None, max: float = None, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Modal(\*c, header=None, footer=None, cls=(), dialog_cls=(),
+  header_cls=‘p-6’, body_cls=‘space-y-6’, footer_cls=(), id=’’,
+  open=False, \*\*kwargs) -\> fastcore.xml.FT
+
+- ModalBody(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- ModalCloseButton(\*c, cls=‘absolute top-3 right-3’, htmx=False,
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- ModalContainer(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- ModalDialog(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- ModalFooter(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- ModalHeader(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- ModalTitle(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- NavBar(\*c, brand=h3((‘Title’,),{‘class’: ‘uk-h3’}),
+  right_cls=‘items-center space-x-4’, mobile_cls=‘space-y-4’, sticky:
+  bool = False, uk_scrollspy_nav: bool | str = False, cls=‘p-4’,
+  scrollspy_cls=\<ScrollspyT.underline: ‘navbar-underline’\>,
+  menu_id=None) -\> fastcore.xml.FT
+
+- NavCloseLi(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- NavContainer(\*li, cls=\<NavT.primary: ‘uk-nav-primary’\>,
+  parent=True, uk_nav=False, uk_scrollspy_nav=False, sticky=False,
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- NavDividerLi(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- NavHeaderLi(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- NavParentLi(\*nav_container, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- NavSubtitle(\*c, cls=\<TextPresets.muted_sm: ‘text-gray-500
+  dark:text-gray-200 text-sm’\>, \*\*kwargs) -\> fastcore.xml.FT
+
+- NavT(\*values)
+
+- Options(\*c, selected_idx: int = None, disabled_idxs: set = None)
+
+- Output(\*c: fastcore.xml.FT | str, form: str = None, for\_: str =
+  None, cls: enum.Enum | str | tuple = (), \*\*kwargs) -\>
+  fastcore.xml.FT
+
+- PicSumImg(h: int = 200, w: int = 200, id: int = None, grayscale: bool
+  = False, blur: int = None, \*\*kwargs) -\> fastcore.xml.FT
+
+- Placeholder(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- Progress(\*c, cls=(), value=’‘, max=’100’, \*\*kwargs) -\>
+  fastcore.xml.FT
+
+- Q(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Radio(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- Range(\*c, value=’’, label=True, min=None, max=None, step=None,
+  cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- S(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Samp(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- ScrollspyT(\*values)
+
+- Section(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- SectionT(\*values)
+
+- Select(\*option, inp_cls=(), cls=(‘h-10’,), cls_custom=‘button:
+  uk-input-fake dropdown: w-full’, id=’‘, name=’‘, placeholder=’’,
+  searchable=False, insertable=False, select_kwargs=None, \*\*kwargs)
+
+- Slider(\*c, cls=’‘, items_cls=’gap-4’, nav=True, nav_cls=’’,
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- SliderContainer(\*c, cls=’’, uk_slider=True, \*\*kwargs) -\>
+  fastcore.xml.FT
+
+- SliderItems(\*c, cls=’’, \*\*kwargs) -\> fastcore.xml.FT
+
+- SliderNav(cls=‘uk-position-small uk-hidden-hover’, prev_cls=‘absolute
+  left-0 top-1/2 -translate-y-1/2’, next_cls=‘absolute right-0 top-1/2
+  -translate-y-1/2’, \*\*kwargs) -\> fastcore.xml.FT
+
+- Small(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- StepT(\*values)
+
+- Steps(\*li, cls=’’, \*\*kwargs) -\> fastcore.xml.FT
+
+- StepsT(\*values)
+
+- Strong(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Sub(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Subtitle(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple =
+  ‘mt-1.5’, \*\*kwargs) -\> fastcore.xml.FT
+
+- Summary(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Sup(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- Switch(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- TabContainer(\*li, cls=’’, alt=False, \*\*kwargs) -\> fastcore.xml.FT
+
+- Table(\*c, cls=(\<TableT.middle: ‘uk-table-middle’\>,
+  \<TableT.divider: ‘uk-table-divider’\>, \<TableT.hover:
+  ‘uk-table-hover’\>, \<TableT.sm: ‘uk-table-sm’\>), \*\*kwargs) -\>
+  fastcore.xml.FT
+
+- TableFromDicts(header_data: Sequence, body_data: Sequence\[dict\],
+  footer_data=None, header_cell_render=<function Th>,
+  body_cell_render=\<function <lambda>\>, footer_cell_render=\<function
+  <lambda>\>, cls=(\<TableT.middle: ‘uk-table-middle’\>,
+  \<TableT.divider: ‘uk-table-divider’\>, \<TableT.hover:
+  ‘uk-table-hover’\>, \<TableT.sm: ‘uk-table-sm’\>), sortable=False,
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- TableFromLists(header_data: Sequence, body_data: Sequence\[Sequence\],
+  footer_data=None, header_cell_render=<function Th>,
+  body_cell_render=<function Td>, footer_cell_render=<function Td>,
+  cls=(\<TableT.middle: ‘uk-table-middle’\>, \<TableT.divider:
+  ‘uk-table-divider’\>, \<TableT.hover: ‘uk-table-hover’\>, \<TableT.sm:
+  ‘uk-table-sm’\>), sortable=False, \*\*kwargs) -\> fastcore.xml.FT
+
+- TableT(\*values)
+
+- Tbody(\*rows, cls=(), sortable=False, \*\*kwargs)
+
+- Td(\*c, cls=(), shrink=False, expand=False, small=False)
+
+- TextArea(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- TextPresets(\*values)
+
+- TextT(\*values)
+
+- Th(\*c, cls=(), shrink=False, expand=False, small=False)
+
+- Theme(\*values)
+
+- ThemeFont()
+
+- ThemePicker(color=True, radii=True, shadows=True, font=True,
+  mode=True, cls=‘p-4’, custom_themes=\[\])
+
+- ThemeRadii(\*values)
+
+- ThemeShadows()
+
+- Time(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  datetime: str = None, \*\*kwargs) -\> fastcore.xml.FT
+
+- Titled(title: str = ‘FastHTML app’, \*c, cls=\<ContainerT.xl:
+  ‘uk-container-xl’\>, \*\*kwargs) -\> fastcore.xml.FT
+
+- Toast(\*c, cls=’‘, alert_cls=’’, \*\*kwargs) -\> fastcore.xml.FT
+
+- ToastHT(\*values)
+
+- ToastVT(\*values)
+
+- U(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- UkFormSection(title, description, \*c, button_txt=‘Update’,
+  outer_margin=6, inner_margin=6)
+
+- UkIcon(icon: str, height: int = None, width: int = None, stroke_width:
+  int = None, cls=(), \*\*kwargs) -\> fastcore.xml.FT
+
+- UkIconLink(icon: str, height: int = None, width: int = None,
+  stroke_width: int = None, cls=(), button: bool = False, \*\*kwargs)
+  -\> fastcore.xml.FT
+
+- Upload(\*c, cls=(), multiple=False, accept=None,
+  button_cls=\<ButtonT.default: ‘uk-btn-default’\>, id=None, name=None,
+  \*\*kwargs) -\> fastcore.xml.FT
+
+- UploadZone(\*c, cls=(), multiple=False, accept=None, id=None,
+  name=None, \*\*kwargs) -\> fastcore.xml.FT
+
+- Var(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
+  \*\*kwargs) -\> fastcore.xml.FT</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
 title = "Reference"
 +++
 
@@ -1358,604 +1400,7 @@ You can set them directly in javascript, or you can use a `meta` tag:
 
 ```html
 <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}'>
-```</doc><doc title="Surreal" desc="Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions"># 🗿 Surreal
-### Tiny jQuery alternative for plain Javascript with inline [Locality of Behavior](https://htmx.org/essays/locality-of-behaviour/)!
-
-![cover](https://user-images.githubusercontent.com/24665/171092805-b41286b2-be4a-4aab-9ee6-d604699cc507.png)
-(Art by [shahabalizadeh](https://www.deviantart.com/shahabalizadeh))
-<!--
-<a href="https://github.com/gnat/surreal/archive/refs/heads/main.zip"><img src="https://img.shields.io/badge/Download%20.zip-ff9800?style=for-the-badge&color=%234400e5" alt="Download badge" /></a>
-
-<a href="https://github.com/gnat/surreal"><img src="https://img.shields.io/github/workflow/status/gnat/surreal/ci?label=ci&style=for-the-badge&color=%237d91ce" alt="CI build badge" /></a>
-<a href="https://github.com/gnat/surreal/releases"><img src="https://img.shields.io/github/workflow/status/gnat/surreal/release?label=Mini&style=for-the-badge&color=%237d91ce" alt="Mini build badge" /></a>
-<a href="https://github.com/gnat/surreal/blob/main/LICENSE"><img src="https://img.shields.io/github/license/gnat/surreal?style=for-the-badge&color=%234400e5" alt="License badge" /></a>-->
-
-## Why does this exist?
-
-For devs who love ergonomics! You may appreciate Surreal if:
-
-* You want to stay as close as possible to Vanilla JS.
-* Hate typing `document.querySelector` over.. and over..
-* Hate typing `addEventListener` over.. and over..
-* Really wish `document.querySelectorAll` had Array functions..
-* Really wish `this` would work in any inline `<script>` tag
-* Enjoyed using jQuery selector syntax.
-* [Animations, timelines, tweens](#-quick-start) with no extra libraries.
-* Only 320 lines. No build step. No dependencies.
-* Pairs well with [htmx](https://htmx.org)
-* Want fewer layers, less complexity. Are aware of the cargo cult. ✈️
-
-## ✨ What does it add to Javascript?
-
-* ⚡️ [Locality of Behavior (LoB)](https://htmx.org/essays/locality-of-behaviour/) Use `me()` inside `<script>`
-  * No **.class** or **#id** needed! Get an element without creating a unique name.
-  * `this` but much more flexible!
-  * Want `me` in your CSS `<style>` tags, too? See our [companion script](https://github.com/gnat/css-scope-inline)
-* 🔗 Call chaining, jQuery style.
-* ♻️ Functions work seamlessly on 1 element or arrays of elements!
-  * All functions can use: `me()`, `any()`, `NodeList`, `HTMLElement` (..or arrays of these!)
-  * Get 1 element: `me()`
-  * ..or many elements: `any()`
-  * `me()` or `any()` can chain with any Surreal function.
-    * `me()` can be used directly as a single element (like `querySelector()` or `$()`)
-    * `any()` can use: `for` / `forEach` / `filter` / `map` (like `querySelectorAll()` or `$()`)
-* 🌗 No forced style. Use: `classAdd` or `class_add` or `addClass` or `add_class`
-  * Use `camelCase` (Javascript) or `snake_case` (Python, Rust, PHP, Ruby, SQL, CSS).
-
-### 🤔 Why use `me()` / `any()` instead of `$()`
-* 💡 Solves the classic jQuery bloat problem: Am I getting 1 element or an array of elements?
-  * `me()` is guaranteed to return 1 element (or first found, or null).
-  * `any()` is guaranteed to return an array (or empty array).
-  * No more checks = write less code. Bonus: Reads more like self-documenting english.
-
-## 👁️ How does it look?
-
-Do surreal things with [Locality of Behavior](https://htmx.org/essays/locality-of-behaviour/) like:
-```html
-<label for="file-input" >
-  <div class="uploader"></div>
-  <script>
-    me().on("dragover", ev => { halt(ev); me(ev).classAdd('.hover'); console.log("Files in drop zone.") })
-    me().on("dragleave", ev => { halt(ev); me(ev).classRemove('.hover'); console.log("Files left drop zone.") })
-    me().on("drop", ev => { halt(ev); me(ev).classRemove('.hover').classAdd('.loading'); me('#file-input').attribute('files', ev.dataTransfer.files); me('#form').send('change') })
-  </script>
-</label>
-```
-
-See the [Live Example](https://gnat.github.io/surreal/example.html)! Then [view source](https://github.com/gnat/surreal/blob/main/example.html).
-
-## 🎁 Install
-
-Surreal is only 320 lines. No build step. No dependencies.
-
-[📥 Download](https://raw.githubusercontent.com/gnat/surreal/main/surreal.js) into your project, and add `<script src="/surreal.js"></script>` in your `<head>`
-
-Or, 🌐 via CDN: `<script src="https://cdnjs.cloudflare.com/ajax/libs/surreal/1.3.2/surreal.js"></script>`
-
-## ⚡ Usage
-
-### <a name="selectors"></a>🔍️ DOM Selection
-
-* Select **one** element: `me(...)`
-  * Can be any of:
-    * CSS selector: `".button"`, `"#header"`, `"h1"`, `"body > .block"`
-    * Variables: `body`, `e`, `some_element`
-    * Events: `event.currentTarget` will be used.
-    * Surreal selectors: `me()`,`any()`
-    * Choose the start location in the DOM with the 2nd arg. (Default: `document`)
-      * 🔥 `any('button', me('#header')).classAdd('red')`
-        * Add `.red` to any `<button>` inside of `#header`
-  * `me()` ⭐ Get parent element of `<script>` without a **.class** or **#id** !
-  * `me("body")` Gets `<body>`
-  * `me(".button")` Gets the first `<div class="button">...</div>`. To get all of them use `any()`
-* Select **one or more** elements as an array: `any(...)`
-  * Like `me()` but guaranteed to return an array (or empty array). 
-  * `any(".foo")` ⭐ Get all matching elements.
-  * Convert between arrays of elements and single elements: `any(me())`, `me(any(".something"))`
- 
-### 🔥 DOM Functions
-
-* ♻️ All functions work on single elements or arrays of elements.
-* 🔗 Start a chain using `me()` and `any()`
-  * 🟢 Style A `me().classAdd('red')` ⭐ Chain style. Recommended!
-  * 🟠 Style B: `classAdd(me(), 'red')`
-* 🌐 Global conveniences help you write less code.
-  * `globalsAdd()` will automatically warn you of any clobbering issues!
-  * 💀🩸 If you want no conveniences, or are a masochist, delete `globalsAdd()`
-    * 🟢 `me().classAdd('red')` becomes `surreal.me().classAdd('red')`
-    * 🟠 `classAdd(me(), 'red')` becomes `surreal.classAdd(surreal.me(), 'red')`
-
-See: [Quick Start](#quick-start) and [Reference](#reference) and [No Surreal Needed](#no-surreal)
-
-## <a name="quick-start"></a>⚡ Quick Start
-
-* Add a class
-  * `me().classAdd('red')`
-  * `any("button").classAdd('red')`
-* Events
-  * `me().on("click", ev => me(ev).fadeOut() )`
-  * `any('button').on('click', ev => { me(ev).styles('color: red') })`
-* Run functions over elements.
-  * `any('button').run(_ => { alert(_) })`
-* Styles / CSS
-  * `me().styles('color: red')`
-  * `me().styles({ 'color':'red', 'background':'blue' })`
-* Attributes
-  * `me().attribute('active', true)`
-
-<a name="timelines"></a>
-#### Timeline animations without any libraries.
-```html
-<div>I change color every second.
-  <script>
-    // On click, animate something new every second.
-    me().on("click", async ev => {
-      let el = me(ev) // Save target because async will lose it.
-      me(el).styles({ "transition": "background 1s" })
-      await sleep(1000)
-      me(el).styles({ "background": "red" })
-      await sleep(1000)
-      me(el).styles({ "background": "green" })
-      await sleep(1000)
-      me(el).styles({ "background": "blue" })
-      await sleep(1000)
-      me(el).styles({ "background": "none" })
-      await sleep(1000)
-      me(el).remove()
-    })
-  </script>
-</div>
-```
-```html
-<div>I fade out and remove myself.
-  <script>me().on("click", ev => { me(ev).fadeOut() })</script>
-</div>
-```
-```html
-<div>Change color every second.
-  <script>
-    // Run immediately.
-    (async (e = me()) => {
-      me(e).styles({ "transition": "background 1s" })
-      await sleep(1000)
-      me(e).styles({ "background": "red" })
-      await sleep(1000)
-      me(e).styles({ "background": "green" })
-      await sleep(1000)
-      me(e).styles({ "background": "blue" })
-      await sleep(1000)
-      me(e).styles({ "background": "none" })
-      await sleep(1000)
-      me(e).remove()
-    })()
-  </script>
-</div>
-```
-```html
-<script>
-  // Run immediately, for every <button> globally!
-  (async () => {
-    any("button").fadeOut()
-  })()
-</script>
-```
-#### Array methods
-```js
-any('button')?.forEach(...)
-any('button')?.map(...)
-```
-
-## <a name="reference"></a>👁️ Functions
-Looking for [DOM Selectors](#selectors)?
-Looking for stuff [we recommend doing in vanilla JS](#no-surreal)?
-### 🧭 Legend
-* 🔗 Chainable off `me()` and `any()`
-* 🌐 Global shortcut.
-* 🔥 Runnable example.
-* 🔌 Built-in Plugin
-### 👁️ At a glance
-
-* 🔗 `run`
-  * It's `forEach` but less wordy and works on single elements, too!
-  * 🔥 `me().run(e => { alert(e) })`
-  * 🔥 `any('button').run(e => { alert(e) })`
-* 🔗 `remove`
-  * 🔥 `me().remove()`
-  * 🔥 `any('button').remove()`
-* 🔗 `classAdd` 🌗 `class_add` 🌗 `addClass` 🌗 `add_class`
-  * 🔥 `me().classAdd('active')`
-  * Leading `.` is **optional**
-    * Same thing: `me().classAdd('active')` 🌗 `me().classAdd('.active')`
-* 🔗 `classRemove` 🌗 `class_remove` 🌗 `removeClass` 🌗 `remove_class`
-  * 🔥 `me().classRemove('active')`
-* 🔗 `classToggle` 🌗 `class_toggle` 🌗 `toggleClass` 🌗 `toggle_class`
-  * 🔥 `me().classToggle('active')`
-* 🔗 `styles`
-  * 🔥 `me().styles('color: red')` Add style.
-  * 🔥 `me().styles({ 'color':'red', 'background':'blue' })` Add multiple styles.
-  * 🔥 `me().styles({ 'background':null })` Remove style.
-* 🔗 `attribute` 🌗 `attributes` 🌗 `attr`
-  * Get: 🔥 `me().attribute('data-x')`
-    * For single elements.
-    * For many elements, wrap it in: `any(...).run(...)` or `any(...).forEach(...)`
-  * Set: 🔥`me().attribute('data-x', true)`
-  * Set multiple: 🔥 `me().attribute({ 'data-x':'yes', 'data-y':'no' })`
-  * Remove: 🔥 `me().attribute('data-x', null)`
-  * Remove multiple: 🔥 `me().attribute({ 'data-x': null, 'data-y':null })`
-* 🔗 `send` 🌗 `trigger`
-  * 🔥 `me().send('change')`
-  * 🔥 `me().send('change', {'data':'thing'})`
-  * Wraps `dispatchEvent`
-* 🔗 `on`
-  * 🔥 `me().on('click', ev => { me(ev).styles('background', 'red') })`
-  * Wraps `addEventListener`
-* 🔗 `off`
-  * 🔥 `me().off('click', fn)`
-  * Wraps `removeEventListener`
-* 🔗 `offAll`
-  * 🔥 `me().offAll()`
-* 🔗 `disable`
-  * 🔥 `me().disable()`
-  * Easy alternative to `off()`. Disables click, key, submit events.
-* 🔗 `enable`
-  * 🔥 `me().enable()`
-  * Opposite of `disable()`
-* 🌐 `createElement` 🌗 `create_element`
-  * 🔥 `e_new = createElement("div"); me().prepend(e_new)`
-  * Alias of [document.createElement](https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement)
-* 🌐 `sleep`
-  * 🔥 `await sleep(1000, ev => { alert(ev) })`
-  * `async` version of `setTimeout`
-  * Wonderful for animation timelines.
-* 🌐 `halt`
-  * 🔥 `halt(event)`
-  * When recieving an event, stop propagation, and prevent default actions (such as form submit).
-  * Wrapper for [stopPropagation](https://developer.mozilla.org/en-US/docs/Web/API/Event/stopPropagation) and [preventDefault](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault)
-* 🌐 `tick`
-  * 🔥 `await tick()`
-  * `await` version of `rAF` / `requestAnimationFrame`.
-  * Waits for 1 frame (browser paint).
-  * Useful to guarantee CSS properties are applied, and events have propagated.
-* 🌐 `rAF`
-  * 🔥 `rAF(e => { return e })`
-  * Calls after 1 frame (browser paint). Alias of [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)
-  * Useful to guarantee CSS properties are applied, and events have propagated.
-* 🌐 `rIC`
-  * 🔥 `rIC(e => { return e })`
-  * Calls when Javascript is idle. Alias of [requestIdleCallback](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback)
-* 🌐 `onloadAdd` 🌗 `onload_add` 🌗 `addOnload` 🌗 `add_onload`
-  * 🔥 `onloadAdd(_ => { alert("loaded!"); })`
-  * 🔥 `<script>let e = me(); onloadAdd(_ => { me(e).on("click", ev => { alert("clicked") }) })</script>`
-  * Execute after the DOM is ready. Similar to jquery `ready()`
-  * Add to `window.onload` while preventing overwrites of `window.onload` and predictable loading!
-  * Alternatives:
-    * Skip missing elements using `?.` example: `me("video")?.requestFullscreen()`
-    * Place `<script>` after the loaded element.
-      * See `me('-')` / `me('prev')`
-* 🔌 `fadeOut`
-  * See below
-* 🔌 `fadeIn`
-  * See below
-
-### <a name="plugin-included"></a>🔌 Built-in Plugins
-
-### Effects
-Build effects with `me().styles({...})` with timelines using [CSS transitioned `await` or callbacks](#timelines).
-
-Common effects included:
-
-* 🔗 `fadeOut` 🌗 `fade_out`
-  * Fade out and remove element.
-  * Keep element with `remove=false`.
-  * 🔥 `me().fadeOut()`
-  * 🔥 `me().fadeOut(ev => { alert("Faded out!") }, 3000)` Over 3 seconds then call function.
-
-* 🔗 `fadeIn` 🌗 `fade_in`
-  * Fade in existing element which has `opacity: 0`
-  * 🔥 `me().fadeIn()`
-  * 🔥 `me().fadeIn(ev => { alert("Faded in!") }, 3000)` Over 3 seconds then call function.
-
-
-## <a name="no-surreal"></a>⚪ No Surreal Needed
-
-More often than not, Vanilla JS is the easiest way!
-
-Logging
-* 🔥 `console.log()` `console.warn()` `console.error()`
-* Event logging: 🔥 `monitorEvents(me())` See: [Chrome Blog](https://developer.chrome.com/blog/quickly-monitor-events-from-the-console-panel-2/)
-
-Benchmarking / Time It!
-* 🔥 `console.time('name')`
-* 🔥 `console.timeEnd('name')`
-
-Text / HTML Content
-* 🔥 `me().textContent = "hello world"`
-  * XSS Safe! See: [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent)
-* 🔥 `me().innerHTML = "<p>hello world</p>"`
-* 🔥 `me().innerText = "hello world"`
-
-Children
-* 🔥 `me().children`
-* 🔥 `me().children.hidden = true`
-
-Append / Prepend elements.
-* 🔥 `me().prepend(new_element)`
-* 🔥 `me().appendChild(new_element)`
-* 🔥 `me().insertBefore(element, other_element.firstChild)`
-* 🔥 `me().insertAdjacentHTML("beforebegin", new_element)`
-
-AJAX (replace jQuery `ajax()`)
-* Use [htmx](https://htmx.org/) or [htmz](https://leanrada.com/htmz/) or [fetch()](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) or [XMLHttpRequest()](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
-* Example using `fetch()`
-```js
-me().on("click", async event => {
-  let e = me(event)
-  // EXAMPLE 1: Hit an endpoint.
-  if((await fetch("/webhook")).ok) console.log("Did the thing.")
-  // EXAMPLE 2: Get content and replace me()
-  try {
-    let response = await fetch('/endpoint')
-    if (response.ok) e.innerHTML = await response.text()
-    else console.warn('fetch(): Bad response')
-  }
-  catch (error) { console.warn(`fetch(): ${error}`) }
-})
-```
-* Example using `XMLHttpRequest()`
-```js
-me().on("click", async event => {
-  let e = me(event)
-  // EXAMPLE 1: Hit an endpoint.
-  var xhr = new XMLHttpRequest()
-  xhr.open("GET", "/webhook")
-  xhr.send()
-  // EXAMPLE 2: Get content and replace me()
-  var xhr = new XMLHttpRequest()
-  xhr.open("GET", "/endpoint")
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState == 4 && xhr.status >= 200 && xhr.status < 300) e.innerHTML = xhr.responseText
-  }
-  xhr.send()
-})
-```
-
- ## 💎 Conventions & Tips
-
-* Many ideas can be done in HTML / CSS (ex: dropdowns)
-* `_` = for temporary or unused variables. Keep it short and sweet!
-* `e`, `el`, `elt` = element
-* `e`, `ev`, `evt` = event
-* `f`, `fn` = function
-
-#### Scope functions and variables inside `<script>`
-  * ⭐ Use a block `{ let note = "hi"; function hey(text) { alert(text) }; me().on('click', ev => { hey(note) }) }`
-    * `let` and `function` is scoped within `{ }`
-  * ⭐ Use `me()`
-    *  `me().hey = (text) => { alert(text) }`
-    *  `me().on('click', (ev) => { me(ev).hey("hi") })`
-  * ⭐ Use an event `me().on('click', ev => { /* add and call function here */ })`
-  * Use an inline module: `<script type="module">`
-    * Note: `me()` in modules will not see `parentElement`, explicit selectors are required: `me(".mybutton")`
-
-#### Select a void element like `<input type="text" />`
-* Use: `me('-')` or `me('prev')` or `me('previous')`
-  * 🔥 `<input type="text" /> <script>me('-').value = "hello"</script>`
-  * Inspired by the CSS "next sibling" combinator `+` but in reverse `-`
-* Or, use a relative start.
-  * 🔥 `<form> <input type="text" n1 /> <script>me('[n1]', me()).value = "hello"</script> </form>`
-
-#### Ignore call chain when element is missing.
-* 🔥 `me("#i_dont_exist")?.classAdd('active')`
-* No warnings: 🔥 `me("#i_dont_exist", document, false)?.classAdd('active')`
-
-## <a name="plugins"></a>🔌 Your own plugin
-
-Feel free to edit Surreal directly- but if you prefer, you can use plugins to effortlessly merge with new versions.
-
-```javascript
-function pluginHello(e) {
-  function hello(e, name="World") {
-    console.log(`Hello ${name} from ${e}`)
-    return e // Make chainable.
-  }
-  // Add sugar
-  e.hello = (name) => { return hello(e, name) }
-}
-
-surreal.plugins.push(pluginHello)
-```
-
-Now use your function like: `me().hello("Internet")`
-
-* See the included `pluginEffects` for a more comprehensive example.
-* Your functions are added globally by `globalsAdd()` If you do not want this, add it to the `restricted` list.
-* Refer to an existing function to see how to make yours work with 1 or many elements.
-
-Make an [issue](https://github.com/gnat/surreal/issues) or [pull request](https://github.com/gnat/surreal/pulls) if you think people would like to use it! If it's useful enough we'll want it in core.
-
-### ⭐ Awesome Surreal examples, plugins, and resources: [awesome-surreal](https://github.com/gnat/awesome-surreal) !
-
-## 📚️ Inspired by
-
-* [jQuery](https://jquery.com/) for the chainable syntax we all love.
-* [BlingBling.js](https://github.com/argyleink/blingblingjs) for modern minimalism.
-* [Bliss.js](https://blissfuljs.com/) for a focus on single elements and extensibility.
-* [Hyperscript](https://hyperscript.org) for Locality of Behavior and awesome ergonomics.
-* Shout out to [Umbrella](https://umbrellajs.com/), [Cash](https://github.com/fabiospampinato/cash), [Zepto](https://zeptojs.com/)- Not quite as ergonomic. Requires build step to extend.
-
-## 🌘 Future
-* Always more `example.html` goodies!
-* Automated browser testing perhaps with:
-  * [Fava](https://github.com/fabiospampinato/fava). See: https://github.com/avajs/ava/issues/24#issuecomment-885949036
-  * [Ava](https://github.com/avajs/ava/blob/main/docs/recipes/browser-testing.md)
-  * [jsdom](https://github.com/jsdom/jsdom)
-    * [jsdom notes](https://github.com/jsdom/jsdom#executing-scripts)</doc><doc title="CSS Scope Inline" desc="A JS library which allow `me` to be used in CSS selectors, by using a `MutationObserver` to monitor the DOM"># 🌘 CSS Scope Inline
-
-![cover](https://github.com/gnat/css-scope-inline/assets/24665/c4935c1b-34e3-4220-9d42-11f064999a57)
-(Art by [shahabalizadeh](https://www.artstation.com/artwork/zDgdd))
-
-## Why does this exist?
-
-* You want an easy inline vanilla CSS experience without Tailwind CSS.
-* Hate creating unique class names over.. and over.. to use once.
-* You want to co-locate your styles for ⚡️ [Locality of Behavior (LoB)](https://htmx.org/essays/locality-of-behaviour/)
-* You wish `this` would work in `<style>` tags.
-* Want all CSS features: [Nesting](https://caniuse.com/css-nesting), animations. Get scoped [`@keyframes`](https://github.com/gnat/css-scope-inline/blob/main/example.html#L50)!
-* You wish `@media` queries were shorter for [responsive design](https://tailwindcss.com/docs/responsive-design).
-* Only 16 lines. No build step. No dependencies.
-* Pairs well with [htmx](https://htmx.org) and [Surreal](https://github.com/gnat/surreal)
-* Want fewer layers, less complexity. Are aware of the cargo cult. ✈️
-
-✨ Want to also scope your `<script>` tags? See our companion project [Surreal](https://github.com/gnat/surreal)
-
-## 👁️ How does it look?
-```html
-<div>
-    <style>
-        me { background: red; } /* ✨ this & self also work! */
-        me button { background: blue; } /* style child elements inline! */
-    </style>
-    <button>I'm blue</button>
-</div>
-```
-See the [Live Example](https://gnat.github.io/css-scope-inline/example.html)! Then [view source](https://github.com/gnat/css-scope-inline/blob/main/example.html).
-
-## 🌘 How does it work?
-
-This uses `MutationObserver` to monitor the DOM, and the moment a `<style>` tag is seen, it scopes the styles to whatever the parent element is. No flashing or popping. 
-
-This method also leaves your existing styles untouched, allowing you to mix and match at your leisure.
-
-## 🎁 Install
-
-✂️ copy + 📋 paste the snippet into `<script>` in your `<head>`
-
-Or, [📥 download](https://raw.githubusercontent.com/gnat/css-scope-inline/main/script.js) into your project, and add `<script src="script.js"></script>` in your `<head>`
-
-Or, 🌐 CDN: `<script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"></script>`
-
-## 🤔 Why consider this over Tailwind CSS?
-
-Use whatever you'd like, but there's a few advantages with this approach over Tailwind, Twind, UnoCSS:
-
-* No [repeated styles](https://tailwindcss.com/docs/reusing-styles) on child elements (..no [@apply](https://tailwindcss.com/docs/reusing-styles#extracting-classes-with-apply), no `[&>thing]` on each style).
-* No repeated prefixes for media queries, hover, focus, etc.
-* No visual noise on every `<div>`. Use a local `<style>` per group.
-* Share syntax between local and external styles. It's just CSS.
-* Regain your "inspect, play with styles, paste" workflow in your web browser!
-* No suffering from lost syntax highlighting on properties and units.
-* No high risk of eventually requiring a build step.
-* No chance of [deprecations](https://windicss.org/posts/sunsetting.html). 16 lines is infinitely maintainable.
-* No suffering from FOUC (a flash of unstyled content).
-* Zero friction movement of styles between inline and `.css` files. Just replace `me`
-* No special tooling or plugins to install.
-
-## ⚡ Workflow Tips
-
-* Flat, 1 selector per line can be very short like Tailwind. See the examples.
-* Use just plain CSS variables in your design system.
-* Use the short `@media` queries for responsive design.
-  * Mobile First (flow: **above** breakpoint): **🟢 None (xs)** `sm` `md` `lg` `xl` `xx` 🏁
-  * Desktop First (flow: **below** breakpoint): 🏁 `xs-` `sm-` `md-` `lg-` `xl-` **🟢 None (xx)**
-  * 🟢 = No breakpoint. Default. See the [Live Example](https://gnat.github.io/css-scope-inline/example.html)!
-  * Based on [Tailwind](https://tailwindcss.com/docs/responsive-design) breakpoints. We use `xx` not `2xl` to not break CSS highlighters.
-  * Unlike Tailwind, you can [nest your @media styles](https://developer.chrome.com/articles/css-nesting/#nesting-media)!
-* Positional selectors may be easier using `div[n1]` for `<div n1>` instead of `div:nth-child(1)`
-* Try tools like- Auto complete styles: [VSCode](https://code.visualstudio.com/) or [Sublime](https://packagecontrol.io/packages/Emmet)
-
-## 👁️ CSS Scope Inline vs Tailwind CSS Showdowns
-### Basics
-Tailwind verbosity goes up with more child elements.
-```html
-<div>
-    <style>
-        me { background: red; }
-        me div { background: green; }
-        me [n1] { background: yellow; }
-        me [n2] { background: blue; }
-    </style>
-    red
-    <div>green</div>
-    <div>green</div>
-    <div>green</div>
-    <div n1>yellow</div>
-    <div n2>blue</div>
-    <div>green</div>
-    <div>green</div>
-</div>
-
-<div class="bg-[red]">
-    red
-    <div class="bg-[green]">green</div>
-    <div class="bg-[green]">green</div>
-    <div class="bg-[green]">green</div>
-    <div class="bg-[yellow]">yellow</div>
-    <div class="bg-[blue]">blue</div>
-    <div class="bg-[green]">green</div>
-    <div class="bg-[green]">green</div>
-</div>
-```
-
-### CSS variables and child elements
-At first glance, **Tailwind Example 2** looks very promising! Exciting ...but:
-* 🔴 **Every child style requires an explicit selector.**
-  * Tailwinds' shorthand advantages sadly disappear.
-  * Any more child styles added in Tailwind will become longer than vanilla CSS.
-  * This limited example is the best case scenario for Tailwind.
-* 🔴 Not visible on github: **no highlighting for properties and units** begins to be painful.
-```html
-<!doctype html>
-<html>
-    <head>
-        <style>
-            :root {
-                --color-1: hsl(0 0% 88%);
-                --color-1-active: hsl(214 20% 70%);
-            }
-        </style>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js"></script>
-    </head>
-    <body>
-        <!-- CSS Scope Inline -->
-        <div>
-            <style>
-               me { margin:8px 6px; }
-               me div a { display:block; padding:8px 12px; margin:10px 0; background:var(--color-1); border-radius:10px; text-align:center; }
-               me div a:hover { background:var(--color-1-active); color:white; }
-            </style>
-            <div><a href="#">Home</a></div>
-            <div><a href="#">Team</a></div>
-            <div><a href="#">Profile</a></div>
-            <div><a href="#">Settings</a></div>
-            <div><a href="#">Log Out</a></div>
-        </div>
-
-        <!-- Tailwind Example 1 -->
-        <div class="mx-2 my-4">
-            <div><a href="#" class="block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white">Home</a></div>
-            <div><a href="#" class="block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white">Team</a></div>
-            <div><a href="#" class="block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white">Profile</a></div>
-            <div><a href="#" class="block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white">Settings</a></div>
-            <div><a href="#" class="block py-2 px-3 my-2 bg-[--color-1] rounded-lg text-center hover:bg-[--color-1-active] hover:text-white">Log Out</a></div>
-        </div>
-
-        <!-- Tailwind Example 2 -->
-        <div class="mx-2 my-4
-            [&_div_a]:block [&_div_a]:py-2 [&_div_a]:px-3 [&_div_a]:my-2 [&_div_a]:bg-[--color-1] [&_div_a]:rounded-lg [&_div_a]:text-center
-            [&_div_a:hover]:bg-[--color-1-active] [&_div_a:hover]:text-white">
-            <div><a href="#">Home</a></div>
-            <div><a href="#">Team</a></div>
-            <div><a href="#">Profile</a></div>
-            <div><a href="#">Settings</a></div>
-            <div><a href="#">Log Out</a></div>
-        </div>
-    </body>
-</html>
-```
-## 🔎 Technical FAQ
-* Why do you use `querySelectorAll()` and not just process the `MutationObserver` results directly?
-  * This was indeed the original design; it will work well up until you begin recieving subtrees (ex: DOM swaps with [htmx](https://htmx.org), ajax, jquery, etc.) which requires walking all subtree elements to ensure we do not miss a `<style>`. This unfortunately involves re-scanning thousands of repeated elements. This is why `querySelectorAll()` ends up the performance (and simplicity) winner.</doc><doc title="Starlette quick guide" desc="A quick overview of some Starlette features useful to FastHTML devs."># 🌟 Starlette Quick Manual
+```</doc><doc title="Starlette quick guide" desc="A quick overview of some Starlette features useful to FastHTML devs."># 🌟 Starlette Quick Manual
 
 
 2020-02-09
@@ -2750,6 +2195,511 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def Favicon(light_icon, dark_icon)`
     Light and dark favicon headers
+</doc><doc title="MonsterUI API List" desc="Complete API Reference for Monster UI, a component framework similar to shadcn, but for FastHTML"># monsterui Module Documentation
+
+## monsterui.core
+
+- `class ThemeRadii(Enum)`
+    Members: none, sm, md, lg
+
+
+- `class ThemeShadows`
+
+- `class ThemeFont`
+
+- `class Theme(Enum)`
+    Selector to choose theme and get all headers needed for app.  Includes frankenui + tailwind + daisyui + highlight.js options
+    Members: slate, stone, gray, neutral, red, rose, orange, green, blue, yellow, violet, zinc
+
+    - `headers(self, mode, daisy, highlightjs, katex, radii, shadows, font)`
+        Create frankenui and tailwind cdns
+
+    - `local_headers(self, mode, static_dir, daisy, highlightjs, katex, radii, shadows, font)`
+        Create headers using local files downloaded from CDNs
+
+
+## monsterui.daisy
+
+- `class AlertT(Enum)`
+    Alert styles from DaisyUI
+    Members: info, success, warning, error
+
+
+- `def Alert(*c, **kwargs)`
+    Alert informs users about important events.
+
+- `class StepsT(Enum)`
+    Options for Steps
+    Members: vertical, horizonal
+
+
+- `class StepT(Enum)`
+    Step styles for LiStep
+    Members: primary, secondary, accent, info, success, warning, error, neutral
+
+
+- `def Steps(*li, **kwargs)`
+    Creates a steps container
+
+- `def LiStep(*c, **kwargs)`
+    Creates a step list item
+
+- `class LoadingT(Enum)`
+    Members: spinner, dots, ring, ball, bars, infinity, xs, sm, md, lg
+
+
+- `def Loading(cls, htmx_indicator, **kwargs)`
+    Creates a loading animation component
+
+- `class ToastHT(Enum)`
+    Horizontal position for Toast
+    Members: start, center, end
+
+
+- `class ToastVT(Enum)`
+    Vertical position for Toast
+    Members: top, middle, bottom
+
+
+## monsterui.foundations
+
+> Data Structures and Utilties
+
+- `def stringify(o)`
+    Converts input types into strings that can be passed to FT components
+
+- `class VEnum(Enum)`
+    Members: 
+
+    - `__str__(self)`
+    - `__add__(self, other)`
+    - `__radd__(self, other)`
+
+## monsterui.franken
+
+- `class TextT(Enum)`
+    Text Styles from https://franken-ui.dev/docs/text
+    Members: paragraph, lead, meta, gray, italic, xs, sm, lg, xl, light, normal, medium, bold, extrabold, muted, primary, secondary, success, warning, error, info, left, right, center, justify, start, end, top, middle, bottom, truncate, break_, nowrap, underline, highlight
+
+
+- `class TextPresets(Enum)`
+    Common Typography Presets
+    Members: muted_sm, muted_lg, bold_sm, bold_lg, md_weight_sm, md_weight_muted
+
+
+- `def CodeSpan(*c, **kwargs)`
+    A CodeSpan with Styling
+
+- `def CodeBlock(*c, **kwargs)`
+    CodeBlock with Styling
+
+- `def H1(*c, **kwargs)`
+    H1 with styling and appropriate size
+
+- `def H2(*c, **kwargs)`
+    H2 with styling and appropriate size
+
+- `def H3(*c, **kwargs)`
+    H3 with styling and appropriate size
+
+- `def H4(*c, **kwargs)`
+    H4 with styling and appropriate size
+
+- `def H5(*c, **kwargs)`
+    H5 with styling and appropriate size
+
+- `def H6(*c, **kwargs)`
+    H6 with styling and appropriate size
+
+- `def Subtitle(*c, **kwargs)`
+    Styled muted_sm text designed to go under Headings and Titles
+
+- `def Q(*c, **kwargs)`
+    Styled quotation mark
+
+- `def Em(*c, **kwargs)`
+    Styled emphasis text
+
+- `def Strong(*c, **kwargs)`
+    Styled strong text
+
+- `def I(*c, **kwargs)`
+    Styled italic text
+
+- `def Small(*c, **kwargs)`
+    Styled small text
+
+- `def Mark(*c, **kwargs)`
+    Styled highlighted text
+
+- `def Del(*c, **kwargs)`
+    Styled deleted text
+
+- `def Ins(*c, **kwargs)`
+    Styled inserted text
+
+- `def Sub(*c, **kwargs)`
+    Styled subscript text
+
+- `def Sup(*c, **kwargs)`
+    Styled superscript text
+
+- `def Blockquote(*c, **kwargs)`
+    Blockquote with Styling
+
+- `def Caption(*c, **kwargs)`
+    Styled caption text
+
+- `def Cite(*c, **kwargs)`
+    Styled citation text
+
+- `def Time(*c, **kwargs)`
+    Styled time element
+
+- `def Address(*c, **kwargs)`
+    Styled address element
+
+- `def Abbr(*c, **kwargs)`
+    Styled abbreviation with dotted underline
+
+- `def Dfn(*c, **kwargs)`
+    Styled definition term with italic and medium weight
+
+- `def Kbd(*c, **kwargs)`
+    Styled keyboard input with subtle background
+
+- `def Samp(*c, **kwargs)`
+    Styled sample output with subtle background
+
+- `def Var(*c, **kwargs)`
+    Styled variable with italic monospace
+
+- `def Figure(*c, **kwargs)`
+    Styled figure container with card-like appearance
+
+- `def Details(*c, **kwargs)`
+    Styled details element
+
+- `def Summary(*c, **kwargs)`
+    Styled summary element
+
+- `def Data(*c, **kwargs)`
+    Styled data element
+
+- `def Meter(*c, **kwargs)`
+    Styled meter element
+
+- `def S(*c, **kwargs)`
+    Styled strikethrough text (different semantic meaning from Del)
+
+- `def U(*c, **kwargs)`
+    Styled underline (for proper names in Chinese, proper spelling etc)
+
+- `def Output(*c, **kwargs)`
+    Styled output element for form results
+
+- `def PicSumImg(h, w, id, grayscale, blur, **kwargs)`
+    Creates a placeholder image using https://picsum.photos/
+
+- `class ButtonT(Enum)`
+    Options for styling Buttons
+    Members: default, ghost, primary, secondary, destructive, text, link, xs, sm, lg, xl, icon
+
+
+- `def Button(*c, **kwargs)`
+    Button with Styling (defaults to `submit` for form submission)
+
+- `class ContainerT(Enum)`
+    Max width container sizes from https://franken-ui.dev/docs/container
+    Members: xs, sm, lg, xl, expand
+
+
+- `class BackgroundT(Enum)`
+    Members: muted, primary, secondary, default
+
+
+- `def Container(*c, **kwargs)`
+    Div to be used as a container that often wraps large sections or a page of content
+
+- `def Titled(title, *c, **kwargs)`
+    Creates a standard page structure for titled page.  Main(Container(title, content))
+
+- `class DividerT(Enum)`
+    Divider Styles from https://franken-ui.dev/docs/divider
+    Members: icon, sm, vertical
+
+
+- `def Divider(*c, **kwargs)`
+    Divider with default styling and margin
+
+- `def DividerSplit(*c)`
+    Creates a simple horizontal line divider with configurable thickness and vertical spacing
+
+- `def Article(*c, **kwargs)`
+    A styled article container for blog posts or similar content
+
+- `def ArticleTitle(*c, **kwargs)`
+    A title component for use within an Article
+
+- `def ArticleMeta(*c, **kwargs)`
+    A metadata component for use within an Article showing things like date, author etc
+
+- `class SectionT(Enum)`
+    Section styles from https://franken-ui.dev/docs/section
+    Members: default, muted, primary, secondary, xs, sm, lg, xl, remove_vertical
+
+
+- `def Section(*c, **kwargs)`
+    Section with styling and margins
+
+- `def Form(*c, **kwargs)`
+    A Form with default spacing between form elements
+
+- `def Fieldset(*c, **kwargs)`
+    A Fieldset with default styling
+
+- `def Legend(*c, **kwargs)`
+    A Legend with default styling
+
+- `def Input(*c, **kwargs)`
+    An Input with default styling
+
+- `def Radio(*c, **kwargs)`
+    A Radio with default styling
+
+- `def CheckboxX(*c, **kwargs)`
+    A Checkbox with default styling
+
+- `def Range(*c, **kwargs)`
+    A Range with default styling
+
+- `def TextArea(*c, **kwargs)`
+    A Textarea with default styling
+
+- `def Switch(*c, **kwargs)`
+    A Switch with default styling
+
+- `def Upload(*c, **kwargs)`
+    A file upload component with default styling
+
+- `def UploadZone(*c, **kwargs)`
+    A file drop zone component with default styling
+
+- `def FormLabel(*c, **kwargs)`
+    A Label with default styling
+
+- `class LabelT(Enum)`
+    Members: primary, secondary, danger
+
+
+- `def Label(*c, **kwargs)`
+    FrankenUI labels, which look like pills
+
+- `def UkFormSection(title, description, *c)`
+    A form section with a title, description and optional button
+
+- `def GenericLabelInput(label, lbl_cls, input_cls, container, cls, id, input_fn, **kwargs)`
+    `Div(Label,Input)` component with Uk styling injected appropriately. Generally you should higher level API, such as `LabelInput` which is created for you in this library
+
+- `def LabelInput(label, lbl_cls, input_cls, cls, id, **kwargs)`
+    A `FormLabel` and `Input` pair that provides default spacing and links/names them based on id
+
+- `def LabelRadio(label, lbl_cls, input_cls, container, cls, id, **kwargs)`
+    A FormLabel and Radio pair that provides default spacing and links/names them based on id
+
+- `def LabelCheckboxX(label, lbl_cls, input_cls, container, cls, id, **kwargs)`
+    A FormLabel and CheckboxX pair that provides default spacing and links/names them based on id
+
+- `def LabelSelect(*option, **kwargs)`
+    A FormLabel and Select pair that provides default spacing and links/names them based on id (usually UkLabelSelect is a better choice)
+
+- `def Options(*c)`
+    Helper function to wrap things into `Option`s for use in `Select`
+
+- `def Select(*option, **kwargs)`
+    Creates a select dropdown with uk styling and option for adding a search box
+
+- `@delegates(GenericLabelInput, but=['input_fn', 'cls']) def LabelRange(label, lbl_cls, input_cls, cls, id, value, min, max, step, label_range, **kwargs)`
+    A FormLabel and Range pair that provides default spacing and links/names them based on id
+
+- `class AT(Enum)`
+    Link styles from https://franken-ui.dev/docs/link
+    Members: muted, text, reset, primary, classic
+
+
+- `class ListT(Enum)`
+    List styles using Tailwind CSS
+    Members: disc, circle, square, decimal, hyphen, bullet, divider, striped
+
+
+- `def ModalContainer(*c, **kwargs)`
+    Creates a modal container that components go in
+
+- `def ModalDialog(*c, **kwargs)`
+    Creates a modal dialog
+
+- `def ModalHeader(*c, **kwargs)`
+    Creates a modal header
+
+- `def ModalBody(*c, **kwargs)`
+    Creates a modal body
+
+- `def ModalFooter(*c, **kwargs)`
+    Creates a modal footer
+
+- `def ModalTitle(*c, **kwargs)`
+    Creates a modal title
+
+- `def ModalCloseButton(*c, **kwargs)`
+    Creates a button that closes a modal with js
+
+- `def Modal(*c, **kwargs)`
+    Creates a modal with the appropriate classes to put the boilerplate in the appropriate places for you
+
+- `def Placeholder(*c, **kwargs)`
+    Creates a placeholder
+
+- `def Progress(*c, **kwargs)`
+    Creates a progress bar
+
+- `def UkIcon(icon, height, width, stroke_width, cls, **kwargs)`
+    Creates an icon using lucide icons
+
+- `def UkIconLink(icon, height, width, stroke_width, cls, button, **kwargs)`
+    Creates an icon link using lucide icons
+
+- `def DiceBearAvatar(seed_name, h, w)`
+    Creates an Avatar using https://dicebear.com/
+
+- `def Center(*c, **kwargs)`
+    Centers contents both vertically and horizontally by default
+
+- `class FlexT(Enum)`
+    Flexbox modifiers using Tailwind CSS
+    Members: block, inline, left, center, right, between, around, stretch, top, middle, bottom, row, row_reverse, column, column_reverse, nowrap, wrap, wrap_reverse
+
+
+- `def Grid(*div, **kwargs)`
+    Creates a responsive grid layout with smart defaults based on content
+
+- `def DivFullySpaced(*c, **kwargs)`
+    Creates a flex div with it's components having as much space between them as possible
+
+- `def DivCentered(*c, **kwargs)`
+    Creates a flex div with it's components centered in it
+
+- `def DivLAligned(*c, **kwargs)`
+    Creates a flex div with it's components aligned to the left
+
+- `def DivRAligned(*c, **kwargs)`
+    Creates a flex div with it's components aligned to the right
+
+- `def DivVStacked(*c, **kwargs)`
+    Creates a flex div with it's components stacked vertically
+
+- `def DivHStacked(*c, **kwargs)`
+    Creates a flex div with it's components stacked horizontally
+
+- `class NavT(Enum)`
+    Members: default, primary, secondary
+
+
+- `def NavContainer(*li, **kwargs)`
+    Creates a navigation container (useful for creating a sidebar navigation).  A Nav is a list (NavBar is something different)
+
+- `def NavParentLi(*nav_container, **kwargs)`
+    Creates a navigation list item with a parent nav for nesting
+
+- `def NavDividerLi(*c, **kwargs)`
+    Creates a navigation list item with a divider
+
+- `def NavHeaderLi(*c, **kwargs)`
+    Creates a navigation list item with a header
+
+- `def NavSubtitle(*c, **kwargs)`
+    Creates a navigation subtitle
+
+- `def NavCloseLi(*c, **kwargs)`
+    Creates a navigation list item with a close button
+
+- `class ScrollspyT(Enum)`
+    Members: underline, bold
+
+
+- `def NavBar(*c)`
+    Creates a responsive navigation bar with mobile menu support
+
+- `def SliderContainer(*c, **kwargs)`
+    Creates a slider container
+
+- `def SliderItems(*c, **kwargs)`
+    Creates a slider items container
+
+- `def SliderNav(cls, prev_cls, next_cls, **kwargs)`
+    Navigation arrows for Slider component
+
+- `def Slider(*c, **kwargs)`
+    Creates a slider with optional navigation arrows
+
+- `def DropDownNavContainer(*li, **kwargs)`
+    A Nav that is part of a DropDown
+
+- `def TabContainer(*li, **kwargs)`
+    A TabContainer where children will be different tabs
+
+- `class CardT(Enum)`
+    Card styles from UIkit
+    Members: default, primary, secondary, destructive, hover
+
+
+- `def CardTitle(*c, **kwargs)`
+    Creates a card title
+
+- `def CardHeader(*c, **kwargs)`
+    Creates a card header
+
+- `def CardBody(*c, **kwargs)`
+    Creates a card body
+
+- `def CardFooter(*c, **kwargs)`
+    Creates a card footer
+
+- `def CardContainer(*c, **kwargs)`
+    Creates a card container
+
+- `def Card(*c, **kwargs)`
+    Creates a Card with a header, body, and footer
+
+- `class TableT(Enum)`
+    Members: divider, striped, hover, sm, lg, justify, middle, responsive
+
+
+- `def Table(*c, **kwargs)`
+    Creates a table
+
+- `def TableFromLists(header_data, body_data, footer_data, header_cell_render, body_cell_render, footer_cell_render, cls, sortable, **kwargs)`
+    Creates a Table from a list of header data and a list of lists of body data
+
+- `def TableFromDicts(header_data, body_data, footer_data, header_cell_render, body_cell_render, footer_cell_render, cls, sortable, **kwargs)`
+    Creates a Table from a list of header data and a list of dicts of body data
+
+- `def apply_classes(html_str, class_map, class_map_mods)`
+    Apply classes to html string
+
+- `def render_md(md_content, class_map, class_map_mods)`
+    Renders markdown using mistletoe and lxml
+
+- `def get_franken_renderer(img_dir)`
+    Create a renderer class with the specified img_dir
+
+- `def ThemePicker(color, radii, shadows, font, mode, cls, custom_themes)`
+    Theme picker component with configurable sections
+
+- `def LightboxContainer(*lightboxitem, **kwargs)`
+    Lightbox container that will hold `LightboxItems`
+
+- `def LightboxItem(*c, **kwargs)`
+    Anchor tag with appropriate structure to go inside a `LightBoxContainer`
 </doc></api><examples><doc title="Websockets application" desc="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
 from fasthtml.common import *
 
