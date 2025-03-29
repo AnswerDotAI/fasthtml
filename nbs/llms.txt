@@ -12,15 +12,15 @@ Things to remember when writing FastHTML apps:
 
 ## Docs
 
-- [FastHTML quick start](https://docs.fastht.ml/tutorials/quickstart_for_web_devs.html.md): A brief overview of many FastHTML features
+- [FastHTML concise guide](https://docs.fastht.ml/ref/concise_guide.html.md): A brief overview of idiomatic FastHTML apps
 - [HTMX reference](https://raw.githubusercontent.com/bigskysoftware/htmx/master/www/content/reference.md): Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options
-- [Surreal](https://raw.githubusercontent.com/AnswerDotAI/surreal/main/README.md): Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions
-- [CSS Scope Inline](https://raw.githubusercontent.com/gnat/css-scope-inline/main/README.md): A JS library which allow `me` to be used in CSS selectors, by using a `MutationObserver` to monitor the DOM
 - [Starlette quick guide](https://gist.githubusercontent.com/jph00/e91192e9bdc1640f5421ce3c904f2efb/raw/61a2774912414029edaf1a55b506f0e283b93c46/starlette-quick.md): A quick overview of some Starlette features useful to FastHTML devs.
 
 ## API
 
 - [API List](https://docs.fastht.ml/apilist.txt): A succint list of all functions and methods in fasthtml.
+- [MonsterUI API List](https://raw.githubusercontent.com/AnswerDotAI/MonsterUI/refs/heads/main/docs/apilist.txt): Complete API Reference for Monster UI, a component framework similar to shadcn, but for FastHTML
+
 
 ## Examples
 
@@ -29,6 +29,7 @@ Things to remember when writing FastHTML apps:
 
 ## Optional
 
+- [Surreal](https://raw.githubusercontent.com/AnswerDotAI/surreal/main/README.md): Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions
 - [Starlette full documentation](https://gist.githubusercontent.com/jph00/809e4a4808d4510be0e3dc9565e9cbd3/raw/9b717589ca44cedc8aaf00b2b8cacef922964c0f/starlette-sml.md): A subset of the Starlette documentation useful for FastHTML development.
 - [JS App Walkthrough](https://docs.fastht.ml/tutorials/e2e.html.md): An end-to-end walkthrough of a complete FastHTML app, including deployment to railway.
 - [FastHTML by Example](https://docs.fastht.ml/tutorials/by_example.html.md): A collection of 4 FastHTML apps showcasing idiomatic use of FastHTML and HTMX patterns.
