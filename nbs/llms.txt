@@ -42,3 +42,4 @@ Things to remember when writing FastHTML apps:
 - [Custom Components](https://answerdotai.github.io/fasthtml/ref/defining_xt_component.md): Explanation of how to create custom components in FastHTML.
 - [Handling Handlers](https://answerdotai.github.io/fasthtml/ref/handlers.html.md): Explanation of how to request and response handlers work in FastHTML as routes.
 - [Live Reloading](https://answerdotai.github.io/fasthtml/ref/live_reload.html.md): Explanation of how to use live reloading for FastHTML development.
+- [MonsterUI API List](https://raw.githubusercontent.com/AnswerDotAI/MonsterUI/refs/heads/main/docs/apilist.txt): Full API list (signatures and enum members) for the MonsterUI component library.
