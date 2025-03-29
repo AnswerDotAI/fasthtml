@@ -8,29 +8,39 @@
 
 
 
+## About This Guide
+
+The code examples here use fast.ai style: prefer ternary op, 1-line
+docstring, minimize vertical space, etc. (Normally fast.ai style uses
+few if any comments, but they’re added here as documentation.)
+
 ``` python
 from fasthtml.common import *
 ```
 
-## A Minimal Application
+## Minimal App
 
-A minimal FastHTML application looks something like this:
+A minimal FastHTML app looks something like this:
 
 ``` python
-# This is a meta-package which includes all of the key symbols from FastHTML and Starlette 
+# Meta-package with all key symbols from FastHTML and Starlette. Import it like this at the start of every FastHTML app.
 from fasthtml.common import *
-# This returns the FastHTML application object as well as a shortcut to `app.route`
+# The FastHTML app object and shortcut to `app.route`
 app,rt = fast_app()
-# Passing a path to `rt` is optional. If not passed, the function name is the route ('/foo') here.
-# By default, both GET and POST HTTP methods are handled.
-# Type annotated params are passed as query params unless a path param is defined (which it isn't here)
+
+# Enums constrain the values accepted for a route parameter
+name = str_enum('names', 'Alice', 'Bev', 'Charlie')
+
+# Passing a path to `rt` is optional. If not passed (recommended), the function name is the route ('/foo')
+# Both GET and POST HTTP methods are handled by default
+# Type-annotated params are passed as query params (recommended) unless a path param is defined (which it isn't here)
 @rt
-def foo(name:str):
-    # `Title` and `P` here are "fasttags". Fasttags are direct m-expression mappings of HTML tags to Python functions with positional and named parameters. All standard HTML tags are included in the common wildcard import.
-    # When a tuple is returned, this returns concatenated HTML partials. HTMX by default will use a title HTML partial to set the current page name. 
+def foo(nm: name):
+    # `Title` and `P` here are FastTags: direct m-expression mappings of HTML tags to Python functions with positional and named parameters. All standard HTML tags are included in the common wildcard import.
+    # When a tuple is returned, this returns concatenated HTML partials. HTMX by default will use a title HTML partial to set the current page name. HEAD tags (e.g. Meta, Link, etc) in the returned tuple are automatically placed in HEAD; everything else is placed in BODY.
     # FastHTML will automatically return a complete HTML document with appropriate headers if a normal HTTP request is received. For an HTMX request, however, just the partials are returned.
-    return Title("FastHTML"), H1("My web app"), P(f"Let's do this, {name}!")
-# By default with `serve` uvicorn hosts on port 5001. `if __name__` etc is *not* needed since `serve` has this check internally.
+    return Title("FastHTML"), H1("My web app"), P(f"Hello, {name}!")
+# By default `serve` runs uvicorn on port 5001. Never write `if __name__ == "__main__"` since `serve` checks it internally.
 serve()
 ```
 
@@ -40,9 +50,11 @@ To run this web app:
 python main.py  # access via localhost:5001
 ```
 
-fasttags can be considered as m-expressions, with some simple sugar
-added. Positional parameters map to children, and named parameters map
-to attributes. Aliases must be used for Python reserved words.
+## FastTags (aka FT Components or FTs)
+
+FTs are m-expressions plus simple sugar. Positional params map to
+children. Named parameters map to attributes. Aliases must be used for
+Python reserved words.
 
 ``` python
 tags = Title("FastHTML"), H1("My web app"), P(f"Let's do this!", cls="myclass")
@@ -53,8 +65,7 @@ tags
      h1(('My web app',),{}),
      p(("Let's do this!",),{'class': 'myclass'}))
 
-This example demonstrates key aspects of how FastHTML components handle
-attributes:
+This example shows key aspects of how FTs handle attributes:
 
 ``` python
 Label(
@@ -63,15 +74,26 @@ Label(
         Option("one", value="1", selected=True),  # True renders just the attribute name
         Option("two", value=2, selected=False),   # Non-string values are converted to strings. False omits the attribute entirely
         cls="selector", id="counter",             # 'cls' becomes 'class'
-        **{'@click':"alert('Clicked');"},         # Dict unpacking for attributes with special characters
+        **{'@click':"alert('Clicked');"},         # Dict unpacking for attributes with special chars
     ),
     _for="counter",                               # '_for' becomes 'for' (can also use 'fr')
 )
 ```
 
-You can create new FT components by importing the new component from
-`fasthtml.components`. If the component doesn’t exist within that
-module, FastHTML will create it.
+Classes with `__ft__` defined are rendered using that method.
+
+``` python
+class FtTest:
+    def __ft__(self): return P('test')
+    
+to_xml(FtTest())
+```
+
+    '<p>test</p>\n'
+
+You can create new FTs by importing the new component from
+`fasthtml.components`. If the FT doesn’t exist within that module,
+FastHTML will create it.
 
 ``` python
 from fasthtml.components import Some_never_before_used_tag
@@ -83,7 +105,16 @@ Some_never_before_used_tag()
 <some-never-before-used-tag></some-never-before-used-tag>
 ```
 
-When creating a response, FastHTML will automatically render tags using
+FTs can be combined by defining them as a function.
+
+``` python
+def Hero(title, statement): return Div(H1(title),P(statement), cls="hero")
+to_xml(Hero("Hello World", "This is a hero statement"))
+```
+
+    '<div class="hero">\n  <h1>Hello World</h1>\n  <p>This is a hero statement</p>\n</div>\n'
+
+When handling a response, FastHTML will automatically render FTs using
 the `to_xml` function.
 
 ``` python
@@ -91,6 +122,8 @@ to_xml(tags)
 ```
 
     '<title>FastHTML</title>\n<h1>My web app</h1>\n<p class="myclass">Let&#x27;s do this!</p>\n'
+
+## JS
 
 The [`Script`](https://docs.fastht.ml/api/xtend.html#script) function
 allows you to include JavaScript. You can use Python to generate parts
@@ -104,85 +137,79 @@ app,rt = fast_app(hdrs=[Script(src="https://cdn.plot.ly/plotly-2.32.0.min.js")])
 @rt
 def index():
     data = {'somedata':'fill me in…'}
-    # `Titled` is a function which returns a title tag and an h1 tag with the 1st param, along with all other params as HTML in a `Main` parent element
+    # `Titled` returns a title tag and an h1 tag with the 1st param, with remaining params as children in a `Main` parent.
     return Titled("Chart Demo", Div(id="myDiv"), Script(f"var data = {data}; Plotly.newPlot('myDiv', data);"))
 # In future snippets `serve() will not be shown, but is required
 serve()
 ```
 
-Route details can be specified as decorator parameters.
+Prefer Python whenever possible over JS. Never use React or shadcn.
+
+## fast_app hdrs
 
 ``` python
 # In future snippets we'll skip showing the `fast_app` call if it has no params
 app, rt = fast_app(
-    pico=False, # The Pico CSS framework is included by default, so pass `false` to disable it if needed.
+    pico=False, # The Pico CSS framework is included by default, so pass `False` to disable it if needed. No other CSS frameworks are included.
     # These are added to the `head` part of the page for non-HTMX requests.
     hdrs=(
         Link(rel='stylesheet', href='assets/normalize.min.css', type='text/css'),
         Link(rel='stylesheet', href='assets/sakura.css', type='text/css'),
-        Style("p {color: red;}",
-        # by default, all standard static extensions are served statically from the web app dir, which can be modified using `static_path`
-        static_path='public')
+        Style("p {color: red;}"),
+        # `MarkdownJS` and `HighlightJS` are available via concise functions
+        MarkdownJS(), HighlightJS(langs=['python', 'javascript', 'html', 'css']),
+        # by default, all standard static extensions are served statically from the web app dir,
+        #   which can be modified using e.g `static_path='public'`
+        )
 )
-# Path parameter parsing is handled by Starlette, so all of the same functionality and syntax is supported.
-# However, it is more idiomatic to use query parameters in FastHTML where possible.
-@rt("/hello/{name}", method="GET")
-def somefunc(name:str): return Titled(f"Hello, {name}!")
-```
 
-Instead of returning a FastTag or tuple of FastTags, standard Starlette
-response types can also be returned in which case they are used directly
-in the same way that Starlette does.
-
-``` python
-@rt("/{fname:path}.{ext:static}")
-async def get(fname:str, ext:str):  return FileResponse(f'public/{fname}.{ext}')
-```
-
-``` python
-# `MarkdownJS` and `HighlightJS` are available via concise functions
-hdrs = (MarkdownJS(), HighlightJS(langs=['python', 'javascript', 'html', 'css']), )
-app, rt = fast_app(hdrs=hdrs)
 @rt
 def index(req): return Titled("Markdown rendering example",
-                              # This will be markdown rendered to HTML
+                              # This will be client-side rendered to HTML with highlight-js
                               Div("*hi* there",cls="marked"),
                               # This will be syntax highlighted
                               Pre(Code("def foo(): pass")))
-serve()
 ```
 
-Returning a JSON serializable dict from a handler will cause the handler
-to return JSON.
+## Responses
 
-`ft` components (“fasttags”) can be combined by defining them as a
-function.
+Routes can return various types:
+
+1.  FastTags or tuples of FastTags (automatically rendered to HTML)
+2.  Standard Starlette responses (used directly)
+3.  JSON-serializable types (returned as JSON in a plain text response)
 
 ``` python
-def Hero(title, statement): return Div(H1(title),P(statement), cls="hero")
-to_xml(Hero("Hello World", "This is a hero statement"))
+@rt("/{fname:path}.{ext:static}")
+async def serve_static_file(fname:str, ext:str): return FileResponse(f'public/{fname}.{ext}')
+
+app, rt = fast_app(hdrs=(MarkdownJS(), HighlightJS(langs=['python', 'javascript'])))
+@rt
+def index(): 
+    return Titled("Example",
+                  Div("*markdown* here", cls="marked"),
+                  Pre(Code("def foo(): pass")))
 ```
 
-    '<div class="hero">\n  <h1>Hello World</h1>\n  <p>This is a hero statement</p>\n</div>\n'
+Route functions can be used in attributes like `href` or `action` and
+will be converted to paths. Use `.to()` to generate paths with query
+parameters.
 
-Classes with `__ft__` defined are rendered using that method.
+``` python
+@rt
+def profile(email:str): return fill_form(profile_form, profiles[email])
+
+profile_form = Form(action=profile)(
+    Label("Email", Input(name="email")),
+    Button("Save", type="submit")
+)
+
+user_profile_path = profile.to(email="user@example.com")  # '/profile?email=user%40example.com'
+```
 
 ``` python
 from dataclasses import dataclass
 
-class FtTest:
-    def __ft__(self): return P('test')
-    
-to_xml(FtTest())
-```
-
-    '<p>test</p>\n'
-
-``` python
-from dataclasses import dataclass
-```
-
-``` python
 app,rt = fast_app()
 ```
 
@@ -207,26 +234,7 @@ profile_form = Form(method="post", action=profile)(
         Button("Save", type="submit"))
 ```
 
-A `to` method is added to route functions, which returns a route path
-with params as query params.
-
-``` python
-path = profile.to(email="john@example.com")
-path
-```
-
-    '/profile?email=john%40example.com'
-
-The `url_for` method of the request object can be used to generate URLs
-for named routes. It takes the route name as its first argument,
-followed by any path parameters needed for that route. Useful for
-generating absolute URLs, ensuring that the correct host and scheme are
-included, even if the application is accessed through different domains
-or protocols.
-
-The `url_path_for` method of the application can be used to generate URL
-paths for named routes. Unlike `url_for`, it returns only the path
-component of the URL, without the scheme or host.
+## Testing
 
 We can use `TestClient` for testing.
 
@@ -235,17 +243,18 @@ from starlette.testclient import TestClient
 ```
 
 ``` python
+path = "/profile?email=john@example.com"
 client = TestClient(app)
 htmx_req = {'HX-Request':'1'}
 print(client.get(path, headers=htmx_req).text)
 ```
 
-    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: GET http://testserver/profile?email=john%40example.com "HTTP/1.1 200 OK"
-
     <form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email       <input name="email" value="john@example.com">
     </label><label>Phone       <input name="phone" value="123456789">
     </label><label>Age       <input name="age" value="5">
     </label></fieldset><button type="submit">Save</button></form>
+
+## Form Handling and Data Binding
 
 When a dataclass, namedtuple, etc. is used as a type annotation, the
 form body will be unpacked into matching attribute names automatically.
@@ -260,23 +269,25 @@ new_data = dict(email='john@example.com', phone='7654321', age=25)
 print(client.post("/edit_profile", data=new_data, headers=htmx_req).text)
 ```
 
-    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: POST http://testserver/edit_profile "HTTP/1.1 307 Temporary Redirect"
-    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: POST http://testserver/profile?email=john%40example.com "HTTP/1.1 200 OK"
-
     <form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email       <input name="email" value="john@example.com">
     </label><label>Phone       <input name="phone" value="7654321">
     </label><label>Age       <input name="age" value="25">
     </label></fieldset><button type="submit">Save</button></form>
 
-The general rules for rendering are: - `__ft__` method will be called
-(for default components like `P`, `H2`, etc. or if you define your own
-components) - If you pass a string, it will be escaped - On other python
-objects, `str()` will be called
+## fasttag Rendering Rules
 
-As a consequence, if you want to include plain HTML tags directly into
-e.g. a `Div()` they will get escaped by default (as a security measure
-to avoid code injections). This can be avoided by using `Safe(...)`, e.g
-to show a data frame use `Div(NotStr(df.to_html()))`.
+The general rules for rendering children inside tuples or fasttag
+children are: - `__ft__` method will be called (for default components
+like `P`, `H2`, etc. or if you define your own components) - If you pass
+a string, it will be escaped - On other python objects, `str()` will be
+called
+
+If you want to include plain HTML tags directly into e.g. a `Div()` they
+will get escaped by default (as a security measure to avoid code
+injections). This can be avoided by using `Safe(...)`, e.g to show a
+data frame use `Div(NotStr(df.to_html()))`.
+
+## Exceptions
 
 FastHTML allows customization of exception handlers.
 
@@ -286,29 +297,27 @@ exception_handlers = {404: not_found}
 app, rt = fast_app(exception_handlers=exception_handlers)
 ```
 
+## Cookies
+
 We can set cookies using the
 [`cookie()`](https://docs.fastht.ml/api/core.html#cookie) function.
 
 ``` python
 @rt
-def setcook(): return P(f'Setting a cookie'), cookie('mycookie', 'foobar')
+def setcook(): return P(f'Set'), cookie('mycookie', 'foobar')
 print(client.get('/setcook', headers=htmx_req).text)
 ```
 
-    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: GET http://testserver/setcook "HTTP/1.1 200 OK"
-
-     <p>Setting a cookie</p>
+     <p>Set</p>
 
 ``` python
 @rt
-def getcook(mycookie:str): return f'Cookie was {mycookie}'
-# Note that if handlers return text, instead of fasttags, then a plain text response is automatically created
+def getcook(mycookie:str): return f'Got {mycookie}'
+# If handlers return text instead of FTs, then a plaintext response is automatically created
 print(client.get('/getcook').text)
 ```
 
-    [2025-03-18 18:42:13 - httpx:1025 - INFO] HTTP Request: GET http://testserver/getcook "HTTP/1.1 200 OK"
-
-    Cookie was foobar
+    Got foobar
 
 FastHTML provide access to Starlette’s request object automatically
 using special `request` parameter name (or any prefix of that name).
@@ -318,22 +327,23 @@ using special `request` parameter name (or any prefix of that name).
 def headers(req): return req.headers['host']
 ```
 
+## Request and Session Objects
+
 FastHTML provides access to Starlette’s session middleware automatically
 using the special `session` parameter name (or any prefix of that name).
 
-Enums can be used to constrain the values accepted for a route
-parameter.
-
-``` python
-names = str_enum('names', 'Alice', 'Bev', 'Charlie')
-```
-
 ``` python
 @rt
-def adder(sess, nm: names):
-    sess.setdefault('attendees', '')
-    sess['attendees'] = sess.get('attendees') + f', {nm}'
-    return Response(f'The attentees are {sess["attendees"]}.')
+def profile(req, sess, user_id: int=None):
+    ip = req.client.host
+    sess['last_visit'] = datetime.now().isoformat()
+    visits = sess.setdefault('visit_count', 0) + 1
+    sess['visit_count'] = visits
+    user = get_user(user_id or sess.get('user_id'))
+    return Titled(f"Profile: {user.name}", 
+                  P(f"Visits: {visits}"), 
+                  P(f"IP: {ip}"),
+                  Button("Logout", hx_post=logout))
 ```
 
 Handler functions can return the
@@ -345,36 +355,29 @@ object to set HTMX-specific response headers.
 def htmlredirect(app): return HtmxResponseHeaders(location="http://example.org")
 ```
 
+## APIRouter
+
 [`APIRouter`](https://docs.fastht.ml/api/core.html#apirouter) lets you
-organize routes across multiple files in a FastHTML app, with an
-optional `prefix` parameter that prepends to all routes in that router
-(e.g., `prefix=/products` makes all routes start with `/products`).
+organize routes across multiple files in a FastHTML app.
 
 ``` python
 # products.py
-ar = APIRouter(prefix="/products")
+ar = APIRouter()
 
-@ar("/all")
+@ar
+def details(pid: int): return f"Here are the product details for ID: {pid}"
+
+@ar
 def all_products(req):
     return Div(
-        "Welcome to the Products Page! Click the button below to look at the details for product 42",
         Div(
-            Button("Details",hx_get=req.url_for("details", pid=42),hx_target="#products_list",hx_swap="outerHTML",),
-        ),
-        id="products_list",
-    )
-
-@ar.get("/", name="details")
-def details(pid: int): return f"Here are the product details for ID: {pid}"
+            Button("Details",hx_get=details.to(pid=42),hx_target="#products_list",hx_swap="outerHTML",),
+        ), id="products_list")
 ```
-
-Adding the products’
-[`APIRouter`](https://docs.fastht.ml/api/core.html#apirouter) to the
-`app`:
 
 ``` python
 # main.py
-from products import ar
+from products import ar,all_products
 
 app, rt = fast_app()
 ar.to_app(app)
@@ -383,10 +386,10 @@ ar.to_app(app)
 def index():
     return Div(
         "Products",
-        hx_get=ar.rt_funcs.all_products,
-        hx_swap="outerHTML",
-    )
+        hx_get=all_products, hx_swap="outerHTML")
 ```
+
+## Toasts
 
 Toasts can be of four types:
 
@@ -417,6 +420,8 @@ visible before disappearing.10 seconds.
 Authentication and authorization are handled with Beforeware, which
 functions that run before the route handler is called.
 
+## Auth
+
 ``` python
 def user_auth_before(req, sess):
     # `auth` key in the request scope is automatically provided to any handler which requests it and can not be injected
@@ -431,18 +436,13 @@ beforeware = Beforeware(
 app, rt = fast_app(before=beforeware)
 ```
 
-FastHTML introduces several tools for working with SSE which are covered
-in the example below. While concise, there’s a lot going on in this
-function so we’ve annotated it quite a bit.
-
-``` python
-import random
-```
+## Server-Side Events (SSE)
 
 FastHTML supports the HTMX SSE extension.
 
 ``` python
-hdrs=(Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js"),)
+import random
+hdrs=(Script(src="https://unpkg.com/htmx-ext-sse@2.2.3/sse.js"),)
 app,rt = fast_app(hdrs=hdrs)
 
 @rt
@@ -460,9 +460,13 @@ async def number_generator():
 async def numstream(): return EventStream(number_generator())
 ```
 
+## Websockets
+
 FastHTML provides useful tools for HTMX’s websockets extension.
 
 ``` python
+# These HTMX extensions are available through `exts`:
+#   head-support preload class-tools loading-states multi-swap path-deps remove-me ws chunked-transfer
 app, rt = fast_app(exts='ws')
 
 def mk_inp(): return Input(id='msg', autofocus=True)
@@ -503,6 +507,7 @@ def index():
         Div(id="result")
     )
 
+# Use `async` handlers where IO is used to avoid blocking other clients
 @rt
 async def upload(file: UploadFile):
     filebuffer = await file.read()
@@ -539,66 +544,45 @@ books = db.create(Book, pk='isbn', transform=True)
 class User: id: int; name: str; active: bool = True
 # If no pk is provided, id is used as the primary key.
 users = db.create(User, transform=True)
+users
 ```
+
+    <Table user (id, name, active)>
 
 ### Fastlite CRUD operations
 
-Every operation in fastlite returns a fastcore flexiclass or a list of
-flexiclasses.
-
-Creating records:
+Every operation in fastlite returns a full superset of dataclass
+functionality.
 
 ``` python
-for name in ['Charlie', 'Braden', 'Alma', 'Amara', 'Alex']: user = users.insert(name=name,active=False)
+user = users.insert(name='Alex',active=False)
 user
 ```
 
-    User(id=5, name='Alex', active=0)
-
-Listing all records:
+    User(id=1, name='Alex', active=0)
 
 ``` python
+# List all records
 users()
 ```
 
-    [User(id=1, name='Charlie', active=0),
-     User(id=2, name='Braden', active=0),
-     User(id=3, name='Alma', active=0),
-     User(id=4, name='Amara', active=0),
-     User(id=5, name='Alex', active=0)]
-
-Limit, offset, and order the results:
+    [User(id=1, name='Alex', active=0)]
 
 ``` python
+# Limit, offset, and order results:
 users(order_by='name', limit=2, offset=1)
-```
 
-    [User(id=3, name='Alma', active=0), User(id=4, name='Amara', active=0)]
+# Filter on the results
+users(where="name='Alex'")
 
-Filter on the results:
+# Placeholder for avoiding injection attacks
+users("name=?", ('Alex',))
 
-``` python
-users(where="name='Alma'")
-```
-
-    [User(id=3, name='Alma', active=0)]
-
-Placeholder for avoiding injection attacks:
-
-``` python
-users("name=?", where_args=('Alma',))
-```
-
-    [User(id=3, name='Alma', active=0)]
-
-Fetching a single record using the pk inside square brackets returns a
-flexiclass:
-
-``` python
+# A single record by pk
 users[user.id]
 ```
 
-    User(id=5, name='Alex', active=0)
+    User(id=1, name='Alex', active=0)
 
 Test if a record exists by using `in` keyword on primary key:
 
@@ -608,7 +592,7 @@ Test if a record exists by using `in` keyword on primary key:
 
     True
 
-Updates return the updated record.
+Updates (which take a dict or a typed object) return the updated record.
 
 ``` python
 user.name='Lauren'
@@ -616,18 +600,19 @@ user.active=True
 users.update(user)
 ```
 
-    User(id=5, name='Lauren', active=1)
+    User(id=1, name='Lauren', active=1)
 
-`.xtra()` to constrain queries:
+`.xtra()` to automatically constrain queries, updates, and inserts from
+there on:
 
 ``` python
 users.xtra(active=True)
 users()
 ```
 
-    [User(id=5, name='Lauren', active=1)]
+    [User(id=1, name='Lauren', active=1)]
 
-Deletes return the table:
+Deleting by pk:
 
 ``` python
 users.delete(user.id)
@@ -635,8 +620,7 @@ users.delete(user.id)
 
     <Table user (id, name, active)>
 
-NotFoundError is raised by square bracket searches, updates, and
-deletes.
+NotFoundError is raised by pk `[]`, updates, and deletes.
 
 ``` python
 try: users['Amy']
@@ -647,8 +631,14 @@ except NotFoundError: print('User not found')
 
 ## MonsterUI
 
-Adds the Tailwind-based libraries FrankenUI and DaisyUI to FastHTML.
-Follows semantic HTML patterns when possible. A minimal app:
+MonsterUI is a shadcn-like component library for FastHTML. It adds the
+Tailwind-based libraries FrankenUI and DaisyUI to FastHTML, as well as
+Python’s mistletoe for Markdown, HighlightJS for code highlighting, and
+Katex for latex support, following semantic HTML patterns when possible.
+It is recommended for when you wish to go beyond the basics provided by
+FastHTML’s built-in pico support.
+
+A minimal app:
 
 ``` python
 from monsterui.all import *
@@ -657,486 +647,14 @@ app, rt = fast_app(hdrs=Theme.blue.headers()) # Use MonsterUI blue theme
 
 @rt
 def index():
-    socials = (('github','https://github.com/AnswerDotAI/MonsterUI'),
-               ('twitter','https://twitter.com/isaac_flath/'),
-               ('linkedin','https://www.linkedin.com/in/isaacflath/'))
-    return Titled("Your First App",
+    socials = (('github','https://github.com/AnswerDotAI/MonsterUI'),)
+    return Titled("App",
         Card(
-            H1("Welcome!"),
-            P("Your first MonsterUI app", cls=TextPresets.muted_sm),
-            # DivLAigned and UkIconLink are non-semantic MonsterUI FT Components
+            P("App", cls=TextPresets.muted_sm),
+            # LabelInput, DivLAigned, and UkIconLink are non-semantic MonsterUI FT Components,
+            LabelInput('Email', type='email', required=True),
             footer=DivLAligned(*[UkIconLink(icon,href=url) for icon,url in socials])))
-```
-
-MonsterUI components are based on Franken UI/shadcn, which uses
-Tailwind:
-
-``` python
-Grid(
-    Card(H4("First Card")),
-    Card(H4("Second Card")))
-```
-
-``` html
-<div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
-  <div class="uk-card ">
-    <div class="uk-card-body space-y-6">
-      <h4 class="uk-h4 ">First Card</h4>
-    </div>
-  </div>
-  <div class="uk-card ">
-    <div class="uk-card-body space-y-6">
-      <h4 class="uk-h4 ">Second Card</h4>
-    </div>
-  </div>
-</div>
-```
-
-List of all MonsterUI FastTags:
-
-``` python
-from monsterui import all as monster
-import inspect
-from IPython.display import Markdown, display
-```
-
-``` python
-def isft(o): return o[0].isupper()
-def ftsig(o): 
-    try: return f'- {o}{inspect.signature(getattr(monster, o))}'
-    except TypeError: return ''
-
-fts = L(dir(monster)).filter(isft).map(ftsig)
-display(Markdown('\n'.join(fts)))
-```
-
-- AT(\*values)
-
-- Abbr(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  title: str = None, \*\*kwargs) -\> fastcore.xml.FT
-
-- Address(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Alert(\*c, cls=’’, \*\*kwargs) -\> fastcore.xml.FT
-
-- AlertT(\*values)
-
-- Article(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- ArticleMeta(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- ArticleTitle(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- BackgroundT(\*values)
-
-- Blockquote(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple =
-  (), \*\*kwargs) -\> fastcore.xml.FT
-
-- Button(\*c: Union\[str, fastcore.xml.FT\], cls: Union\[str,
-  enum.Enum\] = \<ButtonT.default: ‘uk-btn-default’\>, submit=True,
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- ButtonT(\*values)
-
-- Caption(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Card(\*c, header: Union\[fastcore.xml.FT,
-  Iterable\[fastcore.xml.FT\]\] = None, footer: Union\[fastcore.xml.FT,
-  Iterable\[fastcore.xml.FT\]\] = None, body_cls=‘space-y-6’,
-  header_cls=(), footer_cls=(), cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- CardBody(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- CardContainer(\*c, cls=\<CardT.default: ‘uk-card-default’\>,
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- CardFooter(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- CardHeader(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- CardT(\*values)
-
-- CardTitle(\*c, cls=(), \*\*kwargs)
-
-- Center(\*c, vertical: bool = True, horizontal: bool = True, cls=(),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- CheckboxX(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- Cite(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- CodeBlock(\*c: str, cls: enum.Enum | str | tuple = (), code_cls:
-  enum.Enum | str | tuple = (), \*\*kwargs) -\> fastcore.xml.FT
-
-- CodeSpan(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- Container(\*c, cls=(‘mt-5’, \<ContainerT.xl: ‘uk-container-xl’\>),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- ContainerT(\*values)
-
-- Data(\*c: fastcore.xml.FT | str, value: str = None, cls: enum.Enum |
-  str | tuple = (), \*\*kwargs) -\> fastcore.xml.FT
-
-- Del(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Details(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Dfn(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- DiceBearAvatar(seed_name: str, h: int = 20, w: int = 20)
-
-- DivCentered(\*c, cls=‘space-y-4’, vstack=True, \*\*kwargs) -\>
-  fastcore.xml.FT
-
-- DivFullySpaced(\*c, cls=‘w-full’, \*\*kwargs)
-
-- DivHStacked(\*c, cls=‘space-x-4’, \*\*kwargs) -\> fastcore.xml.FT
-
-- DivLAligned(\*c, cls=‘space-x-4’, \*\*kwargs) -\> fastcore.xml.FT
-
-- DivRAligned(\*c, cls=‘space-x-4’, \*\*kwargs) -\> fastcore.xml.FT
-
-- DivVStacked(\*c, cls=‘space-y-4’, \*\*kwargs) -\> fastcore.xml.FT
-
-- Divider(\*c, cls=(‘my-4’, \<DividerT.icon: ‘uk-divider-icon’\>),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- DividerLine(lwidth=2, y_space=4)
-
-- DividerSplit(\*c, cls=(), line_cls=(), text_cls=())
-
-- DividerT(\*values)
-
-- DropDownNavContainer(\*li, cls=\<NavT.primary: ‘uk-nav-primary’\>,
-  parent=True, uk_nav=False, uk_dropdown=True, \*\*kwargs) -\>
-  fastcore.xml.FT
-
-- Em(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- FastHTML(\*args, pico=False, debug=False, routes=None,
-  middleware=None, title: str = ‘FastHTML page’,
-  exception_handlers=None, on_startup=None, on_shutdown=None,
-  lifespan=None, hdrs=None, ftrs=None, exts=None, before=None,
-  after=None, surreal=True, htmx=True, default_hdrs=True,
-  sess_cls=\<class ‘starlette.middleware.sessions.SessionMiddleware’\>,
-  secret_key=None, session_cookie=‘session\_’, max_age=31536000,
-  sess_path=‘/’, same_site=‘lax’, sess_https_only=False,
-  sess_domain=None, key_fname=‘.sesskey’,
-  body_wrap=<function noop_body>, htmlkw=None, nb_hdrs=False)
-
-- Fieldset(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- Figure(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- FlexT(\*values)
-
-- Form(\*c, cls=‘space-y-3’, \*\*kwargs) -\> fastcore.xml.FT
-
-- FormLabel(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- GenericLabelInput(label: str | fastcore.xml.FT, lbl_cls=’‘,
-  input_cls=’‘, container=functools.partial(<function ft>, ’div’,
-  void\_=False), cls=’’, id=None, input_fn=<function noop>, \*\*kwargs)
-
-- Grid(\*div, cols_min: int = 1, cols_max: int = 4, cols_sm: int = None,
-  cols_md: int = None, cols_lg: int = None, cols_xl: int = None, cols:
-  int = None, cls=‘gap-4’, \*\*kwargs) -\> fastcore.xml.FT
-
-- H1(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- H2(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- H3(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- H4(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- H5(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- H6(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- I(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Input(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- Ins(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Kbd(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Label(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- LabelCheckboxX(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
-  container=functools.partial(<function ft>, ’div’, void\_=False),
-  cls=‘flex items-center space-x-2’, id=’’, \*\*kwargs) -\>
-  fastcore.xml.FT
-
-- LabelInput(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
-  cls=’space-y-2’, id=’’, \*\*kwargs) -\> fastcore.xml.FT
-
-- LabelRadio(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
-  container=functools.partial(<function ft>, ’div’, void\_=False),
-  cls=‘flex items-center space-x-2’, id=’’, \*\*kwargs) -\>
-  fastcore.xml.FT
-
-- LabelRange(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
-  cls=’space-y-6’, id=’‘, value=’’, min=None, max=None, step=None,
-  label_range=True, \*, container=functools.partial(<function ft>,
-  ‘div’, void\_=False)) -\> fastcore.xml.FT
-
-- LabelSelect(\*option, label: str | fastcore.xml.FT, lbl_cls=’‘,
-  input_cls=’‘, container=functools.partial(<function ft>, ’div’,
-  void\_=False), cls=‘space-y-2’, id=’’, \*\*kwargs)
-
-- LabelSwitch(label: str | fastcore.xml.FT, lbl_cls=’‘, input_cls=’‘,
-  cls=’space-x-2’, id=’’, \*, container=functools.partial(<function ft>,
-  ‘div’, void\_=False)) -\> fastcore.xml.FT
-
-- LabelT(\*values)
-
-- LabelTextArea(label: str | fastcore.xml.FT, value=’‘, lbl_cls=’‘,
-  input_cls=’‘, cls=’space-y-2’, id=’’, \*\*kwargs) -\> fastcore.xml.FT
-
-- Legend(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- LiStep(\*c, cls=’’, data_content=None, \*\*kwargs) -\> fastcore.xml.FT
-
-- LightboxContainer(\*lightboxitem, data_uk_lightbox=‘counter: true’,
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- LightboxItem(\*c, href, data_alt=None, data_caption=None, cls=’’,
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- ListT(\*values)
-
-- Loading(cls=(\<LoadingT.bars: ‘loading-bars’\>, \<LoadingT.lg:
-  ‘loading-large’\>), htmx_indicator=False, \*\*kwargs) -\>
-  fastcore.xml.FT
-
-- LoadingT(\*values)
-
-- Mark(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Meter(\*c: fastcore.xml.FT | str, value: float = None, min: float =
-  None, max: float = None, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Modal(\*c, header=None, footer=None, cls=(), dialog_cls=(),
-  header_cls=‘p-6’, body_cls=‘space-y-6’, footer_cls=(), id=’’,
-  open=False, \*\*kwargs) -\> fastcore.xml.FT
-
-- ModalBody(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- ModalCloseButton(\*c, cls=‘absolute top-3 right-3’, htmx=False,
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- ModalContainer(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- ModalDialog(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- ModalFooter(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- ModalHeader(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- ModalTitle(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- NavBar(\*c, brand=h3((‘Title’,),{‘class’: ‘uk-h3’}),
-  right_cls=‘items-center space-x-4’, mobile_cls=‘space-y-4’, sticky:
-  bool = False, uk_scrollspy_nav: bool | str = False, cls=‘p-4’,
-  scrollspy_cls=\<ScrollspyT.underline: ‘navbar-underline’\>,
-  menu_id=None) -\> fastcore.xml.FT
-
-- NavCloseLi(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- NavContainer(\*li, cls=\<NavT.primary: ‘uk-nav-primary’\>,
-  parent=True, uk_nav=False, uk_scrollspy_nav=False, sticky=False,
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- NavDividerLi(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- NavHeaderLi(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- NavParentLi(\*nav_container, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- NavSubtitle(\*c, cls=\<TextPresets.muted_sm: ‘text-gray-500
-  dark:text-gray-200 text-sm’\>, \*\*kwargs) -\> fastcore.xml.FT
-
-- NavT(\*values)
-
-- Options(\*c, selected_idx: int = None, disabled_idxs: set = None)
-
-- Output(\*c: fastcore.xml.FT | str, form: str = None, for\_: str =
-  None, cls: enum.Enum | str | tuple = (), \*\*kwargs) -\>
-  fastcore.xml.FT
-
-- PicSumImg(h: int = 200, w: int = 200, id: int = None, grayscale: bool
-  = False, blur: int = None, \*\*kwargs) -\> fastcore.xml.FT
-
-- Placeholder(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- Progress(\*c, cls=(), value=’‘, max=’100’, \*\*kwargs) -\>
-  fastcore.xml.FT
-
-- Q(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Radio(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- Range(\*c, value=’’, label=True, min=None, max=None, step=None,
-  cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- S(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Samp(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- ScrollspyT(\*values)
-
-- Section(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- SectionT(\*values)
-
-- Select(\*option, inp_cls=(), cls=(‘h-10’,), cls_custom=‘button:
-  uk-input-fake dropdown: w-full’, id=’‘, name=’‘, placeholder=’’,
-  searchable=False, insertable=False, select_kwargs=None, \*\*kwargs)
-
-- Slider(\*c, cls=’‘, items_cls=’gap-4’, nav=True, nav_cls=’’,
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- SliderContainer(\*c, cls=’’, uk_slider=True, \*\*kwargs) -\>
-  fastcore.xml.FT
-
-- SliderItems(\*c, cls=’’, \*\*kwargs) -\> fastcore.xml.FT
-
-- SliderNav(cls=‘uk-position-small uk-hidden-hover’, prev_cls=‘absolute
-  left-0 top-1/2 -translate-y-1/2’, next_cls=‘absolute right-0 top-1/2
-  -translate-y-1/2’, \*\*kwargs) -\> fastcore.xml.FT
-
-- Small(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- StepT(\*values)
-
-- Steps(\*li, cls=’’, \*\*kwargs) -\> fastcore.xml.FT
-
-- StepsT(\*values)
-
-- Strong(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Sub(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Subtitle(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple =
-  ‘mt-1.5’, \*\*kwargs) -\> fastcore.xml.FT
-
-- Summary(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Sup(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- Switch(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- TabContainer(\*li, cls=’’, alt=False, \*\*kwargs) -\> fastcore.xml.FT
-
-- Table(\*c, cls=(\<TableT.middle: ‘uk-table-middle’\>,
-  \<TableT.divider: ‘uk-table-divider’\>, \<TableT.hover:
-  ‘uk-table-hover’\>, \<TableT.sm: ‘uk-table-sm’\>), \*\*kwargs) -\>
-  fastcore.xml.FT
-
-- TableFromDicts(header_data: Sequence, body_data: Sequence\[dict\],
-  footer_data=None, header_cell_render=<function Th>,
-  body_cell_render=\<function <lambda>\>, footer_cell_render=\<function
-  <lambda>\>, cls=(\<TableT.middle: ‘uk-table-middle’\>,
-  \<TableT.divider: ‘uk-table-divider’\>, \<TableT.hover:
-  ‘uk-table-hover’\>, \<TableT.sm: ‘uk-table-sm’\>), sortable=False,
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- TableFromLists(header_data: Sequence, body_data: Sequence\[Sequence\],
-  footer_data=None, header_cell_render=<function Th>,
-  body_cell_render=<function Td>, footer_cell_render=<function Td>,
-  cls=(\<TableT.middle: ‘uk-table-middle’\>, \<TableT.divider:
-  ‘uk-table-divider’\>, \<TableT.hover: ‘uk-table-hover’\>, \<TableT.sm:
-  ‘uk-table-sm’\>), sortable=False, \*\*kwargs) -\> fastcore.xml.FT
-
-- TableT(\*values)
-
-- Tbody(\*rows, cls=(), sortable=False, \*\*kwargs)
-
-- Td(\*c, cls=(), shrink=False, expand=False, small=False)
-
-- TextArea(\*c, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- TextPresets(\*values)
-
-- TextT(\*values)
-
-- Th(\*c, cls=(), shrink=False, expand=False, small=False)
-
-- Theme(\*values)
-
-- ThemeFont()
-
-- ThemePicker(color=True, radii=True, shadows=True, font=True,
-  mode=True, cls=‘p-4’, custom_themes=\[\])
-
-- ThemeRadii(\*values)
-
-- ThemeShadows()
-
-- Time(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  datetime: str = None, \*\*kwargs) -\> fastcore.xml.FT
-
-- Titled(title: str = ‘FastHTML app’, \*c, cls=\<ContainerT.xl:
-  ‘uk-container-xl’\>, \*\*kwargs) -\> fastcore.xml.FT
-
-- Toast(\*c, cls=’‘, alert_cls=’’, \*\*kwargs) -\> fastcore.xml.FT
-
-- ToastHT(\*values)
-
-- ToastVT(\*values)
-
-- U(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- UkFormSection(title, description, \*c, button_txt=‘Update’,
-  outer_margin=6, inner_margin=6)
-
-- UkIcon(icon: str, height: int = None, width: int = None, stroke_width:
-  int = None, cls=(), \*\*kwargs) -\> fastcore.xml.FT
-
-- UkIconLink(icon: str, height: int = None, width: int = None,
-  stroke_width: int = None, cls=(), button: bool = False, \*\*kwargs)
-  -\> fastcore.xml.FT
-
-- Upload(\*c, cls=(), multiple=False, accept=None,
-  button_cls=\<ButtonT.default: ‘uk-btn-default’\>, id=None, name=None,
-  \*\*kwargs) -\> fastcore.xml.FT
-
-- UploadZone(\*c, cls=(), multiple=False, accept=None, id=None,
-  name=None, \*\*kwargs) -\> fastcore.xml.FT
-
-- Var(\*c: fastcore.xml.FT | str, cls: enum.Enum | str | tuple = (),
-  \*\*kwargs) -\> fastcore.xml.FT</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
+```</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
 title = "Reference"
 +++
 
@@ -2192,6 +1710,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def Socials(title, site_name, description, image, url, w, h, twitter_site, creator, card)`
     OG and Twitter social card headers
+
+- `def YouTubeEmbed(video_id, **kwargs)`
+    Embed a YouTube video
 
 - `def Favicon(light_icon, dark_icon)`
     Light and dark favicon headers
