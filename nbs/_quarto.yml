@@ -23,7 +23,7 @@ website:
   twitter-card:
     creator: "@jeremyphoward"
     site: "@answerdotai"
-    image: https://answerdotai.github.io/fasthtml/og-image.png
+    image: https://docs.fastht.ml/og-image.png
   open-graph: true
   repo-actions: [issue]
   navbar:
