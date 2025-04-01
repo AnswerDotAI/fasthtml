@@ -436,19 +436,19 @@ async def _wrap_call(f, req, params):
 
 # %% ../nbs/api/00_core.ipynb
 htmx_exts = {
-    "head-support": "https://unpkg.com/htmx-ext-head-support@2.0.3/head-support.js",
-    "preload": "https://unpkg.com/htmx-ext-preload@2.1.0/preload.js",
-    "class-tools": "https://unpkg.com/htmx-ext-class-tools@2.0.1/class-tools.js",
-    "loading-states": "https://unpkg.com/htmx-ext-loading-states@2.0.0/loading-states.js",
-    "multi-swap": "https://unpkg.com/htmx-ext-multi-swap@2.0.0/multi-swap.js",
-    "path-deps": "https://unpkg.com/htmx-ext-path-deps@2.0.0/path-deps.js",
-    "remove-me": "https://unpkg.com/htmx-ext-remove-me@2.0.0/remove-me.js",
-    "ws": "https://unpkg.com/htmx-ext-ws@2.0.2/ws.js",
-    "chunked-transfer": "https://unpkg.com/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js"
+    "head-support": "https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.3/head-support.js",
+    "preload": "https://cdn.jsdelivr.net/npm/htmx-ext-preload@2.1.0/preload.js",
+    "class-tools": "https://cdn.jsdelivr.net/npm/htmx-ext-class-tools@2.0.1/class-tools.js",
+    "loading-states": "https://cdn.jsdelivr.net/npm/htmx-ext-loading-states@2.0.0/loading-states.js",
+    "multi-swap": "https://cdn.jsdelivr.net/npm/htmx-ext-multi-swap@2.0.0/multi-swap.js",
+    "path-deps": "https://cdn.jsdelivr.net/npm/htmx-ext-path-deps@2.0.0/path-deps.js",
+    "remove-me": "https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js",
+    "ws": "https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.2/ws.js",
+    "chunked-transfer": "https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js"
 }
 
 # %% ../nbs/api/00_core.ipynb
-htmxsrc   = Script(src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js")
+htmxsrc   = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4")
 fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
