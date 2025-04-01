@@ -2,7 +2,7 @@
 
 <!-- do not remove -->
 
-## 0.12.7
+## 0.12.8
 
 ### New Features
 
