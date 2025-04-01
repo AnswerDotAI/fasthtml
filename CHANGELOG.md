@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.7
+
+### New Features
+
+- Move htmx and ext js to jsdelivr from unpkg ([#698](https://github.com/AnswerDotAI/fasthtml/issues/698))
+
+
 ## 0.12.6
 
 - update `_formitem` so that it doesn't raise `KeyError` ([#694](https://github.com/AnswerDotAI/fasthtml/pull/694)), thanks to [@comhar](https://github.com/comhar)
