@@ -448,7 +448,7 @@ htmx_exts = {
 }
 
 # %% ../nbs/api/00_core.ipynb
-htmxsrc   = Script(src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js")
+htmxsrc   = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js")
 fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
