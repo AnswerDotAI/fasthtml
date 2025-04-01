@@ -2,54 +2,12 @@
 
 <!-- do not remove -->
 
+
 ## 0.12.9
-
-
-### Bugs Squashed
-
-- Redux background tasks fix+docs ([#692](https://github.com/AnswerDotAI/fasthtml/pull/692)), thanks to [@pydanny](https://github.com/pydanny)
-  - ---
-name: Pull Request
-about: Propose changes to the codebase
-title: '[PR] fix+docs background tasks when used by FtResponse'
-labels: 'bug'
-assignees: 'pydanny,audreyfeldroy'
-
----
-
-This PR combines PRs #674 and #690.
-
-**Related Issue**
-
-#336 - Background Tasks
-
-**Proposed Changes**
-
-This PR makes it possible for the FtResponse class to handle Background Tasks. Also documents the why, when, and how of Background Tasks.
-
-**Types of changes**
-What types of changes does your code introduce? Put an `x` in all the boxes that apply:
-- [x] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
-
-**Checklist**
-Go over all the following points, and put an `x` in all the boxes that apply:
-- [x] My code follows the code style of this project.
-- [x] My change requires a change to the documentation.
-- [x] I have updated the documentation accordingly.
-- [x] I have added tests to cover my changes.
-- [x] All new and existing tests passed.
-- [x] I am aware that this is an nbdev project, and I have edited, cleaned, and synced the source notebooks instead of editing .py or .md files directly.
-
-**Additional Information**
-Any additional information, configuration or data that might be necessary to reproduce the issue.
-
-
-## 0.12.8
 
 ### New Features
 
+- Background tasks fix+docs ([#692](https://github.com/AnswerDotAI/fasthtml/pull/692)), thanks to [@pydanny](https://github.com/pydanny)
 - Move htmx and ext js to jsdelivr from unpkg ([#698](https://github.com/AnswerDotAI/fasthtml/issues/698))
 
 
