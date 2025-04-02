@@ -1,3 +1,11 @@
 [build-system]
 requires = ["setuptools>=64.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name="fasthtml"
+requires-python=">=3.10"
+dynamic = ["description", "version","dependencies", "optional-dependencies", "readme", "requires-python", "license", "authors", "keywords", "classifiers", "entry-points", "urls"]
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "settings.ini" }, { file = "setup.py" }]
