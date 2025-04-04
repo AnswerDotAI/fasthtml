@@ -52,7 +52,12 @@ def test_get_toaster_with_typehint():
     res = cli.get('/see-toast-with-typehint', follow_redirects=True)
     assert 'Toast get' in res.text
 
+def test_toast_container_in_response():
+    # toasts will not render correctly if the toast container isn't rendered.
+    res = cli.get('/see-toast-ft-response')
+    assert 'id="fh-toast-container"' in res.text
+
 test_get_toaster()
 test_post_toaster()
 test_ft_response()
-
+test_toast_container_in_response()
