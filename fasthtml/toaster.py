@@ -35,24 +35,22 @@ toast_css = """
 
 def Toast(message: str, typ: str = "info", dismiss: bool = False, duration:int=5000):
     x_btn = Button('x', cls="fh-toast-dismiss", onclick="htmx.remove(this?.parentElement);") if dismiss else None
-    return Div(Div(Span(message), x_btn, cls=f"fh-toast fh-toast-{typ}", hx_on_transitionend="setTimeout(() => this?.remove(), %d);" % duration), hx_swap_oob=f"afterbegin:#{tcid}")
+    return Div(Span(message), x_btn, cls=f"fh-toast fh-toast-{typ}", hx_on_transitionend="setTimeout(() => this?.remove(), %d);" % duration)
 
 def add_toast(sess, message: str, typ: str = "info", dismiss: bool = False):
     assert typ in ("info", "success", "warning", "error"), '`typ` not in ("info", "success", "warning", "error")'
     sess.setdefault(sk, []).append((message, typ, dismiss))
 
 def render_toasts(sess):
-    toasts = [Toast(msg, typ, dismiss, sess['toast_duration']) 
-              for msg, typ, dismiss in sess.pop(sk, [])]
-    return Div(*toasts)
+    toasts = [Toast(msg, typ, dismiss, sess['toast_duration']) for msg, typ, dismiss in sess.pop(sk, [])]
+    return Div(*toasts, id=tcid, hx_swap_oob='afterbegin')
 
 def toast_after(resp, req, sess):
     if sk in sess and (not resp or isinstance(resp, (tuple,FT,FtResponse))):
         sess['toast_duration'] = req.app.state.toast_duration
         req.injects.append(render_toasts(sess))
 
-js = Script("htmx.onLoad(() => {if (!document.querySelector('#%s')){const elm = document.createElement('div'); elm.id='%s'; document.body.prepend(elm);}})" % (tcid, tcid))
 def setup_toasts(app, duration=5000):
     app.state.toast_duration = duration
-    app.hdrs += [Style(toast_css), js]
+    app.hdrs += [Style(toast_css)]
     app.after.append(toast_after)
