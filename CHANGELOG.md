@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.12
+
+### Bugs Squashed
+
+- inserts toasts at top of the page ([#704](https://github.com/AnswerDotAI/fasthtml/pull/704)), thanks to [@comhar](https://github.com/comhar)
+
+
 ## 0.12.11
 
 ### New Features
