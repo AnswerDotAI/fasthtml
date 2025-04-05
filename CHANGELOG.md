@@ -2,6 +2,12 @@
 
 <!-- do not remove -->
 
+## 0.12.10
+
+### New Features
+
+- Add `Fragment` ([#706](https://github.com/AnswerDotAI/fasthtml/issues/706))
+
 
 ## 0.12.9
 
