@@ -5,7 +5,7 @@
 # %% auto 0
 __all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces',
            'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow',
-           'run_js', 'HtmxOn', 'jsd', 'Titled', 'Socials', 'YouTubeEmbed', 'Favicon', 'clear', 'with_sid']
+           'run_js', 'HtmxOn', 'jsd', 'Fragment', 'Titled', 'Socials', 'YouTubeEmbed', 'Favicon', 'clear', 'with_sid']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
@@ -177,6 +177,11 @@ def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **k
     s = f'https://cdn.jsdelivr.net/{prov}/{org}/{repo}{ver}/{root}/{path}'
     if esm: s += '/+esm'
     return Script(src=s, **kwargs) if typ=='script' else Link(rel='stylesheet', href=s, **kwargs) if typ=='css' else s
+
+# %% ../nbs/api/02_xtend.ipynb
+class Fragment(FT):
+    "An empty tag, used as a container"
+    def __init__(self, *c): super().__init__('', c, {}, void_=True)
 
 # %% ../nbs/api/02_xtend.ipynb
 @delegates(ft_hx, keep=True)
