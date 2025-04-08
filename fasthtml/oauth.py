@@ -26,15 +26,17 @@ class GoogleAppClient(_AppClient):
     token_url = "https://oauth2.googleapis.com/token"
     info_url = "https://openidconnect.googleapis.com/v1/userinfo"
     
-    def __init__(self, client_id, client_secret, code=None, scope=None, **kwargs):
+    def __init__(self, client_id, client_secret, code=None, scope=None, project_id=None, **kwargs):
         scope_pre = "https://www.googleapis.com/auth/userinfo"
         if not scope: scope=["openid", f"{scope_pre}.email", f"{scope_pre}.profile"]
         super().__init__(client_id, client_secret, code=code, scope=scope, **kwargs)
+        self.project_id = project_id
     
     @classmethod
     def from_file(cls, fname, code=None, scope=None, **kwargs):
         cred = Path(fname).read_json()['web']
-        return cls(cred['client_id'], client_secret=cred['client_secret'], code=code, scope=scope, **kwargs)
+        return cls(cred['client_id'], client_secret=cred['client_secret'], project_id=cred['project_id'],
+                  code=code, scope=scope, **kwargs)
 
 # %% ../nbs/api/08_oauth.ipynb
 class GitHubAppClient(_AppClient):
@@ -202,6 +204,14 @@ try:
 except ImportError:
     Request=None
     class Credentials: pass
+
+# %% ../nbs/api/08_oauth.ipynb
+@patch()
+def consent_url(self:GoogleAppClient, proj=None):
+    "Get Google OAuth consent screen URL"
+    loc = "https://console.cloud.google.com/auth/clients"
+    if proj is None: proj=self.project_id
+    return f"{loc}/{self.client_id}?project={proj}"
 
 # %% ../nbs/api/08_oauth.ipynb
 @patch

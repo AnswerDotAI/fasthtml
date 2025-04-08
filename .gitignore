@@ -1,3 +1,4 @@
+client_secret.json
 # TODO: modify nbdev to not warn for nb_export nbs
 fasthtml/stripe_otp.py
 posts/
