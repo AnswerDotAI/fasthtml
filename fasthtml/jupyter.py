@@ -88,6 +88,9 @@ class JupyUvi:
     def start(self):
         self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
 
+    async def start_async(self):
+        self.server = await nb_serve_async(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
+
     def stop(self):
         self.server.should_exit = True
         wait_port_free(self.port)
