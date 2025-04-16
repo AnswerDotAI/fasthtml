@@ -163,7 +163,8 @@ class OAuth:
         if not skip: skip = [redir_path,error_path,login_path]
         store_attr()
         def before(req, session):
-            auth = req.scope['auth'] = session.get('auth')
+            if 'auth' not in req.scope: req.scope['auth'] = session.get('auth')
+            auth = req.scope['auth']
             if not auth: return self.redir_login(session)
             res = self.check_invalid(req, session, auth)
             if res: return res
