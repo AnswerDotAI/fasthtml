@@ -69,6 +69,7 @@ class DiscordAppClient(_AppClient):
     base_url = "https://discord.com/oauth2/authorize"
     token_url = "https://discord.com/api/oauth2/token"
     revoke_url = "https://discord.com/api/oauth2/token/revoke"
+    info_url = "https://discord.com/api/users/@me"
     id_key = 'id'
 
     def __init__(self, client_id, client_secret, is_user=False, perms=0, scope=None, **kwargs):
@@ -77,14 +78,18 @@ class DiscordAppClient(_AppClient):
         self.perms = perms
         super().__init__(client_id, client_secret, scope=scope, **kwargs)
 
-    def login_link(self):
+    def login_link(self, redirect_uri=None, scope=None, state=None):
+        use_scope = scope or self.scope
         d = dict(response_type='code', client_id=self.client_id,
-                 integration_type=self.integration_type, scope=self.scope) #, permissions=self.perms, prompt='consent')
+                 integration_type=self.integration_type, scope=use_scope)
+        if state: d['state'] = state
+        if redirect_uri: d['redirect_uri'] = redirect_uri
         return f'{self.base_url}?' + urlencode(d)
 
-    def parse_response(self, code):
+    def parse_response(self, code, redirect_uri=None):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        data = dict(grant_type='authorization_code', code=code)#, redirect_uri=self.redirect_uri)
+        data = dict(grant_type='authorization_code', code=code)
+        if redirect_uri: data['redirect_uri'] = redirect_uri
         r = httpx.post(self.token_url, data=data, headers=headers, auth=(self.client_id, self.client_secret))
         r.raise_for_status()
         self.parse_request_body_response(r.text)
