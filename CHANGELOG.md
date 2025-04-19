@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.12.13
+
+### New Features
+
+- Add `GoogleAppClient.consent_url` ([#707](https://github.com/AnswerDotAI/fasthtml/issues/707))
+
+### Bugs Squashed
+
+- Fix Discord Client ([#716](https://github.com/AnswerDotAI/fasthtml/pull/716)), thanks to [@erikgaas](https://github.com/erikgaas)
+  - The discord client wasn't working for me so I had to make some changes to get it to work.
+
+
 ## 0.12.12
 
 ### Bugs Squashed
