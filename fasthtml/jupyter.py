@@ -10,6 +10,7 @@ __all__ = ['nb_serve', 'nb_serve_async', 'is_port_free', 'wait_port_free', 'show
 import asyncio, socket, time, uvicorn
 from threading import Thread
 from fastcore.utils import *
+from fastcore.meta import delegates
 from .common import *
 from .common import show as _show
 from fastcore.parallel import startthread
@@ -54,10 +55,11 @@ def wait_port_free(port, host='localhost', max_wait=3):
         time.sleep(0.1)
 
 # %% ../nbs/api/06_jupyter.ipynb
-def show(*s):
+@delegates(_show)
+def show(*s, **kwargs):
     "Same as fasthtml.components.show, but also adds `htmx.process()`"
-    if IN_NOTEBOOK: return _show(*s, Script('if (window.htmx) htmx.process(document.body)'))
-    return _show(*s)
+    if IN_NOTEBOOK: return _show(*s, Script('if (window.htmx) htmx.process(document.body)'), **kwargs)
+    return _show(*s, **kwargs)
 
 # %% ../nbs/api/06_jupyter.ipynb
 def render_ft():
