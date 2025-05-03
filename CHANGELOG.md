@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.15
+
+### New Features
+
+- Pass through kwargs in `show` ([#723](https://github.com/AnswerDotAI/fasthtml/issues/723))
+
+
 ## 0.12.14
 
 ### New Features
