@@ -33,7 +33,7 @@ except ImportError: display=None
 
 # %% ../nbs/api/01_components.ipynb
 @patch
-def __str__(self:FT): return self.id if self.id else object.__str__(self)
+def __str__(self:FT): return self.id if self.id else to_xml(self, indent=False)
 
 # %% ../nbs/api/01_components.ipynb
 @patch
