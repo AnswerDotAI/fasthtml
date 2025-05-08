@@ -4,11 +4,11 @@
 
 # %% auto 0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport',
-           'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders',
-           'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream',
-           'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key', 'qp',
-           'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie',
-           'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+           'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens',
+           'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt',
+           'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond',
+           'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs',
+           'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,signal,asyncio,threading,inspect
@@ -163,6 +163,13 @@ async def _from_body(req, p):
     if req.query_params: data = {**data, **dict(req.query_params)}
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
+
+# %% ../nbs/api/00_core.ipynb
+class JSONResponse(JSONResponseOrig):
+    "Same as starlette's version, but auto-stringifies non serializable types"
+    def render(self, content: Any) -> bytes:
+        res = json.dumps(content, ensure_ascii=False, allow_nan=False, indent=None, separators=(",", ":"), default=str)
+        return res.encode("utf-8")
 
 # %% ../nbs/api/00_core.ipynb
 async def _find_p(req, arg:str, p:Parameter):
@@ -748,7 +755,7 @@ def reg_re_param(m, s):
 # %% ../nbs/api/00_core.ipynb
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
-_static_exts = "ico gif jpg jpeg webm css js woff png svg mp4 webp ttf otf eot woff2 txt html map pdf zip tgz gz csv mp3 wav ogg flac aac doc docx xls xlsx ppt pptx epub mobi bmp tiff avi mov wmv mkv json xml yaml yml rar 7z tar bz2 htm xhtml apk dmg exe msi swf iso json".split()
+_static_exts = "ico gif jpg jpeg webm css js woff png svg mp4 webp ttf otf eot woff2 txt html map pdf zip tgz gz csv mp3 wav ogg flac aac doc docx xls xlsx ppt pptx epub mobi bmp tiff avi mov wmv mkv xml yaml yml rar 7z tar bz2 htm xhtml apk dmg exe msi swf iso".split()
 reg_re_param("static", '|'.join(_static_exts))
 
 @patch
@@ -806,3 +813,14 @@ def setup_ws(app, f=noop):
         for o in conns.values(): await o(s)
     app._send = send
     return send
+
+# %% ../nbs/api/00_core.ipynb
+devtools_loc = "/.well-known/appspecific/com.chrome.devtools.json"
+
+@patch
+def devtools_json(self:FastHTML, path=None, uuid=None):
+    if not path: path = Path().absolute()
+    if not uuid: uuid = get_key()
+    @self.route(devtools_loc)
+    def devtools():
+        return dict(workspace=dict(root=path, uuid=uuid))
