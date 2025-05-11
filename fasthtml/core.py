@@ -443,6 +443,7 @@ async def _wrap_call(f, req, params):
 
 # %% ../nbs/api/00_core.ipynb
 htmx_exts = {
+    "morph": "https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js",
     "head-support": "https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.3/head-support.js",
     "preload": "https://cdn.jsdelivr.net/npm/htmx-ext-preload@2.1.0/preload.js",
     "class-tools": "https://cdn.jsdelivr.net/npm/htmx-ext-class-tools@2.0.1/class-tools.js",
