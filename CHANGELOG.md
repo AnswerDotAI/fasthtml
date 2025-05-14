@@ -2,6 +2,15 @@
 
 <!-- do not remove -->
 
+## 0.12.16
+
+### New Features
+
+- Add morph extension ([#727](https://github.com/AnswerDotAI/fasthtml/issues/727))
+- Add `devtools_json` ([#725](https://github.com/AnswerDotAI/fasthtml/issues/725))
+- fallback stringify FT with `to_xml` ([#724](https://github.com/AnswerDotAI/fasthtml/issues/724))
+
+
 ## 0.12.15
 
 ### New Features
