@@ -7,8 +7,8 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens',
            'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt',
            'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond',
-           'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs',
-           'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+           'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client',
+           'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,signal,asyncio,threading,inspect
@@ -389,25 +389,35 @@ def respond(req, heads, bdy):
     return Html(Head(*heads, *flat_xt(req.hdrs)), body, **req.htmlkw)
 
 # %% ../nbs/api/00_core.ipynb
-def _xt_cts(req, resp):
+def is_full_page(req, resp):
+    is_frag = 'hx-request' in req.headers and 'hx-history-restore-request' not in req.headers
+    return (resp and not is_frag and not any(getattr(o, 'tag', '')=='html' for o in resp))
+
+# %% ../nbs/api/00_core.ipynb
+def _part_resp(req, resp):
     resp = flat_tuple(resp)
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
-    http_hdrs = {o.k:str(o.v) for o in http_hdrs}
     tasks,resp = partition(resp, risinstance(BackgroundTask))
-    ts = BackgroundTasks()
-    for t in tasks: ts.tasks.append(t)
-    hdr_tags = 'title','meta','link','style','base'
-    heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
-    if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
-        title = [] if any(getattr(o, 'tag', '')=='title' for o in heads) else [Title(req.app.title)]
-        resp = respond(req, [*heads, *title], bdy)
-    return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs, ts
+    kw = {"headers": {"vary": "HX-Request, HX-History-Restore-Request"}}
+    if http_hdrs: kw['headers'] |= {o.k:str(o.v) for o in http_hdrs}
+    if tasks:
+        ts = BackgroundTasks()
+        for t in tasks: ts.tasks.append(t)
+        kw['background'] = ts
+    resp = tuple(resp)
+    if len(resp)==1: resp = resp[0]
+    return resp,kw
 
 # %% ../nbs/api/00_core.ipynb
-def _xt_resp(req, resp, status_code):
-    cts,http_hdrs,tasks = _xt_cts(req, resp)
-    return HTMLResponse(cts, status_code=status_code, headers=http_hdrs, background=tasks)
+def _xt_cts(req, resp):
+    hdr_tags = 'title','meta','link','style','base'
+    resp = tuplify(resp)
+    heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
+    if is_full_page(req, resp):
+        title = [] if any(getattr(o, 'tag', '')=='title' for o in heads) else [Title(req.app.title)]
+        resp = respond(req, [*heads, *title], bdy)
+    return _to_xml(req, resp, indent=fh_cfg.indent)
 
 # %% ../nbs/api/00_core.ipynb
 def _is_ft_resp(resp): return isinstance(resp, _iter_typs+(HttpHeader,FT)) or hasattr(resp, '__ft__')
@@ -418,15 +428,18 @@ def _resp(req, resp, cls=empty, status_code=200):
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if cls in (Any,FT): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
-    if cls is not empty: return cls(resp, status_code=status_code)
-    if isinstance(resp, Response): return resp # respect manually set status_code
-    if _is_ft_resp(resp): return _xt_resp(req, resp, status_code)
+    resp,kw = _part_resp(req, resp)
+    if cls is not empty: return cls(resp, status_code=status_code, **kw)
+    if isinstance(resp, Response): return resp
+    if _is_ft_resp(resp):
+        cts = _xt_cts(req, resp)
+        return HTMLResponse(cts, status_code=status_code, **kw)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:
         resp = str(resp)
         cls = HTMLResponse
-    return cls(resp, status_code=status_code)
+    return cls(resp, status_code=status_code, **kw)
 
 # %% ../nbs/api/00_core.ipynb
 class Redirect:
@@ -788,8 +801,10 @@ class FtResponse:
         self.cls,self.media_type,self.background = cls,media_type,background
 
     def __response__(self, req):
-        cts,httphdrs,tasks = _xt_cts(req, self.content)
-        if not tasks.tasks: tasks = self.background
+        resp,kw = _part_resp(req, self.content)
+        cts = _xt_cts(req, resp)
+        tasks,httphdrs = kw.get('background'),kw.get('headers')
+        if not tasks: tasks = self.background
         headers = {**(self.headers or {}), **httphdrs}
         return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=tasks)
 
