@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Background tasks are functions run after handlers return a response.">
+
+<title>Background Tasks – fasthtml</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-a89c50c4e0ee87386b9a491308308b7c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Background Tasks – fasthtml">
+<meta property="og:description" content="Background tasks are functions run after handlers return a response.">
+<meta property="og:site_name" content="fasthtml">
+<meta name="twitter:title" content="Background Tasks – fasthtml">
+<meta name="twitter:description" content="Background tasks are functions run after handlers return a response.">
+<meta name="twitter:image" content="https://docs.fastht.ml/og-image.png">
+<meta name="twitter:creator" content="@jeremyphoward">
+<meta name="twitter:site" content="@answerdotai">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../logo.svg" alt="" class="navbar-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://fastht.ml"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://fastht.ml/about"> 
+<span class="menu-text">Learn</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/answerdotai/fasthtml"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://x.com/answerdotai"> <i class="bi bi-twitter" role="img" aria-label="Fast.ai Twitter">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../explains/background_tasks.html">Explanations</a></li><li class="breadcrumb-item"><a href="../explains/background_tasks.html">Background Tasks</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Get Started</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../tutorials/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/by_example.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FastHTML By Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/quickstart_for_web_devs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Web Devs Quickstart</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/e2e.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">JS App Walkthrough</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/jupyter_and_fasthtml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using Jupyter to write FastHTML</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Explanations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/background_tasks.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Background Tasks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/explaining_xt_components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><strong>FT</strong> Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/faq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FAQ</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/minidataapi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MiniDataAPI Spec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/oauth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OAuth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/routes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Routes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/stripe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stripe</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../explains/websockets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WebSockets</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/concise_guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Concise reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/defining_xt_component.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Custom Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/handlers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Handling handlers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/live_reload.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Live Reloading</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ref/response_types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Response Types</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Source</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Core</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/xtend.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Component extensions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/js.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Javascript examples</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/pico.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pico.css components</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/svg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SVG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/jupyter.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Jupyter compatibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/oauth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OAuth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Command Line Tools</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#a-simple-background-task-example" id="toc-a-simple-background-task-example" class="nav-link active" data-scroll-target="#a-simple-background-task-example">A simple background task example</a></li>
+  <li><a href="#a-more-realistic-example" id="toc-a-more-realistic-example" class="nav-link" data-scroll-target="#a-more-realistic-example">A more realistic example</a>
+  <ul class="collapse">
+  <li><a href="#simulated-slow-api-service" id="toc-simulated-slow-api-service" class="nav-link" data-scroll-target="#simulated-slow-api-service">Simulated Slow API Service</a></li>
+  <li><a href="#main-fasthtml-app" id="toc-main-fasthtml-app" class="nav-link" data-scroll-target="#main-fasthtml-app">Main FastHTML app</a></li>
+  </ul></li>
+  <li><a href="#multiple-background-tasks-in-a-handler" id="toc-multiple-background-tasks-in-a-handler" class="nav-link" data-scroll-target="#multiple-background-tasks-in-a-handler">Multiple background tasks in a handler</a></li>
+  <li><a href="#background-tasks-at-scale" id="toc-background-tasks-at-scale" class="nav-link" data-scroll-target="#background-tasks-at-scale">Background tasks at scale</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="background_tasks.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../explains/background_tasks.html">Explanations</a></li><li class="breadcrumb-item"><a href="../explains/background_tasks.html">Background Tasks</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Background Tasks</h1>
+</div>
+
+<div>
+  <div class="description">
+    Background tasks are functions run after handlers return a response.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>Useful for operations where the user gets a response quickly but doesn’t need to wait for the operation to finish. Typical scenarios include:</p>
+<ul>
+<li>User setup in complex systems where you can inform the user and other people later in email that their account is complete</li>
+<li>Batch processes that can take a significant amount of time (bulk email or API calls)</li>
+<li>Any other process where the user can be notified later by email, websocket, webhook, or pop-up</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Background tasks in FastHTML are built on Starlette’s background tasks, with added sugar. Starlette’s background task design is an easy-to-use wrapper around Python’s async and threading libraries. Background tasks make apps snappier to the end user and generally improve an app’s speed.</p>
+</div>
+</div>
+<section id="a-simple-background-task-example" class="level2">
+<h2 class="anchored" data-anchor-id="a-simple-background-task-example">A simple background task example</h2>
+<p>In this example we are attaching a task to FtResponse by assigning it via the background argument. When the page is visited, it will display ‘Simple Background Task Example’ almost instantly, while in the terminal it will slowly count upward from 0.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>main.py</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-1" data-filename="main.py"><pre class="sourceCode numberSource python code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2"></a><span class="im">from</span> starlette.background <span class="im">import</span> BackgroundTask</span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3"></a><span class="im">from</span> time <span class="im">import</span> sleep</span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4"></a></span>
+<span id="annotated-cell-1-5"><a href="#annotated-cell-1-5"></a>app, rt <span class="op">=</span> fast_app()</span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-7" class="code-annotation-target"><a href="#annotated-cell-1-7"></a><span class="kw">def</span> counter(loops:<span class="bu">int</span>):</span>
+<span id="annotated-cell-1-8"><a href="#annotated-cell-1-8"></a>    <span class="co">"Slowly print integers to the terminal"</span></span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(loops):</span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10"></a>        <span class="bu">print</span>(i)</span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11"></a>        sleep(i)</span>
+<span id="annotated-cell-1-12"><a href="#annotated-cell-1-12"></a></span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13"></a><span class="at">@rt</span></span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14"></a><span class="kw">def</span> index():</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-1-15" class="code-annotation-target"><a href="#annotated-cell-1-15"></a>    task <span class="op">=</span> BackgroundTask(counter, loops<span class="op">=</span><span class="dv">5</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-1-16" class="code-annotation-target"><a href="#annotated-cell-1-16"></a>    <span class="cf">return</span> Titled(<span class="st">'Simple Background Task Example'</span>), task</span>
+<span id="annotated-cell-1-17"><a href="#annotated-cell-1-17"></a></span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18"></a>serve()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="7" data-code-annotation="1"><code>counter</code> is our task function. There is nothing special about it, although it is a good practice for its arguments to be serializable as JSON</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="15" data-code-annotation="2">We use <code>starlette.background.BackgroundTask</code> to turn <code>counter()</code> into a background task</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="16" data-code-annotation="3">To add a background task to a handler, we add it to the return values at the top level of the response.</span>
+</dd>
+</dl>
+</section>
+<section id="a-more-realistic-example" class="level2">
+<h2 class="anchored" data-anchor-id="a-more-realistic-example">A more realistic example</h2>
+<p>Let’s imagine that we are accessing a slow-to-process critical service. We don’t want our users to have to wait. While we could set up SSE to notify on completion, instead we decide to periodically check to see if the status of their record has changed.</p>
+<section id="simulated-slow-api-service" class="level3">
+<h3 class="anchored" data-anchor-id="simulated-slow-api-service">Simulated Slow API Service</h3>
+<p>First, create a very simple slow timestamp API. All it does is stall requests for a few seconds before returning JSON containing timestamps.</p>
+<div class="sourceCode" id="annotated-cell-2"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># slow_api.py</span></span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> time <span class="im">import</span> sleep, time</span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app()</span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/slow'</span>)</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> slow(ts: <span class="bu">int</span>):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-9" class="code-annotation-target"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>    sleep(<span class="dv">3</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-2-10" class="code-annotation-target"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">dict</span>(request_time<span class="op">=</span>ts, response_time<span class="op">=</span><span class="bu">int</span>(time()))</span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>serve(port<span class="op">=</span><span class="dv">8123</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="9" data-code-annotation="1">This represents slow processing.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="10" data-code-annotation="2">Returns both the task’s original timestamp and the time after completion</span>
+</dd>
+</dl>
+</section>
+<section id="main-fasthtml-app" class="level3">
+<h3 class="anchored" data-anchor-id="main-fasthtml-app">Main FastHTML app</h3>
+<p>Now let’s create a user-facing app that uses this API to fetch the timestamp from the glacially slow service.</p>
+<div class="sourceCode" id="annotated-cell-3"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># main.py</span></span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fasthtml.common <span class="im">import</span> <span class="op">*</span></span>
+<span id="annotated-cell-3-3"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> starlette.background <span class="im">import</span> BackgroundTask</span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="annotated-cell-3-5"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> httpx</span>
+<span id="annotated-cell-3-6"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-7"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a>app, rt <span class="op">=</span> fast_app()</span>
+<span id="annotated-cell-3-8"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-9"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a>db <span class="op">=</span> database(<span class="st">':memory:'</span>)</span>
+<span id="annotated-cell-3-10"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-3-11" class="code-annotation-target"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TStamp: request_time: <span class="bu">int</span><span class="op">;</span> response_time: <span class="bu">int</span></span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-13"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a>tstamps <span class="op">=</span> db.create(TStamp, pk<span class="op">=</span><span class="st">'request_time'</span>)</span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-3-15" class="code-annotation-target"><a href="#annotated-cell-3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> task_submit(request_time: <span class="bu">int</span>):</span>
+<span id="annotated-cell-3-16"><a href="#annotated-cell-3-16" aria-hidden="true" tabindex="-1"></a>    client <span class="op">=</span> httpx.Client()</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-3-17" class="code-annotation-target"><a href="#annotated-cell-3-17" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> client.post(<span class="ss">f'http://127.0.0.1:8123/slow?ts=</span><span class="sc">{</span>request_time<span class="sc">}</span><span class="ss">'</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-3-18" class="code-annotation-target"><a href="#annotated-cell-3-18" aria-hidden="true" tabindex="-1"></a>    tstamps.insert(<span class="op">**</span>response.json())</span>
+<span id="annotated-cell-3-19"><a href="#annotated-cell-3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-20"><a href="#annotated-cell-3-20" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span></span>
+<span id="annotated-cell-3-21"><a href="#annotated-cell-3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> submit():</span>
+<span id="annotated-cell-3-22"><a href="#annotated-cell-3-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Route that initiates a background task and returns immediately."</span></span>
+<span id="annotated-cell-3-23"><a href="#annotated-cell-3-23" aria-hidden="true" tabindex="-1"></a>    request_time <span class="op">=</span> <span class="bu">int</span>(time.time())</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-3-24" class="code-annotation-target"><a href="#annotated-cell-3-24" aria-hidden="true" tabindex="-1"></a>    task <span class="op">=</span> BackgroundTask(task_submit, request_time<span class="op">=</span>request_time)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-3-25" class="code-annotation-target"><a href="#annotated-cell-3-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> P(<span class="ss">f'Request submitted at: </span><span class="sc">{</span>request_time<span class="sc">}</span><span class="ss">'</span>), task</span>
+<span id="annotated-cell-3-26"><a href="#annotated-cell-3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-27"><a href="#annotated-cell-3-27" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-3-28" class="code-annotation-target"><a href="#annotated-cell-3-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_tstamps(): <span class="cf">return</span> Ul(<span class="bu">map</span>(Li, tstamps()))</span>
+<span id="annotated-cell-3-29"><a href="#annotated-cell-3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-30"><a href="#annotated-cell-3-30" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span></span>
+<span id="annotated-cell-3-31"><a href="#annotated-cell-3-31" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> index():</span>
+<span id="annotated-cell-3-32"><a href="#annotated-cell-3-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">'Background Task Dashboard'</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="8" onclick="event.preventDefault();">8</a><span id="annotated-cell-3-33" class="code-annotation-target"><a href="#annotated-cell-3-33" aria-hidden="true" tabindex="-1"></a>        P(Button(<span class="st">'Press to call slow service'</span>,</span>
+<span id="annotated-cell-3-34"><a href="#annotated-cell-3-34" aria-hidden="true" tabindex="-1"></a>            hx_post<span class="op">=</span>submit, hx_target<span class="op">=</span><span class="st">'#res'</span>)),</span>
+<span id="annotated-cell-3-35"><a href="#annotated-cell-3-35" aria-hidden="true" tabindex="-1"></a>        H2(<span class="st">'Responses from Tasks'</span>),</span>
+<span id="annotated-cell-3-36"><a href="#annotated-cell-3-36" aria-hidden="true" tabindex="-1"></a>        P(<span class="st">''</span>, <span class="bu">id</span><span class="op">=</span><span class="st">'res'</span>),</span>
+<span id="annotated-cell-3-37"><a href="#annotated-cell-3-37" aria-hidden="true" tabindex="-1"></a>        Div(Ul(<span class="bu">map</span>(Li, tstamps())),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="9" onclick="event.preventDefault();">9</a><span id="annotated-cell-3-38" class="code-annotation-target"><a href="#annotated-cell-3-38" aria-hidden="true" tabindex="-1"></a>            hx_get<span class="op">=</span>show_tstamps, hx_trigger<span class="op">=</span><span class="st">'every 5s'</span>),</span>
+<span id="annotated-cell-3-39"><a href="#annotated-cell-3-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-3-40"><a href="#annotated-cell-3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-41"><a href="#annotated-cell-3-41" aria-hidden="true" tabindex="-1"></a>serve()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="11" data-code-annotation="1">Tracks when requests are sent and responses received</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="15" data-code-annotation="2">Task function calling slow service to be run in the background of a route handler. It is common but not necessary to prefix task functions with ‘task_’</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="17" data-code-annotation="3">Call the slow API service (simulating a time-consuming operation)</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="18" data-code-annotation="4">Store both timestamps in our database</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="24" data-code-annotation="5">Create a background task by passing in the function to a BackgroundTask object, followed by any arguments.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="25" data-code-annotation="6">In FtResponse, use the background keyword argument to set the task to be run after the HTTP response is generated.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="28" data-code-annotation="7">Endpoint that displays all recorded timestamp pairs.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="8">8</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="33" data-code-annotation="8">When this button is pressed, the ‘submit’ handler will respond instantly. The task_submit function will insert the slow API response into the db later.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="9">9</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="38" data-code-annotation="9">Every 5 seconds get the tstamps stored in the DB.</span>
+</dd>
+</dl>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In the example above we use a synchronous background task function set in the <a href="https://docs.fastht.ml/api/core.html#ftresponse"><code>FtResponse</code></a> of a synchronous handler. However, we can also use asynchronous functions and handlers.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="multiple-background-tasks-in-a-handler" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-background-tasks-in-a-handler">Multiple background tasks in a handler</h2>
+<p>It is possible to add multiple background tasks to an FtResponse.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Multiple background tasks on a background task are executed in order. In the case a task raises an exception, following tasks will not get the opportunity to be executed.</p>
+</div>
+</div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> starlette.background <span class="im">import</span> BackgroundTasks</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> signup(email, username):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    tasks <span class="op">=</span> BackgroundTasks()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    tasks.add_task(send_welcome_email, to_address<span class="op">=</span>email)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    tasks.add_task(send_admin_notification, username<span class="op">=</span>username)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Titled(<span class="st">'Signup successful!'</span>), tasks</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> send_welcome_email(to_address):</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> send_admin_notification(username):</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="background-tasks-at-scale" class="level2">
+<h2 class="anchored" data-anchor-id="background-tasks-at-scale">Background tasks at scale</h2>
+<p>Background tasks enhance application performance both for users and apps by handling blocking processes asynchronously, even when defined as synchronous functions.</p>
+<p>When FastHTML’s background tasks aren’t enough and your app runs slow on a server, manually offloading processes to the <code>multiprocessing</code> library is an option. By doing so you can leverage multiple cores and bypass the GIL, significantly improving speed and performance at the cost of added complexity.</p>
+<p>Sometimes a server reaches its processing limits, and this is where distributed task queue systems like Celery and Dramatiq come into play. They are designed to distribute tasks across multiple servers, offering improved observability, retry mechanisms, and persistence, at the cost of substantially increased complexity.</p>
+<p>However most applications work well with built-in background tasks like those in FastHTML, which we recommend trying first. Writing these functions with JSON-serializable arguments ensures straightforward conversion to other concurrency methods if needed.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/docs\.fastht\.ml\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/AnswerDotAI/fasthtml/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

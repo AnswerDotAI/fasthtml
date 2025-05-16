@@ -1,0 +1,51 @@
+.cell { margin-bottom: 1rem; }
+.cell > .sourceCode { margin-bottom: 0; }
+.cell-output > pre { margin-bottom: 0; }
+
+.cell-output > pre, .cell-output > .sourceCode > pre, .cell-output-stdout > pre {
+  margin-left: 0.8rem;
+  margin-top: 0;
+  background: none;
+  border-left: 2px solid lightsalmon;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.cell-output > .sourceCode { border: none; }
+
+.cell-output > .sourceCode {
+  background: none;
+  margin-top: 0;
+}
+
+div.description {
+  padding-left: 2px;
+  padding-top: 5px;
+  font-size: 1.25rem;
+  color: rgba(0, 0, 0, 0.60);
+  opacity: 70%;
+}
+
+
+div.sidebar-item-container .active {
+  background-color: #E8E8FC;
+  color: #000;
+}
+
+div.sidebar-item-container a {
+  color: #000;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+li.sidebar-item {
+  margin-top: 3px;
+}
+
+span.menu-text {
+  line-height: 20px;
+}
+
+.navbar-container { max-width: 1282px; }
+
