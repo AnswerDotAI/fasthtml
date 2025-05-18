@@ -1,5 +1,5 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 import json, uuid, inspect, types, signal, asyncio, threading, inspect
 from fastcore.utils import *
 from fastcore.xml import *
@@ -100,6 +100,12 @@ async def parse_form(req: Request) -> FormData:
 async def _from_body(req, p):
     ...
 
+class JSONResponse(JSONResponseOrig):
+    """Same as starlette's version, but auto-stringifies non serializable types"""
+
+    def render(self, content: Any) -> bytes:
+        ...
+
 async def _find_p(req, arg: str, p: Parameter):
     """In `req` find param named `arg` of type in `p` (`arg` is ignored for body types)"""
     ...
@@ -181,10 +187,13 @@ def respond(req, heads, bdy):
     """Default FT response creation function"""
     ...
 
-def _xt_cts(req, resp):
+def is_full_page(req, resp):
     ...
 
-def _xt_resp(req, resp, status_code):
+def _part_resp(req, resp):
+    ...
+
+def _xt_cts(req, resp):
     ...
 
 def _is_ft_resp(resp):
@@ -204,8 +213,8 @@ class Redirect:
 
 async def _wrap_call(f, req, params):
     ...
-htmx_exts = {'head-support': 'https://unpkg.com/htmx-ext-head-support@2.0.3/head-support.js', 'preload': 'https://unpkg.com/htmx-ext-preload@2.1.0/preload.js', 'class-tools': 'https://unpkg.com/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://unpkg.com/htmx-ext-loading-states@2.0.0/loading-states.js', 'multi-swap': 'https://unpkg.com/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://unpkg.com/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://unpkg.com/htmx-ext-remove-me@2.0.0/remove-me.js', 'ws': 'https://unpkg.com/htmx-ext-ws@2.0.2/ws.js', 'chunked-transfer': 'https://unpkg.com/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js'}
-htmxsrc = Script(src='https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js')
+htmx_exts = {'morph': 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js', 'head-support': 'https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.3/head-support.js', 'preload': 'https://cdn.jsdelivr.net/npm/htmx-ext-preload@2.1.0/preload.js', 'class-tools': 'https://cdn.jsdelivr.net/npm/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://cdn.jsdelivr.net/npm/htmx-ext-loading-states@2.0.0/loading-states.js', 'multi-swap': 'https://cdn.jsdelivr.net/npm/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://cdn.jsdelivr.net/npm/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js', 'ws': 'https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.2/ws.js', 'chunked-transfer': 'https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js'}
+htmxsrc = Script(src='https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js')
 fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js')
 surrsrc = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js')
 scopesrc = Script(src='https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js')
@@ -262,6 +271,9 @@ class FastHTML(Starlette):
 
     def static_route(self, ext='', prefix='/', static_path='.'):
         """Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')"""
+        ...
+
+    def devtools_json(self, path=None, uuid=None):
         ...
 all_meths = 'get post put delete patch head trace options'.split()
 
@@ -336,7 +348,7 @@ def cookie(key: str, value='', max_age=None, expires=None, path='/', domain=None
 def reg_re_param(m, s):
     ...
 reg_re_param('path', '.*?')
-_static_exts = 'ico gif jpg jpeg webm css js woff png svg mp4 webp ttf otf eot woff2 txt html map pdf zip tgz gz csv mp3 wav ogg flac aac doc docx xls xlsx ppt pptx epub mobi bmp tiff avi mov wmv mkv json xml yaml yml rar 7z tar bz2 htm xhtml apk dmg exe msi swf iso json'.split()
+_static_exts = 'ico gif jpg jpeg webm css js woff png svg mp4 webp ttf otf eot woff2 txt html map pdf zip tgz gz csv mp3 wav ogg flac aac doc docx xls xlsx ppt pptx epub mobi bmp tiff avi mov wmv mkv xml yaml yml rar 7z tar bz2 htm xhtml apk dmg exe msi swf iso'.split()
 reg_re_param('static', '|'.join(_static_exts))
 
 class MiddlewareBase:
@@ -347,7 +359,7 @@ class MiddlewareBase:
 class FtResponse:
     """Wrap an FT response with any Starlette `Response`"""
 
-    def __init__(self, content, status_code: int=200, headers=None, cls=HTMLResponse, media_type: str | None=None):
+    def __init__(self, content, status_code: int=200, headers=None, cls=HTMLResponse, media_type: str | None=None, background: BackgroundTask | None=None):
         ...
 
     def __response__(self, req):
@@ -361,3 +373,4 @@ def _add_ids(s):
 
 def setup_ws(app, f=noop):
     ...
+devtools_loc = '/.well-known/appspecific/com.chrome.devtools.json'
