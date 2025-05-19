@@ -125,7 +125,7 @@ to_xml(tags)
 
 ## JS
 
-The [`Script`](https://docs.fastht.ml/api/xtend.html#script) function
+The [`Script`](https://www.fastht.ml/docs/api/xtend.html#script) function
 allows you to include JavaScript. You can use Python to generate parts
 of your JS or JSON like this:
 
@@ -215,7 +215,7 @@ app,rt = fast_app()
 
 When a route handler function is used as a fasttag attribute (such as
 `href`, `hx_get`, or `action`) it is converted to that route’s path.
-[`fill_form`](https://docs.fastht.ml/api/components.html#fill_form) is
+[`fill_form`](https://www.fastht.ml/docs/api/components.html#fill_form) is
 used to copy an object’s matching attrs into matching-name form fields.
 
 ``` python
@@ -300,7 +300,7 @@ app, rt = fast_app(exception_handlers=exception_handlers)
 ## Cookies
 
 We can set cookies using the
-[`cookie()`](https://docs.fastht.ml/api/core.html#cookie) function.
+[`cookie()`](https://www.fastht.ml/docs/api/core.html#cookie) function.
 
 ``` python
 @rt
@@ -347,7 +347,7 @@ def profile(req, sess, user_id: int=None):
 ```
 
 Handler functions can return the
-[`HtmxResponseHeaders`](https://docs.fastht.ml/api/core.html#htmxresponseheaders)
+[`HtmxResponseHeaders`](https://www.fastht.ml/docs/api/core.html#htmxresponseheaders)
 object to set HTMX-specific response headers.
 
 ``` python
@@ -357,7 +357,7 @@ def htmlredirect(app): return HtmxResponseHeaders(location="http://example.org")
 
 ## APIRouter
 
-[`APIRouter`](https://docs.fastht.ml/api/core.html#apirouter) lets you
+[`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter) lets you
 organize routes across multiple files in a FastHTML app.
 
 ``` python
@@ -492,7 +492,7 @@ async def ws(msg:str, send):
 
 ### Single File Uploads
 
-[`Form`](https://docs.fastht.ml/api/xtend.html#form) defaults to
+[`Form`](https://www.fastht.ml/docs/api/xtend.html#form) defaults to
 “multipart/form-data”. A Starlette UploadFile is passed to the handler.
 
 ``` python
