@@ -2,12 +2,13 @@
 
 <!-- do not remove -->
 
+
 ## 0.12.18
 
 ### New Features
 
+- Add canonical link option ([#735](https://github.com/AnswerDotAI/fasthtml/issues/735))
 - Add onevent kwargs ([#734](https://github.com/AnswerDotAI/fasthtml/issues/734))
-
 
 
 ## 0.12.17
