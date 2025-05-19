@@ -1,0 +1,2542 @@
+<project title="FastHTML" summary='FastHTML is a python library which brings together Starlette, Uvicorn, HTMX, and fastcore&#39;s `FT` "FastTags" into a library for creating server-rendered hypermedia applications. The `FastHTML` class itself inherits from `Starlette`, and adds decorator-based routing with many additions, Beforeware, automatic `FT` to HTML rendering, and much more.'>Things to remember when writing FastHTML apps:
+
+- Although parts of its API are inspired by FastAPI, it is *not* compatible with FastAPI syntax and is not targeted at creating API services
+- FastHTML includes support for Pico CSS and the fastlite sqlite library, although using both are optional; sqlalchemy can be used directly or via the fastsql library, and any CSS framework can be used. Support for the Surreal and css-scope-inline libraries are also included, but both are optional
+- FastHTML is compatible with JS-native web components and any vanilla JS library, but not with React, Vue, or Svelte
+- Use `serve()` for running uvicorn (`if __name__ == "__main__"` is not needed since it's automatic)
+- When a title is needed with a response, use `Titled`; note that that already wraps children in `Container`, and already includes both the meta title as well as the H1 element.<docs><doc title="FastHTML concise guide" desc="A brief overview of idiomatic FastHTML apps"># Concise reference
+
+
+
+## About This Guide
+
+The code examples here use fast.ai style: prefer ternary op, 1-line
+docstring, minimize vertical space, etc. (Normally fast.ai style uses
+few if any comments, but they’re added here as documentation.)
+
+``` python
+from fasthtml.common import *
+```
+
+## Minimal App
+
+A minimal FastHTML app looks something like this:
+
+``` python
+# Meta-package with all key symbols from FastHTML and Starlette. Import it like this at the start of every FastHTML app.
+from fasthtml.common import *
+# The FastHTML app object and shortcut to `app.route`
+app,rt = fast_app()
+
+# Enums constrain the values accepted for a route parameter
+name = str_enum('names', 'Alice', 'Bev', 'Charlie')
+
+# Passing a path to `rt` is optional. If not passed (recommended), the function name is the route ('/foo')
+# Both GET and POST HTTP methods are handled by default
+# Type-annotated params are passed as query params (recommended) unless a path param is defined (which it isn't here)
+@rt
+def foo(nm: name):
+    # `Title` and `P` here are FastTags: direct m-expression mappings of HTML tags to Python functions with positional and named parameters. All standard HTML tags are included in the common wildcard import.
+    # When a tuple is returned, this returns concatenated HTML partials. HTMX by default will use a title HTML partial to set the current page name. HEAD tags (e.g. Meta, Link, etc) in the returned tuple are automatically placed in HEAD; everything else is placed in BODY.
+    # FastHTML will automatically return a complete HTML document with appropriate headers if a normal HTTP request is received. For an HTMX request, however, just the partials are returned.
+    return Title("FastHTML"), H1("My web app"), P(f"Hello, {name}!")
+# By default `serve` runs uvicorn on port 5001. Never write `if __name__ == "__main__"` since `serve` checks it internally.
+serve()
+```
+
+To run this web app:
+
+``` bash
+python main.py  # access via localhost:5001
+```
+
+## FastTags (aka FT Components or FTs)
+
+FTs are m-expressions plus simple sugar. Positional params map to
+children. Named parameters map to attributes. Aliases must be used for
+Python reserved words.
+
+``` python
+tags = Title("FastHTML"), H1("My web app"), P(f"Let's do this!", cls="myclass")
+tags
+```
+
+    (title(('FastHTML',),{}),
+     h1(('My web app',),{}),
+     p(("Let's do this!",),{'class': 'myclass'}))
+
+This example shows key aspects of how FTs handle attributes:
+
+``` python
+Label(
+    "Choose an option", 
+    Select(
+        Option("one", value="1", selected=True),  # True renders just the attribute name
+        Option("two", value=2, selected=False),   # Non-string values are converted to strings. False omits the attribute entirely
+        cls="selector", id="counter",             # 'cls' becomes 'class'
+        **{'@click':"alert('Clicked');"},         # Dict unpacking for attributes with special chars
+    ),
+    _for="counter",                               # '_for' becomes 'for' (can also use 'fr')
+)
+```
+
+Classes with `__ft__` defined are rendered using that method.
+
+``` python
+class FtTest:
+    def __ft__(self): return P('test')
+    
+to_xml(FtTest())
+```
+
+    '<p>test</p>\n'
+
+You can create new FTs by importing the new component from
+`fasthtml.components`. If the FT doesn’t exist within that module,
+FastHTML will create it.
+
+``` python
+from fasthtml.components import Some_never_before_used_tag
+
+Some_never_before_used_tag()
+```
+
+``` html
+<some-never-before-used-tag></some-never-before-used-tag>
+```
+
+FTs can be combined by defining them as a function.
+
+``` python
+def Hero(title, statement): return Div(H1(title),P(statement), cls="hero")
+to_xml(Hero("Hello World", "This is a hero statement"))
+```
+
+    '<div class="hero">\n  <h1>Hello World</h1>\n  <p>This is a hero statement</p>\n</div>\n'
+
+When handling a response, FastHTML will automatically render FTs using
+the `to_xml` function.
+
+``` python
+to_xml(tags)
+```
+
+    '<title>FastHTML</title>\n<h1>My web app</h1>\n<p class="myclass">Let&#x27;s do this!</p>\n'
+
+## JS
+
+The [`Script`](https://www.fastht.ml/docs/api/xtend.html#script) function
+allows you to include JavaScript. You can use Python to generate parts
+of your JS or JSON like this:
+
+``` python
+# In future snippets this import will not be shown, but is required
+from fasthtml.common import * 
+app,rt = fast_app(hdrs=[Script(src="https://cdn.plot.ly/plotly-2.32.0.min.js")])
+# `index` is a special function name which maps to the `/` route. 
+@rt
+def index():
+    data = {'somedata':'fill me in…'}
+    # `Titled` returns a title tag and an h1 tag with the 1st param, with remaining params as children in a `Main` parent.
+    return Titled("Chart Demo", Div(id="myDiv"), Script(f"var data = {data}; Plotly.newPlot('myDiv', data);"))
+# In future snippets `serve() will not be shown, but is required
+serve()
+```
+
+Prefer Python whenever possible over JS. Never use React or shadcn.
+
+## fast_app hdrs
+
+``` python
+# In future snippets we'll skip showing the `fast_app` call if it has no params
+app, rt = fast_app(
+    pico=False, # The Pico CSS framework is included by default, so pass `False` to disable it if needed. No other CSS frameworks are included.
+    # These are added to the `head` part of the page for non-HTMX requests.
+    hdrs=(
+        Link(rel='stylesheet', href='assets/normalize.min.css', type='text/css'),
+        Link(rel='stylesheet', href='assets/sakura.css', type='text/css'),
+        Style("p {color: red;}"),
+        # `MarkdownJS` and `HighlightJS` are available via concise functions
+        MarkdownJS(), HighlightJS(langs=['python', 'javascript', 'html', 'css']),
+        # by default, all standard static extensions are served statically from the web app dir,
+        #   which can be modified using e.g `static_path='public'`
+        )
+)
+
+@rt
+def index(req): return Titled("Markdown rendering example",
+                              # This will be client-side rendered to HTML with highlight-js
+                              Div("*hi* there",cls="marked"),
+                              # This will be syntax highlighted
+                              Pre(Code("def foo(): pass")))
+```
+
+## Responses
+
+Routes can return various types:
+
+1.  FastTags or tuples of FastTags (automatically rendered to HTML)
+2.  Standard Starlette responses (used directly)
+3.  JSON-serializable types (returned as JSON in a plain text response)
+
+``` python
+@rt("/{fname:path}.{ext:static}")
+async def serve_static_file(fname:str, ext:str): return FileResponse(f'public/{fname}.{ext}')
+
+app, rt = fast_app(hdrs=(MarkdownJS(), HighlightJS(langs=['python', 'javascript'])))
+@rt
+def index(): 
+    return Titled("Example",
+                  Div("*markdown* here", cls="marked"),
+                  Pre(Code("def foo(): pass")))
+```
+
+Route functions can be used in attributes like `href` or `action` and
+will be converted to paths. Use `.to()` to generate paths with query
+parameters.
+
+``` python
+@rt
+def profile(email:str): return fill_form(profile_form, profiles[email])
+
+profile_form = Form(action=profile)(
+    Label("Email", Input(name="email")),
+    Button("Save", type="submit")
+)
+
+user_profile_path = profile.to(email="user@example.com")  # '/profile?email=user%40example.com'
+```
+
+``` python
+from dataclasses import dataclass
+
+app,rt = fast_app()
+```
+
+When a route handler function is used as a fasttag attribute (such as
+`href`, `hx_get`, or `action`) it is converted to that route’s path.
+[`fill_form`](https://www.fastht.ml/docs/api/components.html#fill_form) is
+used to copy an object’s matching attrs into matching-name form fields.
+
+``` python
+@dataclass
+class Profile: email:str; phone:str; age:int
+email = 'john@example.com'
+profiles = {email: Profile(email=email, phone='123456789', age=5)}
+@rt
+def profile(email:str): return fill_form(profile_form, profiles[email])
+
+profile_form = Form(method="post", action=profile)(
+        Fieldset(
+            Label('Email', Input(name="email")),
+            Label("Phone", Input(name="phone")),
+            Label("Age", Input(name="age"))),
+        Button("Save", type="submit"))
+```
+
+## Testing
+
+We can use `TestClient` for testing.
+
+``` python
+from starlette.testclient import TestClient
+```
+
+``` python
+path = "/profile?email=john@example.com"
+client = TestClient(app)
+htmx_req = {'HX-Request':'1'}
+print(client.get(path, headers=htmx_req).text)
+```
+
+    <form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email       <input name="email" value="john@example.com">
+    </label><label>Phone       <input name="phone" value="123456789">
+    </label><label>Age       <input name="age" value="5">
+    </label></fieldset><button type="submit">Save</button></form>
+
+## Form Handling and Data Binding
+
+When a dataclass, namedtuple, etc. is used as a type annotation, the
+form body will be unpacked into matching attribute names automatically.
+
+``` python
+@rt
+def edit_profile(profile: Profile):
+    profiles[email]=profile
+    return RedirectResponse(url=path)
+
+new_data = dict(email='john@example.com', phone='7654321', age=25)
+print(client.post("/edit_profile", data=new_data, headers=htmx_req).text)
+```
+
+    <form enctype="multipart/form-data" method="post" action="/profile"><fieldset><label>Email       <input name="email" value="john@example.com">
+    </label><label>Phone       <input name="phone" value="7654321">
+    </label><label>Age       <input name="age" value="25">
+    </label></fieldset><button type="submit">Save</button></form>
+
+## fasttag Rendering Rules
+
+The general rules for rendering children inside tuples or fasttag
+children are: - `__ft__` method will be called (for default components
+like `P`, `H2`, etc. or if you define your own components) - If you pass
+a string, it will be escaped - On other python objects, `str()` will be
+called
+
+If you want to include plain HTML tags directly into e.g. a `Div()` they
+will get escaped by default (as a security measure to avoid code
+injections). This can be avoided by using `Safe(...)`, e.g to show a
+data frame use `Div(NotStr(df.to_html()))`.
+
+## Exceptions
+
+FastHTML allows customization of exception handlers.
+
+``` python
+def not_found(req, exc): return Titled("404: I don't exist!")
+exception_handlers = {404: not_found}
+app, rt = fast_app(exception_handlers=exception_handlers)
+```
+
+## Cookies
+
+We can set cookies using the
+[`cookie()`](https://www.fastht.ml/docs/api/core.html#cookie) function.
+
+``` python
+@rt
+def setcook(): return P(f'Set'), cookie('mycookie', 'foobar')
+print(client.get('/setcook', headers=htmx_req).text)
+```
+
+     <p>Set</p>
+
+``` python
+@rt
+def getcook(mycookie:str): return f'Got {mycookie}'
+# If handlers return text instead of FTs, then a plaintext response is automatically created
+print(client.get('/getcook').text)
+```
+
+    Got foobar
+
+FastHTML provide access to Starlette’s request object automatically
+using special `request` parameter name (or any prefix of that name).
+
+``` python
+@rt
+def headers(req): return req.headers['host']
+```
+
+## Request and Session Objects
+
+FastHTML provides access to Starlette’s session middleware automatically
+using the special `session` parameter name (or any prefix of that name).
+
+``` python
+@rt
+def profile(req, sess, user_id: int=None):
+    ip = req.client.host
+    sess['last_visit'] = datetime.now().isoformat()
+    visits = sess.setdefault('visit_count', 0) + 1
+    sess['visit_count'] = visits
+    user = get_user(user_id or sess.get('user_id'))
+    return Titled(f"Profile: {user.name}", 
+                  P(f"Visits: {visits}"), 
+                  P(f"IP: {ip}"),
+                  Button("Logout", hx_post=logout))
+```
+
+Handler functions can return the
+[`HtmxResponseHeaders`](https://www.fastht.ml/docs/api/core.html#htmxresponseheaders)
+object to set HTMX-specific response headers.
+
+``` python
+@rt
+def htmlredirect(app): return HtmxResponseHeaders(location="http://example.org")
+```
+
+## APIRouter
+
+[`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter) lets you
+organize routes across multiple files in a FastHTML app.
+
+``` python
+# products.py
+ar = APIRouter()
+
+@ar
+def details(pid: int): return f"Here are the product details for ID: {pid}"
+
+@ar
+def all_products(req):
+    return Div(
+        Div(
+            Button("Details",hx_get=details.to(pid=42),hx_target="#products_list",hx_swap="outerHTML",),
+        ), id="products_list")
+```
+
+``` python
+# main.py
+from products import ar,all_products
+
+app, rt = fast_app()
+ar.to_app(app)
+
+@rt
+def index():
+    return Div(
+        "Products",
+        hx_get=all_products, hx_swap="outerHTML")
+```
+
+## Toasts
+
+Toasts can be of four types:
+
+- info
+- success
+- warning
+- error
+
+Toasts require the use of the `setup_toasts()` function, plus every
+handler needs:
+
+- The session argument
+- Must return FT components
+
+``` python
+setup_toasts(app)
+
+@rt
+def toasting(session):
+    add_toast(session, f"cooked", "info")
+    add_toast(session, f"ready", "success")
+    return Titled("toaster")
+```
+
+`setup_toasts(duration)` allows you to specify how long a toast will be
+visible before disappearing.10 seconds.
+
+Authentication and authorization are handled with Beforeware, which
+functions that run before the route handler is called.
+
+## Auth
+
+``` python
+def user_auth_before(req, sess):
+    # `auth` key in the request scope is automatically provided to any handler which requests it and can not be injected
+    auth = req.scope['auth'] = sess.get('auth', None)
+    if not auth: return RedirectResponse('/login', status_code=303)
+
+beforeware = Beforeware(
+    user_auth_before,
+    skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', r'.*\.js', '/login', '/']
+)
+
+app, rt = fast_app(before=beforeware)
+```
+
+## Server-Side Events (SSE)
+
+FastHTML supports the HTMX SSE extension.
+
+``` python
+import random
+hdrs=(Script(src="https://unpkg.com/htmx-ext-sse@2.2.3/sse.js"),)
+app,rt = fast_app(hdrs=hdrs)
+
+@rt
+def index(): return Div(hx_ext="sse", sse_connect="/numstream", hx_swap="beforeend show:bottom", sse_swap="message")
+
+# `signal_shutdown()` gets an event that is set on shutdown
+shutdown_event = signal_shutdown()
+
+async def number_generator():
+    while not shutdown_event.is_set():
+        data = Article(random.randint(1, 100))
+        yield sse_message(data)
+
+@rt
+async def numstream(): return EventStream(number_generator())
+```
+
+## Websockets
+
+FastHTML provides useful tools for HTMX’s websockets extension.
+
+``` python
+# These HTMX extensions are available through `exts`:
+#   head-support preload class-tools loading-states multi-swap path-deps remove-me ws chunked-transfer
+app, rt = fast_app(exts='ws')
+
+def mk_inp(): return Input(id='msg', autofocus=True)
+
+@rt
+async def index(request):
+    # `ws_send` tells HTMX to send a message to the nearest websocket based on the trigger for the form element
+    cts = Div(
+        Div(id='notifications'),
+        Form(mk_inp(), id='form', ws_send=True),
+        hx_ext='ws', ws_connect='/ws')
+    return Titled('Websocket Test', cts)
+
+async def on_connect(send): await send(Div('Hello, you have connected', id="notifications"))
+async def on_disconnect(ws): print('Disconnected!')
+
+@app.ws('/ws', conn=on_connect, disconn=on_disconnect)
+async def ws(msg:str, send):
+    # websocket hander returns/sends are treated as OOB swaps
+    await send(Div('Hello ' + msg, id="notifications"))
+    return Div('Goodbye ' + msg, id="notifications"), mk_inp()
+```
+
+### Single File Uploads
+
+[`Form`](https://www.fastht.ml/docs/api/xtend.html#form) defaults to
+“multipart/form-data”. A Starlette UploadFile is passed to the handler.
+
+``` python
+upload_dir = Path("filez")
+
+@rt
+def index():
+    return (
+        Form(hx_post=upload, hx_target="#result")(
+            Input(type="file", name="file"),
+            Button("Upload", type="submit")),
+        Div(id="result")
+    )
+
+# Use `async` handlers where IO is used to avoid blocking other clients
+@rt
+async def upload(file: UploadFile):
+    filebuffer = await file.read()
+    (upload_dir / file.filename).write_bytes(filebuffer)
+    return P('Size: ', file.size)
+```
+
+For multi-file, use `Input(..., multiple=True)`, and a type annotation
+of `list[UploadFile]` in the handler.
+
+## Fastlite
+
+Fastlite and the MiniDataAPI specification it’s built on are a
+CRUD-oriented API for working with SQLite. APSW and apswutils is used to
+connect to SQLite, optimized for speed and clean error handling.
+
+``` python
+from fastlite import *
+```
+
+``` python
+db = database(':memory:') # or database('data/app.db')
+```
+
+Tables are normally constructed with classes, field types are specified
+as type hints.
+
+``` python
+class Book: isbn: str; title: str; pages: int; userid: int
+# The transform arg instructs fastlite to change the db schema when fields change.
+# Create only creates a table if the table doesn't exist.
+books = db.create(Book, pk='isbn', transform=True)
+                
+class User: id: int; name: str; active: bool = True
+# If no pk is provided, id is used as the primary key.
+users = db.create(User, transform=True)
+users
+```
+
+    <Table user (id, name, active)>
+
+### Fastlite CRUD operations
+
+Every operation in fastlite returns a full superset of dataclass
+functionality.
+
+``` python
+user = users.insert(name='Alex',active=False)
+user
+```
+
+    User(id=1, name='Alex', active=0)
+
+``` python
+# List all records
+users()
+```
+
+    [User(id=1, name='Alex', active=0)]
+
+``` python
+# Limit, offset, and order results:
+users(order_by='name', limit=2, offset=1)
+
+# Filter on the results
+users(where="name='Alex'")
+
+# Placeholder for avoiding injection attacks
+users("name=?", ('Alex',))
+
+# A single record by pk
+users[user.id]
+```
+
+    User(id=1, name='Alex', active=0)
+
+Test if a record exists by using `in` keyword on primary key:
+
+``` python
+1 in users
+```
+
+    True
+
+Updates (which take a dict or a typed object) return the updated record.
+
+``` python
+user.name='Lauren'
+user.active=True
+users.update(user)
+```
+
+    User(id=1, name='Lauren', active=1)
+
+`.xtra()` to automatically constrain queries, updates, and inserts from
+there on:
+
+``` python
+users.xtra(active=True)
+users()
+```
+
+    [User(id=1, name='Lauren', active=1)]
+
+Deleting by pk:
+
+``` python
+users.delete(user.id)
+```
+
+    <Table user (id, name, active)>
+
+NotFoundError is raised by pk `[]`, updates, and deletes.
+
+``` python
+try: users['Amy']
+except NotFoundError: print('User not found')
+```
+
+    User not found
+
+## MonsterUI
+
+MonsterUI is a shadcn-like component library for FastHTML. It adds the
+Tailwind-based libraries FrankenUI and DaisyUI to FastHTML, as well as
+Python’s mistletoe for Markdown, HighlightJS for code highlighting, and
+Katex for latex support, following semantic HTML patterns when possible.
+It is recommended for when you wish to go beyond the basics provided by
+FastHTML’s built-in pico support.
+
+A minimal app:
+
+``` python
+from monsterui.all import *
+
+app, rt = fast_app(hdrs=Theme.blue.headers()) # Use MonsterUI blue theme
+
+@rt
+def index():
+    socials = (('github','https://github.com/AnswerDotAI/MonsterUI'),)
+    return Titled("App",
+        Card(
+            P("App", cls=TextPresets.muted_sm),
+            # LabelInput, DivLAigned, and UkIconLink are non-semantic MonsterUI FT Components,
+            LabelInput('Email', type='email', required=True),
+            footer=DivLAligned(*[UkIconLink(icon,href=url) for icon,url in socials])))
+```</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
+title = "Reference"
++++
+
+## Contents
+
+* [htmx Core Attributes](#attributes)
+* [htmx Additional Attributes](#attributes-additional)
+* [htmx CSS Classes](#classes)
+* [htmx Request Headers](#request_headers)
+* [htmx Response Headers](#response_headers)
+* [htmx Events](#events)
+* [htmx Extensions](/extensions)
+* [JavaScript API](#api)
+* [Configuration Options](#config)
+
+## Core Attribute Reference {#attributes}
+
+The most common attributes when using htmx.
+
+<div class="info-table">
+
+| Attribute                                        | Description                                                                                                        |
+|--------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
+| [`hx-get`](@/attributes/hx-get.md)               | issues a `GET` to the specified URL                                                                                |
+| [`hx-post`](@/attributes/hx-post.md)             | issues a `POST` to the specified URL                                                                               |
+| [`hx-on*`](@/attributes/hx-on.md)                | handle events with inline scripts on elements                                                                      |
+| [`hx-push-url`](@/attributes/hx-push-url.md)     | push a URL into the browser location bar to create history                                                         |
+| [`hx-select`](@/attributes/hx-select.md)         | select content to swap in from a response                                                                          |
+| [`hx-select-oob`](@/attributes/hx-select-oob.md) | select content to swap in from a response, somewhere other than the target (out of band)                           |
+| [`hx-swap`](@/attributes/hx-swap.md)             | controls how content will swap in (`outerHTML`, `beforeend`, `afterend`, ...)                                      |
+| [`hx-swap-oob`](@/attributes/hx-swap-oob.md)     | mark element to swap in from a response (out of band)                                                              |
+| [`hx-target`](@/attributes/hx-target.md)         | specifies the target element to be swapped                                                                         |
+| [`hx-trigger`](@/attributes/hx-trigger.md)       | specifies the event that triggers the request                                                                      |
+| [`hx-vals`](@/attributes/hx-vals.md)             | add values to submit with the request (JSON format)                                                                |
+
+</div>
+
+## Additional Attribute Reference {#attributes-additional}
+
+All other attributes available in htmx.
+
+<div class="info-table">
+
+| Attribute                                            | Description                                                                                                                        |
+|------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| [`hx-boost`](@/attributes/hx-boost.md)               | add [progressive enhancement](https://en.wikipedia.org/wiki/Progressive_enhancement) for links and forms                           |
+| [`hx-confirm`](@/attributes/hx-confirm.md)           | shows a `confirm()` dialog before issuing a request                                                                                |
+| [`hx-delete`](@/attributes/hx-delete.md)             | issues a `DELETE` to the specified URL                                                                                             |
+| [`hx-disable`](@/attributes/hx-disable.md)           | disables htmx processing for the given node and any children nodes                                                                 |
+| [`hx-disabled-elt`](@/attributes/hx-disabled-elt.md) | adds the `disabled` attribute to the specified elements while a request is in flight                                               |
+| [`hx-disinherit`](@/attributes/hx-disinherit.md)     | control and disable automatic attribute inheritance for child nodes                                                                |
+| [`hx-encoding`](@/attributes/hx-encoding.md)         | changes the request encoding type                                                                                                  |
+| [`hx-ext`](@/attributes/hx-ext.md)                   | extensions to use for this element                                                                                                 |
+| [`hx-headers`](@/attributes/hx-headers.md)           | adds to the headers that will be submitted with the request                                                                        |
+| [`hx-history`](@/attributes/hx-history.md)           | prevent sensitive data being saved to the history cache                                                                            |
+| [`hx-history-elt`](@/attributes/hx-history-elt.md)   | the element to snapshot and restore during history navigation                                                                      |
+| [`hx-include`](@/attributes/hx-include.md)           | include additional data in requests                                                                                                |
+| [`hx-indicator`](@/attributes/hx-indicator.md)       | the element to put the `htmx-request` class on during the request                                                                  |
+| [`hx-inherit`](@/attributes/hx-inherit.md)           | control and enable automatic attribute inheritance for child nodes if it has been disabled by default                            |
+| [`hx-params`](@/attributes/hx-params.md)             | filters the parameters that will be submitted with a request                                                                       |
+| [`hx-patch`](@/attributes/hx-patch.md)               | issues a `PATCH` to the specified URL                                                                                              |
+| [`hx-preserve`](@/attributes/hx-preserve.md)         | specifies elements to keep unchanged between requests                                                                              |
+| [`hx-prompt`](@/attributes/hx-prompt.md)             | shows a `prompt()` before submitting a request                                                                                     |
+| [`hx-put`](@/attributes/hx-put.md)                   | issues a `PUT` to the specified URL                                                                                                |
+| [`hx-replace-url`](@/attributes/hx-replace-url.md)   | replace the URL in the browser location bar                                                                                        |
+| [`hx-request`](@/attributes/hx-request.md)           | configures various aspects of the request                                                                                          |
+| [`hx-sync`](@/attributes/hx-sync.md)                 | control how requests made by different elements are synchronized                                                                   |
+| [`hx-validate`](@/attributes/hx-validate.md)         | force elements to validate themselves before a request                                                                             |
+| [`hx-vars`](@/attributes/hx-vars.md)                 | adds values dynamically to the parameters to submit with the request (deprecated, please use [`hx-vals`](@/attributes/hx-vals.md)) |
+
+</div>
+
+## CSS Class Reference {#classes}
+
+<div class="info-table">
+
+| Class | Description |
+|-----------|-------------|
+| `htmx-added` | Applied to a new piece of content before it is swapped, removed after it is settled.
+| `htmx-indicator` | A dynamically generated class that will toggle visible (opacity:1) when a `htmx-request` class is present
+| `htmx-request` | Applied to either the element or the element specified with [`hx-indicator`](@/attributes/hx-indicator.md) while a request is ongoing
+| `htmx-settling` | Applied to a target after content is swapped, removed after it is settled. The duration can be modified via [`hx-swap`](@/attributes/hx-swap.md).
+| `htmx-swapping` | Applied to a target before any content is swapped, removed after it is swapped. The duration can be modified via [`hx-swap`](@/attributes/hx-swap.md).
+
+</div>
+
+## HTTP Header Reference {#headers}
+
+### Request Headers Reference {#request_headers}
+
+<div class="info-table">
+
+| Header | Description |
+|--------|-------------|
+| `HX-Boosted` | indicates that the request is via an element using [hx-boost](@/attributes/hx-boost.md)
+| `HX-Current-URL` | the current URL of the browser
+| `HX-History-Restore-Request` | "true" if the request is for history restoration after a miss in the local history cache
+| `HX-Prompt` | the user response to an [hx-prompt](@/attributes/hx-prompt.md)
+| `HX-Request` | always "true"
+| `HX-Target` | the `id` of the target element if it exists
+| `HX-Trigger-Name` | the `name` of the triggered element if it exists
+| `HX-Trigger` | the `id` of the triggered element if it exists
+
+</div>
+
+### Response Headers Reference {#response_headers}
+
+<div class="info-table">
+
+| Header                                               | Description |
+|------------------------------------------------------|-------------|
+| [`HX-Location`](@/headers/hx-location.md)            | allows you to do a client-side redirect that does not do a full page reload
+| [`HX-Push-Url`](@/headers/hx-push-url.md)            | pushes a new url into the history stack
+| [`HX-Redirect`](@/headers/hx-redirect.md)            | can be used to do a client-side redirect to a new location
+| `HX-Refresh`                                         | if set to "true" the client-side will do a full refresh of the page
+| [`HX-Replace-Url`](@/headers/hx-replace-url.md)      | replaces the current URL in the location bar
+| `HX-Reswap`                                          | allows you to specify how the response will be swapped. See [hx-swap](@/attributes/hx-swap.md) for possible values
+| `HX-Retarget`                                        | a CSS selector that updates the target of the content update to a different element on the page
+| `HX-Reselect`                                        | a CSS selector that allows you to choose which part of the response is used to be swapped in. Overrides an existing [`hx-select`](@/attributes/hx-select.md) on the triggering element
+| [`HX-Trigger`](@/headers/hx-trigger.md)              | allows you to trigger client-side events
+| [`HX-Trigger-After-Settle`](@/headers/hx-trigger.md) | allows you to trigger client-side events after the settle step
+| [`HX-Trigger-After-Swap`](@/headers/hx-trigger.md)   | allows you to trigger client-side events after the swap step
+
+</div>
+
+## Event Reference {#events}
+
+<div class="info-table">
+
+| Event | Description |
+|-------|-------------|
+| [`htmx:abort`](@/events.md#htmx:abort) | send this event to an element to abort a request
+| [`htmx:afterOnLoad`](@/events.md#htmx:afterOnLoad) | triggered after an AJAX request has completed processing a successful response
+| [`htmx:afterProcessNode`](@/events.md#htmx:afterProcessNode) | triggered after htmx has initialized a node
+| [`htmx:afterRequest`](@/events.md#htmx:afterRequest)  | triggered after an AJAX request has completed
+| [`htmx:afterSettle`](@/events.md#htmx:afterSettle)  | triggered after the DOM has settled
+| [`htmx:afterSwap`](@/events.md#htmx:afterSwap)  | triggered after new content has been swapped in
+| [`htmx:beforeCleanupElement`](@/events.md#htmx:beforeCleanupElement)  | triggered before htmx [disables](@/attributes/hx-disable.md) an element or removes it from the DOM
+| [`htmx:beforeOnLoad`](@/events.md#htmx:beforeOnLoad)  | triggered before any response processing occurs
+| [`htmx:beforeProcessNode`](@/events.md#htmx:beforeProcessNode) | triggered before htmx initializes a node
+| [`htmx:beforeRequest`](@/events.md#htmx:beforeRequest)  | triggered before an AJAX request is made
+| [`htmx:beforeSwap`](@/events.md#htmx:beforeSwap)  | triggered before a swap is done, allows you to configure the swap
+| [`htmx:beforeSend`](@/events.md#htmx:beforeSend)  | triggered just before an ajax request is sent
+| [`htmx:beforeTransition`](@/events.md#htmx:beforeTransition)  | triggered before the [View Transition](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API) wrapped swap occurs
+| [`htmx:configRequest`](@/events.md#htmx:configRequest)  | triggered before the request, allows you to customize parameters, headers
+| [`htmx:confirm`](@/events.md#htmx:confirm)  | triggered after a trigger occurs on an element, allows you to cancel (or delay) issuing the AJAX request
+| [`htmx:historyCacheError`](@/events.md#htmx:historyCacheError)  | triggered on an error during cache writing
+| [`htmx:historyCacheMiss`](@/events.md#htmx:historyCacheMiss)  | triggered on a cache miss in the history subsystem
+| [`htmx:historyCacheMissError`](@/events.md#htmx:historyCacheMissError)  | triggered on a unsuccessful remote retrieval
+| [`htmx:historyCacheMissLoad`](@/events.md#htmx:historyCacheMissLoad)  | triggered on a successful remote retrieval
+| [`htmx:historyRestore`](@/events.md#htmx:historyRestore)  | triggered when htmx handles a history restoration action
+| [`htmx:beforeHistorySave`](@/events.md#htmx:beforeHistorySave)  | triggered before content is saved to the history cache
+| [`htmx:load`](@/events.md#htmx:load)  | triggered when new content is added to the DOM
+| [`htmx:noSSESourceError`](@/events.md#htmx:noSSESourceError)  | triggered when an element refers to a SSE event in its trigger, but no parent SSE source has been defined
+| [`htmx:onLoadError`](@/events.md#htmx:onLoadError)  | triggered when an exception occurs during the onLoad handling in htmx
+| [`htmx:oobAfterSwap`](@/events.md#htmx:oobAfterSwap)  | triggered after an out of band element as been swapped in
+| [`htmx:oobBeforeSwap`](@/events.md#htmx:oobBeforeSwap)  | triggered before an out of band element swap is done, allows you to configure the swap
+| [`htmx:oobErrorNoTarget`](@/events.md#htmx:oobErrorNoTarget)  | triggered when an out of band element does not have a matching ID in the current DOM
+| [`htmx:prompt`](@/events.md#htmx:prompt)  | triggered after a prompt is shown
+| [`htmx:pushedIntoHistory`](@/events.md#htmx:pushedIntoHistory)  | triggered after a url is pushed into history
+| [`htmx:replacedInHistory`](@/events.md#htmx:replacedInHistory)  | triggered after a url is replaced in history
+| [`htmx:responseError`](@/events.md#htmx:responseError)  | triggered when an HTTP response error (non-`200` or `300` response code) occurs
+| [`htmx:sendAbort`](@/events.md#htmx:sendAbort)  | triggered when a request is aborted
+| [`htmx:sendError`](@/events.md#htmx:sendError)  | triggered when a network error prevents an HTTP request from happening
+| [`htmx:sseError`](@/events.md#htmx:sseError)  | triggered when an error occurs with a SSE source
+| [`htmx:sseOpen`](/events#htmx:sseOpen)  | triggered when a SSE source is opened
+| [`htmx:swapError`](@/events.md#htmx:swapError)  | triggered when an error occurs during the swap phase
+| [`htmx:targetError`](@/events.md#htmx:targetError)  | triggered when an invalid target is specified
+| [`htmx:timeout`](@/events.md#htmx:timeout)  | triggered when a request timeout occurs
+| [`htmx:validation:validate`](@/events.md#htmx:validation:validate)  | triggered before an element is validated
+| [`htmx:validation:failed`](@/events.md#htmx:validation:failed)  | triggered when an element fails validation
+| [`htmx:validation:halted`](@/events.md#htmx:validation:halted)  | triggered when a request is halted due to validation errors
+| [`htmx:xhr:abort`](@/events.md#htmx:xhr:abort)  | triggered when an ajax request aborts
+| [`htmx:xhr:loadend`](@/events.md#htmx:xhr:loadend)  | triggered when an ajax request ends
+| [`htmx:xhr:loadstart`](@/events.md#htmx:xhr:loadstart)  | triggered when an ajax request starts
+| [`htmx:xhr:progress`](@/events.md#htmx:xhr:progress)  | triggered periodically during an ajax request that supports progress events
+
+</div>
+
+## JavaScript API Reference {#api}
+
+<div class="info-table">
+
+| Method | Description |
+|-------|-------------|
+| [`htmx.addClass()`](@/api.md#addClass)  | Adds a class to the given element
+| [`htmx.ajax()`](@/api.md#ajax)  | Issues an htmx-style ajax request
+| [`htmx.closest()`](@/api.md#closest)  | Finds the closest parent to the given element matching the selector
+| [`htmx.config`](@/api.md#config)  | A property that holds the current htmx config object
+| [`htmx.createEventSource`](@/api.md#createEventSource)  | A property holding the function to create SSE EventSource objects for htmx
+| [`htmx.createWebSocket`](@/api.md#createWebSocket)  | A property holding the function to create WebSocket objects for htmx
+| [`htmx.defineExtension()`](@/api.md#defineExtension)  | Defines an htmx [extension](https://htmx.org/extensions)
+| [`htmx.find()`](@/api.md#find)  | Finds a single element matching the selector
+| [`htmx.findAll()` `htmx.findAll(elt, selector)`](@/api.md#find)  | Finds all elements matching a given selector
+| [`htmx.logAll()`](@/api.md#logAll)  | Installs a logger that will log all htmx events
+| [`htmx.logger`](@/api.md#logger)  | A property set to the current logger (default is `null`)
+| [`htmx.off()`](@/api.md#off)  | Removes an event listener from the given element
+| [`htmx.on()`](@/api.md#on)  | Creates an event listener on the given element, returning it
+| [`htmx.onLoad()`](@/api.md#onLoad)  | Adds a callback handler for the `htmx:load` event
+| [`htmx.parseInterval()`](@/api.md#parseInterval)  | Parses an interval declaration into a millisecond value
+| [`htmx.process()`](@/api.md#process)  | Processes the given element and its children, hooking up any htmx behavior
+| [`htmx.remove()`](@/api.md#remove)  | Removes the given element
+| [`htmx.removeClass()`](@/api.md#removeClass)  | Removes a class from the given element
+| [`htmx.removeExtension()`](@/api.md#removeExtension)  | Removes an htmx [extension](https://htmx.org/extensions)
+| [`htmx.swap()`](@/api.md#swap)  | Performs swapping (and settling) of HTML content
+| [`htmx.takeClass()`](@/api.md#takeClass)  | Takes a class from other elements for the given element
+| [`htmx.toggleClass()`](@/api.md#toggleClass)  | Toggles a class from the given element
+| [`htmx.trigger()`](@/api.md#trigger)  | Triggers an event on an element
+| [`htmx.values()`](@/api.md#values)  | Returns the input values associated with the given element
+
+</div>
+
+
+## Configuration Reference {#config}
+
+Htmx has some configuration options that can be accessed either programmatically or declaratively.  They are
+listed below:
+
+<div class="info-table">
+
+| Config Variable                       | Info                                                                                                                                                                       |
+|---------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `htmx.config.historyEnabled`          | defaults to `true`, really only useful for testing                                                                                                                         |
+| `htmx.config.historyCacheSize`        | defaults to 10                                                                                                                                                             |
+| `htmx.config.refreshOnHistoryMiss`    | defaults to `false`, if set to `true` htmx will issue a full page refresh on history misses rather than use an AJAX request                                                |
+| `htmx.config.defaultSwapStyle`        | defaults to `innerHTML`                                                                                                                                                    |
+| `htmx.config.defaultSwapDelay`        | defaults to 0                                                                                                                                                              |
+| `htmx.config.defaultSettleDelay`      | defaults to 20                                                                                                                                                             |
+| `htmx.config.includeIndicatorStyles`  | defaults to `true` (determines if the indicator styles are loaded)                                                                                                         |
+| `htmx.config.indicatorClass`          | defaults to `htmx-indicator`                                                                                                                                               |
+| `htmx.config.requestClass`            | defaults to `htmx-request`                                                                                                                                                 |
+| `htmx.config.addedClass`              | defaults to `htmx-added`                                                                                                                                                   |
+| `htmx.config.settlingClass`           | defaults to `htmx-settling`                                                                                                                                                |
+| `htmx.config.swappingClass`           | defaults to `htmx-swapping`                                                                                                                                                |
+| `htmx.config.allowEval`               | defaults to `true`, can be used to disable htmx's use of eval for certain features (e.g. trigger filters)                                                                  |
+| `htmx.config.allowScriptTags`         | defaults to `true`, determines if htmx will process script tags found in new content                                                                                       |
+| `htmx.config.inlineScriptNonce`       | defaults to `''`, meaning that no nonce will be added to inline scripts                                                                                                    |
+| `htmx.config.inlineStyleNonce`        | defaults to `''`, meaning that no nonce will be added to inline styles                                                                                                     |
+| `htmx.config.attributesToSettle`      | defaults to `["class", "style", "width", "height"]`, the attributes to settle during the settling phase                                                                    |
+| `htmx.config.wsReconnectDelay`        | defaults to `full-jitter`                                                                                                                                                  |
+| `htmx.config.wsBinaryType`            | defaults to `blob`, the [the type of binary data](https://developer.mozilla.org/docs/Web/API/WebSocket/binaryType) being received over the WebSocket connection            |
+| `htmx.config.disableSelector`         | defaults to `[hx-disable], [data-hx-disable]`, htmx will not process elements with this attribute on it or a parent                                                        |
+| `htmx.config.disableInheritance`      | defaults to `false`. If it is set to `true`, the inheritance of attributes is completely disabled and you can explicitly specify the inheritance with the [hx-inherit](@/attributes/hx-inherit.md) attribute.
+| `htmx.config.withCredentials`         | defaults to `false`, allow cross-site Access-Control requests using credentials such as cookies, authorization headers or TLS client certificates                          |
+| `htmx.config.timeout`                 | defaults to 0, the number of milliseconds a request can take before automatically being terminated                                                                         |
+| `htmx.config.scrollBehavior`          | defaults to 'instant', the scroll behavior when using the [show](@/attributes/hx-swap.md#scrolling-scroll-show) modifier with `hx-swap`. The allowed values are `instant` (scrolling should happen instantly in a single jump), `smooth` (scrolling should animate smoothly) and `auto` (scroll behavior is determined by the computed value of [scroll-behavior](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior)). |
+| `htmx.config.defaultFocusScroll`      | if the focused element should be scrolled into view, defaults to false and can be overridden using the [focus-scroll](@/attributes/hx-swap.md#focus-scroll) swap modifier. |
+| `htmx.config.getCacheBusterParam`     | defaults to false, if set to true htmx will append the target element to the `GET` request in the format `org.htmx.cache-buster=targetElementId`                           |
+| `htmx.config.globalViewTransitions`   | if set to `true`, htmx will use the [View Transition](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API) API when swapping in new content.             |
+| `htmx.config.methodsThatUseUrlParams` | defaults to `["get", "delete"]`, htmx will format requests with these methods by encoding their parameters in the URL, not the request body                                |
+| `htmx.config.selfRequestsOnly`        | defaults to `true`, whether to only allow AJAX requests to the same domain as the current document                                                             |
+| `htmx.config.ignoreTitle`             | defaults to `false`, if set to `true` htmx will not update the title of the document when a `title` tag is found in new content                                            |
+| `htmx.config.scrollIntoViewOnBoost`   | defaults to `true`, whether or not the target of a boosted element is scrolled into the viewport. If `hx-target` is omitted on a boosted element, the target defaults to `body`, causing the page to scroll to the top. |
+| `htmx.config.triggerSpecsCache`       | defaults to `null`, the cache to store evaluated trigger specifications into, improving parsing performance at the cost of more memory usage. You may define a simple object to use a never-clearing cache, or implement your own system using a [proxy object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Proxy) |
+| `htmx.config.responseHandling`        | the default [Response Handling](@/docs.md#response-handling) behavior for response status codes can be configured here to either swap or error                             |
+| `htmx.config.allowNestedOobSwaps`     | defaults to `true`, whether to process OOB swaps on elements that are nested within the main response element. See [Nested OOB Swaps](@/attributes/hx-swap-oob.md#nested-oob-swaps). |
+
+</div>
+
+You can set them directly in javascript, or you can use a `meta` tag:
+
+```html
+<meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}'>
+```</doc><doc title="Starlette quick guide" desc="A quick overview of some Starlette features useful to FastHTML devs."># 🌟 Starlette Quick Manual
+
+
+2020-02-09
+
+Starlette is the ASGI web framework used as the foundation of FastHTML. Listed here are some Starlette features FastHTML developers can use directly, since the `FastHTML` class inherits from the `Starlette` class (but note that FastHTML has its own customised `RouteX` and `RouterX` classes for routing, to handle FT element trees etc).
+
+## Get uploaded file content
+
+```
+async def handler(request):
+    inp = await request.form()
+    uploaded_file = inp["filename"]
+    filename = uploaded_file.filename           # abc.png
+    content_type = uploaded.content_type    # MIME type, e.g. image/png
+    content = await uploaded_file.read()       # image content
+
+```
+
+## Return a customized response (status code and headers)
+
+```
+import json
+from starlette.responses import Response
+
+async def handler(request):
+    data = {
+        "name": "Bo"
+    }
+    return Response(json.dumps(data), media_type="application/json")
+
+```
+
+`Response` takes `status_code`, `headers` and `media_type`, so if we want to change a response's status code, we can do:
+
+```
+return Response(content, statu_code=404)
+
+```
+
+And customized headers:
+
+```
+headers = {
+	"x-extra-key": "value"
+}
+return Response(content, status_code=200, headers=headers)
+
+```
+
+## Redirect
+
+```
+from starlette.responses import RedirectResponse
+
+async handler(request):
+    # Customize status_code: 
+    #   301: permanent redirect 
+    #   302: temporary redirect 
+    #   303: see others
+    #   307: temporary redirect (default)
+    return RedirectResponse(url=url, status_code=303)
+
+```
+
+## Request context
+
+### URL Object: `request.url`
+
+  * Get request full url: `url = str(request.url)`
+  * Get scheme: `request.url.scheme` (http, https, ws, wss)
+  * Get netloc: `request.url.netloc`, e.g.: example.com:8080
+  * Get path: `request.url.path`, e.g.: /search
+  * Get query string: `request.url.query`, e.g.: kw=hello
+  * Get hostname: `request.url.hostname`, e.g.: example.com
+  * Get port: `request.url.port`, e.g.: 8080
+  * If using secure scheme: `request.url.is_secure`, True is schme is `https` or `wss`
+
+### Headers: `request.headers`
+
+```
+{
+    'host': 'example.com:8080', 
+    'connection': 'keep-alive', 
+    'cache-control': 'max-age=0', 
+    'sec-ch-ua': 'Google Chrome 80', 
+    'dnt': '1', 
+    'upgrade-insecure-requests': '1', 
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) ...',
+    'sec-fetch-dest': 'document', 
+    'accept': 'text/html,image/apng,*/*;q=0.8;v=b3;q=0.9', 
+    'sec-origin-policy': '0', 
+    'sec-fetch-site': 'none', 
+    'sec-fetch-mode': 'navigate', 
+    'sec-fetch-user': '?1', 
+    'accept-encoding': 'gzip, deflate, br', 
+    'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6', 
+    'cookie': 'session=eyJhZG1pbl91c2_KiQ...'
+}
+
+```
+
+### Client: `request.client`
+
+  * `request.client.host`: get client sock IP
+  * `request.client.port`: get client sock port
+
+### Method: `request.method`
+
+  * `request.method`: GET, POST, etc.
+
+### Get Data
+
+  * `await request.body()`: get raw data from body
+  * `await request.json()`: get passed data and parse it as JSON
+  * `await request.form()`: get posted data and pass it as dictionary
+
+### Scope: `request.scope`
+
+```
+{
+    'type': 'http', 
+    'http_version': '1.1', 
+    'server': ('127.0.0.1', 9092), 
+    'client': ('127.0.0.1', 53102), 
+    'scheme': 'https', 
+    'method': 'GET', 
+    'root_path': '', 
+    'path': '/', 
+    'raw_path': b'/', 
+    'query_string': b'kw=hello', 
+    'headers': [
+        (b'host', b'example.com:8080'), 
+        (b'connection', b'keep-alive'), 
+        (b'cache-control', b'max-age=0'), 
+        ...
+    ], 
+    'app': <starlette.applications.Starlette object at 0x1081bd650>, 
+    'session': {'uid': '57ba03ea7333f72a25f837cf'}, 
+    'router': <starlette.routing.Router object at 0x1081bd6d0>, 
+    'endpoint': <class 'app.index.Index'>, 
+    'path_params': {}
+}
+
+```
+
+## Put varaible in request & app scope
+
+```
+app.state.dbconn = get_db_conn()
+request.state.start_time = time.time()
+# use app-scope state variable in a request
+request.app.state.dbconn
+
+```
+
+## Utility functions
+
+### Use `State` to wrap a dictionary
+
+```
+from starlette.datastructures import State
+
+data = {
+    "name": "Bo"
+}
+print(data["name"])
+# now wrap it with State function
+wrapped = State(data)
+# You can use the dot syntaxt, but can't use `wrapped["name"]` any more.
+print(wrapped.name)
+
+```
+
+### login_required wrapper function
+
+NB: This is easier to do in FastHTML using Beforeware.
+
+```
+import functools
+from starlette.endpoints import HTTPEndpoint
+from starlette.responses import Response
+
+def login_required(login_url="/signin"):
+    def decorator(handler):
+        @functools.wraps(handler)
+        async def new_handler(obj, req, *args, **kwargs):
+            user = req.session.get("login_user")
+            if user is None:
+                return seeother(login_url)
+            return await handler(obj, req, *args, **kwargs)
+        return new_handler
+    return decorator
+
+class MyAccount(HTTPEndpiont):
+    @login_required()
+    async def get(self, request):
+        # some logic here
+        content = "hello"
+        return Response(content)
+
+```
+
+## Exceptions
+
+Handle exception and customize 403, 404, 503, 500 page:
+
+```
+from starlette.exceptions import HTTPException
+
+async def exc_handle_403(request, exc):
+    return HTMLResponse("My 403 page", status_code=exc.status_code)
+
+async def exc_handle_404(request, exc):
+    return HTMLResponse("My 404 page", status_code=exc.status_code)
+
+async def exc_handle_503(request, exc):
+    return HTMLResponse("Failed, please try it later", status_code=exc.status_code)
+
+# error is not exception, 500 is server side unexpected error, all other status code will be treated as Exception
+async def err_handle_500(request, exc):
+    import traceback
+    Log.error(traceback.format_exc())
+    return HTMLResponse("My 500 page", status_code=500)
+
+# To add handler, we can add either status_code or Exception itself as key
+exception_handlers = {
+    403: exc_handle_403,
+    404: exc_handle_404,
+    503: exc_handle_503,
+    500: err_handle_500,
+    #HTTPException: exc_handle_500,
+}
+
+app = Starlette(routes=routes, exception_handlers=exception_handlers)
+
+```
+
+## Background Task
+
+### Put some async task as background task
+
+```
+import aiofiles
+from starlette.background import BackgroundTask
+from starlette.responses import Response
+
+aiofiles_remove = aiofiles.os.wrap(os.remove)
+
+async def del_file(fpath):
+    await aiofiles_remove(fpath)
+
+async def handler(request):
+    content = ""
+    fpath = "/tmp/tmpfile.txt"
+    task = BackgroundTask(del_file, fpath=fpath)
+    return Response(content, background=task)
+
+```
+
+### Put multiple tasks as background task
+
+```
+from starlette.background import BackgroundTasks
+
+async def task1(name):
+    pass
+
+async def task2(email):
+    pass
+
+async def handler(request):
+    tasks = BackgroundTasks()
+    tasks.add_task(task1, name="John")
+    tasks.add_task(task2, email="info@example.com")
+    content = ""
+    return Response(content, background=tasks)
+
+```
+
+## Write middleware
+
+There are 2 ways to write middleware:
+
+### Define `__call__` function:
+
+```
+class MyMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        # see above scope dictionary as reference
+        headers = dict(scope["headers"])
+        # do something
+        # pass to next middleware
+        return await self.app(scope, receive, send)
+
+```
+
+### Use `BaseHTTPMiddleware`
+
+```
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class CustomHeaderMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        # do something before pass to next middleware
+        response = await call_next(request)
+        # do something after next middleware returned
+        response.headers['X-Author'] = 'John'
+        return response
+
+```</doc></docs><api><doc title="API List" desc="A succint list of all functions and methods in fasthtml."># fasthtml Module Documentation
+
+## fasthtml.authmw
+
+- `class BasicAuthMiddleware`
+    - `def __init__(self, app, cb, skip)`
+    - `def __call__(self, scope, receive, send)`
+    - `def authenticate(self, conn)`
+
+## fasthtml.cli
+
+- `@call_parse def railway_link()`
+    Link the current directory to the current project's Railway service
+
+- `@call_parse def railway_deploy(name, mount)`
+    Deploy a FastHTML app to Railway
+
+## fasthtml.components
+
+> `ft_html` and `ft_hx` functions to add some conveniences to `ft`, along with a full set of basic HTML components, and functions to work with forms and `FT` conversion
+
+- `def show(ft, *rest)`
+    Renders FT Components into HTML within a Jupyter notebook.
+
+- `def File(fname)`
+    Use the unescaped text in file `fname` directly
+
+- `def fill_form(form, obj)`
+    Fills named items in `form` using attributes in `obj`
+
+- `def fill_dataclass(src, dest)`
+    Modifies dataclass in-place and returns it
+
+- `def find_inputs(e, tags, **kw)`
+    Recursively find all elements in `e` with `tags` and attrs matching `kw`
+
+- `def html2ft(html, attr1st)`
+    Convert HTML to an `ft` expression
+
+- `def sse_message(elm, event)`
+    Convert element `elm` into a format suitable for SSE streaming
+
+## fasthtml.core
+
+> The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses.
+
+- `def parsed_date(s)`
+    Convert `s` to a datetime
+
+- `def snake2hyphens(s)`
+    Convert `s` from snake case to hyphenated and capitalised
+
+- `@dataclass class HtmxHeaders`
+    - `def __bool__(self)`
+    - `def __init__(self, boosted, current_url, history_restore_request, prompt, request, target, trigger_name, trigger)`
+
+- `@dataclass class HttpHeader`
+    - `def __init__(self, k, v)`
+
+- `@use_kwargs_dict(**htmx_resps) def HtmxResponseHeaders(**kwargs)`
+    HTMX response headers
+
+- `def form2dict(form)`
+    Convert starlette form data to a dict
+
+- `def parse_form(req)`
+    Starlette errors on empty multipart forms, so this checks for that situation
+
+- `def flat_xt(lst)`
+    Flatten lists
+
+- `class Beforeware`
+    - `def __init__(self, f, skip)`
+
+- `def EventStream(s)`
+    Create a text/event-stream response from `s`
+
+- `def flat_tuple(o)`
+    Flatten lists
+
+- `def noop_body(c, req)`
+    Default Body wrap function which just returns the content
+
+- `def respond(req, heads, bdy)`
+    Default FT response creation function
+
+- `class Redirect`
+    Use HTMX or Starlette RedirectResponse as required to redirect to `loc`
+
+    - `def __init__(self, loc)`
+    - `def __response__(self, req)`
+
+- `def qp(p, **kw)`
+    Add parameters kw to path p
+
+- `def def_hdrs(htmx, surreal)`
+    Default headers for a FastHTML app
+
+- `class FastHTML`
+    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, **bodykw)`
+    - `def add_route(self, route)`
+
+- `@patch def ws(self, path, conn, disconn, name, middleware)`
+    Add a websocket route at `path`
+
+- `def nested_name(f)`
+    Get name of function `f` using '_' to join nested function names
+
+- `@patch def route(self, path, methods, name, include_in_schema, body_wrap)`
+    Add a route at `path`
+
+- `def serve(appname, app, host, port, reload, reload_includes, reload_excludes)`
+    Run the app in an async server, with live reload set as the default.
+
+- `class Client`
+    A simple httpx ASGI client that doesn't require `async`
+
+    - `def __init__(self, app, url)`
+
+- `class RouteFuncs`
+    - `def __init__(self)`
+    - `def __setattr__(self, name, value)`
+    - `def __getattr__(self, name)`
+    - `def __dir__(self)`
+
+- `class APIRouter`
+    Add routes to an app
+
+    - `def __init__(self, prefix, body_wrap)`
+    - `def __call__(self, path, methods, name, include_in_schema, body_wrap)`
+        Add a route at `path`
+
+    - `def __getattr__(self, name)`
+    - `def to_app(self, app)`
+        Add routes to `app`
+
+    - `def ws(self, path, conn, disconn, name, middleware)`
+        Add a websocket route at `path`
+
+
+- `def cookie(key, value, max_age, expires, path, domain, secure, httponly, samesite)`
+    Create a 'set-cookie' `HttpHeader`
+
+- `@patch def static_route_exts(self, prefix, static_path, exts)`
+    Add a static route at URL path `prefix` with files from `static_path` and `exts` defined by `reg_re_param()`
+
+- `@patch def static_route(self, ext, prefix, static_path)`
+    Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')
+
+- `class MiddlewareBase`
+    - `def __call__(self, scope, receive, send)`
+
+- `class FtResponse`
+    Wrap an FT response with any Starlette `Response`
+
+    - `def __init__(self, content, status_code, headers, cls, media_type)`
+    - `def __response__(self, req)`
+
+## fasthtml.fastapp
+
+> The `fast_app` convenience wrapper
+
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
+    Create a FastHTML or FastHTMLWithLiveReload app.
+
+## fasthtml.js
+
+> Basic external Javascript lib wrappers
+
+- `def light_media(css)`
+    Render light media for day mode views
+
+- `def dark_media(css)`
+    Render dark media for night mode views
+
+- `def MarkdownJS(sel)`
+    Implements browser-based markdown rendering.
+
+- `def HighlightJS(sel, langs, light, dark)`
+    Implements browser-based syntax highlighting. Usage example [here](/tutorials/quickstart_for_web_devs.html#code-highlighting).
+
+- `def MermaidJS(sel, theme)`
+    Implements browser-based Mermaid diagram rendering.
+
+## fasthtml.jupyter
+
+> Use FastHTML in Jupyter notebooks
+
+- `def nb_serve(app, log_level, port, host, **kwargs)`
+    Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+- `def nb_serve_async(app, log_level, port, host, **kwargs)`
+    Async version of `nb_serve`
+
+- `def is_port_free(port, host)`
+    Check if `port` is free on `host`
+
+- `def wait_port_free(port, host, max_wait)`
+    Wait for `port` to be free on `host`
+
+- `class JupyUvi`
+    Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+    - `def __init__(self, app, log_level, host, port, start, **kwargs)`
+    - `def start(self)`
+    - `def stop(self)`
+
+- `class JupyUviAsync`
+    Start and stop an async Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+
+    - `def __init__(self, app, log_level, host, port, **kwargs)`
+    - `def start(self)`
+    - `def stop(self)`
+
+- `def HTMX(path, app, host, port, height, link, iframe)`
+    An iframe which displays the HTMX application in a notebook.
+
+## fasthtml.live_reload
+
+- `class FastHTMLWithLiveReload`
+    `FastHTMLWithLiveReload` enables live reloading.
+    This means that any code changes saved on the server will automatically
+    trigger a reload of both the server and browser window.
+
+    How does it work?
+      - a websocket is created at `/live-reload`
+      - a small js snippet `LIVE_RELOAD_SCRIPT` is injected into each webpage
+      - this snippet connects to the websocket at `/live-reload` and listens for an `onclose` event
+      - when the `onclose` event is detected the browser is reloaded
+
+    Why do we listen for an `onclose` event?
+      When code changes are saved the server automatically reloads if the --reload flag is set.
+      The server reload kills the websocket connection. The `onclose` event serves as a proxy
+      for "developer has saved some changes".
+
+    Usage
+        >>> from fasthtml.common import *
+        >>> app = FastHTMLWithLiveReload()
+
+        Run:
+            serve()
+
+    - `def __init__(self, *args, **kwargs)`
+
+## fasthtml.oauth
+
+> Basic scaffolding for handling OAuth
+
+- `class GoogleAppClient`
+    A `WebApplicationClient` for Google oauth2
+
+    - `def __init__(self, client_id, client_secret, code, scope, **kwargs)`
+    - `@classmethod def from_file(cls, fname, code, scope, **kwargs)`
+
+- `class GitHubAppClient`
+    A `WebApplicationClient` for GitHub oauth2
+
+    - `def __init__(self, client_id, client_secret, code, scope, **kwargs)`
+
+- `class HuggingFaceClient`
+    A `WebApplicationClient` for HuggingFace oauth2
+
+    - `def __init__(self, client_id, client_secret, code, scope, state, **kwargs)`
+
+- `class DiscordAppClient`
+    A `WebApplicationClient` for Discord oauth2
+
+    - `def __init__(self, client_id, client_secret, is_user, perms, scope, **kwargs)`
+    - `def login_link(self)`
+    - `def parse_response(self, code)`
+
+- `class Auth0AppClient`
+    A `WebApplicationClient` for Auth0 OAuth2
+
+    - `def __init__(self, domain, client_id, client_secret, code, scope, redirect_uri, **kwargs)`
+    - `def login_link(self, req)`
+
+- `@patch def login_link(self, redirect_uri, scope, state, **kwargs)`
+    Get a login link for this client
+
+- `def redir_url(request, redir_path, scheme)`
+    Get the redir url for the host in `request`
+
+- `@patch def parse_response(self, code, redirect_uri)`
+    Get the token from the oauth2 server response
+
+- `@patch def get_info(self, token)`
+    Get the info for authenticated user
+
+- `@patch def retr_info(self, code, redirect_uri)`
+    Combines `parse_response` and `get_info`
+
+- `@patch def retr_id(self, code, redirect_uri)`
+    Call `retr_info` and then return id/subscriber value
+
+- `class OAuth`
+    - `def __init__(self, app, cli, skip, redir_path, error_path, logout_path, login_path, https, http_patterns)`
+    - `def redir_login(self, session)`
+    - `def redir_url(self, req)`
+    - `def login_link(self, req, scope, state)`
+    - `def check_invalid(self, req, session, auth)`
+    - `def logout(self, session)`
+    - `def get_auth(self, info, ident, session, state)`
+
+- `@patch def save(self, fname)`
+    Save credentials to `fname`
+
+- `def load_creds(fname)`
+    Load credentials from `fname`
+
+- `@patch def creds(self)`
+    Create `Credentials` from the client, refreshing if needed
+
+## fasthtml.pico
+
+> Basic components for generating Pico CSS tags
+
+- `@delegates(ft_hx, keep=True) def Card(*c, **kwargs)`
+    A PicoCSS Card, implemented as an Article with optional Header and Footer
+
+- `@delegates(ft_hx, keep=True) def Group(*c, **kwargs)`
+    A PicoCSS Group, implemented as a Fieldset with role 'group'
+
+- `@delegates(ft_hx, keep=True) def Search(*c, **kwargs)`
+    A PicoCSS Search, implemented as a Form with role 'search'
+
+- `@delegates(ft_hx, keep=True) def Grid(*c, **kwargs)`
+    A PicoCSS Grid, implemented as child Divs in a Div with class 'grid'
+
+- `@delegates(ft_hx, keep=True) def DialogX(*c, **kwargs)`
+    A PicoCSS Dialog, with children inside a Card
+
+- `@delegates(ft_hx, keep=True) def Container(*args, **kwargs)`
+    A PicoCSS Container, implemented as a Main with class 'container'
+
+## fasthtml.svg
+
+> Simple SVG FT elements
+
+- `def Svg(*args, **kwargs)`
+    An SVG tag; xmlns is added automatically, and viewBox defaults to height and width if not provided
+
+- `@delegates(ft_hx) def ft_svg(tag, *c, **kwargs)`
+    Create a standard `FT` element with some SVG-specific attrs
+
+- `@delegates(ft_svg) def Rect(width, height, x, y, fill, stroke, stroke_width, rx, ry, **kwargs)`
+    A standard SVG `rect` element
+
+- `@delegates(ft_svg) def Circle(r, cx, cy, fill, stroke, stroke_width, **kwargs)`
+    A standard SVG `circle` element
+
+- `@delegates(ft_svg) def Ellipse(rx, ry, cx, cy, fill, stroke, stroke_width, **kwargs)`
+    A standard SVG `ellipse` element
+
+- `def transformd(translate, scale, rotate, skewX, skewY, matrix)`
+    Create an SVG `transform` kwarg dict
+
+- `@delegates(ft_svg) def Line(x1, y1, x2, y2, stroke, w, stroke_width, **kwargs)`
+    A standard SVG `line` element
+
+- `@delegates(ft_svg) def Polyline(*args, **kwargs)`
+    A standard SVG `polyline` element
+
+- `@delegates(ft_svg) def Polygon(*args, **kwargs)`
+    A standard SVG `polygon` element
+
+- `@delegates(ft_svg) def Text(*args, **kwargs)`
+    A standard SVG `text` element
+
+- `class PathFT`
+    - `def M(self, x, y)`
+        Move to.
+
+    - `def L(self, x, y)`
+        Line to.
+
+    - `def H(self, x)`
+        Horizontal line to.
+
+    - `def V(self, y)`
+        Vertical line to.
+
+    - `def Z(self)`
+        Close path.
+
+    - `def C(self, x1, y1, x2, y2, x, y)`
+        Cubic Bézier curve.
+
+    - `def S(self, x2, y2, x, y)`
+        Smooth cubic Bézier curve.
+
+    - `def Q(self, x1, y1, x, y)`
+        Quadratic Bézier curve.
+
+    - `def T(self, x, y)`
+        Smooth quadratic Bézier curve.
+
+    - `def A(self, rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y)`
+        Elliptical Arc.
+
+
+- `def SvgOob(*args, **kwargs)`
+    Wraps an SVG shape as required for an HTMX OOB swap
+
+- `def SvgInb(*args, **kwargs)`
+    Wraps an SVG shape as required for an HTMX inband swap
+
+## fasthtml.xtend
+
+> Simple extensions to standard HTML components, such as adding sensible defaults
+
+- `@delegates(ft_hx, keep=True) def A(*c, **kwargs)`
+    An A tag; `href` defaults to '#' for more concise use with HTMX
+
+- `@delegates(ft_hx, keep=True) def AX(txt, hx_get, target_id, hx_swap, href, **kwargs)`
+    An A tag with just one text child, allowing hx_get, target_id, and hx_swap to be positional params
+
+- `@delegates(ft_hx, keep=True) def Form(*c, **kwargs)`
+    A Form tag; identical to plain `ft_hx` version except default `enctype='multipart/form-data'`
+
+- `@delegates(ft_hx, keep=True) def Hidden(value, id, **kwargs)`
+    An Input of type 'hidden'
+
+- `@delegates(ft_hx, keep=True) def CheckboxX(checked, label, value, id, name, **kwargs)`
+    A Checkbox optionally inside a Label, preceded by a `Hidden` with matching name
+
+- `@delegates(ft_html, keep=True) def Script(code, **kwargs)`
+    A Script tag that doesn't escape its code
+
+- `@delegates(ft_html, keep=True) def Style(*c, **kwargs)`
+    A Style tag that doesn't escape its code
+
+- `def double_braces(s)`
+    Convert single braces to double braces if next to special chars or newline
+
+- `def undouble_braces(s)`
+    Convert double braces to single braces if next to special chars or newline
+
+- `def loose_format(s, **kw)`
+    String format `s` using `kw`, without being strict about braces outside of template params
+
+- `def ScriptX(fname, src, nomodule, type, _async, defer, charset, crossorigin, integrity, **kw)`
+    A `script` element with contents read from `fname`
+
+- `def replace_css_vars(css, pre, **kwargs)`
+    Replace `var(--)` CSS variables with `kwargs` if name prefix matches `pre`
+
+- `def StyleX(fname, **kw)`
+    A `style` element with contents read from `fname` and variables replaced from `kw`
+
+- `def Nbsp()`
+    A non-breaking space
+
+- `def Surreal(code)`
+    Wrap `code` in `domReadyExecute` and set `m=me()` and `p=me('-')`
+
+- `def On(code, event, sel, me)`
+    An async surreal.js script block event handler for `event` on selector `sel,p`, making available parent `p`, event `ev`, and target `e`
+
+- `def Prev(code, event)`
+    An async surreal.js script block event handler for `event` on previous sibling, with same vars as `On`
+
+- `def Now(code, sel)`
+    An async surreal.js script block on selector `me(sel)`
+
+- `def AnyNow(sel, code)`
+    An async surreal.js script block on selector `any(sel)`
+
+- `def run_js(js, id, **kw)`
+    Run `js` script, auto-generating `id` based on name of caller if needed, and js-escaping any `kw` params
+
+- `def jsd(org, repo, root, path, prov, typ, ver, esm, **kwargs)`
+    jsdelivr `Script` or CSS `Link` tag, or URL
+
+- `@delegates(ft_hx, keep=True) def Titled(title, *args, **kwargs)`
+    An HTML partial containing a `Title`, and `H1`, and any provided children
+
+- `def Socials(title, site_name, description, image, url, w, h, twitter_site, creator, card)`
+    OG and Twitter social card headers
+
+- `def YouTubeEmbed(video_id, **kwargs)`
+    Embed a YouTube video
+
+- `def Favicon(light_icon, dark_icon)`
+    Light and dark favicon headers
+</doc><doc title="MonsterUI API List" desc="Complete API Reference for Monster UI, a component framework similar to shadcn, but for FastHTML"># monsterui Module Documentation
+
+## monsterui.core
+
+- `class ThemeRadii(Enum)`
+    Members: none, sm, md, lg
+
+
+- `class ThemeShadows`
+
+- `class ThemeFont`
+
+- `class Theme(Enum)`
+    Selector to choose theme and get all headers needed for app.  Includes frankenui + tailwind + daisyui + highlight.js options
+    Members: slate, stone, gray, neutral, red, rose, orange, green, blue, yellow, violet, zinc
+
+    - `headers(self, mode, daisy, highlightjs, katex, radii, shadows, font)`
+        Create frankenui and tailwind cdns
+
+    - `local_headers(self, mode, static_dir, daisy, highlightjs, katex, radii, shadows, font)`
+        Create headers using local files downloaded from CDNs
+
+
+## monsterui.daisy
+
+- `class AlertT(Enum)`
+    Alert styles from DaisyUI
+    Members: info, success, warning, error
+
+
+- `def Alert(*c, **kwargs)`
+    Alert informs users about important events.
+
+- `class StepsT(Enum)`
+    Options for Steps
+    Members: vertical, horizonal
+
+
+- `class StepT(Enum)`
+    Step styles for LiStep
+    Members: primary, secondary, accent, info, success, warning, error, neutral
+
+
+- `def Steps(*li, **kwargs)`
+    Creates a steps container
+
+- `def LiStep(*c, **kwargs)`
+    Creates a step list item
+
+- `class LoadingT(Enum)`
+    Members: spinner, dots, ring, ball, bars, infinity, xs, sm, md, lg
+
+
+- `def Loading(cls, htmx_indicator, **kwargs)`
+    Creates a loading animation component
+
+- `class ToastHT(Enum)`
+    Horizontal position for Toast
+    Members: start, center, end
+
+
+- `class ToastVT(Enum)`
+    Vertical position for Toast
+    Members: top, middle, bottom
+
+
+## monsterui.foundations
+
+> Data Structures and Utilties
+
+- `def stringify(o)`
+    Converts input types into strings that can be passed to FT components
+
+- `class VEnum(Enum)`
+    Members: 
+
+    - `__str__(self)`
+    - `__add__(self, other)`
+    - `__radd__(self, other)`
+
+## monsterui.franken
+
+- `class TextT(Enum)`
+    Text Styles from https://franken-ui.dev/docs/text
+    Members: paragraph, lead, meta, gray, italic, xs, sm, lg, xl, light, normal, medium, bold, extrabold, muted, primary, secondary, success, warning, error, info, left, right, center, justify, start, end, top, middle, bottom, truncate, break_, nowrap, underline, highlight
+
+
+- `class TextPresets(Enum)`
+    Common Typography Presets
+    Members: muted_sm, muted_lg, bold_sm, bold_lg, md_weight_sm, md_weight_muted
+
+
+- `def CodeSpan(*c, **kwargs)`
+    A CodeSpan with Styling
+
+- `def CodeBlock(*c, **kwargs)`
+    CodeBlock with Styling
+
+- `def H1(*c, **kwargs)`
+    H1 with styling and appropriate size
+
+- `def H2(*c, **kwargs)`
+    H2 with styling and appropriate size
+
+- `def H3(*c, **kwargs)`
+    H3 with styling and appropriate size
+
+- `def H4(*c, **kwargs)`
+    H4 with styling and appropriate size
+
+- `def H5(*c, **kwargs)`
+    H5 with styling and appropriate size
+
+- `def H6(*c, **kwargs)`
+    H6 with styling and appropriate size
+
+- `def Subtitle(*c, **kwargs)`
+    Styled muted_sm text designed to go under Headings and Titles
+
+- `def Q(*c, **kwargs)`
+    Styled quotation mark
+
+- `def Em(*c, **kwargs)`
+    Styled emphasis text
+
+- `def Strong(*c, **kwargs)`
+    Styled strong text
+
+- `def I(*c, **kwargs)`
+    Styled italic text
+
+- `def Small(*c, **kwargs)`
+    Styled small text
+
+- `def Mark(*c, **kwargs)`
+    Styled highlighted text
+
+- `def Del(*c, **kwargs)`
+    Styled deleted text
+
+- `def Ins(*c, **kwargs)`
+    Styled inserted text
+
+- `def Sub(*c, **kwargs)`
+    Styled subscript text
+
+- `def Sup(*c, **kwargs)`
+    Styled superscript text
+
+- `def Blockquote(*c, **kwargs)`
+    Blockquote with Styling
+
+- `def Caption(*c, **kwargs)`
+    Styled caption text
+
+- `def Cite(*c, **kwargs)`
+    Styled citation text
+
+- `def Time(*c, **kwargs)`
+    Styled time element
+
+- `def Address(*c, **kwargs)`
+    Styled address element
+
+- `def Abbr(*c, **kwargs)`
+    Styled abbreviation with dotted underline
+
+- `def Dfn(*c, **kwargs)`
+    Styled definition term with italic and medium weight
+
+- `def Kbd(*c, **kwargs)`
+    Styled keyboard input with subtle background
+
+- `def Samp(*c, **kwargs)`
+    Styled sample output with subtle background
+
+- `def Var(*c, **kwargs)`
+    Styled variable with italic monospace
+
+- `def Figure(*c, **kwargs)`
+    Styled figure container with card-like appearance
+
+- `def Details(*c, **kwargs)`
+    Styled details element
+
+- `def Summary(*c, **kwargs)`
+    Styled summary element
+
+- `def Data(*c, **kwargs)`
+    Styled data element
+
+- `def Meter(*c, **kwargs)`
+    Styled meter element
+
+- `def S(*c, **kwargs)`
+    Styled strikethrough text (different semantic meaning from Del)
+
+- `def U(*c, **kwargs)`
+    Styled underline (for proper names in Chinese, proper spelling etc)
+
+- `def Output(*c, **kwargs)`
+    Styled output element for form results
+
+- `def PicSumImg(h, w, id, grayscale, blur, **kwargs)`
+    Creates a placeholder image using https://picsum.photos/
+
+- `class ButtonT(Enum)`
+    Options for styling Buttons
+    Members: default, ghost, primary, secondary, destructive, text, link, xs, sm, lg, xl, icon
+
+
+- `def Button(*c, **kwargs)`
+    Button with Styling (defaults to `submit` for form submission)
+
+- `class ContainerT(Enum)`
+    Max width container sizes from https://franken-ui.dev/docs/container
+    Members: xs, sm, lg, xl, expand
+
+
+- `class BackgroundT(Enum)`
+    Members: muted, primary, secondary, default
+
+
+- `def Container(*c, **kwargs)`
+    Div to be used as a container that often wraps large sections or a page of content
+
+- `def Titled(title, *c, **kwargs)`
+    Creates a standard page structure for titled page.  Main(Container(title, content))
+
+- `class DividerT(Enum)`
+    Divider Styles from https://franken-ui.dev/docs/divider
+    Members: icon, sm, vertical
+
+
+- `def Divider(*c, **kwargs)`
+    Divider with default styling and margin
+
+- `def DividerSplit(*c)`
+    Creates a simple horizontal line divider with configurable thickness and vertical spacing
+
+- `def Article(*c, **kwargs)`
+    A styled article container for blog posts or similar content
+
+- `def ArticleTitle(*c, **kwargs)`
+    A title component for use within an Article
+
+- `def ArticleMeta(*c, **kwargs)`
+    A metadata component for use within an Article showing things like date, author etc
+
+- `class SectionT(Enum)`
+    Section styles from https://franken-ui.dev/docs/section
+    Members: default, muted, primary, secondary, xs, sm, lg, xl, remove_vertical
+
+
+- `def Section(*c, **kwargs)`
+    Section with styling and margins
+
+- `def Form(*c, **kwargs)`
+    A Form with default spacing between form elements
+
+- `def Fieldset(*c, **kwargs)`
+    A Fieldset with default styling
+
+- `def Legend(*c, **kwargs)`
+    A Legend with default styling
+
+- `def Input(*c, **kwargs)`
+    An Input with default styling
+
+- `def Radio(*c, **kwargs)`
+    A Radio with default styling
+
+- `def CheckboxX(*c, **kwargs)`
+    A Checkbox with default styling
+
+- `def Range(*c, **kwargs)`
+    A Range with default styling
+
+- `def TextArea(*c, **kwargs)`
+    A Textarea with default styling
+
+- `def Switch(*c, **kwargs)`
+    A Switch with default styling
+
+- `def Upload(*c, **kwargs)`
+    A file upload component with default styling
+
+- `def UploadZone(*c, **kwargs)`
+    A file drop zone component with default styling
+
+- `def FormLabel(*c, **kwargs)`
+    A Label with default styling
+
+- `class LabelT(Enum)`
+    Members: primary, secondary, danger
+
+
+- `def Label(*c, **kwargs)`
+    FrankenUI labels, which look like pills
+
+- `def UkFormSection(title, description, *c)`
+    A form section with a title, description and optional button
+
+- `def GenericLabelInput(label, lbl_cls, input_cls, container, cls, id, input_fn, **kwargs)`
+    `Div(Label,Input)` component with Uk styling injected appropriately. Generally you should higher level API, such as `LabelInput` which is created for you in this library
+
+- `def LabelInput(label, lbl_cls, input_cls, cls, id, **kwargs)`
+    A `FormLabel` and `Input` pair that provides default spacing and links/names them based on id
+
+- `def LabelRadio(label, lbl_cls, input_cls, container, cls, id, **kwargs)`
+    A FormLabel and Radio pair that provides default spacing and links/names them based on id
+
+- `def LabelCheckboxX(label, lbl_cls, input_cls, container, cls, id, **kwargs)`
+    A FormLabel and CheckboxX pair that provides default spacing and links/names them based on id
+
+- `def LabelSelect(*option, **kwargs)`
+    A FormLabel and Select pair that provides default spacing and links/names them based on id (usually UkLabelSelect is a better choice)
+
+- `def Options(*c)`
+    Helper function to wrap things into `Option`s for use in `Select`
+
+- `def Select(*option, **kwargs)`
+    Creates a select dropdown with uk styling and option for adding a search box
+
+- `@delegates(GenericLabelInput, but=['input_fn', 'cls']) def LabelRange(label, lbl_cls, input_cls, cls, id, value, min, max, step, label_range, **kwargs)`
+    A FormLabel and Range pair that provides default spacing and links/names them based on id
+
+- `class AT(Enum)`
+    Link styles from https://franken-ui.dev/docs/link
+    Members: muted, text, reset, primary, classic
+
+
+- `class ListT(Enum)`
+    List styles using Tailwind CSS
+    Members: disc, circle, square, decimal, hyphen, bullet, divider, striped
+
+
+- `def ModalContainer(*c, **kwargs)`
+    Creates a modal container that components go in
+
+- `def ModalDialog(*c, **kwargs)`
+    Creates a modal dialog
+
+- `def ModalHeader(*c, **kwargs)`
+    Creates a modal header
+
+- `def ModalBody(*c, **kwargs)`
+    Creates a modal body
+
+- `def ModalFooter(*c, **kwargs)`
+    Creates a modal footer
+
+- `def ModalTitle(*c, **kwargs)`
+    Creates a modal title
+
+- `def ModalCloseButton(*c, **kwargs)`
+    Creates a button that closes a modal with js
+
+- `def Modal(*c, **kwargs)`
+    Creates a modal with the appropriate classes to put the boilerplate in the appropriate places for you
+
+- `def Placeholder(*c, **kwargs)`
+    Creates a placeholder
+
+- `def Progress(*c, **kwargs)`
+    Creates a progress bar
+
+- `def UkIcon(icon, height, width, stroke_width, cls, **kwargs)`
+    Creates an icon using lucide icons
+
+- `def UkIconLink(icon, height, width, stroke_width, cls, button, **kwargs)`
+    Creates an icon link using lucide icons
+
+- `def DiceBearAvatar(seed_name, h, w)`
+    Creates an Avatar using https://dicebear.com/
+
+- `def Center(*c, **kwargs)`
+    Centers contents both vertically and horizontally by default
+
+- `class FlexT(Enum)`
+    Flexbox modifiers using Tailwind CSS
+    Members: block, inline, left, center, right, between, around, stretch, top, middle, bottom, row, row_reverse, column, column_reverse, nowrap, wrap, wrap_reverse
+
+
+- `def Grid(*div, **kwargs)`
+    Creates a responsive grid layout with smart defaults based on content
+
+- `def DivFullySpaced(*c, **kwargs)`
+    Creates a flex div with it's components having as much space between them as possible
+
+- `def DivCentered(*c, **kwargs)`
+    Creates a flex div with it's components centered in it
+
+- `def DivLAligned(*c, **kwargs)`
+    Creates a flex div with it's components aligned to the left
+
+- `def DivRAligned(*c, **kwargs)`
+    Creates a flex div with it's components aligned to the right
+
+- `def DivVStacked(*c, **kwargs)`
+    Creates a flex div with it's components stacked vertically
+
+- `def DivHStacked(*c, **kwargs)`
+    Creates a flex div with it's components stacked horizontally
+
+- `class NavT(Enum)`
+    Members: default, primary, secondary
+
+
+- `def NavContainer(*li, **kwargs)`
+    Creates a navigation container (useful for creating a sidebar navigation).  A Nav is a list (NavBar is something different)
+
+- `def NavParentLi(*nav_container, **kwargs)`
+    Creates a navigation list item with a parent nav for nesting
+
+- `def NavDividerLi(*c, **kwargs)`
+    Creates a navigation list item with a divider
+
+- `def NavHeaderLi(*c, **kwargs)`
+    Creates a navigation list item with a header
+
+- `def NavSubtitle(*c, **kwargs)`
+    Creates a navigation subtitle
+
+- `def NavCloseLi(*c, **kwargs)`
+    Creates a navigation list item with a close button
+
+- `class ScrollspyT(Enum)`
+    Members: underline, bold
+
+
+- `def NavBar(*c)`
+    Creates a responsive navigation bar with mobile menu support
+
+- `def SliderContainer(*c, **kwargs)`
+    Creates a slider container
+
+- `def SliderItems(*c, **kwargs)`
+    Creates a slider items container
+
+- `def SliderNav(cls, prev_cls, next_cls, **kwargs)`
+    Navigation arrows for Slider component
+
+- `def Slider(*c, **kwargs)`
+    Creates a slider with optional navigation arrows
+
+- `def DropDownNavContainer(*li, **kwargs)`
+    A Nav that is part of a DropDown
+
+- `def TabContainer(*li, **kwargs)`
+    A TabContainer where children will be different tabs
+
+- `class CardT(Enum)`
+    Card styles from UIkit
+    Members: default, primary, secondary, destructive, hover
+
+
+- `def CardTitle(*c, **kwargs)`
+    Creates a card title
+
+- `def CardHeader(*c, **kwargs)`
+    Creates a card header
+
+- `def CardBody(*c, **kwargs)`
+    Creates a card body
+
+- `def CardFooter(*c, **kwargs)`
+    Creates a card footer
+
+- `def CardContainer(*c, **kwargs)`
+    Creates a card container
+
+- `def Card(*c, **kwargs)`
+    Creates a Card with a header, body, and footer
+
+- `class TableT(Enum)`
+    Members: divider, striped, hover, sm, lg, justify, middle, responsive
+
+
+- `def Table(*c, **kwargs)`
+    Creates a table
+
+- `def TableFromLists(header_data, body_data, footer_data, header_cell_render, body_cell_render, footer_cell_render, cls, sortable, **kwargs)`
+    Creates a Table from a list of header data and a list of lists of body data
+
+- `def TableFromDicts(header_data, body_data, footer_data, header_cell_render, body_cell_render, footer_cell_render, cls, sortable, **kwargs)`
+    Creates a Table from a list of header data and a list of dicts of body data
+
+- `def apply_classes(html_str, class_map, class_map_mods)`
+    Apply classes to html string
+
+- `def render_md(md_content, class_map, class_map_mods)`
+    Renders markdown using mistletoe and lxml
+
+- `def get_franken_renderer(img_dir)`
+    Create a renderer class with the specified img_dir
+
+- `def ThemePicker(color, radii, shadows, font, mode, cls, custom_themes)`
+    Theme picker component with configurable sections
+
+- `def LightboxContainer(*lightboxitem, **kwargs)`
+    Lightbox container that will hold `LightboxItems`
+
+- `def LightboxItem(*c, **kwargs)`
+    Anchor tag with appropriate structure to go inside a `LightBoxContainer`
+</doc></api><examples><doc title="Websockets application" desc="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
+from fasthtml.common import *
+
+app = FastHTML(exts='ws')
+rt = app.route
+
+def mk_inp(): return Input(id='msg')
+nid = 'notifications'
+
+@rt('/')
+async def get():
+    cts = Div(
+        Div(id=nid),
+        Form(mk_inp(), id='form', ws_send=True),
+        hx_ext='ws', ws_connect='/ws')
+    return Titled('Websocket Test', cts)
+
+async def on_connect(send): await send(Div('Hello, you have connected', id=nid))
+async def on_disconnect( ): print('Disconnected!')
+
+@app.ws('/ws', conn=on_connect, disconn=on_disconnect)
+async def ws(msg:str, send):
+    await send(Div('Hello ' + msg, id=nid))
+    await sleep(2)
+    return Div('Goodbye ' + msg, id=nid), mk_inp()
+
+serve()
+</doc><doc title="Todo list application" desc="Detailed walk-thru of a complete CRUD app in FastHTML showing idiomatic use of FastHTML and HTMX patterns.">###
+# Walkthrough of an idiomatic fasthtml app
+###
+
+# This fasthtml app includes functionality from fastcore, starlette, fastlite, and fasthtml itself.
+# Run with: `python adv_app.py`
+# Importing from `fasthtml.common` brings the key parts of all of these together.
+# For simplicity, you can just `from fasthtml.common import *`:
+from fasthtml.common import *
+# ...or you can import everything into a namespace:
+# from fasthtml import common as fh
+# ...or you can import each symbol explicitly (which we're commenting out here but including for completeness):
+"""
+from fasthtml.common import (
+    # These are the HTML components we use in this app
+    A, AX, Button, Card, CheckboxX, Container, Div, Form, Grid, Group, H1, H2, Hidden, Input, Li, Main, Script, Style, Textarea, Title, Titled, Ul,
+    # These are FastHTML symbols we'll use
+    Beforeware, FastHTML, fast_app, SortableJS, fill_form, picolink, serve,
+    # These are from Starlette, Fastlite, fastcore, and the Python stdlib
+    FileResponse, NotFoundError, RedirectResponse, database, patch, dataclass
+)
+"""
+
+from hmac import compare_digest
+
+# You can use any database you want; it'll be easier if you pick a lib that supports the MiniDataAPI spec.
+# Here we are using SQLite, with the FastLite library, which supports the MiniDataAPI spec.
+db = database('data/utodos.db')
+# The `t` attribute is the table collection. The `todos` and `users` tables are not created if they don't exist.
+# Instead, you can use the `create` method to create them if needed.
+todos,users = db.t.todos,db.t.users
+if todos not in db.t:
+    # You can pass a dict, or kwargs, to most MiniDataAPI methods.
+    users.create(dict(name=str, pwd=str), pk='name')
+    todos.create(id=int, title=str, done=bool, name=str, details=str, priority=int, pk='id')
+# Although you can just use dicts, it can be helpful to have types for your DB objects.
+# The `dataclass` method creates that type, and stores it in the object, so it will use it for any returned items.
+Todo,User = todos.dataclass(),users.dataclass()
+
+# Any Starlette response class can be returned by a FastHTML route handler.
+# In that case, FastHTML won't change it at all.
+# Status code 303 is a redirect that can change POST to GET, so it's appropriate for a login page.
+login_redir = RedirectResponse('/login', status_code=303)
+
+# The `before` function is a *Beforeware* function. These are functions that run before a route handler is called.
+def before(req, sess):
+    # This sets the `auth` attribute in the request scope, and gets it from the session.
+    # The session is a Starlette session, which is a dict-like object which is cryptographically signed,
+    # so it can't be tampered with.
+    # The `auth` key in the scope is automatically provided to any handler which requests it, and can not
+    # be injected by the user using query params, cookies, etc, so it should be secure to use.
+    auth = req.scope['auth'] = sess.get('auth', None)
+    # If the session key is not there, it redirects to the login page.
+    if not auth: return login_redir
+    # `xtra` is part of the MiniDataAPI spec. It adds a filter to queries and DDL statements,
+    # to ensure that the user can only see/edit their own todos.
+    todos.xtra(name=auth)
+
+markdown_js = """
+import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+proc_htmx('.markdown', e => e.innerHTML = marked.parse(e.textContent));
+"""
+
+# We will use this in our `exception_handlers` dict
+def _not_found(req, exc): return Titled('Oh no!', Div('We could not find that page :('))
+
+# To create a Beforeware object, we pass the function itself, and optionally a list of regexes to skip.
+bware = Beforeware(before, skip=[r'/favicon\.ico', r'/static/.*', r'.*\.css', '/login'])
+# The `FastHTML` class is a subclass of `Starlette`, so you can use any parameters that `Starlette` accepts.
+# In addition, you can add your Beforeware here, and any headers you want included in HTML responses.
+# FastHTML includes the "HTMX" and "Surreal" libraries in headers, unless you pass `default_hdrs=False`.
+app = FastHTML(before=bware,
+               # These are the same as Starlette exception_handlers, except they also support `FT` results
+               exception_handlers={404: _not_found},
+               # PicoCSS is a particularly simple CSS framework, with some basic integration built in to FastHTML.
+               # `picolink` is pre-defined with the header for the PicoCSS stylesheet.
+               # You can use any CSS framework you want, or none at all.
+               hdrs=(picolink,
+                     # `Style` is an `FT` object, which are 3-element lists consisting of:
+                     # (tag_name, children_list, attrs_dict).
+                     # FastHTML composes them from trees and auto-converts them to HTML when needed.
+                     # You can also use plain HTML strings in handlers and headers,
+                     # which will be auto-escaped, unless you use `NotStr(...string...)`.
+                     Style(':root { --pico-font-size: 100%; }'),
+                     # Have a look at fasthtml/js.py to see how these Javascript libraries are added to FastHTML.
+                     # They are only 5-10 lines of code each, and you can add your own too.
+                     SortableJS('.sortable'),
+                     # MarkdownJS is actually provided as part of FastHTML, but we've included the js code here
+                     # so that you can see how it works.
+                     Script(markdown_js, type='module'))
+                )
+# We add `rt` as a shortcut for `app.route`, which is what we'll use to decorate our route handlers.
+# When using `app.route` (or this shortcut), the only required argument is the path.
+# The name of the decorated function (eg `get`, `post`, etc) is used as the HTTP verb for the handler.
+rt = app.route
+
+# For instance, this function handles GET requests to the `/login` path.
+@rt("/login")
+def get():
+    # This creates a form with two input fields, and a submit button.
+    # All of these components are `FT` objects. All HTML tags are provided in this form by FastHTML.
+    # If you want other custom tags (e.g. `MyTag`), they can be auto-generated by e.g
+    # `from fasthtml.components import MyTag`.
+    # Alternatively, manually call e.g `ft(tag_name, *children, **attrs)`.
+    frm = Form(
+        # Tags with a `name` attr will have `name` auto-set to the same as `id` if not provided
+        Input(id='name', placeholder='Name'),
+        Input(id='pwd', type='password', placeholder='Password'),
+        Button('login'),
+        action='/login', method='post')
+    # If a user visits the URL directly, FastHTML auto-generates a full HTML page.
+    # However, if the URL is accessed by HTMX, then one HTML partial is created for each element of the tuple.
+    # To avoid this auto-generation of a full page, return a `HTML` object, or a Starlette `Response`.
+    # `Titled` returns a tuple of a `Title` with the first arg and a `Container` with the rest.
+    # See the comments for `Title` later for details.
+    return Titled("Login", frm)
+
+# Handlers are passed whatever information they "request" in the URL, as keyword arguments.
+# Dataclasses, dicts, namedtuples, TypedDicts, and custom classes are automatically instantiated
+# from form data.
+# In this case, the `Login` class is a dataclass, so the handler will be passed `name` and `pwd`.
+@dataclass
+class Login: name:str; pwd:str
+
+# This handler is called when a POST request is made to the `/login` path.
+# The `login` argument is an instance of the `Login` class, which has been auto-instantiated from the form data.
+# There are a number of special parameter names, which will be passed useful information about the request:
+# `session`: the Starlette session; `request`: the Starlette request; `auth`: the value of `scope['auth']`,
+# `htmx`: the HTMX headers, if any; `app`: the FastHTML app object.
+# You can also pass any string prefix of `request` or `session`.
+@rt("/login")
+def post(login:Login, sess):
+    if not login.name or not login.pwd: return login_redir
+    # Indexing into a MiniDataAPI table queries by primary key, which is `name` here.
+    # It returns a dataclass object, if `dataclass()` has been called at some point, or a dict otherwise.
+    try: u = users[login.name]
+    # If the primary key does not exist, the method raises a `NotFoundError`.
+    # Here we use this to just generate a user -- in practice you'd probably to redirect to a signup page.
+    except NotFoundError: u = users.insert(login)
+    # This compares the passwords using a constant time string comparison
+    # https://sqreen.github.io/DevelopersSecurityBestPractices/timing-attack/python
+    if not compare_digest(u.pwd.encode("utf-8"), login.pwd.encode("utf-8")): return login_redir
+    # Because the session is signed, we can securely add information to it. It's stored in the browser cookies.
+    # If you don't pass a secret signing key to `FastHTML`, it will auto-generate one and store it in a file `./sesskey`.
+    sess['auth'] = u.name
+    return RedirectResponse('/', status_code=303)
+
+# Instead of using `app.route` (or the `rt` shortcut), you can also use `app.get`, `app.post`, etc.
+# In this case, the function name is not used to determine the HTTP verb.
+@app.get("/logout")
+def logout(sess):
+    del sess['auth']
+    return login_redir
+
+# FastHTML uses Starlette's path syntax, and adds a `static` type which matches standard static file extensions.
+# You can define your own regex path specifiers -- for instance this is how `static` is defined in FastHTML
+# `reg_re_param("static", "ico|gif|jpg|jpeg|webm|css|js|woff|png|svg|mp4|webp|ttf|otf|eot|woff2|txt|xml|html")`
+# In this app, we only actually have one static file, which is `favicon.ico`. But it would also be needed if
+# we were referencing images, CSS/JS files, etc.
+# Note, this function is unnecessary, as the `fast_app()` call already includes this functionality.
+# However, it's included here to show how you can define your own static file handler.
+@rt("/{fname:path}.{ext:static}")
+def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
+
+# The `patch` decorator, which is defined in `fastcore`, adds a method to an existing class.
+# Here we are adding a method to the `Todo` class, which is returned by the `todos` table.
+# The `__ft__` method is a special method that FastHTML uses to convert the object into an `FT` object,
+# so that it can be composed into an FT tree, and later rendered into HTML.
+@patch
+def __ft__(self:Todo):
+    # Some FastHTML tags have an 'X' suffix, which means they're "extended" in some way.
+    # For instance, here `AX` is an extended `A` tag, which takes 3 positional arguments:
+    # `(text, hx_get, target_id)`.
+    # All underscores in FT attrs are replaced with hyphens, so this will create an `hx-get` attr,
+    # which HTMX uses to trigger a GET request.
+    # Generally, most of your route handlers in practice (as in this demo app) are likely to be HTMX handlers.
+    # For instance, for this demo, we only have two full-page handlers: the '/login' and '/' GET handlers.
+    show = AX(self.title, f'/todos/{self.id}', 'current-todo')
+    edit = AX('edit',     f'/edit/{self.id}' , 'current-todo')
+    dt = '✅ ' if self.done else ''
+    # FastHTML provides some shortcuts. For instance, `Hidden` is defined as simply:
+    # `return Input(type="hidden", value=value, **kwargs)`
+    cts = (dt, show, ' | ', edit, Hidden(id="id", value=self.id), Hidden(id="priority", value="0"))
+    # Any FT object can take a list of children as positional args, and a dict of attrs as keyword args.
+    return Li(*cts, id=f'todo-{self.id}')
+
+# This is the handler for the main todo list application.
+# By including the `auth` parameter, it gets passed the current username, for displaying in the title.
+@rt("/")
+def get(auth):
+    title = f"{auth}'s Todo list"
+    top = Grid(H1(title), Div(A('logout', href='/logout'), style='text-align: right'))
+    # We don't normally need separate "screens" for adding or editing data. Here for instance,
+    # we're using an `hx-post` to add a new todo, which is added to the start of the list (using 'afterbegin').
+    new_inp = Input(id="new-title", name="title", placeholder="New Todo")
+    add = Form(Group(new_inp, Button("Add")),
+               hx_post="/", target_id='todo-list', hx_swap="afterbegin")
+    # In the MiniDataAPI spec, treating a table as a callable (i.e with `todos(...)` here) queries the table.
+    # Because we called `xtra` in our Beforeware, this queries the todos for the current user only.
+    # We can include the todo objects directly as children of the `Form`, because the `Todo` class has `__ft__` defined.
+    # This is automatically called by FastHTML to convert the `Todo` objects into `FT` objects when needed.
+    # The reason we put the todo list inside a form is so that we can use the 'sortable' js library to reorder them.
+    # That library calls the js `end` event when dragging is complete, so our trigger here causes our `/reorder`
+    # handler to be called.
+    frm = Form(*todos(order_by='priority'),
+               id='todo-list', cls='sortable', hx_post="/reorder", hx_trigger="end")
+    # We create an empty 'current-todo' Div at the bottom of our page, as a target for the details and editing views.
+    card = Card(Ul(frm), header=add, footer=Div(id='current-todo'))
+    # PicoCSS uses `<Main class='container'>` page content; `Container` is a tiny function that generates that.
+    # A handler can return either a single `FT` object or string, or a tuple of them.
+    # In the case of a tuple, the stringified objects are concatenated and returned to the browser.
+    # The `Title` tag has a special purpose: it sets the title of the page.
+    return Title(title), Container(top, card)
+
+# This is the handler for the reordering of todos.
+# It's a POST request, which is used by the 'sortable' js library.
+# Because the todo list form created earlier included hidden inputs with the todo IDs,
+# they are passed as form data. By using a parameter called (e.g) "id", FastHTML will try to find
+# something suitable in the request with this name. In order, it searches as follows:
+# path; query; cookies; headers; session keys; form data.
+# Although all these are provided in the request as strings, FastHTML will use your parameter's type
+# annotation to try to cast the value to the requested type.
+# In the case of form data, there can be multiple values with the same key. So in this case,
+# the parameter is a list of ints.
+@rt("/reorder")
+def post(id:list[int]):
+    for i,id_ in enumerate(id): todos.update({'priority':i}, id_)
+    # HTMX by default replaces the inner HTML of the calling element, which in this case is the todo list form.
+    # Therefore, we return the list of todos, now in the correct order, which will be auto-converted to FT for us.
+    # In this case, it's not strictly necessary, because sortable.js has already reorder the DOM elements.
+    # However, by returning the updated data, we can be assured that there aren't sync issues between the DOM
+    # and the server.
+    return tuple(todos(order_by='priority'))
+
+# Refactoring components in FastHTML is as simple as creating Python functions.
+# The `clr_details` function creates a Div with specific HTMX attributes.
+# `hx_swap_oob='innerHTML'` tells HTMX to swap the inner HTML of the target element out-of-band,
+# meaning it will update this element regardless of where the HTMX request originated from.
+def clr_details(): return Div(hx_swap_oob='innerHTML', id='current-todo')
+
+# This route handler uses a path parameter `{id}` which is automatically parsed and passed as an int.
+@rt("/todos/{id}")
+def delete(id:int):
+    # The `delete` method is part of the MiniDataAPI spec, removing the item with the given primary key.
+    todos.delete(id)
+    # Returning `clr_details()` ensures the details view is cleared after deletion,
+    # leveraging HTMX's out-of-band swap feature.
+    # Note that we are not returning *any* FT component that doesn't have an "OOB" swap, so the target element
+    # inner HTML is simply deleted. That's why the deleted todo is removed from the list.
+    return clr_details()
+
+@rt("/edit/{id}")
+def get(id:int):
+    # The `hx_put` attribute tells HTMX to send a PUT request when the form is submitted.
+    # `target_id` specifies which element will be updated with the server's response.
+    res = Form(Group(Input(id="title"), Button("Save")),
+        Hidden(id="id"), CheckboxX(id="done", label='Done'),
+        Textarea(id="details", name="details", rows=10),
+        hx_put="/", target_id=f'todo-{id}', id="edit")
+    # `fill_form` populates the form with existing todo data, and returns the result.
+    # Indexing into a table (`todos`) queries by primary key, which is `id` here. It also includes
+    # `xtra`, so this will only return the id if it belongs to the current user.
+    return fill_form(res, todos[id])
+
+@rt("/")
+def put(todo: Todo):
+    # `update` is part of the MiniDataAPI spec.
+    # Note that the updated todo is returned. By returning the updated todo, we can update the list directly.
+    # Because we return a tuple with `clr_details()`, the details view is also cleared.
+    return todos.update(todo), clr_details()
+
+@rt("/")
+def post(todo:Todo):
+    # `hx_swap_oob='true'` tells HTMX to perform an out-of-band swap, updating this element wherever it appears.
+    # This is used to clear the input field after adding the new todo.
+    new_inp =  Input(id="new-title", name="title", placeholder="New Todo", hx_swap_oob='true')
+    # `insert` returns the inserted todo, which is appended to the start of the list, because we used
+    # `hx_swap='afterbegin'` when creating the todo list form.
+    return todos.insert(todo), new_inp
+
+@rt("/todos/{id}")
+def get(id:int):
+    todo = todos[id]
+    # `hx_swap` determines how the update should occur. We use "outerHTML" to replace the entire todo `Li` element.
+    btn = Button('delete', hx_delete=f'/todos/{todo.id}',
+                 target_id=f'todo-{todo.id}', hx_swap="outerHTML")
+    # The "markdown" class is used here because that's the CSS selector we used in the JS earlier.
+    # Therefore this will trigger the JS to parse the markdown in the details field.
+    # Because `class` is a reserved keyword in Python, we use `cls` instead, which FastHTML auto-converts.
+    return Div(H2(todo.title), Div(todo.details, cls="markdown"), btn)
+
+serve()</doc></examples></project>
