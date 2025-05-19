@@ -416,7 +416,8 @@ def _xt_cts(req, resp):
     heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
     if not is_full_page(req, resp):
         title = [] if any(getattr(o, 'tag', '')=='title' for o in heads) else [Title(req.app.title)]
-        resp = respond(req, [*heads, *title], bdy)
+        canonical = [Link(rel="canonical", href=getattr(req, 'canonical', req.url))] if req.app.canonical else []
+        resp = respond(req, [*heads, *title, *canonical], bdy)
     return _to_xml(req, resp, indent=fh_cfg.indent)
 
 # %% ../nbs/api/00_core.ipynb
@@ -538,9 +539,9 @@ class FastHTML(Starlette):
                  before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
-                 body_wrap=noop_body, htmlkw=None, nb_hdrs=False, **bodykw):
+                 body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
-        self.title = title
+        self.title,self.canonical = title,canonical
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         exts = {k:htmx_exts[k] for k in exts}
         htmlkw = htmlkw or {}

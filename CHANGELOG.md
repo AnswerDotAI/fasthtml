@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.12.18
+
+### New Features
+
+- Add onevent kwargs ([#734](https://github.com/AnswerDotAI/fasthtml/issues/734))
+
+
+
 ## 0.12.17
 
 ### New Features
