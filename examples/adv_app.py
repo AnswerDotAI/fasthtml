@@ -23,19 +23,22 @@ from fasthtml.common import (
 
 from hmac import compare_digest
 
-# You can use any database you want; it'll be easier if you pick a lib that supports the MiniDataAPI spec.
-# Here we are using SQLite, with the FastLite library, which supports the MiniDataAPI spec.
+# We define database tables using dataclasses. These are simple classes with type annotations.
+# The `dataclass` decorator automatically generates a constructor, and other methods like `__repr__`, `__eq__`, etc.
+@dataclass
+class User: name:str; pwd:str
+@dataclass
+class Todo: id:int; title:str; done:bool; name:str; details:str; priority:int
+
+#We use the `database` function from fastlist to create a sqlite database connection. If the data directory and
+# utodos.db file don't exist, they will be created automatically.
 db = database('data/utodos.db')
-# The `t` attribute is the table collection. The `todos` and `users` tables are not created if they don't exist.
-# Instead, you can use the `create` method to create them if needed.
-todos,users = db.t.todos,db.t.users
-if todos not in db.t:
-    # You can pass a dict, or kwargs, to most MiniDataAPI methods.
-    users.create(dict(name=str, pwd=str), pk='name')
-    todos.create(id=int, title=str, done=bool, name=str, details=str, priority=int, pk='id')
-# Although you can just use dicts, it can be helpful to have types for your DB objects.
-# The `dataclass` method creates that type, and stores it in the object, so it will use it for any returned items.
-Todo,User = todos.dataclass(),users.dataclass()
+# The `create` method creates a table in the database, and returns a table object. We attach this to the `db` object
+# like a namespace so there are no collisions between the database objects and various functions and variables we'll
+# use in this app.
+# The `pk` argument specifies the primary key for the table. The `foreign_keys` argument specifies any foreign keys.
+db.users = db.create(User, pk='name')
+db.todos = db.create(Todo, pk='id', foreign_keys=[('name', 'user')])
 
 # Any Starlette response class can be returned by a FastHTML route handler.
 # In that case, FastHTML won't change it at all.
@@ -54,7 +57,7 @@ def before(req, sess):
     if not auth: return login_redir
     # `xtra` is part of the MiniDataAPI spec. It adds a filter to queries and DDL statements,
     # to ensure that the user can only see/edit their own todos.
-    todos.xtra(name=auth)
+    db.todos.xtra(name=auth)
 
 markdown_js = """
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
@@ -133,10 +136,10 @@ def post(login:Login, sess):
     if not login.name or not login.pwd: return login_redir
     # Indexing into a MiniDataAPI table queries by primary key, which is `name` here.
     # It returns a dataclass object, if `dataclass()` has been called at some point, or a dict otherwise.
-    try: u = users[login.name]
+    try: u = db.users[login.name]
     # If the primary key does not exist, the method raises a `NotFoundError`.
     # Here we use this to just generate a user -- in practice you'd probably to redirect to a signup page.
-    except NotFoundError: u = users.insert(login)
+    except NotFoundError: u = db.users.insert(login)
     # This compares the passwords using a constant time string comparison
     # https://sqreen.github.io/DevelopersSecurityBestPractices/timing-attack/python
     if not compare_digest(u.pwd.encode("utf-8"), login.pwd.encode("utf-8")): return login_redir
@@ -202,7 +205,7 @@ def get(auth):
     # The reason we put the todo list inside a form is so that we can use the 'sortable' js library to reorder them.
     # That library calls the js `end` event when dragging is complete, so our trigger here causes our `/reorder`
     # handler to be called.
-    frm = Form(*todos(order_by='priority'),
+    frm = Form(*db.todos(order_by='priority'),
                id='todo-list', cls='sortable', hx_post="/reorder", hx_trigger="end")
     # We create an empty 'current-todo' Div at the bottom of our page, as a target for the details and editing views.
     card = Card(Ul(frm), header=add, footer=Div(id='current-todo'))
@@ -224,13 +227,13 @@ def get(auth):
 # the parameter is a list of ints.
 @rt("/reorder")
 def post(id:list[int]):
-    for i,id_ in enumerate(id): todos.update({'priority':i}, id_)
+    for i,id_ in enumerate(id): db.todos.update({'priority':i}, id_)
     # HTMX by default replaces the inner HTML of the calling element, which in this case is the todo list form.
     # Therefore, we return the list of todos, now in the correct order, which will be auto-converted to FT for us.
     # In this case, it's not strictly necessary, because sortable.js has already reorder the DOM elements.
     # However, by returning the updated data, we can be assured that there aren't sync issues between the DOM
     # and the server.
-    return tuple(todos(order_by='priority'))
+    return tuple(db.todos(order_by='priority'))
 
 # Refactoring components in FastHTML is as simple as creating Python functions.
 # The `clr_details` function creates a Div with specific HTMX attributes.
@@ -242,7 +245,7 @@ def clr_details(): return Div(hx_swap_oob='innerHTML', id='current-todo')
 @rt("/todos/{id}")
 def delete(id:int):
     # The `delete` method is part of the MiniDataAPI spec, removing the item with the given primary key.
-    todos.delete(id)
+    db.todos.delete(id)
     # Returning `clr_details()` ensures the details view is cleared after deletion,
     # leveraging HTMX's out-of-band swap feature.
     # Note that we are not returning *any* FT component that doesn't have an "OOB" swap, so the target element
@@ -260,14 +263,14 @@ def get(id:int):
     # `fill_form` populates the form with existing todo data, and returns the result.
     # Indexing into a table (`todos`) queries by primary key, which is `id` here. It also includes
     # `xtra`, so this will only return the id if it belongs to the current user.
-    return fill_form(res, todos[id])
+    return fill_form(res, db.todos[id])
 
 @rt("/")
 def put(todo: Todo):
     # `update` is part of the MiniDataAPI spec.
     # Note that the updated todo is returned. By returning the updated todo, we can update the list directly.
     # Because we return a tuple with `clr_details()`, the details view is also cleared.
-    return todos.update(todo), clr_details()
+    return db.todos.update(todo), clr_details()
 
 @rt("/")
 def post(todo:Todo):
@@ -276,11 +279,11 @@ def post(todo:Todo):
     new_inp =  Input(id="new-title", name="title", placeholder="New Todo", hx_swap_oob='true')
     # `insert` returns the inserted todo, which is appended to the start of the list, because we used
     # `hx_swap='afterbegin'` when creating the todo list form.
-    return todos.insert(todo), new_inp
+    return db.todos.insert(todo), new_inp
 
 @rt("/todos/{id}")
 def get(id:int):
-    todo = todos[id]
+    todo = db.todos[id]
     # `hx_swap` determines how the update should occur. We use "outerHTML" to replace the entire todo `Li` element.
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=f'todo-{todo.id}', hx_swap="outerHTML")
