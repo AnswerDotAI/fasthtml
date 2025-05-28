@@ -242,7 +242,7 @@ iframe_scr = Script(NotStr("\n    function sendmsg() {\n        window.parent.po
 
 class FastHTML(Starlette):
 
-    def __init__(self, debug=False, routes=None, middleware=None, title: str='FastHTML page', exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', body_wrap=noop_body, htmlkw=None, nb_hdrs=False, **bodykw):
+    def __init__(self, debug=False, routes=None, middleware=None, title: str='FastHTML page', exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, **bodykw):
         ...
 
     def add_route(self, route):

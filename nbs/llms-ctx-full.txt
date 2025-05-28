@@ -125,9 +125,9 @@ to_xml(tags)
 
 ## JS
 
-The [`Script`](https://www.fastht.ml/docs/api/xtend.html#script) function
-allows you to include JavaScript. You can use Python to generate parts
-of your JS or JSON like this:
+The [`Script`](https://www.fastht.ml/docs/api/xtend.html#script)
+function allows you to include JavaScript. You can use Python to
+generate parts of your JS or JSON like this:
 
 ``` python
 # In future snippets this import will not be shown, but is required
@@ -215,8 +215,9 @@ app,rt = fast_app()
 
 When a route handler function is used as a fasttag attribute (such as
 `href`, `hx_get`, or `action`) it is converted to that route’s path.
-[`fill_form`](https://www.fastht.ml/docs/api/components.html#fill_form) is
-used to copy an object’s matching attrs into matching-name form fields.
+[`fill_form`](https://www.fastht.ml/docs/api/components.html#fill_form)
+is used to copy an object’s matching attrs into matching-name form
+fields.
 
 ``` python
 @dataclass
@@ -357,8 +358,8 @@ def htmlredirect(app): return HtmxResponseHeaders(location="http://example.org")
 
 ## APIRouter
 
-[`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter) lets you
-organize routes across multiple files in a FastHTML app.
+[`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter) lets
+you organize routes across multiple files in a FastHTML app.
 
 ``` python
 # products.py
@@ -641,9 +642,10 @@ FastHTML’s built-in pico support.
 A minimal app:
 
 ``` python
+from fasthtml.common import *
 from monsterui.all import *
 
-app, rt = fast_app(hdrs=Theme.blue.headers()) # Use MonsterUI blue theme
+app, rt = fast_app(hdrs=Theme.blue.headers(highlightjs=True)) # Use MonsterUI blue theme and highlight code in markdown
 
 @rt
 def index():
@@ -654,6 +656,74 @@ def index():
             # LabelInput, DivLAigned, and UkIconLink are non-semantic MonsterUI FT Components,
             LabelInput('Email', type='email', required=True),
             footer=DivLAligned(*[UkIconLink(icon,href=url) for icon,url in socials])))
+```
+
+Flex Layout Elements (such as `DivLAligned` and `DivFullySpaced`) can be
+used to create layouts concisely
+
+``` python
+def TeamCard(name, role, location="Remote"):
+    icons = ("mail", "linkedin", "github")
+    return Card(
+        DivLAligned(
+            DiceBearAvatar(name, h=24, w=24),
+            Div(H3(name), P(role))),
+        footer=DivFullySpaced(
+            DivHStacked(UkIcon("map-pin", height=16), P(location)),
+            DivHStacked(*(UkIconLink(icon, height=16) for icon in icons))))
+```
+
+Forms are styled and spaced for you without significant additional
+classes.
+
+``` python
+def MonsterForm():
+    relationship = ["Parent",'Sibling', "Friend", "Spouse", "Significant Other", "Relative", "Child", "Other"]
+    return Div(
+        DivCentered(
+            H3("Emergency Contact Form"),
+            P("Please fill out the form completely", cls=TextPresets.muted_sm)),
+        Form(
+            Grid(LabelInput("Name",id='name'),LabelInput("Email",     id='email')),
+            H3("Relationship to patient"),
+            Grid(*[LabelCheckboxX(o) for o in relationship], cols=4, cls='space-y-3'),
+            DivCentered(Button("Submit Form", cls=ButtonT.primary))),
+        cls='space-y-4')
+```
+
+Text can be styled with markdown automatically with MonsterUI
+
+```` python
+render_md("""
+# My Document
+
+> Important note here
+
++ List item with **bold**
++ Another with `code`
+
+```python
+def hello():
+    print("world")
+```
+""")
+````
+
+    '<div><h1 class="uk-h1 text-4xl font-bold mt-12 mb-6">My Document</h1>\n<blockquote class="uk-blockquote pl-4 border-l-4 border-primary italic mb-6">\n<p class="text-lg leading-relaxed mb-6">Important note here</p>\n</blockquote>\n<ul class="uk-list uk-list-bullet space-y-2 mb-6 ml-6 text-lg">\n<li class="leading-relaxed">List item with <strong>bold</strong></li>\n<li class="leading-relaxed">Another with <code class="uk-codespan px-1">code</code></li>\n</ul>\n<pre class="bg-base-200 rounded-lg p-4 mb-6"><code class="language-python uk-codespan px-1 uk-codespan px-1 block overflow-x-auto">def hello():\n    print("world")\n</code></pre>\n</div>'
+
+Or using semantic HTML:
+
+``` python
+def SemanticText():
+    return Card(
+        H1("MonsterUI's Semantic Text"),
+        P(
+            Strong("MonsterUI"), " brings the power of semantic HTML to life with ",
+            Em("beautiful styling"), " and ", Mark("zero configuration"), "."),
+        Blockquote(
+            P("Write semantic HTML in pure Python, get modern styling for free."),
+            Cite("MonsterUI Team")),
+        footer=Small("Released February 2025"),)
 ```</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
 title = "Reference"
 +++
@@ -1252,11 +1322,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 > `ft_html` and `ft_hx` functions to add some conveniences to `ft`, along with a full set of basic HTML components, and functions to work with forms and `FT` conversion
 
-- `def show(ft, *rest)`
-    Renders FT Components into HTML within a Jupyter notebook.
-
 - `def File(fname)`
     Use the unescaped text in file `fname` directly
+
+- `def show(ft, *rest)`
+    Renders FT Components into HTML within a Jupyter notebook.
 
 - `def fill_form(form, obj)`
     Fills named items in `form` using attributes in `obj`
@@ -1298,6 +1368,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def parse_form(req)`
     Starlette errors on empty multipart forms, so this checks for that situation
+
+- `class JSONResponse`
+    Same as starlette's version, but auto-stringifies non serializable types
+
+    - `def render(self, content)`
 
 - `def flat_xt(lst)`
     Flatten lists
@@ -1386,7 +1461,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `class FtResponse`
     Wrap an FT response with any Starlette `Response`
 
-    - `def __init__(self, content, status_code, headers, cls, media_type)`
+    - `def __init__(self, content, status_code, headers, cls, media_type, background)`
     - `def __response__(self, req)`
 
 ## fasthtml.fastapp
@@ -1436,6 +1511,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
     - `def __init__(self, app, log_level, host, port, start, **kwargs)`
     - `def start(self)`
+    - `def start_async(self)`
     - `def stop(self)`
 
 - `class JupyUviAsync`
@@ -1482,7 +1558,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `class GoogleAppClient`
     A `WebApplicationClient` for Google oauth2
 
-    - `def __init__(self, client_id, client_secret, code, scope, **kwargs)`
+    - `def __init__(self, client_id, client_secret, code, scope, project_id, **kwargs)`
     - `@classmethod def from_file(cls, fname, code, scope, **kwargs)`
 
 - `class GitHubAppClient`
@@ -1499,8 +1575,8 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     A `WebApplicationClient` for Discord oauth2
 
     - `def __init__(self, client_id, client_secret, is_user, perms, scope, **kwargs)`
-    - `def login_link(self)`
-    - `def parse_response(self, code)`
+    - `def login_link(self, redirect_uri, scope, state)`
+    - `def parse_response(self, code, redirect_uri)`
 
 - `class Auth0AppClient`
     A `WebApplicationClient` for Auth0 OAuth2
@@ -1535,6 +1611,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def logout(self, session)`
     - `def get_auth(self, info, ident, session, state)`
 
+- `@patch() def consent_url(self, proj)`
+    Get Google OAuth consent screen URL
+
 - `@patch def save(self, fname)`
     Save credentials to `fname`
 
@@ -1565,6 +1644,16 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `@delegates(ft_hx, keep=True) def Container(*args, **kwargs)`
     A PicoCSS Container, implemented as a Main with class 'container'
+
+## fasthtml.stripe_otp
+
+- `def create_price(app_nm, amt, currency)`
+    Create a product and bind it to a price object. If product already exist just return the price list.
+
+- `def archive_price(app_nm)`
+    Archive a price - useful for cleanup if testing.
+
+- `class Payment`
 
 ## fasthtml.svg
 
@@ -1705,6 +1794,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def jsd(org, repo, root, path, prov, typ, ver, esm, **kwargs)`
     jsdelivr `Script` or CSS `Link` tag, or URL
 
+- `class Fragment`
+    An empty tag, used as a container
+
+    - `def __init__(self, *c)`
+
 - `@delegates(ft_hx, keep=True) def Titled(title, *args, **kwargs)`
     An HTML partial containing a `Title`, and `H1`, and any provided children
 
@@ -1732,10 +1826,10 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Selector to choose theme and get all headers needed for app.  Includes frankenui + tailwind + daisyui + highlight.js options
     Members: slate, stone, gray, neutral, red, rose, orange, green, blue, yellow, violet, zinc
 
-    - `headers(self, mode, daisy, highlightjs, katex, radii, shadows, font)`
+    - `headers(self, mode, icons, daisy, highlightjs, katex, apex_charts, radii, shadows, font)`
         Create frankenui and tailwind cdns
 
-    - `local_headers(self, mode, static_dir, daisy, highlightjs, katex, radii, shadows, font)`
+    - `local_headers(self, mode, static_dir, icons, daisy, highlightjs, katex, apex_charts, radii, shadows, font)`
         Create headers using local files downloaded from CDNs
 
 
@@ -1922,6 +2016,12 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def PicSumImg(h, w, id, grayscale, blur, **kwargs)`
     Creates a placeholder image using https://picsum.photos/
 
+- `def AccordionItem(title, *c)`
+    Creates a single item for use within an Accordion component, handling title, content, and open state.
+
+- `def Accordion(*c, **kwargs)`
+    Creates a styled Accordion container using accordion component.
+
 - `class ButtonT(Enum)`
     Options for styling Buttons
     Members: default, ghost, primary, secondary, destructive, text, link, xs, sm, lg, xl, icon
@@ -2010,7 +2110,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     A Label with default styling
 
 - `class LabelT(Enum)`
-    Members: primary, secondary, danger
+    Members: primary, secondary, destructive
 
 
 - `def Label(*c, **kwargs)`
@@ -2031,14 +2131,14 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def LabelCheckboxX(label, lbl_cls, input_cls, container, cls, id, **kwargs)`
     A FormLabel and CheckboxX pair that provides default spacing and links/names them based on id
 
-- `def LabelSelect(*option, **kwargs)`
-    A FormLabel and Select pair that provides default spacing and links/names them based on id (usually UkLabelSelect is a better choice)
-
 - `def Options(*c)`
     Helper function to wrap things into `Option`s for use in `Select`
 
 - `def Select(*option, **kwargs)`
     Creates a select dropdown with uk styling and option for adding a search box
+
+- `def LabelSelect(*option, **kwargs)`
+    A FormLabel and Select pair that provides default spacing and links/names them based on id
 
 - `@delegates(GenericLabelInput, but=['input_fn', 'cls']) def LabelRange(label, lbl_cls, input_cls, cls, id, value, min, max, step, label_range, **kwargs)`
     A FormLabel and Range pair that provides default spacing and links/names them based on id
@@ -2221,6 +2321,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def LightboxItem(*c, **kwargs)`
     Anchor tag with appropriate structure to go inside a `LightBoxContainer`
+
+- `def ApexChart(**kws)`
+    Apex chart component
 </doc></api><examples><doc title="Websockets application" desc="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
 from fasthtml.common import *
 
@@ -6507,8 +6610,8 @@ and larger ecosystem of reusable components.
 
 There are many popular JavaScript and CSS libraries that can be used via
 a simple [`Script`](https://www.fastht.ml/docs/api/xtend.html#script) or
-[`Style`](https://www.fastht.ml/docs/api/xtend.html#style) tag. But in some
-cases you will need to write more custom code. FastHTML’s
+[`Style`](https://www.fastht.ml/docs/api/xtend.html#style) tag. But in
+some cases you will need to write more custom code. FastHTML’s
 [js.py](https://github.com/AnswerDotAI/fasthtml/blob/main/fasthtml/js.py)
 contains a few examples that may be useful as reference.
 
@@ -6668,9 +6771,9 @@ def index():
 ```
 
 Create a `server` object using
-[`JupyUvi`](https://www.fastht.ml/docs/api/jupyter.html#jupyuvi), which also
-starts Uvicorn. The `server` runs in a separate thread from Jupyter, so
-it can use normal HTTP client functions in a notebook.
+[`JupyUvi`](https://www.fastht.ml/docs/api/jupyter.html#jupyuvi), which
+also starts Uvicorn. The `server` runs in a separate thread from
+Jupyter, so it can use normal HTTP client functions in a notebook.
 
 ``` python
 server = JupyUvi(app)
@@ -6714,9 +6817,10 @@ where `PORT` is usually the default 8000, so in most cases just click
 
 Use the `server.stop()` function displayed below. If you restart Jupyter
 without calling this line the thread may not be released and the
-[`HTMX`](https://www.fastht.ml/docs/api/jupyter.html#htmx) callable above
-may throw errors. If that happens, a quick temporary fix is to specify a
-different port number in JupyUvi and HTMX with the `port` parameter.
+[`HTMX`](https://www.fastht.ml/docs/api/jupyter.html#htmx) callable
+above may throw errors. If that happens, a quick temporary fix is to
+specify a different port number in JupyUvi and HTMX with the `port`
+parameter.
 
 Cleaner solutions to the dangling thread are to kill the dangling thread
 (dependant on each operating system) or restart the computer.
@@ -6805,8 +6909,8 @@ including:
 
 - [`Titled`](https://www.fastht.ml/docs/api/xtend.html#titled), a
   combination of the `Title()` and `H1()` tags
-- [`Socials`](https://www.fastht.ml/docs/api/xtend.html#socials), renders
-  popular social media tags
+- [`Socials`](https://www.fastht.ml/docs/api/xtend.html#socials),
+  renders popular social media tags
 
 ## The `fasthtml.ft` Namespace
 
@@ -7872,8 +7976,8 @@ here](https://github.com/AnswerDotAI/fasthtml-example/blob/main/oauth_example).
 If you’re wanting to learn more about how this works, and to see where
 you might add additional functionality, the rest of this page will walk
 through some examples **without** the OAuth convenience class, to
-illustrate the concepts. This was writted before said OAuth class was
-available, and is kep here for educational purposes - we recommend you
+illustrate the concepts. This was written before said OAuth class was
+available, and is kept here for educational purposes - we recommend you
 stick with the new approach shown above in most cases.
 
 ## A Minimal Login Flow (GitHub)
@@ -8135,8 +8239,9 @@ serve()
 
 Some things to note:
 
-- The `before` function is used to check if the user is authenticated.
-  If not, they are redirected to the login page.
+- The [`before`](https://www.fastht.ml/docs/explains/stripe.html#before)
+  function is used to check if the user is authenticated. If not, they
+  are redirected to the login page.
 - To log the user out, we remove the user ID from the session.
 - Calling `counts.xtra(name=auth)` ensures that only the row
   corresponding to the current user is accessible when responding to a
@@ -8191,13 +8296,12 @@ want to keep track of some additional state. Another strong use case for
 being able to pass some uniqie state through the OAuth flow is to
 prevent something called a [CSRF
 attack](https://en.wikipedia.org/wiki/Cross-site_request_forgery). To
-add a state string to the OAuth flow, you can use
-`client.login_link_with_state(state)` instead of `client.login_link()`,
-like so:
+add a state string to the OAuth flow, include a `state` argument when
+creating the login link:
 
 ``` python
 # in login page:
-link = A('Login with GitHub', href=client.login_link_with_state(state='current_prompt: add a unicorn'))
+link = A('Login with GitHub', href=client.login_link(state='current_prompt: add a unicorn'))
 
 # in auth_redirect:
 @app.get('/auth_redirect')
@@ -8232,8 +8336,8 @@ JSON service. FastHTML is mainly for making HTML web apps, not APIs).
 </div>
 
 Note that you need to include the types of your parameters, so that
-[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) knows what
-to pass to your function. Here, we’re just expecting a string:
+[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) knows
+what to pass to your function. Here, we’re just expecting a string:
 
 ``` python
 from fasthtml.common import *
@@ -8515,8 +8619,8 @@ the same id without reloading the page.
 > **Note**
 >
 > Make sure you set `exts='ws'` when creating your
-> [`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) object if
-> you want to use websockets so the extension is loaded.
+> [`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) object
+> if you want to use websockets so the extension is loaded.
 
 </div>
 
@@ -8749,12 +8853,13 @@ components more deeply.
 </div>
 
 For example if you want a component that creates `<path></path>` that
-doesn’t conflict names with `pathlib.Path` you can do that. FastHTML
-automatically creates new components with a 1:1 mapping and a consistent
-name, which is almost always what you want. But in some cases you may
-want to customize that and you can use the
-[`ft_hx`](https://www.fastht.ml/docs/api/components.html#ft_hx) function to
-do that differently than the default.
+doesn’t conflict names with
+[`pathlib.Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
+you can do that. FastHTML automatically creates new components with a
+1:1 mapping and a consistent name, which is almost always what you want.
+But in some cases you may want to customize that and you can use the
+[`ft_hx`](https://www.fastht.ml/docs/api/components.html#ft_hx) function
+to do that differently than the default.
 
 ``` python
 from fasthtml.common import ft_hx
@@ -8836,8 +8941,8 @@ import json,time
 app = FastHTML()
 ```
 
-The [`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) class is
-the main application class for FastHTML apps.
+The [`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml)
+class is the main application class for FastHTML apps.
 
 ``` python
 rt = app.route
@@ -8862,9 +8967,9 @@ the response body to the client.
 cli = Client(app)
 ```
 
-[`Client`](https://www.fastht.ml/docs/api/core.html#client) is a test client
-for FastHTML applications. It allows you to simulate requests to your
-app without running a server.
+[`Client`](https://www.fastht.ml/docs/api/core.html#client) is a test
+client for FastHTML applications. It allows you to simulate requests to
+your app without running a server.
 
 ``` python
 cli.get('/hi').text
@@ -8888,7 +8993,9 @@ cli.post('/hi').text
     'Postal'
 
 Handler functions can be defined for different HTTP methods on the same
-route. Here, we define a `post` handler for the `/hi` route. The
+route. Here, we define a
+[`post`](https://www.fastht.ml/docs/explains/stripe.html#post) handler
+for the `/hi` route. The
 [`Client`](https://www.fastht.ml/docs/api/core.html#client) instance can
 simulate different HTTP methods, including POST requests.
 
@@ -9029,9 +9136,11 @@ necessary HTML boilerplate, including default `head` content with
 required scripts.
 
 When using `app.route` (or `rt`), if the function name matches an HTTP
-verb (e.g., `get`, `post`, `put`, `delete`), that HTTP method is
-automatically used for the route. In this case, a path must be
-explicitly provided as an argument to the decorator.
+verb (e.g., `get`,
+[`post`](https://www.fastht.ml/docs/explains/stripe.html#post), `put`,
+`delete`), that HTTP method is automatically used for the route. In this
+case, a path must be explicitly provided as an argument to the
+decorator.
 
 ``` python
 hxhdr = {'headers':{'hx-request':"1"}}
@@ -9124,9 +9233,9 @@ print(cli.get('/autolink').text)
        <div href="/user/Alexis">Text.</div>
      </html>
 
-The [`uri`](https://www.fastht.ml/docs/api/core.html#uri) function is used
-to generate URLs for named routes. It takes the route name as its first
-argument, followed by any path or query parameters needed for that
+The [`uri`](https://www.fastht.ml/docs/api/core.html#uri) function is
+used to generate URLs for named routes. It takes the route name as its
+first argument, followed by any path or query parameters needed for that
 route.
 
 In this example, `uri('gday', nm='Alexis')` generates the URL for the
@@ -9135,8 +9244,9 @@ route named ‘gday’ (which we defined earlier as ‘/user/{nm}’), with
 
 The `link` parameter in FT components sets the `href` attribute of the
 rendered HTML element. By using
-[`uri()`](https://www.fastht.ml/docs/api/core.html#uri), we can dynamically
-generate correct URLs even if the underlying route structure changes.
+[`uri()`](https://www.fastht.ml/docs/api/core.html#uri), we can
+dynamically generate correct URLs even if the underlying route structure
+changes.
 
 This approach promotes maintainable code by centralizing route
 definitions and avoiding hardcoded URLs throughout the application.
@@ -9239,7 +9349,8 @@ print(cli.get('/static/foo/jph.ico').text)
 
     Getting jph.ico from /foo/
 
-The [`reg_re_param`](https://www.fastht.ml/docs/api/core.html#reg_re_param)
+The
+[`reg_re_param`](https://www.fastht.ml/docs/api/core.html#reg_re_param)
 function is used to register custom path parameter types using regular
 expressions. Here, we define a new path parameter type called “imgext”
 that matches common image file extensions.
@@ -9283,9 +9394,10 @@ print(cli.get('/files/foo').text)
     foo.txt
 
 Handler functions can use
-[`Path`](https://www.fastht.ml/docs/api/svg.html#path) objects as parameter
-types. The [`Path`](https://www.fastht.ml/docs/api/svg.html#path) type is
-from Python’s standard library `pathlib` module, which provides an
+[`Path`](https://www.fastht.ml/docs/api/svg.html#path) objects as
+parameter types. The
+[`Path`](https://www.fastht.ml/docs/api/svg.html#path) type is from
+Python’s standard library `pathlib` module, which provides an
 object-oriented interface for working with file paths. In this example,
 the `path` parameter is annotated with
 [`Path`](https://www.fastht.ml/docs/api/svg.html#path), so FastHTML
@@ -9362,9 +9474,10 @@ indicate that the function’s name is not important or won’t be
 referenced elsewhere. This is a common Python convention for throwaway
 or unused variables, and it works here because FastHTML uses the route
 decorator parameter, when provided, to determine the URL path, not the
-function name. By default, both `get` and `post` methods can be used in
-routes that don’t specify an http method (by either using `app.get`,
-`def get`, or the `methods` parameter to `app.route`).
+function name. By default, both `get` and
+[`post`](https://www.fastht.ml/docs/explains/stripe.html#post) methods
+can be used in routes that don’t specify an http method (by either using
+`app.get`, `def get`, or the `methods` parameter to `app.route`).
 
 ``` python
 @app.get("/datie/")
@@ -9411,8 +9524,8 @@ print(cli.get('/hxtest2', headers={'HX-Request':'1'}).text)
 
 Handler functions can access HTMX-specific headers using either the
 special `htmx` parameter name, or a parameter annotated with
-[`HtmxHeaders`](https://www.fastht.ml/docs/api/core.html#htmxheaders). Both
-approaches provide access to HTMX-related information.
+[`HtmxHeaders`](https://www.fastht.ml/docs/api/core.html#htmxheaders).
+Both approaches provide access to HTMX-related information.
 
 In these examples, the `htmx.request` attribute returns the value of the
 ‘HX-Request’ header.
@@ -9427,9 +9540,9 @@ print(cli.get('/app').text)
     foo
 
 Handler functions can access the
-[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) application
-instance using the special `app` parameter name. This allows handlers to
-access application-level attributes and methods.
+[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml)
+application instance using the special `app` parameter name. This allows
+handlers to access application-level attributes and methods.
 
 In this example, we set a custom attribute `chk` on the application
 instance. The handler function then uses the `app` parameter to access
@@ -9447,16 +9560,17 @@ print(r.headers)
     Headers({'mykey': 'myval', 'content-length': '3', 'content-type': 'text/html; charset=utf-8'})
 
 Handler functions can access the
-[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) application
-instance using a parameter annotated with
-[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml). This allows
-handlers to access application-level attributes and methods, just like
-using the special `app` parameter name.
+[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml)
+application instance using a parameter annotated with
+[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml). This
+allows handlers to access application-level attributes and methods, just
+like using the special `app` parameter name.
 
 Handlers can return tuples containing both content and
-[`HttpHeader`](https://www.fastht.ml/docs/api/core.html#httpheader) objects.
-[`HttpHeader`](https://www.fastht.ml/docs/api/core.html#httpheader) allows
-setting custom HTTP headers in the response.
+[`HttpHeader`](https://www.fastht.ml/docs/api/core.html#httpheader)
+objects.
+[`HttpHeader`](https://www.fastht.ml/docs/api/core.html#httpheader)
+allows setting custom HTTP headers in the response.
 
 In this example:
 
@@ -9497,8 +9611,8 @@ cli.get('/app4', follow_redirects=False)
     <Response [303 See Other]>
 
 Handler functions can return
-[`Redirect`](https://www.fastht.ml/docs/api/core.html#redirect) objects to
-perform HTTP redirects. This is useful for redirecting users to
+[`Redirect`](https://www.fastht.ml/docs/api/core.html#redirect) objects
+to perform HTTP redirects. This is useful for redirecting users to
 different pages or external URLs.
 
 In this example:
@@ -9520,9 +9634,9 @@ Redirect.__response__
 
     <function fasthtml.core.Redirect.__response__(self, req)>
 
-The [`Redirect`](https://www.fastht.ml/docs/api/core.html#redirect) class in
-FastHTML implements a `__response__` method, which is a special method
-recognized by the framework. When a handler returns a
+The [`Redirect`](https://www.fastht.ml/docs/api/core.html#redirect)
+class in FastHTML implements a `__response__` method, which is a special
+method recognized by the framework. When a handler returns a
 [`Redirect`](https://www.fastht.ml/docs/api/core.html#redirect) object,
 FastHTML internally calls this `__response__` method to replace the
 original response.
@@ -9573,10 +9687,10 @@ tags, which are both placed in the head.
 
 ## APIRouter
 
-[`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter) is useful
-when you want to split your application routes across multiple `.py`
-files that are part of a single FastHTMl application. It accepts an
-optional `prefix` argument that will be applied to all routes within
+[`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter) is
+useful when you want to split your application routes across multiple
+`.py` files that are part of a single FastHTMl application. It accepts
+an optional `prefix` argument that will be applied to all routes within
 that instance of
 [`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter).
 
@@ -9818,10 +9932,11 @@ parsed into the specified type. In this example, `it` is of type
 `Bodie`, and FastHTML converts the incoming JSON data to a `Bodie`
 instance.
 
-The [`Titled`](https://www.fastht.ml/docs/api/xtend.html#titled) component
-is used to create a page with a title and main content. It automatically
-generates an `<h1>` with the provided title, wraps the content in a
-`<main>` tag with a “container” class, and adds a `title` to the head.
+The [`Titled`](https://www.fastht.ml/docs/api/xtend.html#titled)
+component is used to create a page with a title and main content. It
+automatically generates an `<h1>` with the provided title, wraps the
+content in a `<main>` tag with a “container” class, and adds a `title`
+to the head.
 
 When making a request with JSON data: - Set the “Content-Type” header to
 “application/json” - Provide the JSON data as a string in the `data`
@@ -9850,10 +9965,10 @@ Handler functions can set and retrieve cookies. In this example:
 - The `/getcookie` route retrieves the ‘now’ cookie and returns its
   value.
 
-The [`cookie()`](https://www.fastht.ml/docs/api/core.html#cookie) function
-is used to create a cookie response. FastHTML automatically converts the
-datetime object to a string when setting the cookie, and parses it back
-to a date object when retrieving it.
+The [`cookie()`](https://www.fastht.ml/docs/api/core.html#cookie)
+function is used to create a cookie response. FastHTML automatically
+converts the datetime object to a string when setting the cookie, and
+parses it back to a date object when retrieving it.
 
 ``` python
 cookie('now', datetime.now())
@@ -9861,11 +9976,12 @@ cookie('now', datetime.now())
 
     HttpHeader(k='set-cookie', v='now="2025-01-30 16:19:29.997374"; Path=/; SameSite=lax')
 
-The [`cookie()`](https://www.fastht.ml/docs/api/core.html#cookie) function
-returns an
-[`HttpHeader`](https://www.fastht.ml/docs/api/core.html#httpheader) object
-with the ‘set-cookie’ key. You can return it in a tuple along with `FT`
-elements, along with anything else FastHTML supports in responses.
+The [`cookie()`](https://www.fastht.ml/docs/api/core.html#cookie)
+function returns an
+[`HttpHeader`](https://www.fastht.ml/docs/api/core.html#httpheader)
+object with the ‘set-cookie’ key. You can return it in a tuple along
+with `FT` elements, along with anything else FastHTML supports in
+responses.
 
 ``` python
 app = FastHTML(secret_key='soopersecret')
@@ -10043,8 +10159,8 @@ that it watches for any changes to your code and automatically refreshes
 the webpage in your browser.
 
 To enable live reloading simply replace
-[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) in your app
-with `FastHTMLWithLiveReload`.
+[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) in your
+app with `FastHTMLWithLiveReload`.
 
 ``` python
 from fasthtml.common import *
