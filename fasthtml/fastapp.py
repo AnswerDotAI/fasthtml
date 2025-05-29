@@ -36,6 +36,7 @@ def fast_app(
         middleware:Optional[tuple]=None, # Standard Starlette middleware
         live:bool=False, # Enable live reloading
         debug:bool=False, # Passed to Starlette, indicating if debug tracebacks should be returned on errors
+        title:str="FastHTML page", # Default page title
         routes:Optional[tuple]=None, # Passed to Starlette
         exception_handlers:Optional[dict]=None, # Passed to Starlette
         on_startup:Optional[callable]=None, # Passed to Starlette
@@ -67,7 +68,7 @@ def fast_app(
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
 
-    app = _app_factory(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, live=live, debug=debug, routes=routes, exception_handlers=exception_handlers,
+    app = _app_factory(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, live=live, debug=debug, title=title, routes=routes, exception_handlers=exception_handlers,
                   on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, default_hdrs=default_hdrs, secret_key=secret_key, canonical=canonical,
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
                   sess_domain=sess_domain, key_fname=key_fname, exts=exts, surreal=surreal, htmx=htmx, htmlkw=htmlkw,
