@@ -2,6 +2,12 @@
 
 <!-- do not remove -->
 
+## 0.12.19
+
+### New Features
+
+- `seeded` option for `unqid` ([#741](https://github.com/AnswerDotAI/fasthtml/issues/741))
+
 
 ## 0.12.18
 
