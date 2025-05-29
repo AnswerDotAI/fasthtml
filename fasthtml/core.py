@@ -11,7 +11,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
 
 # %% ../nbs/api/00_core.ipynb
-import json,uuid,inspect,types,signal,asyncio,threading,inspect
+import json,uuid,inspect,types,signal,asyncio,threading,inspect,random
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -31,7 +31,7 @@ from warnings import warn
 from dateutil import parser as dtparse
 from httpx import ASGITransport, AsyncClient
 from anyio import from_thread
-from uuid import uuid4
+from uuid import uuid4, UUID
 from base64 import b85encode,b64encode
 
 from .starlette import *
@@ -810,8 +810,9 @@ class FtResponse:
         return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=tasks)
 
 # %% ../nbs/api/00_core.ipynb
-def unqid():
-    res = b64encode(uuid4().bytes)
+def unqid(seeded=False):
+    id4 = UUID(int=random.getrandbits(128), version=4) if seeded else uuid4()
+    res = b64encode(id4.bytes)
     return '_' + res.decode().rstrip('=').translate(str.maketrans('+/', '_-'))
 
 # %% ../nbs/api/00_core.ipynb
