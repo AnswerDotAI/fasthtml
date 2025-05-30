@@ -19,7 +19,6 @@ __all__ = ['named', 'html_attrs', 'hx_attrs', 'hx_evts', 'js_evts', 'hx_attrs_an
 # %% ../nbs/api/01_components.ipynb
 from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
 from bs4 import BeautifulSoup, Comment
-from collections import UserDict
 from typing import Literal, Mapping, Optional
 
 from fastcore.utils import *
