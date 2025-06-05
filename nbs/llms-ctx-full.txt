@@ -8,17 +8,45 @@
 
 
 
-## About This Guide
-
-The code examples here use fast.ai style: prefer ternary op, 1-line
-docstring, minimize vertical space, etc. (Normally fast.ai style uses
-few if any comments, but they’re added here as documentation.)
+## About FastHTML
 
 ``` python
 from fasthtml.common import *
 ```
 
+FastHTML is a python library which brings together Starlette, Uvicorn,
+HTMX, and fastcore’s `FT` “FastTags” into a library for creating
+server-rendered hypermedia applications. The
+[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) class
+itself inherits from `Starlette`, and adds decorator-based routing with
+many additions, Beforeware, automatic `FT` to HTML rendering, and much
+more.
+
+Things to remember when writing FastHTML apps:
+
+- *Not* compatible with FastAPI syntax; FastHTML is for HTML-first apps,
+  not API services (although it can implement APIs too)
+- FastHTML includes support for Pico CSS and the fastlite sqlite
+  library, although using both are optional; sqlalchemy can be used
+  directly or via the fastsql library, and any CSS framework can be
+  used. MonsterUI is a richer FastHTML-first component framework with
+  similar capabilities to shadcn
+- FastHTML is compatible with JS-native web components and any vanilla
+  JS library, but not with React, Vue, or Svelte
+- Use [`serve()`](https://www.fastht.ml/docs/api/core.html#serve) for
+  running uvicorn (`if __name__ == "__main__"` is not needed since it’s
+  automatic)
+- When a title is needed with a response, use
+  [`Titled`](https://www.fastht.ml/docs/api/xtend.html#titled); note
+  that that already wraps children in
+  [`Container`](https://www.fastht.ml/docs/api/pico.html#container), and
+  already includes both the meta title as well as the H1 element.
+
 ## Minimal App
+
+The code examples here use fast.ai style: prefer ternary op, 1-line
+docstring, minimize vertical space, etc. (Normally fast.ai style uses
+few if any comments, but they’re added here as documentation.)
 
 A minimal FastHTML app looks something like this:
 
@@ -491,6 +519,29 @@ async def ws(msg:str, send):
     return Div('Goodbye ' + msg, id="notifications"), mk_inp()
 ```
 
+Sample chatbot that uses FastHTML’s
+[`setup_ws`](https://www.fastht.ml/docs/api/core.html#setup_ws)
+function:
+
+``` py
+app = FastHTML(exts='ws')
+rt = app.route
+msgs = []
+
+@rt('/')
+def home():
+    return Div(hx_ext='ws', ws_connect='/ws')(
+        Div(Ul(*[Li(m) for m in msgs], id='msg-list')),
+        Form(Input(id='msg'), id='form', ws_send=True)
+    )
+
+async def ws(msg:str):
+    msgs.append(msg)
+    await send(Ul(*[Li(m) for m in msgs], id='msg-list'))
+
+send = setup_ws(app, ws)
+```
+
 ### Single File Uploads
 
 [`Form`](https://www.fastht.ml/docs/api/xtend.html#form) defaults to
@@ -657,6 +708,18 @@ def index():
             LabelInput('Email', type='email', required=True),
             footer=DivLAligned(*[UkIconLink(icon,href=url) for icon,url in socials])))
 ```
+
+MonsterUI recommendations:
+
+- Use defaults as much as possible, for example
+  [`Container`](https://www.fastht.ml/docs/api/pico.html#container) in
+  monsterui already has defaults for margins
+- Use `*T` for button styling consistency, for example
+  `cls=ButtonT.destructive` for a red delete button or
+  `cls=ButtonT.primary` for a CTA button
+- Use `Label*` functions for forms as much as possible
+  (e.g. `LabelInput`, `LabelRange`) which creates and links both the
+  `FormLabel` and user input appropriately to avoid boiler plate.
 
 Flex Layout Elements (such as `DivLAligned` and `DivFullySpaced`) can be
 used to create layouts concisely
@@ -1405,7 +1468,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, **bodykw)`
+    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, canonical, **bodykw)`
     - `def add_route(self, route)`
 
 - `@patch def ws(self, path, conn, disconn, name, middleware)`
@@ -1468,7 +1531,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 > The `fast_app` convenience wrapper
 
-- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, canonical, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
 ## fasthtml.js

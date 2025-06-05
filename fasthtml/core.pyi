@@ -1,6 +1,6 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
-import json, uuid, inspect, types, signal, asyncio, threading, inspect
+import json, uuid, inspect, types, signal, asyncio, threading, inspect, random
 from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs_dict
@@ -18,7 +18,7 @@ from warnings import warn
 from dateutil import parser as dtparse
 from httpx import ASGITransport, AsyncClient
 from anyio import from_thread
-from uuid import uuid4
+from uuid import uuid4, UUID
 from base64 import b85encode, b64encode
 from .starlette import *
 
@@ -365,7 +365,7 @@ class FtResponse:
     def __response__(self, req):
         ...
 
-def unqid():
+def unqid(seeded=False):
     ...
 
 def _add_ids(s):
