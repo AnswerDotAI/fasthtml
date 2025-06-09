@@ -8,17 +8,45 @@
 
 
 
-## About This Guide
-
-The code examples here use fast.ai style: prefer ternary op, 1-line
-docstring, minimize vertical space, etc. (Normally fast.ai style uses
-few if any comments, but they’re added here as documentation.)
+## About FastHTML
 
 ``` python
 from fasthtml.common import *
 ```
 
+FastHTML is a python library which brings together Starlette, Uvicorn,
+HTMX, and fastcore’s `FT` “FastTags” into a library for creating
+server-rendered hypermedia applications. The
+[`FastHTML`](https://www.fastht.ml/docs/api/core.html#fasthtml) class
+itself inherits from `Starlette`, and adds decorator-based routing with
+many additions, Beforeware, automatic `FT` to HTML rendering, and much
+more.
+
+Things to remember when writing FastHTML apps:
+
+- *Not* compatible with FastAPI syntax; FastHTML is for HTML-first apps,
+  not API services (although it can implement APIs too)
+- FastHTML includes support for Pico CSS and the fastlite sqlite
+  library, although using both are optional; sqlalchemy can be used
+  directly or via the fastsql library, and any CSS framework can be
+  used. MonsterUI is a richer FastHTML-first component framework with
+  similar capabilities to shadcn
+- FastHTML is compatible with JS-native web components and any vanilla
+  JS library, but not with React, Vue, or Svelte
+- Use [`serve()`](https://www.fastht.ml/docs/api/core.html#serve) for
+  running uvicorn (`if __name__ == "__main__"` is not needed since it’s
+  automatic)
+- When a title is needed with a response, use
+  [`Titled`](https://www.fastht.ml/docs/api/xtend.html#titled); note
+  that that already wraps children in
+  [`Container`](https://www.fastht.ml/docs/api/pico.html#container), and
+  already includes both the meta title as well as the H1 element.
+
 ## Minimal App
+
+The code examples here use fast.ai style: prefer ternary op, 1-line
+docstring, minimize vertical space, etc. (Normally fast.ai style uses
+few if any comments, but they’re added here as documentation.)
 
 A minimal FastHTML app looks something like this:
 
@@ -125,9 +153,9 @@ to_xml(tags)
 
 ## JS
 
-The [`Script`](https://docs.fastht.ml/api/xtend.html#script) function
-allows you to include JavaScript. You can use Python to generate parts
-of your JS or JSON like this:
+The [`Script`](https://www.fastht.ml/docs/api/xtend.html#script)
+function allows you to include JavaScript. You can use Python to
+generate parts of your JS or JSON like this:
 
 ``` python
 # In future snippets this import will not be shown, but is required
@@ -215,8 +243,9 @@ app,rt = fast_app()
 
 When a route handler function is used as a fasttag attribute (such as
 `href`, `hx_get`, or `action`) it is converted to that route’s path.
-[`fill_form`](https://docs.fastht.ml/api/components.html#fill_form) is
-used to copy an object’s matching attrs into matching-name form fields.
+[`fill_form`](https://www.fastht.ml/docs/api/components.html#fill_form)
+is used to copy an object’s matching attrs into matching-name form
+fields.
 
 ``` python
 @dataclass
@@ -300,7 +329,7 @@ app, rt = fast_app(exception_handlers=exception_handlers)
 ## Cookies
 
 We can set cookies using the
-[`cookie()`](https://docs.fastht.ml/api/core.html#cookie) function.
+[`cookie()`](https://www.fastht.ml/docs/api/core.html#cookie) function.
 
 ``` python
 @rt
@@ -347,7 +376,7 @@ def profile(req, sess, user_id: int=None):
 ```
 
 Handler functions can return the
-[`HtmxResponseHeaders`](https://docs.fastht.ml/api/core.html#htmxresponseheaders)
+[`HtmxResponseHeaders`](https://www.fastht.ml/docs/api/core.html#htmxresponseheaders)
 object to set HTMX-specific response headers.
 
 ``` python
@@ -357,8 +386,8 @@ def htmlredirect(app): return HtmxResponseHeaders(location="http://example.org")
 
 ## APIRouter
 
-[`APIRouter`](https://docs.fastht.ml/api/core.html#apirouter) lets you
-organize routes across multiple files in a FastHTML app.
+[`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter) lets
+you organize routes across multiple files in a FastHTML app.
 
 ``` python
 # products.py
@@ -490,9 +519,32 @@ async def ws(msg:str, send):
     return Div('Goodbye ' + msg, id="notifications"), mk_inp()
 ```
 
+Sample chatbot that uses FastHTML’s
+[`setup_ws`](https://www.fastht.ml/docs/api/core.html#setup_ws)
+function:
+
+``` py
+app = FastHTML(exts='ws')
+rt = app.route
+msgs = []
+
+@rt('/')
+def home():
+    return Div(hx_ext='ws', ws_connect='/ws')(
+        Div(Ul(*[Li(m) for m in msgs], id='msg-list')),
+        Form(Input(id='msg'), id='form', ws_send=True)
+    )
+
+async def ws(msg:str):
+    msgs.append(msg)
+    await send(Ul(*[Li(m) for m in msgs], id='msg-list'))
+
+send = setup_ws(app, ws)
+```
+
 ### Single File Uploads
 
-[`Form`](https://docs.fastht.ml/api/xtend.html#form) defaults to
+[`Form`](https://www.fastht.ml/docs/api/xtend.html#form) defaults to
 “multipart/form-data”. A Starlette UploadFile is passed to the handler.
 
 ``` python
@@ -641,9 +693,10 @@ FastHTML’s built-in pico support.
 A minimal app:
 
 ``` python
+from fasthtml.common import *
 from monsterui.all import *
 
-app, rt = fast_app(hdrs=Theme.blue.headers()) # Use MonsterUI blue theme
+app, rt = fast_app(hdrs=Theme.blue.headers(highlightjs=True)) # Use MonsterUI blue theme and highlight code in markdown
 
 @rt
 def index():
@@ -654,6 +707,86 @@ def index():
             # LabelInput, DivLAigned, and UkIconLink are non-semantic MonsterUI FT Components,
             LabelInput('Email', type='email', required=True),
             footer=DivLAligned(*[UkIconLink(icon,href=url) for icon,url in socials])))
+```
+
+MonsterUI recommendations:
+
+- Use defaults as much as possible, for example
+  [`Container`](https://www.fastht.ml/docs/api/pico.html#container) in
+  monsterui already has defaults for margins
+- Use `*T` for button styling consistency, for example
+  `cls=ButtonT.destructive` for a red delete button or
+  `cls=ButtonT.primary` for a CTA button
+- Use `Label*` functions for forms as much as possible
+  (e.g. `LabelInput`, `LabelRange`) which creates and links both the
+  `FormLabel` and user input appropriately to avoid boiler plate.
+
+Flex Layout Elements (such as `DivLAligned` and `DivFullySpaced`) can be
+used to create layouts concisely
+
+``` python
+def TeamCard(name, role, location="Remote"):
+    icons = ("mail", "linkedin", "github")
+    return Card(
+        DivLAligned(
+            DiceBearAvatar(name, h=24, w=24),
+            Div(H3(name), P(role))),
+        footer=DivFullySpaced(
+            DivHStacked(UkIcon("map-pin", height=16), P(location)),
+            DivHStacked(*(UkIconLink(icon, height=16) for icon in icons))))
+```
+
+Forms are styled and spaced for you without significant additional
+classes.
+
+``` python
+def MonsterForm():
+    relationship = ["Parent",'Sibling', "Friend", "Spouse", "Significant Other", "Relative", "Child", "Other"]
+    return Div(
+        DivCentered(
+            H3("Emergency Contact Form"),
+            P("Please fill out the form completely", cls=TextPresets.muted_sm)),
+        Form(
+            Grid(LabelInput("Name",id='name'),LabelInput("Email",     id='email')),
+            H3("Relationship to patient"),
+            Grid(*[LabelCheckboxX(o) for o in relationship], cols=4, cls='space-y-3'),
+            DivCentered(Button("Submit Form", cls=ButtonT.primary))),
+        cls='space-y-4')
+```
+
+Text can be styled with markdown automatically with MonsterUI
+
+```` python
+render_md("""
+# My Document
+
+> Important note here
+
++ List item with **bold**
++ Another with `code`
+
+```python
+def hello():
+    print("world")
+```
+""")
+````
+
+    '<div><h1 class="uk-h1 text-4xl font-bold mt-12 mb-6">My Document</h1>\n<blockquote class="uk-blockquote pl-4 border-l-4 border-primary italic mb-6">\n<p class="text-lg leading-relaxed mb-6">Important note here</p>\n</blockquote>\n<ul class="uk-list uk-list-bullet space-y-2 mb-6 ml-6 text-lg">\n<li class="leading-relaxed">List item with <strong>bold</strong></li>\n<li class="leading-relaxed">Another with <code class="uk-codespan px-1">code</code></li>\n</ul>\n<pre class="bg-base-200 rounded-lg p-4 mb-6"><code class="language-python uk-codespan px-1 uk-codespan px-1 block overflow-x-auto">def hello():\n    print("world")\n</code></pre>\n</div>'
+
+Or using semantic HTML:
+
+``` python
+def SemanticText():
+    return Card(
+        H1("MonsterUI's Semantic Text"),
+        P(
+            Strong("MonsterUI"), " brings the power of semantic HTML to life with ",
+            Em("beautiful styling"), " and ", Mark("zero configuration"), "."),
+        Blockquote(
+            P("Write semantic HTML in pure Python, get modern styling for free."),
+            Cite("MonsterUI Team")),
+        footer=Small("Released February 2025"),)
 ```</doc><doc title="HTMX reference" desc="Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options">+++
 title = "Reference"
 +++
@@ -1252,11 +1385,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 > `ft_html` and `ft_hx` functions to add some conveniences to `ft`, along with a full set of basic HTML components, and functions to work with forms and `FT` conversion
 
-- `def show(ft, *rest)`
-    Renders FT Components into HTML within a Jupyter notebook.
-
 - `def File(fname)`
     Use the unescaped text in file `fname` directly
+
+- `def show(ft, *rest)`
+    Renders FT Components into HTML within a Jupyter notebook.
 
 - `def fill_form(form, obj)`
     Fills named items in `form` using attributes in `obj`
@@ -1299,6 +1432,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def parse_form(req)`
     Starlette errors on empty multipart forms, so this checks for that situation
 
+- `class JSONResponse`
+    Same as starlette's version, but auto-stringifies non serializable types
+
+    - `def render(self, content)`
+
 - `def flat_xt(lst)`
     Flatten lists
 
@@ -1330,7 +1468,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, **bodykw)`
+    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, canonical, **bodykw)`
     - `def add_route(self, route)`
 
 - `@patch def ws(self, path, conn, disconn, name, middleware)`
@@ -1386,14 +1524,14 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `class FtResponse`
     Wrap an FT response with any Starlette `Response`
 
-    - `def __init__(self, content, status_code, headers, cls, media_type)`
+    - `def __init__(self, content, status_code, headers, cls, media_type, background)`
     - `def __response__(self, req)`
 
 ## fasthtml.fastapp
 
 > The `fast_app` convenience wrapper
 
-- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, canonical, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
 ## fasthtml.js
@@ -1436,6 +1574,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
     - `def __init__(self, app, log_level, host, port, start, **kwargs)`
     - `def start(self)`
+    - `def start_async(self)`
     - `def stop(self)`
 
 - `class JupyUviAsync`
@@ -1482,7 +1621,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `class GoogleAppClient`
     A `WebApplicationClient` for Google oauth2
 
-    - `def __init__(self, client_id, client_secret, code, scope, **kwargs)`
+    - `def __init__(self, client_id, client_secret, code, scope, project_id, **kwargs)`
     - `@classmethod def from_file(cls, fname, code, scope, **kwargs)`
 
 - `class GitHubAppClient`
@@ -1499,8 +1638,8 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     A `WebApplicationClient` for Discord oauth2
 
     - `def __init__(self, client_id, client_secret, is_user, perms, scope, **kwargs)`
-    - `def login_link(self)`
-    - `def parse_response(self, code)`
+    - `def login_link(self, redirect_uri, scope, state)`
+    - `def parse_response(self, code, redirect_uri)`
 
 - `class Auth0AppClient`
     A `WebApplicationClient` for Auth0 OAuth2
@@ -1535,6 +1674,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     - `def logout(self, session)`
     - `def get_auth(self, info, ident, session, state)`
 
+- `@patch() def consent_url(self, proj)`
+    Get Google OAuth consent screen URL
+
 - `@patch def save(self, fname)`
     Save credentials to `fname`
 
@@ -1565,6 +1707,16 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `@delegates(ft_hx, keep=True) def Container(*args, **kwargs)`
     A PicoCSS Container, implemented as a Main with class 'container'
+
+## fasthtml.stripe_otp
+
+- `def create_price(app_nm, amt, currency)`
+    Create a product and bind it to a price object. If product already exist just return the price list.
+
+- `def archive_price(app_nm)`
+    Archive a price - useful for cleanup if testing.
+
+- `class Payment`
 
 ## fasthtml.svg
 
@@ -1705,6 +1857,11 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def jsd(org, repo, root, path, prov, typ, ver, esm, **kwargs)`
     jsdelivr `Script` or CSS `Link` tag, or URL
 
+- `class Fragment`
+    An empty tag, used as a container
+
+    - `def __init__(self, *c)`
+
 - `@delegates(ft_hx, keep=True) def Titled(title, *args, **kwargs)`
     An HTML partial containing a `Title`, and `H1`, and any provided children
 
@@ -1732,10 +1889,10 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Selector to choose theme and get all headers needed for app.  Includes frankenui + tailwind + daisyui + highlight.js options
     Members: slate, stone, gray, neutral, red, rose, orange, green, blue, yellow, violet, zinc
 
-    - `headers(self, mode, daisy, highlightjs, katex, radii, shadows, font)`
+    - `headers(self, mode, icons, daisy, highlightjs, katex, apex_charts, radii, shadows, font)`
         Create frankenui and tailwind cdns
 
-    - `local_headers(self, mode, static_dir, daisy, highlightjs, katex, radii, shadows, font)`
+    - `local_headers(self, mode, static_dir, icons, daisy, highlightjs, katex, apex_charts, radii, shadows, font)`
         Create headers using local files downloaded from CDNs
 
 
@@ -1922,6 +2079,12 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def PicSumImg(h, w, id, grayscale, blur, **kwargs)`
     Creates a placeholder image using https://picsum.photos/
 
+- `def AccordionItem(title, *c)`
+    Creates a single item for use within an Accordion component, handling title, content, and open state.
+
+- `def Accordion(*c, **kwargs)`
+    Creates a styled Accordion container using accordion component.
+
 - `class ButtonT(Enum)`
     Options for styling Buttons
     Members: default, ghost, primary, secondary, destructive, text, link, xs, sm, lg, xl, icon
@@ -2010,7 +2173,7 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     A Label with default styling
 
 - `class LabelT(Enum)`
-    Members: primary, secondary, danger
+    Members: primary, secondary, destructive
 
 
 - `def Label(*c, **kwargs)`
@@ -2031,14 +2194,14 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def LabelCheckboxX(label, lbl_cls, input_cls, container, cls, id, **kwargs)`
     A FormLabel and CheckboxX pair that provides default spacing and links/names them based on id
 
-- `def LabelSelect(*option, **kwargs)`
-    A FormLabel and Select pair that provides default spacing and links/names them based on id (usually UkLabelSelect is a better choice)
-
 - `def Options(*c)`
     Helper function to wrap things into `Option`s for use in `Select`
 
 - `def Select(*option, **kwargs)`
     Creates a select dropdown with uk styling and option for adding a search box
+
+- `def LabelSelect(*option, **kwargs)`
+    A FormLabel and Select pair that provides default spacing and links/names them based on id
 
 - `@delegates(GenericLabelInput, but=['input_fn', 'cls']) def LabelRange(label, lbl_cls, input_cls, cls, id, value, min, max, step, label_range, **kwargs)`
     A FormLabel and Range pair that provides default spacing and links/names them based on id
@@ -2221,6 +2384,9 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def LightboxItem(*c, **kwargs)`
     Anchor tag with appropriate structure to go inside a `LightBoxContainer`
+
+- `def ApexChart(**kws)`
+    Apex chart component
 </doc></api><examples><doc title="Websockets application" desc="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
 from fasthtml.common import *
 

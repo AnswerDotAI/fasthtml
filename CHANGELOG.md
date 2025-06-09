@@ -2,6 +2,30 @@
 
 <!-- do not remove -->
 
+## 0.12.19
+
+### New Features
+
+- `seeded` option for `unqid` ([#741](https://github.com/AnswerDotAI/fasthtml/issues/741))
+
+
+## 0.12.18
+
+### New Features
+
+- Add canonical link option ([#735](https://github.com/AnswerDotAI/fasthtml/issues/735))
+- Add onevent kwargs ([#734](https://github.com/AnswerDotAI/fasthtml/issues/734))
+
+
+## 0.12.17
+
+### New Features
+
+- Check for "hx-history-restore-request" for identifying full page request ([#733](https://github.com/AnswerDotAI/fasthtml/issues/733))
+- Set `"vary": "HX-Request, HX-History-Restore-Request"` ([#733](https://github.com/AnswerDotAI/fasthtml/issues/733))
+- Allow background tasks in tuple for non-FT responses ([#733](https://github.com/AnswerDotAI/fasthtml/issues/733))
+
+
 ## 0.12.16
 
 ### New Features

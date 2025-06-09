@@ -16,6 +16,7 @@ format:
     css: styles.css
     toc: true
     keep-md: true
+    canonical-url: true
   commonmark: default
 
 website:
@@ -23,7 +24,7 @@ website:
   twitter-card:
     creator: "@jeremyphoward"
     site: "@answerdotai"
-    image: https://docs.fastht.ml/og-image.png
+    image: https://www.fastht.ml/docs/og-image.png
   open-graph: true
   repo-actions: [issue]
   navbar:

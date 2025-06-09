@@ -19,11 +19,11 @@
 
 > `ft_html` and `ft_hx` functions to add some conveniences to `ft`, along with a full set of basic HTML components, and functions to work with forms and `FT` conversion
 
-- `def show(ft, *rest)`
-    Renders FT Components into HTML within a Jupyter notebook.
-
 - `def File(fname)`
     Use the unescaped text in file `fname` directly
+
+- `def show(ft, *rest)`
+    Renders FT Components into HTML within a Jupyter notebook.
 
 - `def fill_form(form, obj)`
     Fills named items in `form` using attributes in `obj`
@@ -66,6 +66,11 @@
 - `def parse_form(req)`
     Starlette errors on empty multipart forms, so this checks for that situation
 
+- `class JSONResponse`
+    Same as starlette's version, but auto-stringifies non serializable types
+
+    - `def render(self, content)`
+
 - `def flat_xt(lst)`
     Flatten lists
 
@@ -97,7 +102,7 @@
     Default headers for a FastHTML app
 
 - `class FastHTML`
-    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, **bodykw)`
+    - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, canonical, **bodykw)`
     - `def add_route(self, route)`
 
 - `@patch def ws(self, path, conn, disconn, name, middleware)`
@@ -153,14 +158,14 @@
 - `class FtResponse`
     Wrap an FT response with any Starlette `Response`
 
-    - `def __init__(self, content, status_code, headers, cls, media_type)`
+    - `def __init__(self, content, status_code, headers, cls, media_type, background)`
     - `def __response__(self, req)`
 
 ## fasthtml.fastapp
 
 > The `fast_app` convenience wrapper
 
-- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
+- `def fast_app(db_file, render, hdrs, ftrs, tbls, before, middleware, live, debug, title, routes, exception_handlers, on_startup, on_shutdown, lifespan, default_hdrs, pico, surreal, htmx, exts, canonical, secret_key, key_fname, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, htmlkw, bodykw, reload_attempts, reload_interval, static_path, body_wrap, nb_hdrs, **kwargs)`
     Create a FastHTML or FastHTMLWithLiveReload app.
 
 ## fasthtml.js
@@ -203,6 +208,7 @@
 
     - `def __init__(self, app, log_level, host, port, start, **kwargs)`
     - `def start(self)`
+    - `def start_async(self)`
     - `def stop(self)`
 
 - `class JupyUviAsync`
@@ -249,7 +255,7 @@
 - `class GoogleAppClient`
     A `WebApplicationClient` for Google oauth2
 
-    - `def __init__(self, client_id, client_secret, code, scope, **kwargs)`
+    - `def __init__(self, client_id, client_secret, code, scope, project_id, **kwargs)`
     - `@classmethod def from_file(cls, fname, code, scope, **kwargs)`
 
 - `class GitHubAppClient`
@@ -266,8 +272,8 @@
     A `WebApplicationClient` for Discord oauth2
 
     - `def __init__(self, client_id, client_secret, is_user, perms, scope, **kwargs)`
-    - `def login_link(self)`
-    - `def parse_response(self, code)`
+    - `def login_link(self, redirect_uri, scope, state)`
+    - `def parse_response(self, code, redirect_uri)`
 
 - `class Auth0AppClient`
     A `WebApplicationClient` for Auth0 OAuth2
@@ -302,6 +308,9 @@
     - `def logout(self, session)`
     - `def get_auth(self, info, ident, session, state)`
 
+- `@patch() def consent_url(self, proj)`
+    Get Google OAuth consent screen URL
+
 - `@patch def save(self, fname)`
     Save credentials to `fname`
 
@@ -332,6 +341,16 @@
 
 - `@delegates(ft_hx, keep=True) def Container(*args, **kwargs)`
     A PicoCSS Container, implemented as a Main with class 'container'
+
+## fasthtml.stripe_otp
+
+- `def create_price(app_nm, amt, currency)`
+    Create a product and bind it to a price object. If product already exist just return the price list.
+
+- `def archive_price(app_nm)`
+    Archive a price - useful for cleanup if testing.
+
+- `class Payment`
 
 ## fasthtml.svg
 
@@ -472,11 +491,19 @@
 - `def jsd(org, repo, root, path, prov, typ, ver, esm, **kwargs)`
     jsdelivr `Script` or CSS `Link` tag, or URL
 
+- `class Fragment`
+    An empty tag, used as a container
+
+    - `def __init__(self, *c)`
+
 - `@delegates(ft_hx, keep=True) def Titled(title, *args, **kwargs)`
     An HTML partial containing a `Title`, and `H1`, and any provided children
 
 - `def Socials(title, site_name, description, image, url, w, h, twitter_site, creator, card)`
     OG and Twitter social card headers
+
+- `def YouTubeEmbed(video_id, **kwargs)`
+    Embed a YouTube video
 
 - `def Favicon(light_icon, dark_icon)`
     Light and dark favicon headers

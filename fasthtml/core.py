@@ -7,11 +7,11 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens',
            'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt',
            'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond',
-           'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs',
-           'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+           'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client',
+           'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb
-import json,uuid,inspect,types,signal,asyncio,threading,inspect
+import json,uuid,inspect,types,signal,asyncio,threading,inspect,random,contextlib
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -31,7 +31,7 @@ from warnings import warn
 from dateutil import parser as dtparse
 from httpx import ASGITransport, AsyncClient
 from anyio import from_thread
-from uuid import uuid4
+from uuid import uuid4, UUID
 from base64 import b85encode,b64encode
 
 from .starlette import *
@@ -389,44 +389,58 @@ def respond(req, heads, bdy):
     return Html(Head(*heads, *flat_xt(req.hdrs)), body, **req.htmlkw)
 
 # %% ../nbs/api/00_core.ipynb
-def _xt_cts(req, resp):
+def is_full_page(req, resp):
+    if resp and any(getattr(o, 'tag', '')=='html' for o in resp): return True
+    return 'hx-request' in req.headers and 'hx-history-restore-request' not in req.headers
+
+# %% ../nbs/api/00_core.ipynb
+def _part_resp(req, resp):
     resp = flat_tuple(resp)
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
-    http_hdrs = {o.k:str(o.v) for o in http_hdrs}
     tasks,resp = partition(resp, risinstance(BackgroundTask))
-    ts = BackgroundTasks()
-    for t in tasks: ts.tasks.append(t)
-    hdr_tags = 'title','meta','link','style','base'
-    heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
-    if resp and 'hx-request' not in req.headers and not any(getattr(o, 'tag', '')=='html' for o in resp):
-        title = [] if any(getattr(o, 'tag', '')=='title' for o in heads) else [Title(req.app.title)]
-        resp = respond(req, [*heads, *title], bdy)
-    return _to_xml(req, resp, indent=fh_cfg.indent), http_hdrs, ts
+    kw = {"headers": {"vary": "HX-Request, HX-History-Restore-Request"}}
+    if http_hdrs: kw['headers'] |= {o.k:str(o.v) for o in http_hdrs}
+    if tasks:
+        ts = BackgroundTasks()
+        for t in tasks: ts.tasks.append(t)
+        kw['background'] = ts
+    resp = tuple(resp)
+    if len(resp)==1: resp = resp[0]
+    return resp,kw
 
 # %% ../nbs/api/00_core.ipynb
-def _xt_resp(req, resp, status_code):
-    cts,http_hdrs,tasks = _xt_cts(req, resp)
-    return HTMLResponse(cts, status_code=status_code, headers=http_hdrs, background=tasks)
+def _xt_cts(req, resp):
+    hdr_tags = 'title','meta','link','style','base'
+    resp = tuplify(resp)
+    heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
+    if not is_full_page(req, resp):
+        title = [] if any(getattr(o, 'tag', '')=='title' for o in heads) else [Title(req.app.title)]
+        canonical = [Link(rel="canonical", href=getattr(req, 'canonical', req.url))] if req.app.canonical else []
+        resp = respond(req, [*heads, *title, *canonical], bdy)
+    return _to_xml(req, resp, indent=fh_cfg.indent)
 
 # %% ../nbs/api/00_core.ipynb
 def _is_ft_resp(resp): return isinstance(resp, _iter_typs+(HttpHeader,FT)) or hasattr(resp, '__ft__')
 
 # %% ../nbs/api/00_core.ipynb
 def _resp(req, resp, cls=empty, status_code=200):
-    if not resp: resp=()
+    if not resp: resp=''
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if cls in (Any,FT): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
-    if cls is not empty: return cls(resp, status_code=status_code)
-    if isinstance(resp, Response): return resp # respect manually set status_code
-    if _is_ft_resp(resp): return _xt_resp(req, resp, status_code)
+    resp,kw = _part_resp(req, resp)
+    if cls is not empty: return cls(resp, status_code=status_code, **kw)
+    if isinstance(resp, Response): return resp
+    if _is_ft_resp(resp):
+        cts = _xt_cts(req, resp)
+        return HTMLResponse(cts, status_code=status_code, **kw)
     if isinstance(resp, str): cls = HTMLResponse
     elif isinstance(resp, Mapping): cls = JSONResponse
     else:
         resp = str(resp)
         cls = HTMLResponse
-    return cls(resp, status_code=status_code)
+    return cls(resp, status_code=status_code, **kw)
 
 # %% ../nbs/api/00_core.ipynb
 class Redirect:
@@ -525,9 +539,9 @@ class FastHTML(Starlette):
                  before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware,
                  secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
-                 body_wrap=noop_body, htmlkw=None, nb_hdrs=False, **bodykw):
+                 body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
-        self.title = title
+        self.title,self.canonical = title,canonical
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         exts = {k:htmx_exts[k] for k in exts}
         htmlkw = htmlkw or {}
@@ -554,12 +568,14 @@ class FastHTML(Starlette):
         excs = {k:_wrap_ex(v, k, hdrs, ftrs, htmlkw, bodykw, body_wrap=body_wrap) for k,v in exception_handlers.items()}
         super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
 
-    def add_route(self, route):
-        route.methods = [m.upper() for m in listify(route.methods)]
-        self.router.routes = [r for r in self.router.routes if not
-                       (r.path==route.path and r.name == route.name and
-                        ((route.methods is None) or (set(r.methods) == set(route.methods))))]
-        self.router.routes.append(route)
+# %% ../nbs/api/00_core.ipynb
+@patch
+def add_route(self:FastHTML, route):
+    route.methods = [m.upper() for m in listify(route.methods)]
+    self.router.routes = [r for r in self.router.routes if not
+                   (r.path==route.path and r.name == route.name and
+                    ((route.methods is None) or (set(r.methods) == set(route.methods))))]
+    self.router.routes.append(route)
 
 # %% ../nbs/api/00_core.ipynb
 all_meths = 'get post put delete patch head trace options'.split()
@@ -641,6 +657,12 @@ def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_sche
     return f(path) if callable(path) else f
 
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def set_lifespan(self:FastHTML, value):
+    if inspect.isasyncgenfunction(value): value = contextlib.asynccontextmanager(value)
+    self.router.lifespan_context = value
 
 # %% ../nbs/api/00_core.ipynb
 def serve(
@@ -788,14 +810,17 @@ class FtResponse:
         self.cls,self.media_type,self.background = cls,media_type,background
 
     def __response__(self, req):
-        cts,httphdrs,tasks = _xt_cts(req, self.content)
-        if not tasks.tasks: tasks = self.background
+        resp,kw = _part_resp(req, self.content)
+        cts = _xt_cts(req, resp)
+        tasks,httphdrs = kw.get('background'),kw.get('headers')
+        if not tasks: tasks = self.background
         headers = {**(self.headers or {}), **httphdrs}
         return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=tasks)
 
 # %% ../nbs/api/00_core.ipynb
-def unqid():
-    res = b64encode(uuid4().bytes)
+def unqid(seeded=False):
+    id4 = UUID(int=random.getrandbits(128), version=4) if seeded else uuid4()
+    res = b64encode(id4.bytes)
     return '_' + res.decode().rstrip('=').translate(str.maketrans('+/', '_-'))
 
 # %% ../nbs/api/00_core.ipynb
@@ -805,7 +830,8 @@ def _add_ids(s):
     for c in s.children: _add_ids(c)
 
 # %% ../nbs/api/00_core.ipynb
-def setup_ws(app, f=noop):
+@patch
+def setup_ws(app:FastHTML, f=noop):
     conns = {}
     async def on_connect(scope, send): conns[scope.client] = send
     async def on_disconnect(scope): conns.pop(scope.client)

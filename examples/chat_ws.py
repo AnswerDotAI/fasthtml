@@ -15,6 +15,6 @@ async def ws(msg:str):
     msgs.append(msg)
     await send(Ul(*[Li(m) for m in msgs], id='msg-list'))
 
-send = setup_ws(app, ws)
+send = app.setup_ws(ws)
 
 serve()

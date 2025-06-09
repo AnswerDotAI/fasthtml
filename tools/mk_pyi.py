@@ -11,6 +11,6 @@ with open('fasthtml/components.pyi', 'a') as f:
     f.write(f"\ndef ft_html(tag: str, *c, {attrs_str}, **kwargs): ...\n")
     f.write(f"def ft_hx(tag: str, *c, {attrs_str}, **kwargs): ...\n")
     for o in _all_:
-        attrs = (['name'] if o.lower() in named else []) + hx_attrs
+        attrs = (['name'] if o.lower() in named else []) + hx_attrs + evt_attrs
         attrs_str = ', '.join(f'{t}:{"Any" if t not in hx_attrs_annotations else str(hx_attrs_annotations[t]).replace("typing.","")}=None' for t in attrs)
         f.write(f"def {o}(*c, {attrs_str}, **kwargs): ...\n")
