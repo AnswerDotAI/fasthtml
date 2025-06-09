@@ -8,10 +8,10 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt',
            'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond',
            'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client',
-           'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
+           'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb
-import json,uuid,inspect,types,signal,asyncio,threading,inspect,random
+import json,uuid,inspect,types,signal,asyncio,threading,inspect,random,contextlib
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -568,12 +568,14 @@ class FastHTML(Starlette):
         excs = {k:_wrap_ex(v, k, hdrs, ftrs, htmlkw, bodykw, body_wrap=body_wrap) for k,v in exception_handlers.items()}
         super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
 
-    def add_route(self, route):
-        route.methods = [m.upper() for m in listify(route.methods)]
-        self.router.routes = [r for r in self.router.routes if not
-                       (r.path==route.path and r.name == route.name and
-                        ((route.methods is None) or (set(r.methods) == set(route.methods))))]
-        self.router.routes.append(route)
+# %% ../nbs/api/00_core.ipynb
+@patch
+def add_route(self:FastHTML, route):
+    route.methods = [m.upper() for m in listify(route.methods)]
+    self.router.routes = [r for r in self.router.routes if not
+                   (r.path==route.path and r.name == route.name and
+                    ((route.methods is None) or (set(r.methods) == set(route.methods))))]
+    self.router.routes.append(route)
 
 # %% ../nbs/api/00_core.ipynb
 all_meths = 'get post put delete patch head trace options'.split()
@@ -655,6 +657,12 @@ def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_sche
     return f(path) if callable(path) else f
 
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def set_lifespan(self:FastHTML, value):
+    if inspect.isasyncgenfunction(value): value = contextlib.asynccontextmanager(value)
+    self.router.lifespan_context = value
 
 # %% ../nbs/api/00_core.ipynb
 def serve(
@@ -822,7 +830,8 @@ def _add_ids(s):
     for c in s.children: _add_ids(c)
 
 # %% ../nbs/api/00_core.ipynb
-def setup_ws(app, f=noop):
+@patch
+def setup_ws(app:FastHTML, f=noop):
     conns = {}
     async def on_connect(scope, send): conns[scope.client] = send
     async def on_disconnect(scope): conns.pop(scope.client)
