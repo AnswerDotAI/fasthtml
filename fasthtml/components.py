@@ -217,7 +217,8 @@ def html2ft(html, attr1st=False):
               for c in cts if str(c).strip()]
         attrs, exotic_attrs  = [], {}
         for key, value in sorted(elm.attrs.items(), key=lambda x: x[0]=='class'):
-            if isinstance(value,(tuple,list)): value = " ".join(value)
+            if value is None or value == True: value = True  # handle boolean attributes
+            elif isinstance(value,(tuple,list)): value = " ".join(value)
             key, value = rev_map.get(key, key), value or True
             if _re_h2x_attr_key.match(key): attrs.append(f'{key.replace("-", "_")}={value!r}')
             else: exotic_attrs[key] = value
