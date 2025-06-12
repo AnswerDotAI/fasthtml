@@ -46,7 +46,7 @@
 
 ### New Features
 
-- docsrc support in `show` ([#717](https://github.com/AnswerDotAI/fasthtml/issues/717))
+- srcdoc support in `show` ([#717](https://github.com/AnswerDotAI/fasthtml/issues/717))
 - Add `GoogleAppClient.consent_url` ([#707](https://github.com/AnswerDotAI/fasthtml/issues/707))
 
 ### Bugs Squashed
