@@ -1,6 +1,6 @@
 """The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid', 'setup_ws']
-import json, uuid, inspect, types, signal, asyncio, threading, inspect, random
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid']
+import json, uuid, inspect, types, signal, asyncio, threading, inspect, random, contextlib
 from fastcore.utils import *
 from fastcore.xml import *
 from fastcore.meta import use_kwargs_dict
@@ -265,12 +265,18 @@ class FastHTML(Starlette):
         """Add a route at `path`"""
         ...
 
+    def set_lifespan(self, value):
+        ...
+
     def static_route_exts(self, prefix='/', static_path='.', exts='static'):
         """Add a static route at URL path `prefix` with files from `static_path` and `exts` defined by `reg_re_param()`"""
         ...
 
     def static_route(self, ext='', prefix='/', static_path='.'):
         """Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')"""
+        ...
+
+    def setup_ws(app, f=noop):
         ...
 
     def devtools_json(self, path=None, uuid=None):
@@ -369,8 +375,5 @@ def unqid(seeded=False):
     ...
 
 def _add_ids(s):
-    ...
-
-def setup_ws(app, f=noop):
     ...
 devtools_loc = '/.well-known/appspecific/com.chrome.devtools.json'
