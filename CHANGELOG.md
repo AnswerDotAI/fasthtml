@@ -2,6 +2,21 @@
 
 <!-- do not remove -->
 
+## 0.12.20
+
+### New Features
+
+- Add `set_lifespan` ([#744](https://github.com/AnswerDotAI/fasthtml/issues/744))
+- Add title= kwarg to `fast_app()` constructor ([#740](https://github.com/AnswerDotAI/fasthtml/pull/740)), thanks to [@mmacpherson](https://github.com/mmacpherson)
+- Allow any Mapping children to specify attributes. fix #737 ([#738](https://github.com/AnswerDotAI/fasthtml/pull/738)), thanks to [@gazpachoking](https://github.com/gazpachoking)
+
+### Bugs Squashed
+
+- Correct treatment of empty/boolean attributes in the html2ft function ([#732](https://github.com/AnswerDotAI/fasthtml/pull/732)), thanks to [@renatodamas](https://github.com/renatodamas)
+- html2ft handling empty attribute ([#731](https://github.com/AnswerDotAI/fasthtml/issues/731))
+- Toasts inserted at bottom of page ([#703](https://github.com/AnswerDotAI/fasthtml/issues/703))
+
+
 ## 0.12.19
 
 ### New Features
