@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.21
+
+### New Features
+
+- Handle empty host in `HTMX()` ([#752](https://github.com/AnswerDotAI/fasthtml/issues/752))
+
+
 ## 0.12.20
 
 ### New Features
