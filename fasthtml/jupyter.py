@@ -111,7 +111,7 @@ class JupyUviAsync(JupyUvi):
         wait_port_free(self.port)
 
 # %% ../nbs/api/06_jupyter.ipynb
-def HTMX(path="", app=None, host='localhost', port=8000, height="auto", link=False, iframe=True):
+def HTMX(path="/", host='localhost', app=None, port=8000, height="auto", link=False, iframe=True):
     "An iframe which displays the HTMX application in a notebook."
     if isinstance(path, (FT,tuple,Safe)):
         assert app, 'Need an app to render a component'
@@ -127,9 +127,11 @@ def HTMX(path="", app=None, host='localhost', port=8000, height="auto", link=Fal
             if (e.data.height) frame.style.height = (e.data.height+1) + 'px';
         }, false);
     }""" if height == "auto" else ""
-    if link: display(HTML(f'<a href="http://{host}:{port}{path}" target="_blank">Open in new tab</a>'))
+    proto = 'http' if host=='localhost' else 'https'
+    fullpath = f"{proto}://{host}:{port}{path}" if host else path
+    if link: display(HTML(f'<a href="{fullpath}" target="_blank">Open in new tab</a>'))
     if iframe:
-        return HTML(f'<iframe src="http://{host}:{port}{path}" style="width: 100%; height: {height}; border: none;" onload="{scr}" ' + """allow="accelerometer; autoplay; camera; clipboard-read; clipboard-write; display-capture; encrypted-media; fullscreen; gamepad; geolocation; gyroscope; hid; identity-credentials-get; idle-detection; magnetometer; microphone; midi; payment; picture-in-picture; publickey-credentials-get; screen-wake-lock; serial; usb; web-share; xr-spatial-tracking"></iframe> """)
+        return HTML(f'<iframe src="{fullpath}" style="width: 100%; height: {height}; border: none;" onload="{scr}" ' + """allow="accelerometer; autoplay; camera; clipboard-read; clipboard-write; display-capture; encrypted-media; fullscreen; gamepad; geolocation; gyroscope; hid; identity-credentials-get; idle-detection; magnetometer; microphone; midi; payment; picture-in-picture; publickey-credentials-get; screen-wake-lock; serial; usb; web-share; xr-spatial-tracking"></iframe> """)
 
 # %% ../nbs/api/06_jupyter.ipynb
 def ws_client(app, nm='', host='localhost', port=8000, ws_connect='/ws', frame=True, link=True, **kwargs):
