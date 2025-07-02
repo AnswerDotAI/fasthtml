@@ -7,6 +7,8 @@
     - `def __call__(self, scope, receive, send)`
     - `def authenticate(self, conn)`
 
+- `def user_pwd_auth(lookup, skip, **kwargs)`
+- `def basic_logout(request)`
 ## fasthtml.cli
 
 - `@call_parse def railway_link()`
@@ -19,6 +21,12 @@
 
 > `ft_html` and `ft_hx` functions to add some conveniences to `ft`, along with a full set of basic HTML components, and functions to work with forms and `FT` conversion
 
+- `@patch def __str__(self)`
+- `@patch def __radd__(self, b)`
+- `@patch def __add__(self, b)`
+- `def attrmap_x(o)`
+- `def ft_html(tag, *c, **kwargs)`
+- `@use_kwargs(hx_attrs + evt_attrs, keep=True) def ft_hx(tag, *c, **kwargs)`
 - `def File(fname)`
     Use the unescaped text in file `fname` directly
 
@@ -34,6 +42,7 @@
 - `def find_inputs(e, tags, **kw)`
     Recursively find all elements in `e` with `tags` and attrs matching `kw`
 
+- `def __getattr__(tag)`
 - `def html2ft(html, attr1st)`
     Convert HTML to an `ft` expression
 
@@ -80,6 +89,11 @@
 - `def EventStream(s)`
     Create a text/event-stream response from `s`
 
+- `def signal_shutdown()`
+- `def uri(_arg, **kwargs)`
+- `def decode_uri(s)`
+- `@patch def to_string(self, value)`
+- `@patch def url_path_for(self, name, **path_params)`
 - `def flat_tuple(o)`
     Flatten lists
 
@@ -89,12 +103,14 @@
 - `def respond(req, heads, bdy)`
     Default FT response creation function
 
+- `def is_full_page(req, resp)`
 - `class Redirect`
     Use HTMX or Starlette RedirectResponse as required to redirect to `loc`
 
     - `def __init__(self, loc)`
     - `def __response__(self, req)`
 
+- `def get_key(key, fname)`
 - `def qp(p, **kw)`
     Add parameters kw to path p
 
@@ -103,8 +119,8 @@
 
 - `class FastHTML`
     - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, canonical, **bodykw)`
-    - `def add_route(self, route)`
 
+- `@patch def add_route(self, route)`
 - `@patch def ws(self, path, conn, disconn, name, middleware)`
     Add a websocket route at `path`
 
@@ -114,6 +130,7 @@
 - `@patch def route(self, path, methods, name, include_in_schema, body_wrap)`
     Add a route at `path`
 
+- `@patch def set_lifespan(self, value)`
 - `def serve(appname, app, host, port, reload, reload_includes, reload_excludes)`
     Run the app in an async server, with live reload set as the default.
 
@@ -146,6 +163,7 @@
 - `def cookie(key, value, max_age, expires, path, domain, secure, httponly, samesite)`
     Create a 'set-cookie' `HttpHeader`
 
+- `def reg_re_param(m, s)`
 - `@patch def static_route_exts(self, prefix, static_path, exts)`
     Add a static route at URL path `prefix` with files from `static_path` and `exts` defined by `reg_re_param()`
 
@@ -161,6 +179,9 @@
     - `def __init__(self, content, status_code, headers, cls, media_type, background)`
     - `def __response__(self, req)`
 
+- `def unqid(seeded)`
+- `@patch def setup_ws(app, f)`
+- `@patch def devtools_json(self, path, uuid)`
 ## fasthtml.fastapp
 
 > The `fast_app` convenience wrapper
@@ -181,9 +202,11 @@
 - `def MarkdownJS(sel)`
     Implements browser-based markdown rendering.
 
+- `def KatexMarkdownJS(sel, inline_delim, display_delim, math_envs)`
 - `def HighlightJS(sel, langs, light, dark)`
     Implements browser-based syntax highlighting. Usage example [here](/tutorials/quickstart_for_web_devs.html#code-highlighting).
 
+- `def SortableJS(sel, ghost_class)`
 - `def MermaidJS(sel, theme)`
     Implements browser-based Mermaid diagram rendering.
 
@@ -203,6 +226,8 @@
 - `def wait_port_free(port, host, max_wait)`
     Wait for `port` to be free on `host`
 
+- `def render_ft()`
+- `def htmx_config_port(port)`
 - `class JupyUvi`
     Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
 
@@ -218,11 +243,14 @@
     - `def start(self)`
     - `def stop(self)`
 
-- `def HTMX(path, app, host, port, height, link, iframe)`
+- `def HTMX(path, host, app, port, height, link, iframe)`
     An iframe which displays the HTMX application in a notebook.
 
+- `def ws_client(app, nm, host, port, ws_connect, frame, link, **kwargs)`
 ## fasthtml.live_reload
 
+- `def LiveReloadJs(reload_attempts, reload_interval, **kwargs)`
+- `def live_reload_ws(websocket)`
 - `class FastHTMLWithLiveReload`
     `FastHTMLWithLiveReload` enables live reloading.
     This means that any code changes saved on the server will automatically
@@ -299,6 +327,7 @@
 - `@patch def retr_id(self, code, redirect_uri)`
     Call `retr_info` and then return id/subscriber value
 
+- `def url_match(url, patterns)`
 - `class OAuth`
     - `def __init__(self, app, cli, skip, redir_path, error_path, logout_path, login_path, https, http_patterns)`
     - `def redir_login(self, session)`
@@ -324,6 +353,7 @@
 
 > Basic components for generating Pico CSS tags
 
+- `def set_pico_cls()`
 - `@delegates(ft_hx, keep=True) def Card(*c, **kwargs)`
     A PicoCSS Card, implemented as an Article with optional Header and Footer
 
@@ -342,6 +372,7 @@
 - `@delegates(ft_hx, keep=True) def Container(*args, **kwargs)`
     A PicoCSS Container, implemented as a Main with class 'container'
 
+- `def PicoBusy()`
 ## fasthtml.stripe_otp
 
 - `def create_price(app_nm, amt, currency)`
@@ -350,8 +381,16 @@
 - `def archive_price(app_nm)`
     Archive a price - useful for cleanup if testing.
 
+- `def before(sess)`
+- `@rt('/') def home(sess)`
+- `@rt('/create-checkout-session', methods=['POST']) def create_checkout_session(sess)`
 - `class Payment`
 
+- `@rt('/webhook') def post(req)`
+- `@rt('/success') def success(sess, checkout_sid)`
+- `@rt('/cancel') def cancel()`
+- `@rt('/refund', methods=['POST']) def refund(sess, checkout_sid)`
+- `@rt('/account') def account_management(sess)`
 ## fasthtml.svg
 
 > Simple SVG FT elements
@@ -424,6 +463,13 @@
 - `def SvgInb(*args, **kwargs)`
     Wraps an SVG shape as required for an HTMX inband swap
 
+## fasthtml.toaster
+
+- `def Toast(message, typ, dismiss, duration)`
+- `def add_toast(sess, message, typ, dismiss)`
+- `def render_toasts(sess)`
+- `def toast_after(resp, req, sess)`
+- `def setup_toasts(app, duration)`
 ## fasthtml.xtend
 
 > Simple extensions to standard HTML components, such as adding sensible defaults
@@ -488,6 +534,7 @@
 - `def run_js(js, id, **kw)`
     Run `js` script, auto-generating `id` based on name of caller if needed, and js-escaping any `kw` params
 
+- `def HtmxOn(eventname, code)`
 - `def jsd(org, repo, root, path, prov, typ, ver, esm, **kwargs)`
     jsdelivr `Script` or CSS `Link` tag, or URL
 
@@ -508,3 +555,5 @@
 - `def Favicon(light_icon, dark_icon)`
     Light and dark favicon headers
 
+- `def clear(id)`
+- `def with_sid(app, dest, path)`

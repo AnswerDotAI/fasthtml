@@ -138,7 +138,7 @@ repo’s notebooks and the official FastHTML examples repo:
 Then explore the small but growing third-party ecosystem of FastHTML
 tutorials, notebooks, libraries, and components:
 
-- [FastHTML Gallery](https://fastht.ml/gallery): Learn from minimal
+- [FastHTML Gallery](https://gallery.fastht.ml): Learn from minimal
   examples of components (ie chat bubbles, click-to-edit, infinite
   scroll, etc)
 - [Creating Custom FastHTML Tags for Markdown
