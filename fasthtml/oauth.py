@@ -130,7 +130,7 @@ def get_host(request):
 def redir_url(request, redir_path, scheme=None):
     "Get the redir url for the host in `request`"
     host = get_host(request)
-    scheme = 'http' if host.split(':')[0] in ("localhost", "127.0.0.1") else 'https'
+    scheme = 'http' if url_match(req,self.http_patterns) or not self.https else 'https'
     return f"{scheme}://{host}{redir_path}"
 
 # %% ../nbs/api/08_oauth.ipynb
@@ -185,7 +185,7 @@ class OAuth:
         @app.get(redir_path)
         def redirect(req, session, code:str=None, error:str=None, state:str=None):
             if not code: session['oauth_error']=error; return RedirectResponse(self.error_path, status_code=303)
-            scheme = 'http' if url_match(req.url,self.http_patterns) or not self.https else 'https'
+            scheme = 'http' if url_match(req,self.http_patterns) or not self.https else 'https'
             base_url = f"{scheme}://{get_host(req)}"
             info = AttrDictDefault(cli.retr_info(code, base_url+redir_path))
             ident = info.get(self.cli.id_key)
