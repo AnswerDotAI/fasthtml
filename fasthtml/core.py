@@ -263,7 +263,8 @@ def _wrap_ws(ws, data, params):
 # %% ../nbs/api/00_core.ipynb
 async def _send_ws(ws, resp):
     if not resp: return
-    res = to_xml(resp, indent=fh_cfg.indent) if isinstance(resp, (list,tuple,FT)) or hasattr(resp, '__ft__') else resp
+#     res = to_xml(resp, indent=fh_cfg.indent) if isinstance(resp, (list,tuple,FT)) or hasattr(resp, '__ft__') else resp
+    res = to_xml(resp, indent=fh_cfg.indent)
     await ws.send_text(res)
 
 def _ws_endp(recv, conn=None, disconn=None):
