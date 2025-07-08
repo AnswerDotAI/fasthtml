@@ -127,10 +127,10 @@ def get_host(request):
     return forwarded_host if forwarded_host else request.url.netloc
 
 # %% ../nbs/api/08_oauth.ipynb
-def redir_url(request, redir_path, scheme=None):
+def redir_url(req, redir_path, scheme=None):
     "Get the redir url for the host in `request`"
-    host = get_host(request)
-    scheme = 'http' if url_match(req,self.http_patterns) or not self.https else 'https'
+    host = get_host(req)
+    scheme = 'http' if host.split(':')[0] in ("localhost", "127.0.0.1") else 'https'
     return f"{scheme}://{host}{redir_path}"
 
 # %% ../nbs/api/08_oauth.ipynb
