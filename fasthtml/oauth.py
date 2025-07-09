@@ -4,7 +4,7 @@
 
 # %% auto 0
 __all__ = ['http_patterns', 'GoogleAppClient', 'GitHubAppClient', 'HuggingFaceClient', 'DiscordAppClient', 'Auth0AppClient',
-           'redir_url', 'url_match', 'OAuth', 'load_creds']
+           'get_host', 'redir_url', 'url_match', 'OAuth', 'load_creds']
 
 # %% ../nbs/api/08_oauth.ipynb
 from .common import *
@@ -121,10 +121,17 @@ def login_link(self:WebApplicationClient, redirect_uri, scope=None, state=None, 
     return self.prepare_request_uri(self.base_url, redirect_uri, scope, state=state, **kwargs)
 
 # %% ../nbs/api/08_oauth.ipynb
-def redir_url(request, redir_path, scheme=None):
+def get_host(request):
+    """Get the host, preferring X-Forwarded-Host if available"""
+    forwarded_host = request.headers.get('x-forwarded-host')
+    return forwarded_host if forwarded_host else request.url.netloc
+
+# %% ../nbs/api/08_oauth.ipynb
+def redir_url(req, redir_path, scheme=None):
     "Get the redir url for the host in `request`"
-    scheme = 'http' if request.url.hostname in ("localhost", "127.0.0.1") else 'https'
-    return f"{scheme}://{request.url.netloc}{redir_path}"
+    host = get_host(req)
+    scheme = 'http' if host.split(':')[0] in ("localhost", "127.0.0.1") else 'https'
+    return f"{scheme}://{host}{redir_path}"
 
 # %% ../nbs/api/08_oauth.ipynb
 @patch
@@ -159,8 +166,8 @@ def retr_id(self:_AppClient, code, redirect_uri):
 
 # %% ../nbs/api/08_oauth.ipynb
 http_patterns = (r'^(localhost|127\.0\.0\.1)(:\d+)?$',)
-def url_match(url, patterns=http_patterns):
-    return any(re.match(pattern, url.netloc.split(':')[0]) for pattern in patterns)
+def url_match(request, patterns=http_patterns):
+    return any(re.match(pattern, get_host(request).split(':')[0]) for pattern in patterns)
 
 # %% ../nbs/api/08_oauth.ipynb
 class OAuth:
@@ -178,8 +185,8 @@ class OAuth:
         @app.get(redir_path)
         def redirect(req, session, code:str=None, error:str=None, state:str=None):
             if not code: session['oauth_error']=error; return RedirectResponse(self.error_path, status_code=303)
-            scheme = 'http' if url_match(req.url,self.http_patterns) or not self.https else 'https'
-            base_url = f"{scheme}://{req.url.netloc}"
+            scheme = 'http' if url_match(req,self.http_patterns) or not self.https else 'https'
+            base_url = f"{scheme}://{get_host(req)}"
             info = AttrDictDefault(cli.retr_info(code, base_url+redir_path))
             ident = info.get(self.cli.id_key)
             if not ident: return self.redir_login(session)
