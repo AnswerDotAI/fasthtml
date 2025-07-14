@@ -202,7 +202,7 @@ class OAuth:
 
     def redir_login(self, session): return RedirectResponse(self.login_path, status_code=303)
     def redir_url(self, req):
-        scheme = 'http' if url_match(req.url,self.http_patterns) or not self.https else 'https'
+        scheme = 'http' if url_match(req,self.http_patterns) or not self.https else 'https'
         return redir_url(req, self.redir_path, scheme)
 
     def login_link(self, req, scope=None, state=None): return self.cli.login_link(self.redir_url(req), scope=scope, state=state)
