@@ -33,9 +33,17 @@ toast_css = """
 .fh-toast-error { background-color: #F44336; }
 """
 
+js = '''htmx.onLoad(() => {
+if (!htmx.find('#fh-toast-container')) {
+    const ctn = document.createElement('div');
+    ctn.id = 'fh-toast-container';
+    document.body.appendChild(ctn);
+    }
+});'''
+
 def Toast(message: str, typ: str = "info", dismiss: bool = False, duration:int=5000):
     x_btn = Button('x', cls="fh-toast-dismiss", onclick="htmx.remove(this?.parentElement);") if dismiss else None
-    return Div(Span(message), x_btn, cls=f"fh-toast fh-toast-{typ}", hx_on_transitionend="setTimeout(() => this?.remove(), %d);" % duration)
+    return Div(Span(message), x_btn, cls=f"fh-toast fh-toast-{typ}", hx_on_transitionend=f"setTimeout(() => this?.remove(), {duration});")
 
 def add_toast(sess, message: str, typ: str = "info", dismiss: bool = False):
     assert typ in ("info", "success", "warning", "error"), '`typ` not in ("info", "success", "warning", "error")'
@@ -43,7 +51,7 @@ def add_toast(sess, message: str, typ: str = "info", dismiss: bool = False):
 
 def render_toasts(sess):
     toasts = [Toast(msg, typ, dismiss, sess['toast_duration']) for msg, typ, dismiss in sess.pop(sk, [])]
-    return Div(*toasts, id=tcid, hx_swap_oob='afterbegin')
+    return Div(*toasts, hx_swap_oob=f'beforeend:#{tcid}')
 
 def toast_after(resp, req, sess):
     if sk in sess and (not resp or isinstance(resp, (tuple,FT,FtResponse))):
@@ -52,5 +60,5 @@ def toast_after(resp, req, sess):
 
 def setup_toasts(app, duration=5000):
     app.state.toast_duration = duration
-    app.hdrs += [Style(toast_css)]
+    app.hdrs += [Style(toast_css), Script(js)]
     app.after.append(toast_after)
