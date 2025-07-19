@@ -240,6 +240,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
         if issubclass(anno, HtmxHeaders): return _get_htmx(hdrs)
         if issubclass(anno, Starlette): return ws.scope['app']
         if issubclass(anno, WebSocket): return ws
+        if issubclass(anno, dict): return data
     if anno is empty:
         if arg.lower()=='ws': return ws
         if arg.lower()=='scope': return dict2obj(ws.scope)
