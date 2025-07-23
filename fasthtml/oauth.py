@@ -139,7 +139,7 @@ def parse_response(self:_AppClient, code, redirect_uri):
     "Get the token from the oauth2 server response"
     payload = dict(code=code, redirect_uri=redirect_uri, client_id=self.client_id,
                    client_secret=self.client_secret, grant_type='authorization_code')
-    r = httpx.post(self.token_url, json=payload)
+    r = httpx.post(self.token_url, data=payload)
     r.raise_for_status()
     self.parse_request_body_response(r.text)
 
