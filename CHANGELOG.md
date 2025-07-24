@@ -2,6 +2,20 @@
 
 <!-- do not remove -->
 
+## 0.12.22
+
+### New Features
+
+- Support dict params in ws routes ([#759](https://github.com/AnswerDotAI/fasthtml/issues/759))
+- Add a small JS snippet to support HTMX requests for toasts
+- support x-forwarded-host as source for redirect ([#755](https://github.com/AnswerDotAI/fasthtml/pull/755)), thanks to [@erikgaas](https://github.com/erikgaas)
+- Overhaul `adv_app` with more modern idioms ([#754](https://github.com/AnswerDotAI/fasthtml/issues/754))
+
+### Bugs Squashed
+
+- Use data instead of json for oauth ([#761](https://github.com/AnswerDotAI/fasthtml/pull/761)), thanks to [@erikgaas](https://github.com/erikgaas)
+
+
 ## 0.12.21
 
 ### New Features
