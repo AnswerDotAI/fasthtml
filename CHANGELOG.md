@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.12.23
+
+### New Features
+
+- Add `__from_request__` ([#765](https://github.com/AnswerDotAI/fasthtml/issues/765))
+- Handle async `__from_request__` ([#766](https://github.com/AnswerDotAI/fasthtml/issues/766))
+
+
 ## 0.12.22
 
 ### New Features
