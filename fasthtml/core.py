@@ -160,7 +160,7 @@ async def _from_body(req, p):
     data = form2dict(await parse_form(req))
     if req.query_params: data = {**data, **dict(req.query_params)}
     ctor = getattr(anno, '__from_request__', None)
-    if ctor: return ctor(data, req)
+    if ctor: return await ctor(data, req) if asyncio.iscoroutinefunction(ctor) else ctor(data, req)
     d = _annotations(anno)
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
