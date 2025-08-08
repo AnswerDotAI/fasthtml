@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.24
+
+### New Features
+
+- Update htmx and ext versions ([#767](https://github.com/AnswerDotAI/fasthtml/issues/767))
+
+
 ## 0.12.23
 
 ### New Features
