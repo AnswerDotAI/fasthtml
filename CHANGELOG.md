@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.25
+
+### New Features
+
+- Use kw args for handler params ([#771](https://github.com/AnswerDotAI/fasthtml/issues/771))
+
+
 ## 0.12.24
 
 ### New Features
