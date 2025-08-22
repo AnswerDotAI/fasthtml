@@ -213,7 +213,7 @@ async def _find_p(req, arg:str, p:Parameter):
     except ValueError: raise HTTPException(404, req.url.path) from None
 
 async def _wrap_req(req, params):
-    return [await _find_p(req, arg, p) for arg,p in params.items()]
+    return {arg:await _find_p(req, arg, p) for arg,p in params.items()}
 
 # %% ../nbs/api/00_core.ipynb
 def flat_xt(lst):
@@ -230,7 +230,7 @@ class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
 
 # %% ../nbs/api/00_core.ipynb
-async def _handle(f, args, **kwargs):
+async def _handle(f, *args, **kwargs):
     return (await f(*args, **kwargs)) if is_async_callable(f) else await run_in_threadpool(f, *args, **kwargs)
 
 # %% ../nbs/api/00_core.ipynb
@@ -260,12 +260,11 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
 
 def _wrap_ws(ws, data, params):
     hdrs = {k.lower().replace('-','_'):v for k,v in data.pop('HEADERS', {}).items()}
-    return [_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()]
+    return {arg:_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()}
 
 # %% ../nbs/api/00_core.ipynb
 async def _send_ws(ws, resp):
     if not resp: return
-#     res = to_xml(resp, indent=fh_cfg.indent) if isinstance(resp, (list,tuple,FT)) or hasattr(resp, '__ft__') else resp
     res = to_xml(resp, indent=fh_cfg.indent)
     await ws.send_text(res)
 
@@ -274,7 +273,7 @@ def _ws_endp(recv, conn=None, disconn=None):
 
     async def _generic_handler(handler, ws, data=None):
         wd = _wrap_ws(ws, loads(data) if data else {}, _params(handler))
-        resp = await _handle(handler, wd)
+        resp = await _handle(handler, **wd)
         if resp: await _send_ws(ws, resp)
 
     async def _connect(self, ws):
@@ -469,7 +468,7 @@ class Redirect:
 async def _wrap_call(f, req, params):
     "Wrap function call with request parameter injection"
     wreq = await _wrap_req(req, params)
-    return await _handle(f, wreq)
+    return await _handle(f, **wreq)
 
 # %% ../nbs/api/00_core.ipynb
 htmx_exts = {
@@ -514,7 +513,7 @@ def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
     async def _f(req, exc):
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (hdrs, ftrs, htmlkw, bodykw))
         req.body_wrap = body_wrap
-        res = await _handle(f, (req, exc))
+        res = await _handle(f, req, exc)
         return _resp(req, res, status_code=status_code)
     return _f
 
