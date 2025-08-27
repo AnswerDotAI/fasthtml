@@ -3,13 +3,9 @@
 document.addEventListener('DOMContentLoaded', function() {
   function fixCommonMarkLinks() {
     document.querySelectorAll('a[data-original-href*="index.html.md"]').forEach(link => {
-      if (link.dataset.originalHref) {
-        link.href = link.dataset.originalHref;
-        console.log('Fixed CommonMark link:', link.href);
-      }
+      if (link.dataset.originalHref) { link.href = link.dataset.originalHref; }
     });
-  }
-  
+  }  
   fixCommonMarkLinks();
 });
 </script>
