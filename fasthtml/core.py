@@ -619,8 +619,8 @@ def _endp(self:FastHTML, f, body_wrap):
         req.body_wrap = body_wrap
         if not resp: resp = await _wrap_call(f, req, sig.parameters)
         for a in self.after:
-            _,*wreq = await _wrap_req(req, _params(a))
-            nr = a(resp, *wreq)
+            wreq = await _wrap_req(req, _params(a))
+            nr = a(*wreq.values())
             if nr: resp = nr
         return _resp(req, resp, sig.return_annotation)
     return _f
