@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.26
+
+### Bugs Squashed
+
+- update afterware arg parsing ([#777](https://github.com/AnswerDotAI/fasthtml/pull/777)), thanks to [@comhar](https://github.com/comhar)
+
+
 ## 0.12.25
 
 ### New Features
