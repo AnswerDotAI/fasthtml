@@ -14,6 +14,7 @@ format:
       - cosmo
       - custom.scss
     css: styles.css
+    include-after-body: fix-commonmark.html
     toc: true
     keep-md: true
     canonical-url: true
