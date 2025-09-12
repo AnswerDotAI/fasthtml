@@ -2,7 +2,7 @@ from fasthtml.common import *
 
 db = database('data/todos.db')
 todos = db.t.todos
-if todos not in db.t: todos.create(id=int, title=str, done=bool, pk='id')
+if todos not in db.t: todos.create(id=int, task=str, done=bool, pk='id')
 Todo = todos.dataclass()
 
 id_curr = 'current-todo'
@@ -18,12 +18,12 @@ def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 
 @patch
 def __ft__(self:Todo):
-    show = AX(self.title, f'/todos/{self.id}', id_curr)
+    show = AX(self.task, f'/todos/{self.id}', id_curr)
     edit = AX('edit',     f'/edit/{self.id}' , id_curr)
     dt = ' (done)' if self.done else ''
     return Li(show, dt, ' | ', edit, id=tid(self.id))
 
-def mk_input(**kw): return Input(id="new-title", name="title", placeholder="New Todo", **kw)
+def mk_input(**kw): return Input(id="new-task", name="task", placeholder="New Todo", **kw)
 def clr_details(): return Div(hx_swap_oob='innerHTML', id=id_curr)
 
 @rt("/")
@@ -44,7 +44,7 @@ def post(todo:Todo): return todos.insert(todo), mk_input(hx_swap_oob='true')
 
 @rt("/edit/{id}")
 def get(id:int):
-    res = Form(Group(Input(id="title"), Button("Save")),
+    res = Form(Group(Input(id="task"), Button("Save")),
         Hidden(id="id"), CheckboxX(id="done", label='Done'),
         hx_put="/", target_id=tid(id), id="edit")
     return fill_form(res, todos[id])
@@ -57,7 +57,7 @@ def get(id:int):
     todo = todos[id]
     btn = Button('delete', hx_delete=f'/todos/{todo.id}',
                  target_id=tid(todo.id), hx_swap="outerHTML")
-    return Div(Div(todo.title), btn)
+    return Div(Div(todo.task), btn)
 
 serve()
 

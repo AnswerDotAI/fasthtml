@@ -106,8 +106,7 @@ def _form_arg(k, v, d):
 class HttpHeader: k:str;v:str
 
 # %% ../nbs/api/00_core.ipynb
-def _to_htmx_header(s):
-    return 'HX-' + s.replace('_', '-').title()
+def _to_htmx_header(s): return 'HX-' + s.replace('_', '-').title()
 
 htmx_resps = dict(location=None, push_url=None, redirect=None, refresh=None, replace_url=None,
                  reswap=None, retarget=None, reselect=None, trigger=None, trigger_after_settle=None, trigger_after_swap=None)
@@ -126,7 +125,7 @@ def _annotations(anno):
     return get_annotations(anno)
 
 # %% ../nbs/api/00_core.ipynb
-def _is_body(anno): return issubclass(anno, (dict,ns)) or _annotations(anno)
+def _is_body(anno): return issubclass(anno, (dict,ns)) or hasattr(anno,'__from_request__') or _annotations(anno)
 
 # %% ../nbs/api/00_core.ipynb
 def _formitem(form, k):
@@ -156,11 +155,13 @@ async def parse_form(req: Request) -> FormData:
 
 # %% ../nbs/api/00_core.ipynb
 async def _from_body(req, p):
+    "Parse request form/query data and create an instance of the annotated parameter type"
     anno = p.annotation
-    # Get the fields and types of type `anno`, if available
-    d = _annotations(anno)
     data = form2dict(await parse_form(req))
     if req.query_params: data = {**data, **dict(req.query_params)}
+    ctor = getattr(anno, '__from_request__', None)
+    if ctor: return await ctor(data, req) if asyncio.iscoroutinefunction(ctor) else ctor(data, req)
+    d = _annotations(anno)
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
 
@@ -212,7 +213,7 @@ async def _find_p(req, arg:str, p:Parameter):
     except ValueError: raise HTTPException(404, req.url.path) from None
 
 async def _wrap_req(req, params):
-    return [await _find_p(req, arg, p) for arg,p in params.items()]
+    return {arg:await _find_p(req, arg, p) for arg,p in params.items()}
 
 # %% ../nbs/api/00_core.ipynb
 def flat_xt(lst):
@@ -229,7 +230,7 @@ class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
 
 # %% ../nbs/api/00_core.ipynb
-async def _handle(f, args, **kwargs):
+async def _handle(f, *args, **kwargs):
     return (await f(*args, **kwargs)) if is_async_callable(f) else await run_in_threadpool(f, *args, **kwargs)
 
 # %% ../nbs/api/00_core.ipynb
@@ -240,6 +241,7 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
         if issubclass(anno, HtmxHeaders): return _get_htmx(hdrs)
         if issubclass(anno, Starlette): return ws.scope['app']
         if issubclass(anno, WebSocket): return ws
+        if issubclass(anno, dict): return data
     if anno is empty:
         if arg.lower()=='ws': return ws
         if arg.lower()=='scope': return dict2obj(ws.scope)
@@ -258,12 +260,11 @@ def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
 
 def _wrap_ws(ws, data, params):
     hdrs = {k.lower().replace('-','_'):v for k,v in data.pop('HEADERS', {}).items()}
-    return [_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()]
+    return {arg:_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()}
 
 # %% ../nbs/api/00_core.ipynb
 async def _send_ws(ws, resp):
     if not resp: return
-#     res = to_xml(resp, indent=fh_cfg.indent) if isinstance(resp, (list,tuple,FT)) or hasattr(resp, '__ft__') else resp
     res = to_xml(resp, indent=fh_cfg.indent)
     await ws.send_text(res)
 
@@ -272,7 +273,7 @@ def _ws_endp(recv, conn=None, disconn=None):
 
     async def _generic_handler(handler, ws, data=None):
         wd = _wrap_ws(ws, loads(data) if data else {}, _params(handler))
-        resp = await _handle(handler, wd)
+        resp = await _handle(handler, **wd)
         if resp: await _send_ws(ws, resp)
 
     async def _connect(self, ws):
@@ -305,10 +306,12 @@ def signal_shutdown():
 
 # %% ../nbs/api/00_core.ipynb
 def uri(_arg, **kwargs):
+    "Create a URI by URL-encoding `_arg` and appending query parameters from `kwargs`"
     return f"{quote(_arg)}/{urlencode(kwargs, doseq=True)}"
 
 # %% ../nbs/api/00_core.ipynb
 def decode_uri(s):
+    "Decode a URI created by `uri()` back into argument and keyword dict"
     arg,_,kw = s.partition('/')
     return unquote(arg), {k:v[0] for k,v in parse_qs(kw).items()}
 
@@ -335,6 +338,7 @@ def url_path_for(self:HTTPConnection, name: str, **path_params):
 _verbs = dict(get='hx-get', post='hx-post', put='hx-post', delete='hx-delete', patch='hx-patch', link='href')
 
 def _url_for(req, t):
+    "Generate URL for route `t` using request `req`"
     if callable(t): t = t.__routename__
     kw = {}
     if t.find('/')>-1 and (t.find('?')<0 or t.find('/')<t.find('?')): t,kw = decode_uri(t)
@@ -342,6 +346,7 @@ def _url_for(req, t):
     return f"{req.url_path_for(t, **kw)}{m}{q}"
 
 def _find_targets(req, resp):
+    "Find and convert route targets in response attributes to URLs"
     if isinstance(resp, tuple):
         for o in resp: _find_targets(req, o)
     if isinstance(resp, FT):
@@ -351,12 +356,14 @@ def _find_targets(req, resp):
             if t: resp.attrs[v] = _url_for(req, t)
 
 def _apply_ft(o):
+    "Apply FastTag transformation recursively to object `o`"
     if isinstance(o, tuple): o = tuple(_apply_ft(c) for c in o)
     if hasattr(o, '__ft__'): o = o.__ft__()
     if isinstance(o, FT): o.children = tuple(_apply_ft(c) for c in o.children)
     return o
 
 def _to_xml(req, resp, indent):
+    "Convert response to XML string with target URL resolution"
     resp = _apply_ft(resp)
     _find_targets(req, resp)
     return to_xml(resp, indent)
@@ -366,7 +373,7 @@ _iter_typs = (tuple,list,map,filter,range,types.GeneratorType)
 
 # %% ../nbs/api/00_core.ipynb
 def flat_tuple(o):
-    "Flatten lists"
+    "Flatten nested iterables into a single tuple"
     result = []
     if not isinstance(o,_iter_typs): o=[o]
     o = list(o)
@@ -391,11 +398,13 @@ def respond(req, heads, bdy):
 
 # %% ../nbs/api/00_core.ipynb
 def is_full_page(req, resp):
+    "Check if response should be rendered as full page or fragment"
     if resp and any(getattr(o, 'tag', '')=='html' for o in resp): return True
     return 'hx-request' in req.headers and 'hx-history-restore-request' not in req.headers
 
 # %% ../nbs/api/00_core.ipynb
 def _part_resp(req, resp):
+    "Partition response into HTTP headers, background tasks, and content"
     resp = flat_tuple(resp)
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
@@ -412,6 +421,7 @@ def _part_resp(req, resp):
 
 # %% ../nbs/api/00_core.ipynb
 def _xt_cts(req, resp):
+    "Extract content and headers, render as full page or fragment"
     hdr_tags = 'title','meta','link','style','base'
     resp = tuplify(resp)
     heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
@@ -422,10 +432,13 @@ def _xt_cts(req, resp):
     return _to_xml(req, resp, indent=fh_cfg.indent)
 
 # %% ../nbs/api/00_core.ipynb
-def _is_ft_resp(resp): return isinstance(resp, _iter_typs+(HttpHeader,FT)) or hasattr(resp, '__ft__')
+def _is_ft_resp(resp):
+    "Check if response is a FastTag-compatible type"
+    return isinstance(resp, _iter_typs+(HttpHeader,FT)) or hasattr(resp, '__ft__')
 
 # %% ../nbs/api/00_core.ipynb
 def _resp(req, resp, cls=empty, status_code=200):
+    "Create appropriate HTTP response from request and response data"
     if not resp: resp=''
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if cls in (Any,FT): cls=empty
@@ -453,16 +466,17 @@ class Redirect:
 
 # %% ../nbs/api/00_core.ipynb
 async def _wrap_call(f, req, params):
+    "Wrap function call with request parameter injection"
     wreq = await _wrap_req(req, params)
-    return await _handle(f, wreq)
+    return await _handle(f, **wreq)
 
 # %% ../nbs/api/00_core.ipynb
 htmx_exts = {
     "morph": "https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js",
-    "head-support": "https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.3/head-support.js",
-    "preload": "https://cdn.jsdelivr.net/npm/htmx-ext-preload@2.1.0/preload.js",
+    "head-support": "https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.4/head-support.js",
+    "preload": "https://cdn.jsdelivr.net/npm/htmx-ext-preload@2.1.1/preload.js",
     "class-tools": "https://cdn.jsdelivr.net/npm/htmx-ext-class-tools@2.0.1/class-tools.js",
-    "loading-states": "https://cdn.jsdelivr.net/npm/htmx-ext-loading-states@2.0.0/loading-states.js",
+    "loading-states": "https://cdn.jsdelivr.net/npm/htmx-ext-loading-states@2.0.1/loading-states.js",
     "multi-swap": "https://cdn.jsdelivr.net/npm/htmx-ext-multi-swap@2.0.0/multi-swap.js",
     "path-deps": "https://cdn.jsdelivr.net/npm/htmx-ext-path-deps@2.0.0/path-deps.js",
     "remove-me": "https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js",
@@ -471,7 +485,7 @@ htmx_exts = {
 }
 
 # %% ../nbs/api/00_core.ipynb
-htmxsrc   = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js")
+htmxsrc   = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js")
 fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
@@ -480,6 +494,7 @@ charset   = Meta(charset="utf-8")
 
 # %% ../nbs/api/00_core.ipynb
 def get_key(key=None, fname='.sesskey'):
+    "Get session key from `key` param or read/create from file `fname`"
     if key: return key
     fname = Path(fname)
     if fname.exists(): return fname.read_text()
@@ -488,14 +503,17 @@ def get_key(key=None, fname='.sesskey'):
     return key
 
 # %% ../nbs/api/00_core.ipynb
-def _list(o): return [] if not o else list(o) if isinstance(o, (tuple,list)) else [o]
+def _list(o):
+    "Wrap non-list item in a list, returning empty list if None"
+    return [] if not o else list(o) if isinstance(o, (tuple,list)) else [o]
 
 # %% ../nbs/api/00_core.ipynb
 def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
+    "Wrap exception handler with FastHTML request processing"
     async def _f(req, exc):
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (hdrs, ftrs, htmlkw, bodykw))
         req.body_wrap = body_wrap
-        res = await _handle(f, (req, exc))
+        res = await _handle(f, req, exc)
         return _resp(req, res, status_code=status_code)
     return _f
 
@@ -572,6 +590,7 @@ class FastHTML(Starlette):
 # %% ../nbs/api/00_core.ipynb
 @patch
 def add_route(self:FastHTML, route):
+    "Add or replace a route in the FastHTML app"
     route.methods = [m.upper() for m in listify(route.methods)]
     self.router.routes = [r for r in self.router.routes if not
                    (r.path==route.path and r.name == route.name and
@@ -584,6 +603,7 @@ all_meths = 'get post put delete patch head trace options'.split()
 # %% ../nbs/api/00_core.ipynb
 @patch
 def _endp(self:FastHTML, f, body_wrap):
+    "Create endpoint wrapper with before/after middleware processing"
     sig = signature_ex(f, True)
     async def _f(req):
         resp = None
@@ -599,8 +619,8 @@ def _endp(self:FastHTML, f, body_wrap):
         req.body_wrap = body_wrap
         if not resp: resp = await _wrap_call(f, req, sig.parameters)
         for a in self.after:
-            _,*wreq = await _wrap_req(req, _params(a))
-            nr = a(resp, *wreq)
+            wreq = await _wrap_req(req, _params(a))
+            nr = a(**wreq)
             if nr: resp = nr
         return _resp(req, resp, sig.return_annotation)
     return _f
@@ -608,6 +628,7 @@ def _endp(self:FastHTML, f, body_wrap):
 # %% ../nbs/api/00_core.ipynb
 @patch
 def _add_ws(self:FastHTML, func, path, conn, disconn, name, middleware):
+    "Add websocket route to FastHTML app"
     endp = _ws_endp(func, conn, disconn)
     route = WebSocketRoute(path, endpoint=endp, name=name, middleware=middleware)
     route.methods = ['ws']
@@ -623,6 +644,7 @@ def ws(self:FastHTML, path:str, conn=None, disconn=None, name=None, middleware=N
 
 # %% ../nbs/api/00_core.ipynb
 def _mk_locfunc(f,p):
+    "Create a location function wrapper with route path and to() method"
     class _lf:
         def __init__(self): update_wrapper(self, f)
         def __call__(self, *args, **kw): return f(*args, **kw)
@@ -638,6 +660,7 @@ def nested_name(f):
 # %% ../nbs/api/00_core.ipynb
 @patch
 def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body_wrap):
+    "Add HTTP route to FastHTML app with automatic method detection"
     n,fn,p = name,nested_name(func),None if callable(path) else path
     if methods: m = [methods] if isinstance(methods,str) else methods
     elif fn in all_meths and p is not None: m = [fn]
@@ -662,6 +685,7 @@ for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o
 # %% ../nbs/api/00_core.ipynb
 @patch
 def set_lifespan(self:FastHTML, value):
+    "Set the lifespan context manager for the FastHTML app"
     if inspect.isasyncgenfunction(value): value = contextlib.asynccontextmanager(value)
     self.router.lifespan_context = value
 

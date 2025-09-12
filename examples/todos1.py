@@ -1,10 +1,10 @@
 from fasthtml.common import *
 
-app,rt,todos,Todo = fast_app('data/todos.db', id=int, title=str, done=bool, pk='id')
+app,rt,todos,Todo = fast_app('data/todos.db', id=int, task=str, done=bool, pk='id')
 
 def TodoRow(todo):
     return Li(
-        A(todo.title, href=f'/todos/{todo.id}'),
+        A(todo.task, href=f'/todos/{todo.id}'),
         (' (done)' if todo.done else '') + ' | ',
         A('edit',     href=f'/edit/{todo.id}'),
         id=f'todo-{todo.id}'
@@ -13,7 +13,7 @@ def TodoRow(todo):
 def home():
     add = Form(
             Group(
-                Input(name="title", placeholder="New Todo"),
+                Input(name="task", placeholder="New Todo"),
                 Button("Add")
             ), action="/", method='post'
         )
@@ -46,7 +46,7 @@ def get(id:int):
 def get(id:int):
     res = Form(
             Group(
-                Input(id="title"),
+                Input(id="task"),
                 Button("Save")
             ),
             Hidden(id="id"),
@@ -60,7 +60,7 @@ def get(id:int):
 @rt("/todos/{id}")
 def get(id:int):
     contents = Div(
-        Div(todos[id].title),
+        Div(todos[id].task),
         A('Delete', href=f'/remove?id={id}', role="button"),
         A('Back', href='/', role="button")
     )
