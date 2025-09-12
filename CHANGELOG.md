@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.27
+
+### Bugs Squashed
+
+- Correct afterware resp objects ([#778](https://github.com/AnswerDotAI/fasthtml/pull/778)), thanks to [@erikgaas](https://github.com/erikgaas)
+
+
 ## 0.12.26
 
 ### Bugs Squashed
