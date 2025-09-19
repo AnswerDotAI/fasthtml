@@ -2,6 +2,15 @@
 
 <!-- do not remove -->
 
+## 0.12.28
+
+
+### Bugs Squashed
+
+- fix broken toasts ([#782](https://github.com/AnswerDotAI/fasthtml/pull/782)), thanks to [@comhar](https://github.com/comhar)
+- Fix Railway CLI command ([#781](https://github.com/AnswerDotAI/fasthtml/pull/781)), thanks to [@knollfear](https://github.com/knollfear)
+
+
 ## 0.12.27
 
 ### Bugs Squashed
