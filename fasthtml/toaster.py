@@ -51,7 +51,7 @@ def add_toast(sess, message: str, typ: str = "info", dismiss: bool = False):
 
 def render_toasts(sess):
     toasts = [Toast(msg, typ, dismiss, sess['toast_duration']) for msg, typ, dismiss in sess.pop(sk, [])]
-    return Div(*toasts, hx_swap_oob=f'beforeend:#{tcid}')
+    return Div(*toasts, id=tcid, hx_swap_oob=f'beforeend:#{tcid}')
 
 def toast_after(resp, req, sess):
     if sk in sess and (not resp or isinstance(resp, (tuple,FT,FtResponse))):
