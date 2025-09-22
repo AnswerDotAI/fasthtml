@@ -8,7 +8,8 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt',
            'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond',
            'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client',
-           'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid']
+           'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'MiddlewareBase', 'FtResponse',
+           'unqid']
 
 # %% ../nbs/api/00_core.ipynb
 import json,uuid,inspect,types,signal,asyncio,threading,inspect,random,contextlib
@@ -819,6 +820,13 @@ def static_route(self:FastHTML, ext='', prefix='/', static_path='.'):
     "Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')"
     @self.route(f"{prefix}{{fname:path}}{ext}")
     async def get(fname:str): return FileResponse(f'{static_path}/{fname}{ext}')
+
+# %% ../nbs/api/00_core.ipynb
+class StaticNoCache(StaticFiles):
+    def file_response(self, *args, **kwargs):
+        resp = super().file_response(*args, **kwargs)
+        resp.headers.setdefault("Cache-Control", "no-cache")
+        return resp
 
 # %% ../nbs/api/00_core.ipynb
 class MiddlewareBase:
