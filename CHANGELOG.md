@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.29
+
+### New Features
+
+- Add `StaticNoCache` ([#783](https://github.com/AnswerDotAI/fasthtml/issues/783))
+
+
 ## 0.12.28
 
 
