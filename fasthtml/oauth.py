@@ -184,7 +184,9 @@ class OAuth:
 
         @app.get(redir_path)
         def redirect(req, session, code:str=None, error:str=None, state:str=None):
-            if not code: session['oauth_error']=error; return RedirectResponse(self.error_path, status_code=303)
+            if not code:
+                session['oauth_error']=error
+                return RedirectResponse(self.error_path, status_code=303)
             scheme = 'http' if url_match(req,self.http_patterns) or not self.https else 'https'
             base_url = f"{scheme}://{get_host(req)}"
             info = AttrDictDefault(cli.retr_info(code, base_url+redir_path))
