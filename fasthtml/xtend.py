@@ -5,7 +5,9 @@
 # %% auto 0
 __all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces',
            'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow',
-           'run_js', 'HtmxOn', 'jsd', 'Fragment', 'Titled', 'Socials', 'YouTubeEmbed', 'Favicon', 'clear', 'with_sid']
+           'run_js', 'HtmxOn', 'jsd', 'Fragment', 'Titled', 'Socials', 'YouTubeEmbed', 'Favicon', 'clear', 'with_sid',
+           'LdJson', 'LdContactPoint', 'LdOrg', 'LdWebsite', 'LdCourseInstance', 'LdCourse', 'robots_txt',
+           'sitemap_url', 'sitemap_xml']
 
 # %% ../nbs/api/02_xtend.ipynb
 from dataclasses import dataclass, asdict
@@ -224,18 +226,13 @@ def YouTubeEmbed(video_id:str, *, width:int=560, height:int=315, start_time:int=
     print(f"https://www.youtube.com/embed/{video_id}{query_string}")
     return Div(
         Iframe(
-            width=width,
-            height=height,
+            width=width, height=height,
             src=f"https://www.youtube.com/embed/{video_id}{query_string}",
-            title=title,
-            frameborder="0",
+            title=title, frameborder="0",
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
-            referrerpolicy="strict-origin-when-cross-origin",
-            allowfullscreen='',
+            referrerpolicy="strict-origin-when-cross-origin", allowfullscreen='',
             **kwargs
-        ),
-        cls=cls
-    )
+        ), cls=cls)
 
 # %% ../nbs/api/02_xtend.ipynb
 def Favicon(light_icon, dark_icon):
@@ -268,3 +265,88 @@ htmx.on("htmx:configRequest", (e) => {
 def with_sid(app, dest, path='/'):
     @app.route(path)
     def get(): return Div(hx_get=dest, hx_trigger=f'load delay:0.001s', hx_swap='outerHTML')
+
+# %% ../nbs/api/02_xtend.ipynb
+def LdJson(typ, data:dict, script=False, extra=None, **kwargs)->FT:
+    "A script tag containing JSON-LD structured data"
+    cts = {'@type':typ, "@context": "https://schema.org"} | data | (extra or {})
+    if not script: return cts
+    return Script(dumps(cts, indent=1), type="application/ld+json", **kwargs)
+
+# %% ../nbs/api/02_xtend.ipynb
+def LdContactPoint(contact_type:str, email:str=None, phone:str=None, script=False, **extra)->dict:
+    "Create a ContactPoint for JSON-LD"
+    data = {"contactType": contact_type}
+    if email: data["email"] = email  
+    if phone: data["telephone"] = phone
+    return LdJson("ContactPoint", data, extra=extra, script=script)
+
+# %% ../nbs/api/02_xtend.ipynb
+def LdOrg(name:str, url:str=None, logo:str=None, alt_name:str=None, 
+          same_as:list=None, contact_points:list=None, script=False, **extra)->dict:
+    "JSON-LD Organization structured data"
+    data = {"name": name}
+    if alt_name: data["alternateName"] = alt_name
+    if url: data["url"] = url
+    if logo: data["logo"] = logo
+    if same_as: data["sameAs"] = same_as
+    if contact_points: data["contactPoint"] = contact_points
+    return LdJson("Organization", data, extra=extra, script=script)
+
+# %% ../nbs/api/02_xtend.ipynb
+def LdWebsite(name:str, url:str, script=False, **extra)->dict:
+    "Create JSON-LD WebSite structured data"
+    data = {"name": name, "url": url}
+    return LdJson("WebSite", data, extra=extra, script=script)
+
+# %% ../nbs/api/02_xtend.ipynb
+def LdCourseInstance(course_mode:str="Online", start_date:str=None, end_date:str=None, 
+                     location:dict=None, instructor:dict=None, script=False, **extra)->dict:
+    "Create a CourseInstance for JSON-LD"
+    data = {"courseMode": course_mode}
+    if start_date: data["startDate"] = start_date
+    if end_date: data["endDate"] = end_date  
+    if location: data["location"] = location
+    if instructor: data["instructor"] = instructor
+    return LdJson("CourseInstance", data, extra=extra, script=script)
+
+# %% ../nbs/api/02_xtend.ipynb
+def LdCourse(name:str, description:str, provider:dict, course_instance:dict=None, script=False, **extra)->dict:
+    "Create JSON-LD Course structured data"
+    data = { "name": name, "description": description, "provider": provider }
+    if course_instance: data["hasCourseInstance"] = course_instance
+    return LdJson("Course", data, extra=extra, script=script)
+
+# %% ../nbs/api/02_xtend.ipynb
+def robots_txt(app, allow_all=True, disallow_paths=None, sitemap_url=None, crawl_delay=None):
+    "Add a /robots.txt route to the app"
+    @app.route("/robots.txt")
+    def get():
+        lines = ["User-agent: *"]
+        if allow_all and not disallow_paths: lines.append("Allow: /")
+        elif disallow_paths: lines.extend(f"Disallow: {path}" for path in disallow_paths)
+        else: lines.append("Disallow: /")
+        if crawl_delay: lines.append(f"Crawl-delay: {crawl_delay}")
+        if sitemap_url: lines.append(f"Sitemap: {sitemap_url}")
+        return "\n".join(lines)
+
+# %% ../nbs/api/02_xtend.ipynb
+from fastcore.xml import Url,Loc,Lastmod,Changefreq,Priority,Urlset
+
+# %% ../nbs/api/02_xtend.ipynb
+def sitemap_url(url_info, loc_base=""):
+    "Create a sitemap URL element from url_info (string or dict)"
+    if isinstance(url_info, str): return Url(Loc(loc_base + url_info))
+    loc = loc_base + url_info['loc']
+    url_elem = [Loc(loc)]
+    if 'lastmod' in url_info: url_elem.append(Lastmod(url_info['lastmod']))
+    if 'changefreq' in url_info: url_elem.append(Changefreq(url_info['changefreq']))
+    if 'priority' in url_info: url_elem.append(Priority(str(url_info['priority'])))
+    return Url(*url_elem)
+
+def sitemap_xml(app, urls, loc_base=""):
+    "Add a /sitemap.xml route to the app with list of URLs"
+    @app.route("/sitemap.xml")
+    def get():
+        urlset = [sitemap_url(url_info, loc_base) for url_info in urls]
+        return Urlset(*urlset, xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
