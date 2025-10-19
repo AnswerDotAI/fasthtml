@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.30
+
+### New Features
+
+- Add LsJson, robots.txt, and sitemap.xml ([#786](https://github.com/AnswerDotAI/fasthtml/issues/786))
+
+
 ## 0.12.29
 
 ### New Features
