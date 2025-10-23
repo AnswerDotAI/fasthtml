@@ -85,7 +85,7 @@ class JupyUvi:
         store_attr(but='start')
         self.server = None
         if start: self.start()
-        htmx_config_port(port)
+        if not os.environ.get('IN_SOLVEIT'): htmx_config_port(port)
 
     def start(self):
         self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
