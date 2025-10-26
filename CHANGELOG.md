@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.31
+
+### New Features
+
+- Use https for canonical ([#789](https://github.com/AnswerDotAI/fasthtml/issues/789))
+
+
 ## 0.12.30
 
 ### New Features
