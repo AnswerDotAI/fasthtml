@@ -421,6 +421,11 @@ def _part_resp(req, resp):
     return resp,kw
 
 # %% ../nbs/api/00_core.ipynb
+def _canonical(req):
+    if not req.app.canonical: return []
+    url = str(getattr(req, 'canonical', req.url)).replace('http://', 'https://', 1)
+    return [Link(rel="canonical", href=url)]
+
 def _xt_cts(req, resp):
     "Extract content and headers, render as full page or fragment"
     hdr_tags = 'title','meta','link','style','base'
@@ -428,8 +433,7 @@ def _xt_cts(req, resp):
     heads,bdy = partition(resp, lambda o: getattr(o, 'tag', '') in hdr_tags)
     if not is_full_page(req, resp):
         title = [] if any(getattr(o, 'tag', '')=='title' for o in heads) else [Title(req.app.title)]
-        canonical = [Link(rel="canonical", href=getattr(req, 'canonical', req.url))] if req.app.canonical else []
-        resp = respond(req, [*heads, *title, *canonical], bdy)
+        resp = respond(req, [*heads, *title, *_canonical(req)], bdy)
     return _to_xml(req, resp, indent=fh_cfg.indent)
 
 # %% ../nbs/api/00_core.ipynb
@@ -481,12 +485,13 @@ htmx_exts = {
     "multi-swap": "https://cdn.jsdelivr.net/npm/htmx-ext-multi-swap@2.0.0/multi-swap.js",
     "path-deps": "https://cdn.jsdelivr.net/npm/htmx-ext-path-deps@2.0.0/path-deps.js",
     "remove-me": "https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js",
+    "debug": "https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js",
     "ws": "https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.3/ws.js",
     "chunked-transfer": "https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js"
 }
 
 # %% ../nbs/api/00_core.ipynb
-htmxsrc   = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js")
+htmxsrc   = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.js")
 fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
