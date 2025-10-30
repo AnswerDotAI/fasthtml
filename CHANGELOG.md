@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.33
+
+### New Features
+
+- `render_ft` kw param ([#791](https://github.com/AnswerDotAI/fasthtml/issues/791))
+
+
 ## 0.12.32
 
 ### New Features
