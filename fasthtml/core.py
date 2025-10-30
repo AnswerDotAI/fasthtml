@@ -650,13 +650,17 @@ def ws(self:FastHTML, path:str, conn=None, disconn=None, name=None, middleware=N
     return f
 
 # %% ../nbs/api/00_core.ipynb
-def _mk_locfunc(f,p):
+def _mk_locfunc(f, p, app=None):
     "Create a location function wrapper with route path and to() method"
     class _lf:
-        def __init__(self): update_wrapper(self, f)
+        def __init__(self):
+            update_wrapper(self, f)
+            self.app = app
+
         def __call__(self, *args, **kw): return f(*args, **kw)
         def to(self, **kw): return qp(p, **kw)
         def __str__(self): return p
+
     return _lf()
 
 # %% ../nbs/api/00_core.ipynb
@@ -676,7 +680,7 @@ def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body
     if not p: p = '/'+('' if fn=='index' else fn)
     route = Route(p, endpoint=self._endp(func, body_wrap or self.body_wrap), methods=m, name=n, include_in_schema=include_in_schema)
     self.add_route(route)
-    lf = _mk_locfunc(func, p)
+    lf = _mk_locfunc(func, p, app=self)
     lf.__routename__ = n
     return lf
 
