@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.32
+
+### New Features
+
+- Use TestClient to render HTMX components ([#790](https://github.com/AnswerDotAI/fasthtml/issues/790))
+
+
 ## 0.12.31
 
 ### New Features
