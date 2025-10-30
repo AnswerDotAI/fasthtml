@@ -62,9 +62,12 @@ def show(*s, **kwargs):
     return _show(*s, **kwargs)
 
 # %% ../nbs/api/06_jupyter.ipynb
-def render_ft():
+def render_ft(**kw):
+    "Call once in a notebook or solveit dialog to auto-render components"
     @patch
-    def _repr_markdown_(self:FT): return to_xml(Div(self, Script('if (window.htmx) htmx.process(document.body)')))
+    def _repr_markdown_(self:FT):
+        scr_proc = Script('if (window.htmx) htmx.process(document.body)')
+        return to_xml(Div(self, scr_proc, **kw))
 
 # %% ../nbs/api/06_jupyter.ipynb
 def htmx_config_port(port=8000):
