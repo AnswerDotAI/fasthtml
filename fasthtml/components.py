@@ -127,6 +127,7 @@ def File(fname):
 # %% ../nbs/api/01_components.ipynb
 def show(ft, *rest, iframe=False, height='auto', style=None):
     "Renders FT Components into HTML within a Jupyter notebook."
+    if isinstance(ft, str): ft = Safe(ft)
     if rest: ft = (ft,)+rest
     res = to_xml(ft)
     if iframe:
