@@ -207,14 +207,14 @@ _re_h2x_attr_key = re.compile(r'^[A-Za-z_-][\w-]*$')
 def html2ft(html, attr1st=False):
     """Convert HTML to an `ft` expression"""
     rev_map = {'class': 'cls', 'for': 'fr'}
-    
+
     def _parse(elm, lvl=0, indent=4):
-        if isinstance(elm, str): return repr(elm.strip()) if elm.strip() else ''
+        if isinstance(elm, str): return repr(elm.strip("\n")) if elm.strip() else ''
         if isinstance(elm, list): return '\n'.join(_parse(o, lvl) for o in elm)
         tag_name = elm.name.capitalize().replace("-", "_")
         if tag_name=='[document]': return _parse(list(elm.children), lvl)
         cts = elm.contents
-        cs = [repr(c.strip()) if isinstance(c, str) else _parse(c, lvl+1)
+        cs = [repr(c.strip("\n")) if isinstance(c, str) else _parse(c, lvl+1)
               for c in cts if str(c).strip()]
         attrs, exotic_attrs  = [], {}
         for key, value in sorted(elm.attrs.items(), key=lambda x: x[0]=='class'):
