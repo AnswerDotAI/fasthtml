@@ -12,7 +12,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'unqid']
 
 # %% ../nbs/api/00_core.ipynb
-import json,uuid,inspect,types,signal,asyncio,threading,inspect,random,contextlib
+import json,uuid,inspect,types,signal,asyncio,threading,inspect,random,contextlib,httpx,itsdangerous
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -30,7 +30,6 @@ from urllib.parse import urlencode, parse_qs, quote, unquote
 from copy import copy,deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
-from httpx import ASGITransport, AsyncClient
 from anyio import from_thread
 from uuid import uuid4, UUID
 from base64 import b85encode,b64encode
@@ -566,7 +565,7 @@ class FastHTML(Starlette):
                  same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
                  body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
-        self.title,self.canonical = title,canonical
+        self.title,self.canonical,self.session_cookie,self.key_fname = title,canonical,session_cookie,key_fname
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         exts = {k:htmx_exts[k] for k in exts}
         htmlkw = htmlkw or {}
@@ -580,9 +579,9 @@ class FastHTML(Starlette):
         on_startup,on_shutdown = listify(on_startup) or None,listify(on_shutdown) or None
         self.lifespan,self.hdrs,self.ftrs = lifespan,hdrs,ftrs
         self.body_wrap,self.before,self.after,self.htmlkw,self.bodykw = body_wrap,before,after,htmlkw,bodykw
-        secret_key = get_key(secret_key, key_fname)
+        self.secret_key = get_key(secret_key, key_fname)
         if sess_cls:
-            sess = Middleware(sess_cls, secret_key=secret_key,session_cookie=session_cookie,
+            sess = Middleware(sess_cls, secret_key=self.secret_key,session_cookie=session_cookie,
                               max_age=max_age, path=sess_path, same_site=same_site,
                               https_only=sess_https_only, domain=sess_domain)
             middleware.append(sess)
@@ -727,7 +726,7 @@ def serve(
 class Client:
     "A simple httpx ASGI client that doesn't require `async`"
     def __init__(self, app, url="http://testserver"):
-        self.cli = AsyncClient(transport=ASGITransport(app), base_url=url)
+        self.cli = httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url=url)
 
     def _sync(self, method, url, **kwargs):
         async def _request(): return await self.cli.request(method, url, **kwargs)
@@ -894,3 +893,14 @@ def devtools_json(self:FastHTML, path=None, uuid=None):
     @self.route(devtools_loc)
     def devtools():
         return dict(workspace=dict(root=path, uuid=uuid))
+
+# %% ../nbs/api/00_core.ipynb
+@patch
+def get_client(self:FastHTML, asink=False, **kw):
+    "Get an httpx client with session cookes set from `**kw`"
+    signer = itsdangerous.TimestampSigner(self.secret_key)
+    data = b64encode(dumps(kw).encode())
+    data = signer.sign(data)
+    client = httpx.AsyncClient() if asink else httpx.Client()
+    client.cookies.update({self.session_cookie: data.decode()})
+    return client
