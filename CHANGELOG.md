@@ -2,6 +2,20 @@
 
 <!-- do not remove -->
 
+## 0.12.34
+
+### New Features
+
+- Add `get_client` ([#800](https://github.com/AnswerDotAI/fasthtml/issues/800))
+- Handle str in `show` ([#796](https://github.com/AnswerDotAI/fasthtml/issues/796))
+
+### Bugs Squashed
+
+- Use updated railway return val ([#798](https://github.com/AnswerDotAI/fasthtml/issues/798))
+- Only strip newlines when parsing strings ([#797](https://github.com/AnswerDotAI/fasthtml/pull/797)), thanks to [@johnowhitaker](https://github.com/johnowhitaker)
+- Fix StreamingResponse handling in `_resp` ([#792](https://github.com/AnswerDotAI/fasthtml/pull/792)), thanks to [@kenfj](https://github.com/kenfj)
+
+
 ## 0.12.33
 
 ### New Features
