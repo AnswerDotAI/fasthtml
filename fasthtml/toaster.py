@@ -7,7 +7,7 @@ tcid='fh-toast-container'
 sk = "toasts"
 toast_css = """
 #fh-toast-container {
-    position: fixed; inset: 20px 0; z-index: 1000; max-width: 80vw;
+    position: fixed; inset: 20px 0; z-index: 1090; max-width: 80vw;
     display: flex; flex-direction: column; align-items: center;
     gap: 10px; pointer-events: none; margin: 0 auto;
 }
