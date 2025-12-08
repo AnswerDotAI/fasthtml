@@ -2,10 +2,12 @@
 
 <!-- do not remove -->
 
-## 0.12.34
+## 0.12.36
 
-### New Features
+### Bugs Squashed
 
+- Bump toast z-index to 1090 so toasts appear above modals ([#807](https://github.com/AnswerDotAI/fasthtml/pull/807)), thanks to [@erikgaas](https://github.com/erikgaas)
+- Fix StreamingResponse handling in `_resp` ([#792](https://github.com/AnswerDotAI/fasthtml/pull/792)), thanks to [@kenfj](https://github.com/kenfj)
 - Add `get_client` ([#800](https://github.com/AnswerDotAI/fasthtml/issues/800))
 - Handle str in `show` ([#796](https://github.com/AnswerDotAI/fasthtml/issues/796))
 
