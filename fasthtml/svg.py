@@ -82,7 +82,7 @@ def transformd(translate=None, scale=None, rotate=None, skewX=None, skewY=None, 
 def Line(x1, y1, x2=0, y2=0, stroke=None, w=None, stroke_width=None, **kwargs):
     "A standard SVG `line` element"
     if w: stroke_width = w
-    return ft_hx('line', x1=x1, y1=y1, x2=x2, y2=y2, stroke=stroke, stroke_width=stroke_width, **kwargs)
+    return ft_svg('line', x1=x1, y1=y1, x2=x2, y2=y2, stroke=stroke, stroke_width=stroke_width, **kwargs)
 
 # %% ../nbs/api/05_svg.ipynb
 @delegates(ft_svg)
