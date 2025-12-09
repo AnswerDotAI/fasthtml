@@ -63,7 +63,7 @@ def fast_app(
         static_path:str=".",  # Where the static file route points to, defaults to root dir
         body_wrap:callable=noop_body, # FT wrapper for body contents
         nb_hdrs:bool=False, # If in notebook include headers inject headers in notebook DOM?
-        **kwargs)->Any:
+        **kwargs):
     "Create a FastHTML or FastHTMLWithLiveReload app."
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
