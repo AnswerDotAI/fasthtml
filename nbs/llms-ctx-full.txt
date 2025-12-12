@@ -7058,7 +7058,7 @@ you can disable it entirely by adding this to your settings:
 ## Why the distinctive coding style?
 
 FastHTML coding style is the [fastai coding
-style](https://fast.ai/docs/dev/style.html).
+style](https://docs.fast.ai/dev/style.html).
 
 If you are coming from a data science background the **fastai coding
 style** may already be your preferred style.
