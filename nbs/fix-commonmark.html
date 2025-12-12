@@ -1,8 +1,11 @@
 <script type="application/javascript">
 // Fix CommonMark link bug where Quarto JS changes index.html.md to .md
+// Use setTimeout to run after Quarto's JS has finished mangling the href
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('a[href=".md"]').forEach(link => {
-    link.href = 'index.html.md';
-  });
+  setTimeout(function() {
+    document.querySelectorAll('a[data-original-href*="index.html.md"]').forEach(link => {
+      if (link.dataset.originalHref) { link.href = link.dataset.originalHref; }
+    });
+  }, 100);
 });
 </script>
