@@ -10,7 +10,7 @@ __all__ = ['http_patterns', 'GoogleAppClient', 'GitHubAppClient', 'HuggingFaceCl
 from .common import *
 from oauthlib.oauth2 import WebApplicationClient
 from urllib.parse import urlparse, urlencode, parse_qs, quote, unquote
-import secrets, httpx, time, jwt
+import secrets, httpx, time
 
 # %% ../nbs/api/08_oauth.ipynb
 class _AppClient(WebApplicationClient):
@@ -125,6 +125,7 @@ class AppleAppClient(_AppClient):
     
     @property
     def client_secret(self):
+        import jwt
         now = int(time.time())
         payload = dict(iss=self.team_id, iat=now, exp=now + 86400 * 180, aud='https://appleid.apple.com', sub=self.client_id)
         return jwt.encode(payload, self.private_key, algorithm='ES256', headers={'kid': self.key_id})
@@ -134,6 +135,7 @@ class AppleAppClient(_AppClient):
     
     def get_info(self, token=None):
         "Decode user info from the ID token"
+        import jwt
         if token: self.token = token
         return jwt.decode(self.token.get('id_token'), options={"verify_signature": False})
 
