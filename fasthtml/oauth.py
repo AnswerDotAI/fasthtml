@@ -10,7 +10,7 @@ __all__ = ['http_patterns', 'GoogleAppClient', 'GitHubAppClient', 'HuggingFaceCl
 from .common import *
 from oauthlib.oauth2 import WebApplicationClient
 from urllib.parse import urlparse, urlencode, parse_qs, quote, unquote
-import secrets, httpx
+import secrets, httpx, time, jwt
 
 # %% ../nbs/api/08_oauth.ipynb
 class _AppClient(WebApplicationClient):
