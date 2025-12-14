@@ -129,6 +129,9 @@ class AppleAppClient(_AppClient):
         payload = dict(iss=self.team_id, iat=now, exp=now + 86400 * 180, aud='https://appleid.apple.com', sub=self.client_id)
         return jwt.encode(payload, self.private_key, algorithm='ES256', headers={'kid': self.key_id})
     
+    @client_secret.setter
+    def client_secret(self, value): pass
+    
     def get_info(self, token=None):
         "Decode user info from the ID token"
         if token: self.token = token
