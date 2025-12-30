@@ -63,9 +63,9 @@ def show(*s, **kwargs):
 
 # %% ../nbs/api/06_jupyter.ipynb
 def render_ft(**kw):
-    "Call once in a notebook or solveit dialog to auto-render components"
+    "Call once in a notebook or solveit dialog to auto-render components with HTMX support"
     @patch
-    def _repr_markdown_(self:FT):
+    def _repr_html_(self:FT):
         scr_proc = Script('if (window.htmx) htmx.process(document.body)')
         return to_xml(Div(self, scr_proc, **kw))
 
