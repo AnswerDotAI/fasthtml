@@ -2,6 +2,366 @@
 
 <!-- do not remove -->
 
+## 0.12.37
+
+### New Features
+
+- Add Apple sign in ([#813](https://github.com/AnswerDotAI/fasthtml/pull/813)), thanks to [@erikgaas](https://github.com/erikgaas)
+  - Adding sign in with apple. It is slightly different because it requires parsing a p8 file and a post request for the redirect if you want name and email.
+
+Adding PyJWT as a req. It's small and fairly ubiquitous, but I'm down to reconsider.
+
+Fun fact apple sign in does not work on localhost which is super annoying, but you can use solveit easily to test it out : )
+
+- [FEATURE] ([#793](https://github.com/AnswerDotAI/fasthtml/issues/793))
+  - Hi my feature request has to do with how we interact with database tables
+
+Currently although they do implement CRUD I feel very limited in how I can manipulate data and interact with tables. I was wondering if by any chance it's possible to instead just load in databases using pandas and interact with tables as data frames? 
+
+This would make it a lot easier and faster to work with data and python users would likely have an easier time developing with pandas dataframes as their API is more familiar and has a ton of features and documentation
+
+### Bugs Squashed
+
+- Line defaults suppressed inheriting of stroke color from parent elements ([#804](https://github.com/AnswerDotAI/fasthtml/pull/804)), thanks to [@erikgaas](https://github.com/erikgaas)
+  - Fixes #757 
+
+Line defaults suppressed inheriting of stroke color from parent elements.
+
+- [BUG]  SVG Line should not have some default parameters ([#757](https://github.com/AnswerDotAI/fasthtml/issues/757))
+  - in FastHTML 0.12.21 in file ```svg.py``` the ```Line``` is defined with default values for stroke and stroke_width:
+```python
+def Line(x1, y1, x2=0, y2=0, stroke='black', w=None, stroke_width=1, **kwargs): ...
+```
+This results that using a line with only coordinates, will also auto generate:  ```stroke="black" stroke-width="1"```
+This is wrong as it overrides attributes defined in a parent tag like ```<g>```. 
+Eg. this will fail to achieve the result of having red and thick lines:
+```python
+G(stroke="red", stroke_width="20" )(
+        Line(x1=0, y1=0, x2=100, y2=100),
+        Line(x1=0, y1=0, x2=10, y2=100),
+    )
+```
+Instead of desired outputs like:
+```svg
+<line x1="0" y1="0" x2="100" y2="100">
+```
+will generate lines that have unwanted attributes, that override the parent:
+```svg
+<line x1="0" y1="0" x2="100" y2="100" stroke="black" stroke-width="1">
+```
+
+- [BUG] Toasts are not displayed in version 0.12.12 ([#709](https://github.com/AnswerDotAI/fasthtml/issues/709))
+  - Until now, my application used version 0.12.6, and toasts were displayed at the bottom of the screen. But I updated to the latest version 0.12.12, which supposedly fixed the issue, and to my surprise, the toasts no longer appear.
+I tested with a simple app, and the toasts show correctly, so I suspect some interference with my code.
+
+I suspect the code in my main.js, which I'm copying below:
+
+```javascript
+// DataTables initialization and event handling for HTMX
+// This script initializes DataTables on elements with the class "datatable"
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.addEventListener('htmx:afterSwap', (e) => {
+        console.log("📦 htmx:afterSwap event received");
+
+        const tables = document.querySelectorAll(".datatable");
+        console.log("🔍 Looking for .datatable...");
+
+        tables.forEach(table => {
+            console.log(`➡️ Init DataTable for: #${table.id}`);
+            
+            if ($.fn.DataTable.isDataTable(table)) {
+                console.warn("⚠️ Table already initialized. Destroying existing instance.");
+
+                $(table).DataTable().destroy();
+
+                const clonedTable = table.cloneNode(true);
+                table.parentElement.replaceChild(clonedTable, table);
+                table = clonedTable;
+            }
+
+            const $table = $(table);
+            // DataTable configuration in Spanish
+            $table.DataTable({
+                renderer: 'bootstrap',
+                language: {
+                    decimal: ",",
+                    processing: "Procesando...",
+                    search: "Buscar:",
+                    lengthMenu: "Mostrar _MENU_",
+                    info: "Mostrando (_START_ a _END_) de _TOTAL_ registros",
+                    infoEmpty: "No hay datos que mostrar.",
+                    infoFiltered: "(filtrado de _MAX_ registros en total)",
+                    loadingRecords: "Cargando...",
+                    zeroRecords: "No se encontraron registros coincidentes",
+                    emptyTable: "No hay datos disponibles en la tabla",
+                    paginate: {
+                        first: "<<",
+                        previous: "<",
+                        next: ">",
+                        last: ">>"
+                    },
+                    aria: {
+                        sortAscending: ": activar para ordenar la columna de manera ascendente",
+                        sortDescending: ": activar para ordenar la columna de manera descendente"
+                    }
+                },
+                layout: {
+                    topStart: 'info',
+                    topEnd: {
+                        search: { placeholder: 'Buscar ...' },
+                    },
+                    bottomStart: 'pageLength',
+                    bottomEnd: {
+                        paging: { firstLast: false }
+                    }
+                },
+                initComplete: function () {
+                    htmx.process(this.api().table().node());
+                },
+                drawCallback: function () {
+                    const rows = this.api().rows({ page: 'current' }).nodes();
+                    rows.each(function (row) {
+                        htmx.process(row); // 🔥 this reactivates the buttons in each visible row
+                    });
+                },
+                // dom: 'Bfrtip',
+                // buttons: [
+                //     {
+                //         extend: 'excelHtml5',
+                //         text: '<i class="bi bi-file-earmark-excel"></i> Export records',
+                //         className: 'btn btn-success btn-sm',
+                //         exportOptions: {
+                //             modifier: {
+                //                 page: 'current'  // Solo exporta los visibles
+                //             }
+                //         }
+                //     }
+                // ],
+            });
+
+            // Focus on search field
+            document.querySelector(`#${table.id}_wrapper .dt-search input`)?.focus();
+        });
+    });
+});
+
+// Bootstrap 5.3.0 - Collapse
+// This script handles the collapse functionality of the Bootstrap navbar
+document.addEventListener('DOMContentLoaded', function () {
+    const navbarCollapse = document.querySelector('.navbar-collapse');
+    const navLinks = document.querySelectorAll('.navbar-collapse .nav-link, .navbar-collapse .dropdown-item');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            // Do not close if the click was on the dropdown button.
+            if (link.getAttribute('data-bs-toggle') === 'dropdown') {
+                return;
+            }
+
+            // Close the menu if it is expanded.
+            if (navbarCollapse.classList.contains('show')) {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) {
+                    bsCollapse.hide();
+                }
+            }
+        });
+    });
+});
+```
+This code is meant to interact with Datatable.js and Bootstrap, addressing some unusual behaviors from these two libraries. I suspect the conflict stems from the htmx:afterSwap Listener.
+
+- [BUG] XT undefined in components.py ([#672](https://github.com/AnswerDotAI/fasthtml/issues/672))
+  - # `XT` undefined in components.py in FastHTML 0.12.4
+
+
+**Describe the bug**
+In FastHTML version 0.12.4, there is an error in the `components.py` file where `XT` is referenced but not defined. According to the error message, this should be `FT` based on the library's own suggestion. This appears to be a remnant from a transition from using `XT` to `FT` for component types, as mentioned in FastHTML's changelog for version 0.1.10.
+
+The error prevents any application using FastHTML from running, as the import chain fails before any application code can execute. This appears to be a critical issue affecting all users of FastHTML 0.12.4.
+
+**Minimal Reproducible Example**
+```python
+from fasthtml.core import fast_app
+from fasthtml.xtend import Style
+
+# Initialize the FastHTML app
+app, rt = fast_app(
+    hdrs=[Style("body { font-family: sans-serif; }")]
+)
+
+@rt("/")
+def get():
+    return "Hello, World!"
+
+if __name__ == "__main__":
+    from fasthtml.core import serve
+    serve()
+```
+
+When running the above script, the following error occurs:
+
+```
+Traceback (most recent call last):
+  File "/path/to/app.py", line 1, in <module>
+    from fasthtml.core import fast_app
+  File "/path/to/.venv/lib/python3.11/site-packages/fasthtml/__init__.py", line 2, in <module>
+    from .core import *
+  File "/path/to/.venv/lib/python3.11/site-packages/fasthtml/core.py", line 14, in <module>
+    from .xtend import *
+  File "/path/to/.venv/lib/python3.11/site-packages/fasthtml/xtend.py", line 15, in <module>
+    from .components import *
+  File "/path/to/.venv/lib/python3.11/site-packages/fasthtml/components.py", line 85, in <module>
+    def fill_form(form:XT, obj)->XT:
+                       ^^
+NameError: name 'XT' is not defined. Did you mean: 'FT'?
+```
+
+**Expected behavior**
+The script should run successfully, starting a FastHTML application without any import errors.
+
+**Environment Information**
+Please provide the following version information:
+- fasthtml version: 0.12.4
+- fastcore version: 1.7.29
+- fastlite version: 0.1.2
+- Python version: 3.11
+- Operating system: Linux 6.11.0-18-generic
+- Installation method: pip via uv (`uv pip install python-fasthtml`)
+
+**Confirmation**
+- [x] I have read the FAQ (https://docs.fastht.ml/explains/faq.html)
+- [x] I have provided a minimal reproducible example
+- [x] I have included the versions of fastlite, fastcore, and fasthtml
+- [x] I understand that this is a volunteer open source project with no commercial support.
+
+**Additional context**
+This appears to be a leftover artifact from the transition mentioned in the changelog for version 0.1.10:
+
+```
+## 0.1.10
+
+### Dependencies
+
+* Update for fastcore XT to FT name change
+```
+
+It seems that in `components.py`, line 85, the type annotation still uses `XT` instead of `FT`, but `XT` is no longer defined in the namespace.
+
+Looking at the error message, the Python interpreter even suggests the correct fix: "Did you mean: 'FT'?", supporting the hypothesis that this is a missed rename.
+
+The fix would likely involve updating the `fill_form` function signature in components.py from:
+
+```python
+def fill_form(form:XT, obj)->XT:
+```
+
+to:
+
+```python
+def fill_form(form:FT, obj)->FT:
+```
+
+- [BUG] Pico Search component doesn't work as expected ([#484](https://github.com/AnswerDotAI/fasthtml/issues/484))
+  - **Describe the bug**
+Using the Pico Search component does not reproduce UI elements like in teh pico docs https://picocss.com/docs/group#search
+
+**Minimal Reproducible Example**
+```python
+from fasthtml.common import *
+app, rt = fast_app(
+    hdrs=(picolink,),
+)
+def search_form():
+    return Search(
+        Input(name="search", type="search", placeholder="search"),
+        Input(type="submit", value="search"),cls="container")
+```
+result:
+```html
+<search class="container">       
+       <input name="search" type="search" placeholder="search">
+       <input type="submit" value="search">
+</search>
+```
+![image](https://github.com/user-attachments/assets/b1482671-4380-4ea8-8090-565961c7b477)
+
+**Expected behavior**
+Expected: 
+![image](https://github.com/user-attachments/assets/038978ae-6162-4082-ae26-c6b8b15687c3)
+ 
+Visually, the textbox has the correct style but the submit button does not.
+Expected html per picocss docs
+```html
+<form role="search">
+  <input name="search" type="search" placeholder="Search" />
+  <input type="submit" value="Search" />
+</form>
+```
+**Environment Information**
+Please provide the following version information:
+- fastlite version: 0.0.11
+- fastcore version: 1.7.10
+- fasthtml version: 0.6.9
+
+**Confirmation**
+Please confirm the following:
+- [x] I have read the FAQ (https://docs.fastht.ml/explains/faq.html)
+- [x] I have provided a minimal reproducible example
+- [x] I have included the versions of fastlite, fastcore, and fasthtml
+- [x] I understand that this is a volunteer open source project with no commercial support.
+
+**Additional context**
+Add any other context about the problem here.
+
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
+
+- [BUG] FastHTML by Example should use a redirect for POST instead of render ([#389](https://github.com/AnswerDotAI/fasthtml/issues/389))
+  - **Describe the bug**
+This is more a "bug"/question about the tutorial. I was following along and noticed when I got to the [WebPage->Web App](https://docs.fastht.ml/tutorials/by_example.html#web-page---web-app) section that things did not work in the browser. 
+
+1. There seemed to be some loop (that I can not repo) that caused the page to keep adding the last item I submitted
+2. After you add an items and get back to the home page, if you refresh the page it wants to do another form submission 
+
+Feels like both issues are because the POST renders the home page instead of redirecting
+
+```
+@app.post("/")
+def add_message(data:str):
+    messages.append(data)
+    return home()
+```
+
+vs
+
+```
+@app.post("/")
+def add_message(data: str):
+    messages.append(data)
+    return RedirectResponse("/", status_code=302)
+```
+
+**Expected behavior**
+If I am follow a demo, the demo produces best practice web patterns. I had to go looking through GitHub example repos to even find that RedirectResponse is the right way to do this. 
+
+**Environment Information**
+Please provide the following version information:
+- fastlite version: "0.0.9"
+- fastcore version:"1.7.3"
+- fasthtml version:"0.5.1"
+
+**Confirmation**
+Please confirm the following:
+- [x] I have read the FAQ (https://docs.fastht.ml/explains/faq.html)
+- [x] I have provided a minimal reproducible example
+- [x] I have included the versions of fastlite, fastcore, and fasthtml
+- [x] I understand that this is a volunteer open source project with no commercial support.
+
+**Additional context**
+Note: problem #1 might have been because I was using an earlier version of fasthtml and recently updated, but #2 to exists still.
+
+
 ## 0.12.36
 
 ### Bugs Squashed
