@@ -7,6 +7,17 @@
 ### New Features
 
 - Add Apple sign in ([#813](https://github.com/AnswerDotAI/fasthtml/pull/813)), thanks to [@erikgaas](https://github.com/erikgaas)
+
+### Bugs Squashed
+
+- Line defaults suppressed inheriting of stroke color from parent elements ([#804](https://github.com/AnswerDotAI/fasthtml/pull/804)), thanks to [@erikgaas](https://github.com/erikgaas)
+
+
+## 0.12.37
+
+### New Features
+
+- Add Apple sign in ([#813](https://github.com/AnswerDotAI/fasthtml/pull/813)), thanks to [@erikgaas](https://github.com/erikgaas)
   - Adding sign in with apple. It is slightly different because it requires parsing a p8 file and a post request for the redirect if you want name and email.
 
 Adding PyJWT as a req. It's small and fairly ubiquitous, but I'm down to reconsider.
