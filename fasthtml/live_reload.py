@@ -1,4 +1,5 @@
 from starlette.routing import WebSocketRoute
+from starlette.websockets import WebSocketDisconnect
 from fasthtml.basics import FastHTML, Script
 
 __all__ = ["FastHTMLWithLiveReload"]
@@ -23,7 +24,11 @@ def LiveReloadJs(reload_attempts:int=20, reload_interval:int=1000, **kwargs):
     """
     return Script(src % (reload_attempts, reload_interval))
 
-async def live_reload_ws(websocket): await websocket.accept()
+async def live_reload_ws(websocket):
+    await websocket.accept()
+    try:
+        while True: await websocket.receive()
+    except WebSocketDisconnect: pass
 
 class FastHTMLWithLiveReload(FastHTML):
     """
