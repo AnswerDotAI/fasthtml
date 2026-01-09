@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.12.38
+
+### Bugs Squashed
+
+- Fix typo: put='hx-post' → put='hx-put' in `_verbs` mapping ([#821](https://github.com/AnswerDotAI/fasthtml/pull/821)), thanks to [@erikgaas](https://github.com/erikgaas)
+- Fix live reload infinite loop on uvicorn >= 0.39 ([#818](https://github.com/AnswerDotAI/fasthtml/pull/818)), thanks to [@erikgaas](https://github.com/erikgaas)
+
+
 ## 0.12.37
 
 ### New Features
