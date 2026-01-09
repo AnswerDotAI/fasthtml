@@ -335,7 +335,7 @@ def url_path_for(self:HTTPConnection, name: str, **path_params):
     return URLPath(f"{self.scope['root_path']}{lp}", lp.protocol, lp.host)
 
 # %% ../nbs/api/00_core.ipynb
-_verbs = dict(get='hx-get', post='hx-post', put='hx-post', delete='hx-delete', patch='hx-patch', link='href')
+_verbs = dict(get='hx-get', post='hx-post', put='hx-put', delete='hx-delete', patch='hx-patch', link='href')
 
 def _url_for(req, t):
     "Generate URL for route `t` using request `req`"
