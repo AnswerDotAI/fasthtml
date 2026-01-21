@@ -6,32 +6,32 @@
 __all__ = ['marked_imp', 'npmcdn', 'light_media', 'dark_media', 'MarkdownJS', 'KatexMarkdownJS', 'HighlightJS', 'SortableJS',
            'MermaidJS']
 
-# %% ../nbs/api/03_js.ipynb #ddc8b61a
+# %% ../nbs/api/03_js.ipynb #cd3eb2a3
 import re
 from fastcore.utils import *
 from fasthtml.components import *
 from fasthtml.xtend import *
 
-# %% ../nbs/api/03_js.ipynb #4c8d1272
+# %% ../nbs/api/03_js.ipynb #f7792683
 def light_media(
         css: str # CSS to be included in the light media query
     ):
     "Render light media for day mode views"
     return Style('@media (prefers-color-scheme: light) {%s}' %css)
 
-# %% ../nbs/api/03_js.ipynb #26cd2ccc
+# %% ../nbs/api/03_js.ipynb #0a2307c3
 def dark_media(
         css: str # CSS to be included in the dark media query
     ):
     "Render dark media for night mode views"
     return Style('@media (prefers-color-scheme:  dark) {%s}' %css)
 
-# %% ../nbs/api/03_js.ipynb #c7cd64ef
+# %% ../nbs/api/03_js.ipynb #f60ca53b
 marked_imp = """import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 """
 npmcdn = 'https://cdn.jsdelivr.net/npm/'
 
-# %% ../nbs/api/03_js.ipynb #857e3fe6
+# %% ../nbs/api/03_js.ipynb #3e318ccd
 def MarkdownJS(
         sel='.marked' # CSS selector for markdown elements
     ):
@@ -39,7 +39,7 @@ def MarkdownJS(
     src = "proc_htmx('%s', e => e.innerHTML = marked.parse(e.textContent));" % sel
     return Script(marked_imp+src, type='module')
 
-# %% ../nbs/api/03_js.ipynb #fa5b6642
+# %% ../nbs/api/03_js.ipynb #595d4e8f
 def KatexMarkdownJS(
         sel='.marked',  # CSS selector for markdown elements
         inline_delim='$',  # Delimiter for inline math
@@ -54,7 +54,7 @@ def KatexMarkdownJS(
     css = Link(rel="stylesheet", href=npmcdn+"katex@0.16.11/dist/katex.min.css")
     return scr,css
 
-# %% ../nbs/api/03_js.ipynb #c8144d89
+# %% ../nbs/api/03_js.ipynb #7a2a45ef
 def HighlightJS(
         sel='pre code:not([data-highlighted="yes"])', # CSS selector for code elements. Default is industry standard, be careful before adjusting it
         langs:str|list|tuple='python',  # Language(s) to highlight
@@ -77,7 +77,7 @@ htmx.onLoad(hljs.highlightAll);""" % sel
             jsd(*hjc, 'highlightjs-copy.min.css', typ='css'),
             *langjs, Script(src, type='module')]
 
-# %% ../nbs/api/03_js.ipynb #9004c11b
+# %% ../nbs/api/03_js.ipynb #59c00b7d
 def SortableJS(
         sel='.sortable',  # CSS selector for sortable elements
         ghost_class='blue-background-class'  # When an element is being dragged, this is the class used to distinguish it from the rest
@@ -88,7 +88,7 @@ proc_htmx('%s', Sortable.create);
 """ % sel
     return Script(src, type='module')
 
-# %% ../nbs/api/03_js.ipynb #0e060ddb
+# %% ../nbs/api/03_js.ipynb #3518340d
 def MermaidJS(
         sel='.language-mermaid',  # CSS selector for mermaid elements
         theme='base',  # Mermaid theme to use

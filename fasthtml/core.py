@@ -445,7 +445,7 @@ def _resp(req, resp, cls=empty, status_code=200):
     "Create appropriate HTTP response from request and response data"
     if not resp: resp=''
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
-    if cls in (Any,FT): cls=empty
+    if not (isinstance(cls, type) and issubclass(cls, Response)): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     resp,kw = _part_resp(req, resp)
     if isinstance(resp, Response): return resp
