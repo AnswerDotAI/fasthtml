@@ -3,19 +3,16 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="python-fasthtml"
+name = "python-fasthtml"
 dynamic = ["version"]
 description = "The fastest way to create an HTML app"
 readme = "README.md"
-requires-python=">=3.10"
+requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
 authors = [{name = "Jeremy Howard and contributors", email = "github@jhoward.fastmail.fm"}]
 keywords = ['nbdev', 'jupyter', 'notebook', 'python']
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-]
-dependencies = ["fastcore>=1.10.0","python-dateutil","starlette>0.33","oauthlib","itsdangerous","uvicorn[standard]>=0.30","httpx","fastlite>=0.1.1","python-multipart","beautifulsoup4"]
+classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
+dependencies = ['fastcore>=1.10.0', 'python-dateutil', 'starlette>0.33', 'oauthlib', 'itsdangerous', 'uvicorn[standard]>=0.30', 'httpx', 'fastlite>=0.1.1', 'python-multipart', 'beautifulsoup4']
 
 [project.urls]
 Repository = "https://github.com/AnswerDotAI/fasthtml"
@@ -24,16 +21,19 @@ Documentation = "https://www.fastht.ml/docs/"
 [project.entry-points.nbdev]
 fasthtml = "fasthtml._modidx:d"
 
+[project.optional-dependencies]
+dev = ['ipython', 'lxml', 'pysymbol_llm', 'monsterui', 'PyJWT']
+
+
 [project.scripts]
 fh_railway_link = "fasthtml.cli:railway_link"
+fh_railway_deploy = "fasthtml.cli:railway_deploy"
+
 [tool.setuptools.dynamic]
 version = {attr = "fasthtml.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["fasthtml"]
-
-[project.optional-dependencies]
-dev = ["ipython","lxml","pysymbol_llm","monsterui","PyJWT"]
 
 [tool.nbdev]
 jupyter_hooks = true
