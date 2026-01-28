@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
 ]
-dependencies = []
+dependencies = ["fastcore>=1.10.0","python-dateutil","starlette>0.33","oauthlib","itsdangerous","uvicorn[standard]>=0.30","httpx","fastlite>=0.1.1","python-multipart","beautifulsoup4"]
 
 [project.urls]
 Repository = "https://github.com/AnswerDotAI/fasthtml"
@@ -29,6 +29,9 @@ version = {attr = "fasthtml.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["fasthtml"]
+
+[project.optional-dependencies]
+dev = ["ipython","lxml","pysymbol_llm","monsterui","PyJWT"]
 
 [tool.nbdev]
 jupyter_hooks = true
