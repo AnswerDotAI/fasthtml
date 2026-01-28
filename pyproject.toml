@@ -24,8 +24,14 @@ Documentation = "https://www.fastht.ml/docs/"
 [project.entry-points.nbdev]
 fasthtml = "fasthtml._modidx:d"
 
+[project.scripts]
+fh_railway_link=fasthtml.cli:railway_link
+
 [tool.setuptools.dynamic]
 version = {attr = "fasthtml.__version__"}
+
+[project.scripts]
+fh_railway_link=fasthtml.cli:railway_link
 
 [tool.setuptools.packages.find]
 include = ["fasthtml"]
