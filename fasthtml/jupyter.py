@@ -118,7 +118,7 @@ from starlette.testclient import TestClient
 from html import escape
 
 # %% ../nbs/api/06_jupyter.ipynb #89b8984b
-def HTMX(path="/", host='localhost', app=None, port=8000, height="auto", link=False, iframe=True):
+def HTMX(path="/", host='localhost', app=None, port=8000, height="auto", link=False, iframe=True, client=None):
     "An iframe which displays the HTMX application in a notebook."
     if isinstance(height, int): height = f"{height}px"
     scr = """{
@@ -137,7 +137,8 @@ def HTMX(path="/", host='localhost', app=None, port=8000, height="auto", link=Fa
         route = f'/{unqid()}'
         res = path
         app.get(route)(lambda: res)
-        page = TestClient(app).get(route).text
+        cli = client if client is not None else TestClient(app)
+        page = cli.get(route).text
         src = f'srcdoc="{escape(page)}"'
     if iframe:
         return HTML(f'<iframe {src} style="width: 100%; height: {height}; border: none;" onload="{scr}" ' + """allow="accelerometer; autoplay; camera; clipboard-read; clipboard-write; display-capture; encrypted-media; fullscreen; gamepad; geolocation; gyroscope; hid; identity-credentials-get; idle-detection; magnetometer; microphone; midi; payment; picture-in-picture; publickey-credentials-get; screen-wake-lock; serial; usb; web-share; xr-spatial-tracking"></iframe> """)
