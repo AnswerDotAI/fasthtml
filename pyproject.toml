@@ -38,3 +38,4 @@ include = ["fasthtml"]
 [tool.nbdev]
 jupyter_hooks = true
 custom_sidebar = false
+lib_path = "fasthtml"
