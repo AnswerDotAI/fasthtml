@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.12.40
+
+### New Features
+
+- add optional client arg to HTMX for persistent tests ([#824](https://github.com/AnswerDotAI/fasthtml/pull/824)), thanks to [@johnowhitaker](https://github.com/johnowhitaker)
+
+### Bugs Squashed
+
+- Fix return type annotation bug ([#823](https://github.com/AnswerDotAI/fasthtml/pull/823)), thanks to [@erikgaas](https://github.com/erikgaas)
+
+
 ## 0.12.39
 
 ### Bugs Squashed
