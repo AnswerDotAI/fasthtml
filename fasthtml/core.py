@@ -183,6 +183,7 @@ async def _find_p(req, arg:str, p:Parameter):
         if issubclass(anno, HtmxHeaders): return _get_htmx(req.headers)
         if issubclass(anno, Starlette): return req.scope['app']
         if _is_body(anno) and 'session'.startswith(arg.lower()): return req.scope.get('session', {})
+        if issubclass(anno, State): return req.scope['app'].state
         if _is_body(anno): return await _from_body(req, p)
     # If there's no annotation, check for special names
     if anno is empty:
@@ -193,6 +194,7 @@ async def _find_p(req, arg:str, p:Parameter):
         if arg.lower()=='htmx': return _get_htmx(req.headers)
         if arg.lower()=='app': return req.scope['app']
         if arg.lower()=='body': return (await req.body()).decode()
+        if arg.lower()=='state': return req.scope['app'].state
         if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(req, arg.lower())
         if arg!='resp': warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")
         return None
