@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.12.41
+
+### New Features
+
+- Add async OAuth methods and make OAuth handlers async ([#828](https://github.com/AnswerDotAI/fasthtml/issues/828))
+- Add `State` injection support for route handlers via type annotation or arg name ([#827](https://github.com/AnswerDotAI/fasthtml/issues/827))
+
+
 ## 0.12.40
 
 ### New Features
