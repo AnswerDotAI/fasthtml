@@ -10,7 +10,7 @@ __all__ = ['http_patterns', 'GoogleAppClient', 'GitHubAppClient', 'HuggingFaceCl
 from .common import *
 from oauthlib.oauth2 import WebApplicationClient
 from urllib.parse import urlparse, urlencode, parse_qs, quote, unquote
-import secrets, httpx, time
+import secrets, httpx, time, asyncio
 
 # %% ../nbs/api/08_oauth.ipynb #0a078133
 class _AppClient(WebApplicationClient):
@@ -90,8 +90,8 @@ class DiscordAppClient(_AppClient):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         data = dict(grant_type='authorization_code', code=code)
         if redirect_uri: data['redirect_uri'] = redirect_uri
-        r = httpx.post(self.token_url, data=data, headers=headers, auth=(self.client_id, self.client_secret))
-        r.raise_for_status()
+        r = httpx.post(self.token_url, data=data, headers=headers, auth=(self.client_id, self.client_secret)
+            ).raise_for_status()
         self.parse_request_body_response(r.text)
 
 # %% ../nbs/api/08_oauth.ipynb #276520b0
@@ -104,9 +104,7 @@ class Auth0AppClient(_AppClient):
         super().__init__(client_id, client_secret, code=code, scope=scope, redirect_uri=redirect_uri, **kwargs)
 
     def _fetch_openid_config(self):
-        r = httpx.get(f"https://{self.domain}/.well-known/openid-configuration")
-        r.raise_for_status()
-        return r.json()
+        return httpx.get(f"https://{self.domain}/.well-known/openid-configuration").raise_for_status().json()
 
     def login_link(self, req):
         d = dict(response_type="code", client_id=self.client_id, scope=self.scope, redirect_uri=redir_url(req, self.redirect_uri))
@@ -166,11 +164,9 @@ def parse_response(self:_AppClient, code, redirect_uri):
     "Get the token from the oauth2 server response"
     payload = dict(code=code, redirect_uri=redirect_uri, client_id=self.client_id,
                    client_secret=self.client_secret, grant_type='authorization_code')
-    r = httpx.post(self.token_url, data=payload)
-    r.raise_for_status()
+    r = httpx.post(self.token_url, data=payload).raise_for_status()
     self.parse_request_body_response(r.text)
 
-# %% ../nbs/api/08_oauth.ipynb #6967dbb0
 @patch
 def get_info(self:_AppClient, token=None):
     "Get the info for authenticated user"
@@ -178,12 +174,35 @@ def get_info(self:_AppClient, token=None):
     headers = {'Authorization': f'Bearer {token}'}
     return httpx.get(self.info_url, headers=headers).json()
 
-# %% ../nbs/api/08_oauth.ipynb #03702349
 @patch
 def retr_info(self:_AppClient, code, redirect_uri):
     "Combines `parse_response` and `get_info`"
     self.parse_response(code, redirect_uri)
     return self.get_info()
+
+# %% ../nbs/api/08_oauth.ipynb #0ff353ae
+@patch
+async def parse_response_async(self:_AppClient, code, redirect_uri):
+    "Get the token from the oauth2 server response"
+    payload = dict(code=code, redirect_uri=redirect_uri, client_id=self.client_id,
+                   client_secret=self.client_secret, grant_type='authorization_code')
+    async with httpx.AsyncClient() as c:
+        r = (await c.post(self.token_url, data=payload)).raise_for_status()
+    self.parse_request_body_response(r.text)
+
+@patch
+async def get_info_async(self:_AppClient, token=None):
+    "Get the info for authenticated user"
+    if not token: token = self.token["access_token"]
+    headers = {'Authorization': f'Bearer {token}'}
+    async with httpx.AsyncClient() as c:
+        return (await c.get(self.info_url, headers=headers)).raise_for_status().json()
+
+@patch
+async def retr_info_async(self:_AppClient, code, redirect_uri):
+    "Combines `parse_response` and `get_info`"
+    await self.parse_response_async(code, redirect_uri)
+    return await self.get_info_async()
 
 # %% ../nbs/api/08_oauth.ipynb #29f52061
 @patch
@@ -197,38 +216,43 @@ def url_match(request, patterns=http_patterns):
     return any(re.match(pattern, get_host(request).split(':')[0]) for pattern in patterns)
 
 # %% ../nbs/api/08_oauth.ipynb #dda68390
+async def _arun(res): return await res if asyncio.iscoroutine(res) else res
+
+# %% ../nbs/api/08_oauth.ipynb #c09a79ff
 class OAuth:
-    def __init__(self, app, cli, skip=None, redir_path='/redirect', error_path='/error', logout_path='/logout', login_path='/login', https=True, http_patterns=http_patterns, redir_method='get'):
+    def __init__(self, app, cli, skip=None,
+            redir_path='/redirect', error_path='/error', logout_path='/logout', login_path='/login',
+            https=True, http_patterns=http_patterns, redir_method='get'):
         if not skip: skip = [redir_path,error_path,login_path]
         redir_handler = app.post if redir_method == 'post' else app.get
         store_attr()
-        def before(req, session):
+        async def before(req, session):
             if 'auth' not in req.scope: req.scope['auth'] = session.get('auth')
             auth = req.scope['auth']
             if not auth: return self.redir_login(session)
-            res = self.check_invalid(req, session, auth)
+            res = await _arun(self.check_invalid(req, session, auth))
             if res: return res
         app.before.append(Beforeware(before, skip=skip))
 
         @redir_handler(redir_path)
-        def redirect(req, session, code:str=None, error:str=None, state:str=None):
+        async def redirect(req, session, code:str=None, error:str=None, state:str=None):
             if not code:
                 session['oauth_error']=error
                 return RedirectResponse(self.error_path, status_code=303)
             scheme = 'http' if url_match(req,self.http_patterns) or not self.https else 'https'
             base_url = f"{scheme}://{get_host(req)}"
-            info = AttrDictDefault(cli.retr_info(code, base_url+redir_path))
+            info = AttrDictDefault(await cli.retr_info_async(code, base_url+redir_path))
             ident = info.get(self.cli.id_key)
             if not ident: return self.redir_login(session)
-            res = self.get_auth(info, ident, session, state)
-            if not res:   return self.redir_login(session)
+            res = await _arun(self.get_auth(info, ident, session, state))
+            if not res: return self.redir_login(session)
             req.scope['auth'] = session['auth'] = ident
             return res
 
         @app.get(logout_path)
-        def logout(session):
+        async def logout(session):
             session.pop('auth', None)
-            return self.logout(session)
+            return await _arun(self.logout(session))
 
     def redir_login(self, session): return RedirectResponse(self.login_path, status_code=303)
     def redir_url(self, req):
