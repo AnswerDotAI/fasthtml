@@ -714,10 +714,9 @@ def serve(
     "Run the app in an async server, with live reload set as the default."
     bk = inspect.currentframe().f_back
     glb = bk.f_globals
-    code = bk.f_code
     if not appname:
         if glb.get('__name__')=='__main__': appname = Path(glb.get('__file__', '')).stem
-        elif code.co_name=='main' and bk.f_back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
+        elif bk.f_back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
     import uvicorn
     if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
