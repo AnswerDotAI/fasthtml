@@ -12,11 +12,12 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
-import json,uuid,inspect,types,signal,asyncio,threading,inspect,random,contextlib,httpx,itsdangerous
+import json,uuid,inspect,types,signal,asyncio,threading,inspect,random,contextlib,httpx,itsdangerous,uvicorn
 
 from fastcore.utils import *
 from fastcore.xml import *
-from fastcore.meta import use_kwargs_dict
+from fastcore.meta import use_kwargs_dict,delegates
+from fastcore.style import S
 
 from types import UnionType, SimpleNamespace as ns, GenericAlias
 from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List, Any
@@ -702,15 +703,15 @@ def set_lifespan(self:FastHTML, value):
     self.router.lifespan_context = value
 
 # %% ../nbs/api/00_core.ipynb #3a348474
+@delegates(uvicorn.run)
 def serve(
         appname=None, # Name of the module
         app='app', # App instance to be served
         host='0.0.0.0', # If host is 0.0.0.0 will convert to localhost
         port=None, # If port is None it will default to 5001 or the PORT environment variable
         reload=True, # Default is to reload the app upon code changes
-        reload_includes:list[str]|str|None=None, # Additional files to watch for changes
-        reload_excludes:list[str]|str|None=None # Files to ignore for changes
-        ):
+        **kwargs
+    ):
     "Run the app in an async server, with live reload set as the default."
     bk = inspect.currentframe().f_back
     glb = bk.f_globals
@@ -718,11 +719,11 @@ def serve(
     if not appname:
         if glb.get('__name__')=='__main__': appname = Path(glb.get('__file__', '')).stem
         elif code.co_name=='main' and bk.f_back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
-    import uvicorn
     if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
-        print(f'Link: http://{"localhost" if host=="0.0.0.0" else host}:{port}')
-        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload, reload_includes=reload_includes, reload_excludes=reload_excludes)
+        link = f'http://{"localhost" if host=="0.0.0.0" else host}:{port}'
+        print('Link: '+ S.light_red.bold(link))
+        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload, **kwargs)
 
 # %% ../nbs/api/00_core.ipynb #8121968a
 class Client:
