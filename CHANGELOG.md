@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.42
+
+### New Features
+
+- Add uvicorn kwargs to serve() with @delegates(uvicorn.run) and add colored link output ([#830](https://github.com/AnswerDotAI/fasthtml/issues/830))
+
+
 ## 0.12.41
 
 ### New Features
