@@ -5,11 +5,11 @@
 # %% auto #0
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport',
            'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens',
-           'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt',
-           'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond',
-           'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client',
-           'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'MiddlewareBase', 'FtResponse',
-           'unqid']
+           'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'ApiReturn', 'JSONResponse',
+           'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body',
+           'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve',
+           'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'MiddlewareBase',
+           'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
 import json,uuid,inspect,types,signal,asyncio,threading,inspect,random,contextlib,httpx,itsdangerous,uvicorn
@@ -166,6 +166,13 @@ async def _from_body(req, p):
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
 
+# %% ../nbs/api/00_core.ipynb #88b6da3f
+class ApiReturn:
+    @classmethod
+    async def __from_request__(cls, data, req): return cls(req.headers.get('accept')=='application/json')
+    def __init__(self, isapi=False): self.isapi = isapi
+    def __call__(self, norm, **kw): return kw if self.isapi else norm
+
 # %% ../nbs/api/00_core.ipynb #7cc39ba9
 class JSONResponse(JSONResponseOrig):
     "Same as starlette's version, but auto-stringifies non serializable types"
@@ -196,6 +203,7 @@ async def _find_p(req, arg:str, p:Parameter):
         if arg.lower()=='app': return req.scope['app']
         if arg.lower()=='body': return (await req.body()).decode()
         if arg.lower()=='state': return req.scope['app'].state
+        if arg.lower()=='api': return ApiReturn(req.headers.get('accept')=='application/json')
         if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(req, arg.lower())
         if arg!='resp': warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")
         return None
