@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.43
+
+### New Features
+
+- Add ApiReturn class for dual browser/API responses in route handlers ([#831](https://github.com/AnswerDotAI/fasthtml/issues/831))
+
+
 ## 0.12.42
 
 ### New Features
