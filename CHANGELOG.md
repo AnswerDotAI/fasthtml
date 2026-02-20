@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.12.44
+
+- Add all HTTP request param handling to websockets too
+
+
 ## 0.12.43
 
 ### New Features
