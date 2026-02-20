@@ -154,14 +154,12 @@ async def parse_form(req: Request) -> FormData:
     if clen <= min_len: return FormData()
     return await req.form()
 
-# %% ../nbs/api/00_core.ipynb #33d3bc16
-async def _from_body(req, p):
-    "Parse request form/query data and create an instance of the annotated parameter type"
+# %% ../nbs/api/00_core.ipynb #089fe388
+async def _from_body(conn, p, data):
+    "Create an instance of the annotated type from pre-parsed `data`"
     anno = p.annotation
-    data = form2dict(await parse_form(req))
-    if req.query_params: data = {**data, **dict(req.query_params)}
     ctor = getattr(anno, '__from_request__', None)
-    if ctor: return await ctor(data, req) if asyncio.iscoroutinefunction(ctor) else ctor(data, req)
+    if ctor: return await maybe_await(ctor(data, conn))
     d = _annotations(anno)
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
@@ -180,51 +178,67 @@ class JSONResponse(JSONResponseOrig):
         res = json.dumps(content, ensure_ascii=False, allow_nan=False, indent=None, separators=(",", ":"), default=str)
         return res.encode("utf-8")
 
-# %% ../nbs/api/00_core.ipynb #6775cbf8
-async def _find_p(req, arg:str, p:Parameter):
-    "In `req` find param named `arg` of type in `p` (`arg` is ignored for body types)"
+# %% ../nbs/api/00_core.ipynb #5fa96e3a
+async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
+    "In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"
     anno = p.annotation
-    # If there's an annotation of special types, return object of that type
-    # GenericAlias is a type of typing for iterators like list[int] that is not a class
+    # Special annotation types
     if isinstance(anno, type) and not isinstance(anno, GenericAlias):
-        if issubclass(anno, Request): return req
-        if issubclass(anno, HtmxHeaders): return _get_htmx(req.headers)
-        if issubclass(anno, Starlette): return req.scope['app']
-        if _is_body(anno) and 'session'.startswith(arg.lower()): return req.scope.get('session', {})
-        if issubclass(anno, State): return req.scope['app'].state
-        if _is_body(anno): return await _from_body(req, p)
-    # If there's no annotation, check for special names
+        if issubclass(anno, HtmxHeaders): return _get_htmx(hdrs)
+        if issubclass(anno, Starlette): return conn.scope['app']
+        if issubclass(anno, HTTPConnection): return conn
+        if issubclass(anno, State): return conn.scope['app'].state
+        if issubclass(anno, dict): return data
+        if _is_body(anno):
+            if 'session'.startswith(arg.lower()): return conn.scope.get('session', {})
+            return await _from_body(conn, p, data)
+    # Special param names with no annotations
     if anno is empty:
-        if 'request'.startswith(arg.lower()): return req
-        if 'session'.startswith(arg.lower()): return req.scope.get('session', {})
-        if arg.lower()=='scope': return dict2obj(req.scope)
-        if arg.lower()=='auth': return req.scope.get('auth', None)
-        if arg.lower()=='htmx': return _get_htmx(req.headers)
-        if arg.lower()=='app': return req.scope['app']
-        if arg.lower()=='body': return (await req.body()).decode()
-        if arg.lower()=='state': return req.scope['app'].state
-        if arg.lower()=='api': return ApiReturn(req.headers.get('accept')=='application/json')
-        if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(req, arg.lower())
+        if arg.lower()=='ws' or 'request'.startswith(arg.lower()): return conn
+        if 'session'.startswith(arg.lower()): return conn.scope.get('session', {})
+        if arg.lower()=='scope': return dict2obj(conn.scope)
+        if arg.lower()=='data': return data
+        if arg.lower()=='htmx': return _get_htmx(hdrs)
+        if arg.lower()=='app': return conn.scope['app']
+        if arg.lower()=='state': return conn.scope['app'].state
+        if arg.lower()=='auth': return conn.scope.get('auth', None)
+        if arg.lower()=='send':
+            assert not isinstance(conn, Request), "`send` requires a websocket, not a `Request`"
+            return partial(_send_ws, conn)
+        if arg.lower()=='api': return ApiReturn(hdrs.get('accept')=='application/json')
+        if arg.lower()=='body': return (await conn.body()).decode()
+        if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(conn, arg.lower())
         if arg!='resp': warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")
         return None
-    # Look through path, cookies, headers, query, and body in that order
-    res = req.path_params.get(arg, None)
-    if res in (empty,None): res = req.cookies.get(arg, None)
-    if res in (empty,None): res = req.headers.get(snake2hyphens(arg), None)
-    if res in (empty,None): res = req.query_params.getlist(arg)
+    # Not a special name or a special annotation
+    res = conn.path_params.get(arg, None)
+    if res in (empty,None): res = conn.cookies.get(arg, None)
+    if res in (empty,None): res = hdrs.get(snake2hyphens(arg), None)
+    if res in (empty,None): res = conn.query_params.getlist(arg)
     if res==[]: res = None
-    if res in (empty,None): res = _formitem(await parse_form(req), arg)
-    # Raise 400 error if the param does not include a default
-    if (res in (empty,None)) and p.default is empty: raise HTTPException(400, f"Missing required field: {arg}")
-    # If we have a default, return that if we have no value
-    if res in (empty,None): res = p.default
+    if res in (empty,None): res = data.get(arg, None)
+    if res in (empty,None):
+        if p.default is empty:
+            if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {arg}")
+            raise ValueError(f"Missing required field: {arg}")
+        res = p.default
     # We can cast str and list[str] to types; otherwise just return what we have
-    if anno is empty: return res
+    if not isinstance(res, (list,str)) or anno is empty: return res
     try: return _fix_anno(anno, res)
-    except ValueError: raise HTTPException(404, req.url.path) from None
+    except ValueError as e:
+        if isinstance(conn, Request): raise HTTPException(404, f"{conn.url.path}: {e}") from None
+        raise
 
+
+# %% ../nbs/api/00_core.ipynb #bf42edad
+async def _find_ps(conn, data, hdrs, params):
+    if conn.query_params: data |= dict(conn.query_params)
+    return {arg:await _find_p(conn, data, hdrs, arg, p) for arg,p in params.items()}
+
+# %% ../nbs/api/00_core.ipynb #090f1f0f
 async def _wrap_req(req, params):
-    return {arg:await _find_p(req, arg, p) for arg,p in params.items()}
+    data = form2dict(await parse_form(req))
+    return await _find_ps(req, data, req.headers, params)
 
 # %% ../nbs/api/00_core.ipynb #7a661bfa
 def flat_xt(lst):
@@ -244,34 +258,10 @@ class Beforeware:
 async def _handle(f, *args, **kwargs):
     return (await f(*args, **kwargs)) if is_async_callable(f) else await run_in_threadpool(f, *args, **kwargs)
 
-# %% ../nbs/api/00_core.ipynb #f2277c02
-def _find_wsp(ws, data, hdrs, arg:str, p:Parameter):
-    "In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"
-    anno = p.annotation
-    if isinstance(anno, type):
-        if issubclass(anno, HtmxHeaders): return _get_htmx(hdrs)
-        if issubclass(anno, Starlette): return ws.scope['app']
-        if issubclass(anno, WebSocket): return ws
-        if issubclass(anno, dict): return data
-    if anno is empty:
-        if arg.lower()=='ws': return ws
-        if arg.lower()=='scope': return dict2obj(ws.scope)
-        if arg.lower()=='data': return data
-        if arg.lower()=='htmx': return _get_htmx(hdrs)
-        if arg.lower()=='app': return ws.scope['app']
-        if arg.lower()=='send': return partial(_send_ws, ws)
-        if 'session'.startswith(arg.lower()): return ws.scope.get('session', {})
-        return None
-    res = data.get(arg, None)
-    if res is empty or res is None: res = hdrs.get(arg, None)
-    if res is empty or res is None: res = p.default
-    # We can cast str and list[str] to types; otherwise just return what we have
-    if not isinstance(res, (list,str)) or anno is empty: return res
-    return [_fix_anno(anno, o) for o in res] if isinstance(res,list) else _fix_anno(anno, res)
-
-def _wrap_ws(ws, data, params):
+# %% ../nbs/api/00_core.ipynb #ad0f0e87
+async def _wrap_ws(ws, data, params):
     hdrs = {k.lower().replace('-','_'):v for k,v in data.pop('HEADERS', {}).items()}
-    return {arg:_find_wsp(ws, data, hdrs, arg, p) for arg,p in params.items()}
+    return await _find_ps(ws, data, hdrs, params)
 
 # %% ../nbs/api/00_core.ipynb #dcc15129
 async def _send_ws(ws, resp):
@@ -283,9 +273,11 @@ def _ws_endp(recv, conn=None, disconn=None):
     cls = type('WS_Endp', (WebSocketEndpoint,), {"encoding":"text"})
 
     async def _generic_handler(handler, ws, data=None):
-        wd = _wrap_ws(ws, loads(data) if data else {}, _params(handler))
-        resp = await _handle(handler, **wd)
-        if resp: await _send_ws(ws, resp)
+        try:
+            wd = await _wrap_ws(ws, loads(data) if data else {}, _params(handler))
+            resp = await _handle(handler, **wd)
+            if resp: await _send_ws(ws, resp)
+        except ValueError as e: await ws.send_text(str(e))
 
     async def _connect(self, ws):
         await ws.accept()
