@@ -170,6 +170,7 @@ class ApiReturn:
     async def __from_request__(cls, data, req): return cls(req.headers.get('accept')=='application/json')
     def __init__(self, isapi=False): self.isapi = isapi
     def __call__(self, norm, **kw): return kw if self.isapi else norm
+    def __bool__(self): return bool(self.isapi)
 
 # %% ../nbs/api/00_core.ipynb #7cc39ba9
 class JSONResponse(JSONResponseOrig):
