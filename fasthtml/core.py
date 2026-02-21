@@ -188,7 +188,7 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if issubclass(anno, Starlette): return conn.scope['app']
         if issubclass(anno, HTTPConnection): return conn
         if issubclass(anno, State): return conn.scope['app'].state
-        if issubclass(anno, dict): return data
+        if anno is dict: return data
         if _is_body(anno):
             if 'session'.startswith(arg.lower()): return conn.scope.get('session', {})
             return await _from_body(conn, p, data)
@@ -222,13 +222,11 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
             if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {arg}")
             raise ValueError(f"Missing required field: {arg}")
         res = p.default
-    # We can cast str and list[str] to types; otherwise just return what we have
-    if not isinstance(res, (list,str)) or anno is empty: return res
+    if anno is empty: return res
     try: return _fix_anno(anno, res)
     except ValueError as e:
         if isinstance(conn, Request): raise HTTPException(404, f"{conn.url.path}: {e}") from None
         raise
-
 
 # %% ../nbs/api/00_core.ipynb #bf42edad
 async def _find_ps(conn, data, hdrs, params):
