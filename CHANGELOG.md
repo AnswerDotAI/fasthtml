@@ -2,10 +2,11 @@
 
 <!-- do not remove -->
 
-## 0.12.46
+## 0.12.47
 
 ### New Features
 
+- Make ApiReturn callable without positional args by defaulting norm to None ([#833](https://github.com/AnswerDotAI/fasthtml/issues/833))
 - Add `__bool__` method to ApiReturn for direct boolean context support ([#832](https://github.com/AnswerDotAI/fasthtml/issues/832))
 
 
