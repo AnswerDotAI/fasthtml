@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.12.46
+
+### New Features
+
+- Add `__bool__` method to ApiReturn for direct boolean context support ([#832](https://github.com/AnswerDotAI/fasthtml/issues/832))
+
+
 ## 0.12.45
 
 - Add all HTTP request param handling to websockets too
