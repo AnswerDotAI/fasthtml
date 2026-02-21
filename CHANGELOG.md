@@ -2,7 +2,7 @@
 
 <!-- do not remove -->
 
-## 0.12.44
+## 0.12.45
 
 - Add all HTTP request param handling to websockets too
 
