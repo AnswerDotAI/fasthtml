@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.12.48
+
+
+### Bugs Squashed
+
+- Cache request body if content-type header is not `multipart/form-data` ([#837](https://github.com/AnswerDotAI/fasthtml/pull/837)), thanks to [@curtis-allan](https://github.com/curtis-allan)
+
+
 ## 0.12.47
 
 ### New Features
