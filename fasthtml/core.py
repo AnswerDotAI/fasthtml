@@ -145,6 +145,7 @@ def form2dict(form: FormData) -> dict:
 async def parse_form(req: Request) -> FormData:
     "Starlette errors on empty multipart forms, so this checks for that situation"
     ctype = req.headers.get("Content-Type", "")
+    if not ctype.startswith('multipart'): await req.body()
     if ctype=='application/json': return await req.json()
     if not ctype.startswith("multipart/form-data"): return await req.form()
     try: boundary = ctype.split("boundary=")[1].strip()
@@ -368,7 +369,7 @@ def _to_xml(req, resp, indent):
     "Convert response to XML string with target URL resolution"
     resp = _apply_ft(resp)
     _find_targets(req, resp)
-    return to_xml(resp, indent)
+    return to_xml(resp, indent=indent)
 
 # %% ../nbs/api/00_core.ipynb #f1e3ed2d
 _iter_typs = (tuple,list,map,filter,range,types.GeneratorType)
