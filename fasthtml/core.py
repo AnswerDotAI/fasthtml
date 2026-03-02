@@ -145,15 +145,14 @@ def form2dict(form: FormData) -> dict:
 async def parse_form(req: Request) -> FormData:
     "Starlette errors on empty multipart forms, so this checks for that situation"
     ctype = req.headers.get("Content-Type", "")
-    if not ctype.startswith('multipart'): await req.body()
-    if ctype=='application/json': return await req.json()
-    if not ctype.startswith("multipart/form-data"): return await req.form()
-    try: boundary = ctype.split("boundary=")[1].strip()
-    except IndexError: raise HTTPException(400, "Invalid form-data: no boundary")
-    min_len = len(boundary) + 6
-    clen = int(req.headers.get("Content-Length", "0"))
-    if clen <= min_len: return FormData()
-    return await req.form()
+    if ctype.startswith("multipart/form-data"):
+        try: boundary = ctype.split("boundary=")[1].strip()
+        except IndexError: raise HTTPException(400, "Invalid form-data: no boundary")
+        if int(req.headers.get("Content-Length", "0")) <= len(boundary) + 6: return FormData()
+        return await req.form()
+    await req.body()  # Cache body for non-multipart request types
+    return await req.json() if ctype == 'application/json' else await req.form()
+
 
 # %% ../nbs/api/00_core.ipynb #089fe388
 async def _from_body(conn, p, data):
