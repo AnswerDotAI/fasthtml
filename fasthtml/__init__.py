@@ -1,2 +1,2 @@
-__version__ = "0.12.48"
+__version__ = "0.12.49"
 from .core import *
