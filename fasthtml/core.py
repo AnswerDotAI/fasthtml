@@ -368,7 +368,7 @@ def _to_xml(req, resp, indent):
     "Convert response to XML string with target URL resolution"
     resp = _apply_ft(resp)
     _find_targets(req, resp)
-    return to_xml(resp, indent)
+    return to_xml(resp, indent=indent)
 
 # %% ../nbs/api/00_core.ipynb #f1e3ed2d
 _iter_typs = (tuple,list,map,filter,range,types.GeneratorType)
