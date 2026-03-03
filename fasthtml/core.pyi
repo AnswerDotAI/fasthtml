@@ -122,7 +122,7 @@ class Beforeware:
     def __init__(self, f, skip=None):
         ...
 
-async def _handle(f, args, **kwargs):
+async def _handle(f, /, args, **kwargs):
     ...
 
 def _find_wsp(ws, data, hdrs, arg: str, p: Parameter):

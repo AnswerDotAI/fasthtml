@@ -254,7 +254,7 @@ class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
 
 # %% ../nbs/api/00_core.ipynb #78c3c357
-async def _handle(f, *args, **kwargs):
+async def _handle(f, /, *args, **kwargs):
     return (await f(*args, **kwargs)) if is_async_callable(f) else await run_in_threadpool(f, *args, **kwargs)
 
 # %% ../nbs/api/00_core.ipynb #ad0f0e87
