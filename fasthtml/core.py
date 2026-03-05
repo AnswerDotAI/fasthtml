@@ -84,6 +84,7 @@ fh_cfg = AttrDict(indent=True)
 def _fix_anno(t, o):
     "Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"
     origin = get_origin(t)
+    if t is list and origin is None: return listify(o)
     if origin is Union or origin is UnionType or origin in (list,List):
         t = first(o for o in get_args(t) if o!=type(None))
     d = {bool: str2bool, int: str2int, date: str2date, UploadFile: noop}
