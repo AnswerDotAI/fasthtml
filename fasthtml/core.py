@@ -80,16 +80,24 @@ def _mk_list(t, v): return [t(o) for o in listify(v)]
 # %% ../nbs/api/00_core.ipynb #5ab74473
 fh_cfg = AttrDict(indent=True)
 
+# %% ../nbs/api/00_core.ipynb #88d12e68
+_special_names = {'ws','request','session','scope','data','htmx','app','state','auth','send','api','body','hdrs','ftrs','bodykw','htmlkw','resp','self'}
+
+def _check_anno(arg, anno):
+    "Check for common annotation issues; returns warning string or None"
+    if anno is empty and arg.lower() not in _special_names and not any(s.startswith(arg.lower()) for s in ('request','session')): return f"`{arg}` has no type annotation and is not a recognised special name, so is ignored."
+    if isinstance(anno, type) and not get_origin(anno) and issubclass(anno, (list, tuple)) and not _is_body(anno): return f"`{arg}` uses bare `{anno.__name__}` annotation, so is ignored (use e.g. `{anno.__name__}[str]` instead)."
+
 # %% ../nbs/api/00_core.ipynb #0afb520c
 def _fix_anno(t, o):
     "Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"
     origin = get_origin(t)
-    if t is list and origin is None: return listify(o)
-    if origin is Union or origin is UnionType or origin in (list,List):
-        t = first(o for o in get_args(t) if o!=type(None))
+    if origin is Union or origin is UnionType: origin = get_origin(t:=first(o for o in get_args(t) if o!=type(None)))
+    if origin in (list,List): t = first(o for o in get_args(t) if o!=type(None))
     d = {bool: str2bool, int: str2int, date: str2date, UploadFile: noop}
     res = d.get(t, t)
     if origin in (list,List): return _mk_list(res, o)
+    if isinstance(t, type) and issubclass(t, (list,tuple)): return None
     if not isinstance(o, (str,list,tuple)): return o
     return res(o[-1]) if isinstance(o,(list,tuple)) else res(o)
 
@@ -194,6 +202,7 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if _is_body(anno):
             if 'session'.startswith(arg.lower()): return conn.scope.get('session', {})
             return await _from_body(conn, p, data)
+    if (msg := _check_anno(arg, anno)): return warn(msg)
     # Special param names with no annotations
     if anno is empty:
         if arg.lower()=='ws' or 'request'.startswith(arg.lower()): return conn
@@ -210,7 +219,6 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if arg.lower()=='api': return ApiReturn(hdrs.get('accept')=='application/json')
         if arg.lower()=='body': return (await conn.body()).decode()
         if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(conn, arg.lower())
-        if arg!='resp': warn(f"`{arg} has no type annotation and is not a recognised special name, so is ignored.")
         return None
     # Not a special name or a special annotation
     res = conn.path_params.get(arg, None)
@@ -224,7 +232,6 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
             if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {arg}")
             raise ValueError(f"Missing required field: {arg}")
         res = p.default
-    if anno is empty: return res
     try: return _fix_anno(anno, res)
     except ValueError as e:
         if isinstance(conn, Request): raise HTTPException(404, f"{conn.url.path}: {e}") from None
@@ -613,6 +620,7 @@ all_meths = 'get post put delete patch head trace options'.split()
 def _endp(self:FastHTML, f, body_wrap):
     "Create endpoint wrapper with before/after middleware processing"
     sig = signature_ex(f, True)
+    for n,p in sig.parameters.items(): (msg:=_check_anno(n,p.annotation)) and warn(msg)
     async def _f(req):
         resp = None
         req.injects = []
