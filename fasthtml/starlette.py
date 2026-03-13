@@ -12,7 +12,7 @@ from starlette.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 from starlette._utils import is_async_callable
 from starlette.convertors import Convertor, StringConvertor, register_url_convertor, CONVERTOR_TYPES
-from starlette.routing import Route, Router, Mount, WebSocketRoute
+from starlette.routing import Route, Router, Mount, WebSocketRoute, Host, Match, compile_path
 from starlette.exceptions import HTTPException,WebSocketException
 from starlette.endpoints import HTTPEndpoint,WebSocketEndpoint
 from starlette.config import Config
