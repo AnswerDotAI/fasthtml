@@ -7,7 +7,7 @@ from starlette.authentication import AuthCredentials, AuthenticationBackend, Aut
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.responses import Response, HTMLResponse, FileResponse, JSONResponse as JSONResponseOrig, RedirectResponse, StreamingResponse
-from starlette.requests import Request, HTTPConnection, FormData
+from starlette.requests import Request, HTTPConnection, FormData, Headers
 from starlette.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 from starlette._utils import is_async_callable
@@ -21,4 +21,5 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from starlette.concurrency import run_in_threadpool
 from starlette.background import BackgroundTask, BackgroundTasks
 from starlette.websockets import WebSocketDisconnect, WebSocket
+
 

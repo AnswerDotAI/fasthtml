@@ -616,6 +616,10 @@ class HostRoute(Route):
             if not self.host_regex.match(host): return Match.NONE, {}
         return super().matches(scope)
 
+    def __repr__(self) -> str:
+        methods = sorted(self.methods or [])
+        return f"{self.__class__.__name__}(path={self.path!r}, name={self.name!r}, methods={methods!r}, host={self.host!r})"
+
 # %% ../nbs/api/00_core.ipynb #e0accf76
 @patch
 def add_route(self:FastHTML, route):
