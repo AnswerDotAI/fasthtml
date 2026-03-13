@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.12.49
+
+### New Features
+
+- Add HostRoute class for host-header based routing with pattern matching ([#843](https://github.com/AnswerDotAI/fasthtml/issues/843))
+
+### Bugs Squashed
+
+- Fix `_fix_anno` mangling bare `list` annotations ([#841](https://github.com/AnswerDotAI/fasthtml/pull/841)), thanks to [@jackhogan](https://github.com/jackhogan)
+
+
 ## 0.12.48
 
 
