@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.13.0
+
+### New Features
+
+- Add `_mk_lifespan` helper to wrap `on_startup`/`on_shutdown` for Starlette 1.x compatibility ([#850](https://github.com/AnswerDotAI/fasthtml/issues/850))
+
+### Bugs Squashed
+
+- missing `format_datetime` ([#846](https://github.com/AnswerDotAI/fasthtml/issues/846))
+
+
 ## 0.12.50
 
 ### New Features
