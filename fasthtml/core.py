@@ -586,7 +586,13 @@ class FastHTML(Starlette):
             from IPython.display import display,HTML
             if nb_hdrs: display(HTML(to_xml(tuple(hdrs))))
             middleware.append(cors_allow)
-        on_startup,on_shutdown = listify(on_startup) or None,listify(on_shutdown) or None
+        on_startup,on_shutdown = listify(on_startup),listify(on_shutdown)
+        if (on_startup or on_shutdown) and not lifespan:
+            @contextlib.asynccontextmanager
+            async def lifespan(app):
+                for h in on_startup: await h() if asyncio.iscoroutinefunction(h) else h()
+                yield
+                for h in on_shutdown: await h() if asyncio.iscoroutinefunction(h) else h()
         self.lifespan,self.hdrs,self.ftrs = lifespan,hdrs,ftrs
         self.body_wrap,self.before,self.after,self.htmlkw,self.bodykw = body_wrap,before,after,htmlkw,bodykw
         self.secret_key = get_key(secret_key, key_fname)
@@ -600,7 +606,7 @@ class FastHTML(Starlette):
             def _not_found(req, exc): return  Response('404 Not Found', status_code=404)
             exception_handlers[404] = _not_found
         excs = {k:_wrap_ex(v, k, hdrs, ftrs, htmlkw, bodykw, body_wrap=body_wrap) for k,v in exception_handlers.items()}
-        super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
+        super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, lifespan=lifespan)
 
 # %% ../nbs/api/00_core.ipynb #dce68049
 class HostRoute(Route):
