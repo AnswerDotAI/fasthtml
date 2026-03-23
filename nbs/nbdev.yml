@@ -2,7 +2,7 @@ project:
   output-dir: _docs
 
 website:
-  title: "fasthtml"
+  title: "python-fasthtml"
   site-url: "https://www.fastht.ml/docs"
   description: "The fastest way to create an HTML app"
   repo-branch: main

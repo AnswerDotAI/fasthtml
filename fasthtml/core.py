@@ -566,6 +566,18 @@ iframe_scr = Script(NotStr("""
         document.body.addEventListener('htmx:wsAfterMessage', sendmsg);
     };"""))
 
+# %% ../nbs/api/00_core.ipynb #d370ef59
+def _mk_lifespan(ls, on_startup, on_shutdown):
+    if not on_startup and not on_shutdown: return ls
+    @contextlib.asynccontextmanager
+    async def _ls(app):
+        for f in listify(on_startup): await _handle(f)
+        if ls:
+            async with ls(app): yield
+        else: yield
+        for f in listify(on_shutdown): await _handle(f)
+    return _ls
+
 # %% ../nbs/api/00_core.ipynb #3327a1e9
 class FastHTML(Starlette):
     def __init__(self, debug=False, routes=None, middleware=None, title: str = "FastHTML page", exception_handlers=None,
@@ -586,7 +598,7 @@ class FastHTML(Starlette):
             from IPython.display import display,HTML
             if nb_hdrs: display(HTML(to_xml(tuple(hdrs))))
             middleware.append(cors_allow)
-        on_startup,on_shutdown = listify(on_startup) or None,listify(on_shutdown) or None
+        lifespan = _mk_lifespan(lifespan, on_startup, on_shutdown)
         self.lifespan,self.hdrs,self.ftrs = lifespan,hdrs,ftrs
         self.body_wrap,self.before,self.after,self.htmlkw,self.bodykw = body_wrap,before,after,htmlkw,bodykw
         self.secret_key = get_key(secret_key, key_fname)
@@ -600,7 +612,7 @@ class FastHTML(Starlette):
             def _not_found(req, exc): return  Response('404 Not Found', status_code=404)
             exception_handlers[404] = _not_found
         excs = {k:_wrap_ex(v, k, hdrs, ftrs, htmlkw, bodykw, body_wrap=body_wrap) for k,v in exception_handlers.items()}
-        super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan)
+        super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, lifespan=lifespan)
 
 # %% ../nbs/api/00_core.ipynb #dce68049
 class HostRoute(Route):
