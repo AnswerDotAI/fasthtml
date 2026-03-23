@@ -574,10 +574,12 @@ def _wrap_lifespan(lifespan, on_startup, on_shutdown):
     @contextlib.asynccontextmanager
     async def _lifespan(app):
         for h in on_startup: await h() if inspect.iscoroutinefunction(h) else h()
-        if lifespan:
-            async with lifespan(app) as state: yield state
-        else: yield
-        for h in on_shutdown: await h() if inspect.iscoroutinefunction(h) else h()
+        try:
+            if lifespan:
+                async with lifespan(app) as state: yield state
+            else: yield
+        finally:
+            for h in on_shutdown: await h() if inspect.iscoroutinefunction(h) else h()
     return _lifespan
 
 # %% ../nbs/api/00_core.ipynb #3327a1e9

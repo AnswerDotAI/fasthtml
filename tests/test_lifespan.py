@@ -58,3 +58,19 @@ def test_async_startup_shutdown():
     with cli:
         assert state == ['async_start']
     assert state == ['async_start', 'async_stop']
+
+def test_shutdown_runs_on_lifespan_error():
+    state = []
+    @contextlib.asynccontextmanager
+    async def lifespan(app):
+        yield
+        raise RuntimeError('lifespan error')
+    app = FastHTML(
+        lifespan=lifespan,
+        on_shutdown=[lambda: state.append('shutdown')],
+    )
+    cli = TestClient(app, raise_server_exceptions=False)
+    try:
+        with cli: pass
+    except RuntimeError: pass
+    assert state == ['shutdown']
