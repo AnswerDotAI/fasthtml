@@ -7,9 +7,9 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens',
            'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'ApiReturn', 'JSONResponse',
            'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body',
-           'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'HostRoute', 'nested_name',
-           'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'MiddlewareBase',
-           'FtResponse', 'unqid']
+           'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML', 'HostRoute',
+           'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache',
+           'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
 import json,uuid,inspect,types,asyncio,inspect,random,contextlib,httpx,itsdangerous,uvicorn
@@ -566,17 +566,32 @@ iframe_scr = Script(NotStr("""
         document.body.addEventListener('htmx:wsAfterMessage', sendmsg);
     };"""))
 
-# %% ../nbs/api/00_core.ipynb #d370ef59
-def _mk_lifespan(ls, on_startup, on_shutdown):
-    if not on_startup and not on_shutdown: return ls
-    @contextlib.asynccontextmanager
-    async def _ls(app):
-        for f in listify(on_startup): await _handle(f)
-        if ls:
-            async with ls(app): yield
+# %% ../nbs/api/00_core.ipynb #17ced9a3
+class _LifespanCtx:
+    def __init__(self, gen): self.gen = gen
+    async def __aenter__(self): return await anext(self.gen)
+    async def __aexit__(self, *_):
+        try: await anext(self.gen)
+        except StopAsyncIteration: pass
+    def __aiter__(self): return self.gen
+    async def __anext__(self): return await self.gen.__anext__()
+
+class Lifespan:
+    def __init__(self, startup=None, shutdown=None, ls=None):
+        startup,shutdown = listify(startup),listify(shutdown)
+        store_attr()
+
+    def __call__(self, app): return _LifespanCtx(self._run(app))
+
+    async def _run(self, app):
+        for f in self.startup: await _handle(f)
+        if self.ls:
+            async for state in self.ls(app): yield state
         else: yield
-        for f in listify(on_shutdown): await _handle(f)
-    return _ls
+        for f in self.shutdown: await _handle(f)
+
+    def on_event(self, event_type):
+        return lambda f: (getattr(self, event_type)).append(f)
 
 # %% ../nbs/api/00_core.ipynb #3327a1e9
 class FastHTML(Starlette):
@@ -598,8 +613,8 @@ class FastHTML(Starlette):
             from IPython.display import display,HTML
             if nb_hdrs: display(HTML(to_xml(tuple(hdrs))))
             middleware.append(cors_allow)
-        lifespan = _mk_lifespan(lifespan, on_startup, on_shutdown)
-        self.lifespan,self.hdrs,self.ftrs = lifespan,hdrs,ftrs
+        self.lifespan = Lifespan(on_startup, on_shutdown, lifespan)
+        self.hdrs,self.ftrs = hdrs,ftrs
         self.body_wrap,self.before,self.after,self.htmlkw,self.bodykw = body_wrap,before,after,htmlkw,bodykw
         self.secret_key = get_key(secret_key, key_fname)
         if sess_cls:
@@ -609,10 +624,12 @@ class FastHTML(Starlette):
             middleware.append(sess)
         exception_handlers = ifnone(exception_handlers, {})
         if 404 not in exception_handlers:
-            def _not_found(req, exc): return  Response('404 Not Found', status_code=404)
+            def _not_found(req, exc): return Response('404 Not Found', status_code=404)
             exception_handlers[404] = _not_found
         excs = {k:_wrap_ex(v, k, hdrs, ftrs, htmlkw, bodykw, body_wrap=body_wrap) for k,v in exception_handlers.items()}
-        super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, lifespan=lifespan)
+        super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, lifespan=self.lifespan)
+
+    def on_event(self, event_type): return self.lifespan.on_event(event_type)
 
 # %% ../nbs/api/00_core.ipynb #dce68049
 class HostRoute(Route):
@@ -690,6 +707,12 @@ def ws(self:FastHTML, path:str, conn=None, disconn=None, name=None, middleware=N
     "Add a websocket route at `path`"
     def f(func=noop): return self._add_ws(func, path, conn, disconn, name=name, middleware=middleware)
     return f
+
+# %% ../nbs/api/00_core.ipynb #j6ete5u68fo
+@patch
+def add_websocket_route(self:FastHTML, path, func, conn=None, disconn=None, name=None, middleware=None):
+    "Add a websocket route at `path` (Starlette-compatible API)"
+    return self._add_ws(func, path, conn, disconn, name=name, middleware=middleware)
 
 # %% ../nbs/api/00_core.ipynb #919618c3
 def _mk_locfunc(f, p, app=None):
