@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.13.1
+
+### New Features
+
+- Refactor lifespan handling into Lifespan class with `on_event` support and add `add_websocket_route` method ([#851](https://github.com/AnswerDotAI/fasthtml/issues/851))
+
+
 ## 0.13.0
 
 ### New Features
