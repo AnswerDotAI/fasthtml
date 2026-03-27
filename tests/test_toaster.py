@@ -46,10 +46,8 @@ def test_ft_response():
     assert 'Toast FtResponse' in res.text
 
 def test_get_toaster_with_typehint():
-    res = cli.get('/see-toast-with-typehint', follow_redirects=False)
-    assert 'Toast get' in res.text
-
-    res = cli.get('/see-toast-with-typehint', follow_redirects=True)
+    cli.get('/set-toast-get', follow_redirects=False)
+    res = cli.get('/see-toast-with-typehint')
     assert 'Toast get' in res.text
 
 def test_toast_container_in_response():
@@ -57,7 +55,22 @@ def test_toast_container_in_response():
     res = cli.get('/see-toast-ft-response')
     assert 'id="fh-toast-container"' in res.text
 
+def test_session_dict_no_query_param_leak():
+    """Regression test for https://github.com/AnswerDotAI/fasthtml/issues/845.
+
+    Query parameters must not leak into the session when it is typed as dict.
+    """
+    res = cli.get('/see-toast-with-typehint?foo=bar')
+    # The session content is rendered inside <p>...</p>; query params must not appear there
+    import re
+    session_match = re.search(r'<p>(.*?)</p>', res.text)
+    assert session_match is not None
+    session_content = session_match.group(1)
+    assert 'foo' not in session_content
+    assert 'bar' not in session_content
+
 test_get_toaster()
 test_post_toaster()
 test_ft_response()
 test_toast_container_in_response()
+test_session_dict_no_query_param_leak()
