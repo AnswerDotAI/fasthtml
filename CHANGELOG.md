@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.13.2
+
+### Bugs Squashed
+
+- Fix ws header lookup key mismatch ([#853](https://github.com/AnswerDotAI/fasthtml/pull/853)), thanks to [@dienhoa](https://github.com/dienhoa)
+
+
 ## 0.13.1
 
 ### New Features
