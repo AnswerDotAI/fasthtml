@@ -267,7 +267,7 @@ async def _handle(f, *args, **kwargs):
 
 # %% ../nbs/api/00_core.ipynb #ad0f0e87
 async def _wrap_ws(ws, data, params):
-    hdrs = Headers({k.lower():v for k,v in data.pop('HEADERS', {}).items()})
+    hdrs = Headers({k.lower():v for k,v in data.pop('HEADERS', {}).items() if v is not None})
     return await _find_ps(ws, data, hdrs, params)
 
 # %% ../nbs/api/00_core.ipynb #dcc15129
