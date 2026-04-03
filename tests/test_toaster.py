@@ -46,9 +46,11 @@ def test_ft_response():
     assert 'Toast FtResponse' in res.text
 
 def test_get_toaster_with_typehint():
+    cli.get('/set-toast-get', follow_redirects=False)
     res = cli.get('/see-toast-with-typehint', follow_redirects=False)
     assert 'Toast get' in res.text
 
+    cli.get('/set-toast-get', follow_redirects=False)
     res = cli.get('/see-toast-with-typehint', follow_redirects=True)
     assert 'Toast get' in res.text
 
