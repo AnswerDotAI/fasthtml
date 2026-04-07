@@ -9,7 +9,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body',
            'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML', 'HostRoute',
            'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache',
-           'MiddlewareBase', 'FtResponse', 'unqid']
+           'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
 import json,uuid,inspect,types,asyncio,inspect,random,contextlib,httpx,itsdangerous,uvicorn
@@ -163,12 +163,15 @@ async def parse_form(req: Request) -> FormData:
     return await req.json() if ctype == 'application/json' else await req.form()
 
 
-# %% ../nbs/api/00_core.ipynb #089fe388
+# %% ../nbs/api/00_core.ipynb #0caedd04
 async def _from_body(conn, p, data):
     "Create an instance of the annotated type from pre-parsed `data`"
     anno = p.annotation
     ctor = getattr(anno, '__from_request__', None)
-    if ctor: return await maybe_await(ctor(data, conn))
+    if ctor:
+        ps = {k:v for k,v in _params(ctor).items() if k != 'cls'}
+        kwargs = await _find_ps(conn, data, conn.headers, ps)
+        return await maybe_await(ctor(**kwargs))
     d = _annotations(anno)
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
@@ -260,6 +263,7 @@ def flat_xt(lst):
 # %% ../nbs/api/00_core.ipynb #aacff5ac
 class Beforeware:
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
+    def __repr__(self): return f'Beforeware({self.f}, skip={self.skip})'
 
 # %% ../nbs/api/00_core.ipynb #78c3c357
 async def _handle(f, *args, **kwargs):
@@ -903,6 +907,43 @@ class StaticNoCache(StaticFiles):
         resp = super().file_response(*args, **kwargs)
         resp.headers.setdefault("Cache-Control", "no-cache")
         return resp
+
+# %% ../nbs/api/00_core.ipynb #7189daf8
+from functools import wraps
+from inspect import signature, isawaitable
+
+# %% ../nbs/api/00_core.ipynb #7eed23b7
+def add_sig_param(f, name, typ=NoneType, kind=Parameter.KEYWORD_ONLY, default=Parameter.empty):
+    "Add a parameter to a function's signature"
+    sig = signature(f)
+    if name in sig.parameters: return f
+    kw = {} if default is Parameter.empty else {'default': default}
+    new_params = list(sig.parameters.values()) + [Parameter(name, kind, **kw)]
+    f.__signature__ = sig.replace(parameters=new_params)
+    f.__annotations__[name] = typ
+    return f
+
+# %% ../nbs/api/00_core.ipynb #9e5a9e88
+class into:
+    "Decorator to pass a route's return value into `func`, with keyword params added to the route signature"
+    def __init__(self, func):
+        self.func = func
+        self.params = {k:p for k,p in signature(func).parameters.items()
+            if p.kind not in (Parameter.VAR_POSITIONAL, Parameter.VAR_KEYWORD)}
+
+    def __call__(self, f):
+        @wraps(f)
+        async def _inner(*args, **kw):
+            extra = {k: kw.pop(k, None) for k in self.params}
+            res = f(*args, **kw)
+            if isawaitable(res): res = await res
+            res = self.func(*tuplify(res), **extra)
+            if isawaitable(res): res = await res
+            return res
+        for k,p in self.params.items():
+            anno = p.annotation if p.annotation is not Parameter.empty else NoneType
+            add_sig_param(_inner, k, anno, default=p.default)
+        return _inner
 
 # %% ../nbs/api/00_core.ipynb #1960d7ff
 class MiddlewareBase:
