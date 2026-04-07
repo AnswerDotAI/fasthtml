@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.13.3
+
+### New Features
+
+- Add `into` decorator and `add_sig_param` utility; improve `__from_request__` param handling; add `Beforeware.__repr__` ([#858](https://github.com/AnswerDotAI/fasthtml/issues/858))
+
+### Bugs Squashed
+
+- Fix WebSocket crash when HTMX sends null header values ([#856](https://github.com/AnswerDotAI/fasthtml/pull/856)), thanks to [@aleph-ra](https://github.com/aleph-ra)
+
+
 ## 0.13.2
 
 ### Bugs Squashed
