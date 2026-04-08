@@ -210,7 +210,7 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
     if anno is empty:
         if arg.lower()=='ws' or 'request'.startswith(arg.lower()): return conn
         if 'session'.startswith(arg.lower()): return conn.scope.get('session', {})
-        if arg.lower()=='scope': return dict2obj(conn.scope)
+        if arg.lower()=='scope': return conn.scope
         if arg.lower()=='data': return data
         if arg.lower()=='htmx': return _get_htmx(hdrs)
         if arg.lower()=='app': return conn.scope['app']
