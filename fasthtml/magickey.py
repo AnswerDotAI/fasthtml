@@ -65,14 +65,17 @@ class MagicKey:
 
         @app.post('/verify_passkey_auth')
         def verify_passkey_auth(response: str, id: str, data: dict, session, req):
-            challenge = base64url_to_bytes(session.pop('auth_challenge'))
+            challenge_b64 = session.pop('auth_challenge', None)
+            if not challenge_b64: return RedirectResponse(f'{login_path}?error=no_challenge', status_code=303)
             cred_id = base64url_to_bytes(id)
             stored = self.get_passkey(cred_id)
-            if not stored: return P('No matching passkey')
+            if not stored: return RedirectResponse(f'{login_path}?error=passkey_not_found', status_code=303)
             data['response'] = loads(response)
-            res = verify_authentication_response(
-                credential_public_key=stored['public_key'], credential_current_sign_count=stored['sign_count'],
-                credential=data, expected_challenge=challenge, require_user_verification=True, **_origin_kw(req))
+            try:
+                res = verify_authentication_response(
+                    credential_public_key=stored['public_key'], credential_current_sign_count=stored['sign_count'],
+                    credential=data, expected_challenge=base64url_to_bytes(challenge_b64), require_user_verification=True, **_origin_kw(req))
+            except Exception: return RedirectResponse(f'{login_path}?error=passkey_failed', status_code=303)
             self.update_passkey(cred_id, res.new_sign_count)
             session['auth'] = stored['email']
             return self._do_auth(stored['email'], session, htmx=True)
@@ -80,7 +83,7 @@ class MagicKey:
         @app.post('/request_passkey_reg')
         def request_passkey_reg(session, req):
             email = session.get('pending_email')
-            if not email: return P('No pending registration')
+            if not email: return RedirectResponse(f'{login_path}?error=no_pending_reg', status_code=303)
             uid = base64url_to_bytes(email)
             selec = AuthenticatorSelectionCriteria(resident_key=ResidentKeyRequirement.REQUIRED, require_resident_key=True)
             opts = generate_registration_options(
@@ -94,11 +97,14 @@ class MagicKey:
         @app.post('/finish_passkey_reg')
         def finish_passkey_reg(response: str, data: dict, session, req):
             email = session.pop('pending_email', None)
-            if not email: return P('No pending registration')
-            challenge = base64url_to_bytes(session.pop('reg_challenge'))
+            if not email: return RedirectResponse(f'{login_path}?error=no_pending_reg', status_code=303)
+            challenge_b64 = session.pop('reg_challenge', None)
+            if not challenge_b64: return RedirectResponse('/setup_passkey?error=no_challenge', status_code=303)
             data['response'] = loads(response)
-            res = verify_registration_response(
-                credential=data, expected_challenge=challenge, require_user_verification=True, **_origin_kw(req))
+            try:
+                res = verify_registration_response(
+                    credential=data, expected_challenge=base64url_to_bytes(challenge_b64), require_user_verification=True, **_origin_kw(req))
+            except Exception: return RedirectResponse('/setup_passkey?error=reg_failed', status_code=303)
             self.save_passkey(res.credential_id, email, res.credential_public_key, res.sign_count)
             session['auth'] = email
             return self._do_auth(email, session, htmx=True)
