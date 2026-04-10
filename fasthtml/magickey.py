@@ -66,16 +66,16 @@ class MagicKey:
         @app.post('/verify_passkey_auth')
         def verify_passkey_auth(response: str, id: str, data: dict, session, req):
             challenge_b64 = session.pop('auth_challenge', None)
-            if not challenge_b64: return RedirectResponse(f'{login_path}?error=no_challenge', status_code=303)
+            if not challenge_b64: return HttpHeader('HX-Redirect', f'{login_path}?error=no_challenge')
             cred_id = base64url_to_bytes(id)
             stored = self.get_passkey(cred_id)
-            if not stored: return RedirectResponse(f'{login_path}?error=passkey_not_found', status_code=303)
+            if not stored: return HttpHeader('HX-Redirect', f'{login_path}?error=passkey_not_found')
             data['response'] = loads(response)
             try:
                 res = verify_authentication_response(
                     credential_public_key=stored['public_key'], credential_current_sign_count=stored['sign_count'],
                     credential=data, expected_challenge=base64url_to_bytes(challenge_b64), require_user_verification=True, **_origin_kw(req))
-            except Exception: return RedirectResponse(f'{login_path}?error=passkey_failed', status_code=303)
+            except Exception: return HttpHeader('HX-Redirect', f'{login_path}?error=passkey_failed')
             self.update_passkey(cred_id, res.new_sign_count)
             session['auth'] = stored['email']
             return self._do_auth(stored['email'], session, htmx=True)

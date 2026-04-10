@@ -69,6 +69,7 @@ async def test_skip_passkey_reg(browser):
     await page.close()
     print('✅ test_skip_passkey_reg')
 
+
 async def run_tests():
     srv = threading.Thread(target=_start_server, daemon=True)
     srv.start()
