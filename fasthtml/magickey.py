@@ -49,7 +49,7 @@ class MagicKey:
         @app.get('/verify_magiclink')
         def verify_magiclink(token: str, session, req):
             link = self.magiclink_db.get(token)
-            if not link or link['used'] or time.time() - link['timestamp'] > 3600: return P('Invalid or expired link')
+            if not link or link['used'] or time.time() - link['timestamp'] > 3600: return RedirectResponse(f'{login_path}?error=invalid_link', status_code=303)
             link['used'] = True
             return self.after_magiclink_verify(link['email'], session, req)
 
