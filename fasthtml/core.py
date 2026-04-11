@@ -369,16 +369,8 @@ def _find_targets(req, resp):
             t = resp.attrs.pop(k, None)
             if t: resp.attrs[v] = _url_for(req, t)
 
-def _apply_ft(o):
-    "Apply FastTag transformation recursively to object `o`"
-    if isinstance(o, tuple): o = tuple(_apply_ft(c) for c in o)
-    if hasattr(o, '__ft__'): o = o.__ft__()
-    if isinstance(o, FT): o.children = tuple(_apply_ft(c) for c in o.children)
-    return o
-
 def _to_xml(req, resp, indent):
     "Convert response to XML string with target URL resolution"
-    resp = _apply_ft(resp)
     _find_targets(req, resp)
     return to_xml(resp, indent=indent)
 
