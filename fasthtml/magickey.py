@@ -74,8 +74,7 @@ class MagicKey:
     def _verify_passkey_auth(self, response: str, id: str, rawId: str, type: str, session, req):
         challenge_b64 = session.pop('auth_challenge', None)
         if not challenge_b64: return HttpHeader('HX-Redirect', f'{self.login_path}?error=no_challenge')
-        cred_id = base64url_to_bytes(id)
-        stored = self.get_passkey(cred_id)
+        stored = self.get_passkey(id)
         if not stored: return HttpHeader('HX-Redirect', f'{self.login_path}?error=passkey_not_found')
         try:
             res = verify_authentication_response(
@@ -85,7 +84,7 @@ class MagicKey:
                 expected_challenge=base64url_to_bytes(challenge_b64), 
                 require_user_verification=True, **_origin_kw(req))
         except Exception: return HttpHeader('HX-Redirect', f'{self.login_path}?error=passkey_failed')
-        self.update_passkey(cred_id, res.new_sign_count)
+        self.update_passkey(id, res.new_sign_count)
         session['auth'] = self.get_user_id(stored['email'])
         return self._do_auth(session['auth'], session, htmx=True)
 
@@ -108,7 +107,7 @@ class MagicKey:
                                                 expected_challenge=base64url_to_bytes(challenge_b64),
                                                 require_user_verification=True, **_origin_kw(req))
         except Exception: return RedirectResponse('/setup_passkey?error=reg_failed', status_code=303)
-        self.save_passkey(res.credential_id, email, res.credential_public_key, res.sign_count)
+        self.save_passkey(bytes_to_base64url(res.credential_id), email, res.credential_public_key, res.sign_count)
         session['auth'] = self.get_user_id(email)
         return self._do_auth(session['auth'], session, htmx=True)
 
