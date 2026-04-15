@@ -19,117 +19,120 @@ def _origin_kw(req):
     scheme = 'http' if host in ('localhost', '127.0.0.1') else 'https'
     return dict(expected_origin=f'{scheme}://{req.url.netloc}', expected_rp_id=host)
 
-# %% ../nbs/api/10_magickey.ipynb #811449f3
+# %% ../nbs/api/10_magickey.ipynb #02b50590
+def _webauthn_js(opts, action, callback):
+    return Script("SimpleWebAuthnBrowser.%s({ optionsJSON: %s }).then(r => {"
+        "htmx.ajax('POST', '%s', { values: r });});" % (action, options_to_json(opts), callback))
+
+# %% ../nbs/api/10_magickey.ipynb #032d5010
 class MagicKey:
-    def __init__(self, app, send_email, skip=None, login_path='/login', logout_path='/logout'):
+    def __init__(self, app, send_email, skip=None, login_path='/login', logout_path='/logout', token_expiry=3600, rp_name=None):
         if not skip: skip = [login_path, '/verify_magiclink', '/send_magic_link', '/request_passkey_auth',
                              '/verify_passkey_auth', '/setup_passkey', '/request_passkey_reg',
                              '/finish_passkey_reg', '/skip_passkey_reg']
         self.magiclink_db = {}
         store_attr()
-
-        async def before(req, session):
+        async def _before(req, session):
             if 'auth' not in req.scope: req.scope['auth'] = session.get('auth')
             if not req.scope['auth']: return RedirectResponse(login_path, status_code=303)
-        app.before.append(Beforeware(before, skip=skip))
+        app.before.append(Beforeware(_before, skip=skip))
+        app.hdrs += (Script(src='https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@13.1.0/dist/bundle/index.umd.min.js'),)
+        app.get(logout_path)(self._logout)
+        app.post('/send_magic_link')(self._send_magic_link)
+        app.get('/verify_magiclink')(self._verify_magiclink)
+        app.post('/request_passkey_auth')(self._request_passkey_auth)
+        app.post('/verify_passkey_auth')(self._verify_passkey_auth)
+        app.post('/request_passkey_reg')(self._request_passkey_reg)
+        app.post('/finish_passkey_reg')(self._finish_passkey_reg)
+        app.post('/skip_passkey_reg')(self._skip_passkey_reg)
 
-        @app.get(logout_path)
-        def logout(session):
-            session.pop('auth', None)
-            return RedirectResponse(login_path, status_code=303)
+    def _logout(self, session):
+        session.pop('auth', None)
+        return RedirectResponse(self.login_path, status_code=303)
 
-        @app.post('/send_magic_link')
-        def send_magic_link(email: str, req):
-            token = secrets.token_urlsafe(32)
-            self.magiclink_db[token] = dict(email=email, timestamp=time.time(), used=False)
-            scheme = 'http' if req.url.hostname in ('localhost', '127.0.0.1') else 'https'
-            magic_url = f'{scheme}://{req.url.netloc}/verify_magiclink?token={token}'
-            return self.send_email(email, magic_url)
+    def _send_magic_link(self, email: str, req):
+        self.magiclink_db = {k:v for k,v in self.magiclink_db.items() if not v['used'] and time.time() - v['timestamp'] <= self.token_expiry}
+        token = secrets.token_urlsafe(32)
+        self.magiclink_db[token] = dict(email=email, timestamp=time.time(), used=False)
+        scheme = 'http' if req.url.hostname in ('localhost', '127.0.0.1') else 'https'
+        magic_url = f'{scheme}://{req.url.netloc}/verify_magiclink?token={token}'
+        return self.send_email(email, magic_url)
 
-        @app.get('/verify_magiclink')
-        def verify_magiclink(token: str, session, req):
-            link = self.magiclink_db.get(token)
-            if not link or link['used'] or time.time() - link['timestamp'] > 3600: return RedirectResponse(f'{login_path}?error=invalid_link', status_code=303)
-            link['used'] = True
-            return self.after_magiclink_verify(link['email'], session, req)
+    def _verify_magiclink(self, token: str, session, req):
+        link = self.magiclink_db.get(token)
+        if not link or link['used'] or time.time() - link['timestamp'] > self.token_expiry:
+            return RedirectResponse(f'{self.login_path}?error=invalid_link', status_code=303)
+        link['used'] = True
+        return self.after_magiclink_verify(link['email'], session, req)
 
-        @app.post('/request_passkey_auth')
-        def request_passkey_auth(session, req):
-            auth_opts = generate_authentication_options(
-                rp_id=req.url.hostname, user_verification=UserVerificationRequirement.PREFERRED)
-            session['auth_challenge'] = bytes_to_base64url(auth_opts.challenge)
-            return Script("""
-                SimpleWebAuthnBrowser.startAuthentication({ optionsJSON: %s }).then(r => {
-                    htmx.ajax('POST', '/verify_passkey_auth', { values: r, target:'#result' });
-                });""" % options_to_json(auth_opts))
+    def _request_passkey_auth(self, session, req):
+        auth_opts = generate_authentication_options(
+            rp_id=req.url.hostname, user_verification=UserVerificationRequirement.REQUIRED)
+        session['auth_challenge'] = bytes_to_base64url(auth_opts.challenge)
+        return _webauthn_js(auth_opts, 'startAuthentication', '/verify_passkey_auth')
 
-        @app.post('/verify_passkey_auth')
-        def verify_passkey_auth(response: str, id: str, data: dict, session, req):
-            challenge_b64 = session.pop('auth_challenge', None)
-            if not challenge_b64: return HttpHeader('HX-Redirect', f'{login_path}?error=no_challenge')
-            cred_id = base64url_to_bytes(id)
-            stored = self.get_passkey(cred_id)
-            if not stored: return HttpHeader('HX-Redirect', f'{login_path}?error=passkey_not_found')
-            data['response'] = loads(response)
-            try:
-                res = verify_authentication_response(
-                    credential_public_key=stored['public_key'], credential_current_sign_count=stored['sign_count'],
-                    credential=data, expected_challenge=base64url_to_bytes(challenge_b64), require_user_verification=True, **_origin_kw(req))
-            except Exception: return HttpHeader('HX-Redirect', f'{login_path}?error=passkey_failed')
-            self.update_passkey(cred_id, res.new_sign_count)
-            session['auth'] = stored['email']
-            return self._do_auth(stored['email'], session, htmx=True)
+    def _verify_passkey_auth(self, response: str, id: str, rawId: str, type: str, session, req):
+        challenge_b64 = session.pop('auth_challenge', None)
+        if not challenge_b64: return HttpHeader('HX-Redirect', f'{self.login_path}?error=no_challenge')
+        cred_id = base64url_to_bytes(id)
+        stored = self.get_passkey(cred_id)
+        if not stored: return HttpHeader('HX-Redirect', f'{self.login_path}?error=passkey_not_found')
+        try:
+            res = verify_authentication_response(
+                credential=dict(id=id, rawId=rawId, response=loads(response), type=type),
+                credential_public_key=stored['public_key'], 
+                credential_current_sign_count=stored['sign_count'],
+                expected_challenge=base64url_to_bytes(challenge_b64), 
+                require_user_verification=True, **_origin_kw(req))
+        except Exception: return HttpHeader('HX-Redirect', f'{self.login_path}?error=passkey_failed')
+        self.update_passkey(cred_id, res.new_sign_count)
+        session['auth'] = self.get_user_id(stored['email'])
+        return self._do_auth(session['auth'], session, htmx=True)
 
-        @app.post('/request_passkey_reg')
-        def request_passkey_reg(session, req):
-            email = session.get('pending_email')
-            if not email: return RedirectResponse(f'{login_path}?error=no_pending_reg', status_code=303)
-            uid = base64url_to_bytes(email)
-            selec = AuthenticatorSelectionCriteria(resident_key=ResidentKeyRequirement.REQUIRED, require_resident_key=True)
-            opts = generate_registration_options(
-                rp_id=req.url.hostname, rp_name='MagicKey', user_name=email, user_id=uid, authenticator_selection=selec)
-            session['reg_challenge'] = bytes_to_base64url(opts.challenge)
-            return Script("""
-                SimpleWebAuthnBrowser.startRegistration({ optionsJSON: %s }).then(r => {
-                    htmx.ajax('POST', '/finish_passkey_reg', { values: r, target:'#result' });
-                });""" % options_to_json(opts))
+    def _request_passkey_reg(self, session, req):
+        email = session.get('pending_email')
+        if not email: return RedirectResponse(f'{self.login_path}?error=no_pending_reg', status_code=303)
+        opts = generate_registration_options(
+            rp_id=req.url.hostname, rp_name=self.rp_name or req.url.hostname, user_name=email, 
+            user_id=str(self.get_user_id(email)).encode(), 
+            authenticator_selection=AuthenticatorSelectionCriteria(resident_key=ResidentKeyRequirement.REQUIRED))
+        session['reg_challenge'] = bytes_to_base64url(opts.challenge)
+        return _webauthn_js(opts, 'startRegistration', '/finish_passkey_reg')
 
-        @app.post('/finish_passkey_reg')
-        def finish_passkey_reg(response: str, data: dict, session, req):
-            email = session.pop('pending_email', None)
-            if not email: return RedirectResponse(f'{login_path}?error=no_pending_reg', status_code=303)
-            challenge_b64 = session.pop('reg_challenge', None)
-            if not challenge_b64: return RedirectResponse('/setup_passkey?error=no_challenge', status_code=303)
-            data['response'] = loads(response)
-            try:
-                res = verify_registration_response(
-                    credential=data, expected_challenge=base64url_to_bytes(challenge_b64), require_user_verification=True, **_origin_kw(req))
-            except Exception: return RedirectResponse('/setup_passkey?error=reg_failed', status_code=303)
-            self.save_passkey(res.credential_id, email, res.credential_public_key, res.sign_count)
-            session['auth'] = email
-            return self._do_auth(email, session, htmx=True)
+    def _finish_passkey_reg(self, response: str, id: str, rawId: str, type: str, session, req):
+        email = session.pop('pending_email', None)
+        if not email: return RedirectResponse(f'{self.login_path}?error=no_pending_reg', status_code=303)
+        challenge_b64 = session.pop('reg_challenge', None)
+        if not challenge_b64: return RedirectResponse('/setup_passkey?error=no_challenge', status_code=303)
+        try: res = verify_registration_response(credential=dict(id=id, rawId=rawId, response=loads(response), type=type),
+                                                expected_challenge=base64url_to_bytes(challenge_b64),
+                                                require_user_verification=True, **_origin_kw(req))
+        except Exception: return RedirectResponse('/setup_passkey?error=reg_failed', status_code=303)
+        self.save_passkey(res.credential_id, email, res.credential_public_key, res.sign_count)
+        session['auth'] = self.get_user_id(email)
+        return self._do_auth(session['auth'], session, htmx=True)
 
-        @app.get('/skip_passkey_reg')
-        def skip_passkey_reg(session):
-            email = session.pop('pending_email', None)
-            if not email: return RedirectResponse(login_path, status_code=303)
-            session['auth'] = email
-            return self._do_auth(email, session, htmx=False)
+    def _skip_passkey_reg(self, session):
+        email = session.pop('pending_email', None)
+        if not email: return RedirectResponse(self.login_path, status_code=303)
+        session['auth'] = self.get_user_id(email)
+        return self._do_auth(session['auth'], session, htmx=False)
 
-    def _do_auth(self, email, session, htmx=False):
-        url = self.get_auth(email, session)
+    def _do_auth(self, user_id, session, htmx=False):
+        url = self.get_auth(user_id, session)
         if htmx: return HttpHeader('HX-Redirect', url)
         return RedirectResponse(url, status_code=303)
 
-    def get_auth(self, email, session): raise NotImplementedError()
-    def has_passkey(self, email): return False
-    def get_passkey(self, credential_id): return None
+    def get_auth(self, user_id, session): return '/'
+    def get_user_id(self, email): raise NotImplementedError()
+    def has_passkey(self, email): raise NotImplementedError()
+    def get_passkey(self, credential_id): raise NotImplementedError()
     def save_passkey(self, credential_id, email, public_key, sign_count): raise NotImplementedError()
     def update_passkey(self, credential_id, sign_count): raise NotImplementedError()
 
     def after_magiclink_verify(self, email, session, req):
         if self.has_passkey(email):
-            session['auth'] = email
-            return self._do_auth(email, session, htmx=False)
+            session['auth'] = self.get_user_id(email)
+            return self._do_auth(session['auth'], session, htmx=False)
         session['pending_email'] = email
         return RedirectResponse('/setup_passkey', status_code=303)
