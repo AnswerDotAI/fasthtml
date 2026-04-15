@@ -5,6 +5,7 @@ passkey_store = {}
 
 class Auth(MagicKey):
     def get_auth(self, email, session): return '/'
+    def get_user_id(self, email): return email
     def has_passkey(self, email): return any(v['email'] == email for v in passkey_store.values())
     def get_passkey(self, credential_id): return passkey_store.get(credential_id)
     def save_passkey(self, credential_id, email, public_key, sign_count):
@@ -36,5 +37,5 @@ def setup_passkey():
     return Titled('Set Up Passkey', simplewebauthn,
         P('Set up a passkey for faster logins next time?'),
         Button('Register Passkey', hx_post='/request_passkey_reg', target_id='scripts'),
-        A('Skip', href='/skip_passkey_reg', id='skip-link'),
+        Form(Button('Skip', type='submit', id='skip-btn'), action='/skip_passkey_reg', method='post'),
         Div(id='scripts'), Div(id='result'))

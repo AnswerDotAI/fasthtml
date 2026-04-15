@@ -1,4 +1,8 @@
-"""End-to-end tests for MagicKey using Playwright with virtual WebAuthn authenticator."""
+"""End-to-end tests for MagicKey using Playwright with virtual WebAuthn authenticator.
+
+To run: `python tests/test_magickey_end2end.py`
+
+"""
 import asyncio, threading, time, uvicorn
 from playwright.async_api import async_playwright
 
@@ -36,7 +40,7 @@ async def _register(page, email, passkey=True):
     await link.click()
     await page.wait_for_url('**/setup_passkey**')
     if passkey: await page.click('text=Register Passkey')
-    else :      await page.click('#skip-link')
+    else :      await page.click('#skip-btn')
     await page.wait_for_url('**/')
 
 async def test_magic_link_and_passkey_reg(browser):
