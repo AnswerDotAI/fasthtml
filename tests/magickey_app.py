@@ -16,10 +16,10 @@ class Auth(MagicKey):
 def _dev_send_email(email, url): return P(f'Magic link for {email}: ', A(url, href=url))
 mk = Auth(app, send_email=_dev_send_email)
 
-@rt('/')
-def home(auth): return Titled('Home', P(f'Hello {auth}!'), A('Log out', href='/logout'))
+@rt
+def index(auth): return Titled('Home', P(f'Hello {auth}!'), A('Log out', href='/logout'))
 
-@rt('/login')
+@rt
 def login():
     return Titled('Sign In',
         Button('Sign in with Passkey', hx_post='/request_passkey_auth', target_id='scripts'),
@@ -29,7 +29,7 @@ def login():
             Button('Send Magic Link', type='submit')),
         Div(id='scripts'))
 
-@rt('/setup_passkey')
+@rt
 def setup_passkey():
     return Titled('Set Up Passkey',
         P('Set up a passkey for faster logins next time?'),
