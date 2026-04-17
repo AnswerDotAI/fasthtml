@@ -14,7 +14,7 @@ class Auth(MagicKey):
     def update_passkey(self, credential_id, sign_count): passkey_store[credential_id]['sign_count'] = sign_count
 
 def _dev_send_email(email, url): return P(f'Magic link for {email}: ', A(url, href=url))
-mk = Auth(app, send_email=_dev_send_email)
+mk = Auth(app, send_email=_dev_send_email, public_origin='http://localhost:8123', rp_id='localhost')
 
 @rt
 def index(auth): return Titled('Home', P(f'Hello {auth}!'), A('Log out', href='/logout'))
@@ -36,3 +36,4 @@ def setup_passkey():
         Button('Register Passkey', hx_post='/request_passkey_reg', target_id='scripts'),
         Form(Button('Skip', type='submit', id='skip-btn'), action='/skip_passkey_reg', method='post'),
         Div(id='scripts'))
+

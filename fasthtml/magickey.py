@@ -6,18 +6,24 @@
 __all__ = ['MagicKey']
 
 # %% ../nbs/api/10_magickey.ipynb #d3fd43fe
-from .common import *
+import secrets, time
+from json import loads
+from urllib.parse import urlparse
+
 from webauthn import generate_authentication_options, generate_registration_options, verify_authentication_response, verify_registration_response, options_to_json
 from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
 from webauthn.helpers.structs import AuthenticatorSelectionCriteria, ResidentKeyRequirement, UserVerificationRequirement
-from json import loads
-import secrets, time
+
+from fastcore.utils import *
+from fastcore.xml import *
+from fastlite import *
+from .basics import *
+from .starlette import *
+from .fastapp import *
 
 # %% ../nbs/api/10_magickey.ipynb #03d86e44
-def _origin_kw(req):
-    host = req.url.hostname
-    scheme = 'http' if host in ('localhost', '127.0.0.1') else 'https'
-    return dict(expected_origin=f'{scheme}://{req.url.netloc}', expected_rp_id=host)
+# _origin_kw removed; public_origin / rp_id inlined at call sites
+
 
 # %% ../nbs/api/10_magickey.ipynb #02b50590
 def _webauthn_js(opts, action, callback):
@@ -26,15 +32,26 @@ def _webauthn_js(opts, action, callback):
 
 # %% ../nbs/api/10_magickey.ipynb #032d5010
 class MagicKey:
-    def __init__(self, app, send_email, skip=None, login_path='/login', logout_path='/logout', token_expiry=3600, rp_name=None):
-        if not skip: skip = [login_path, '/verify_magiclink', '/send_magic_link', '/request_passkey_auth',
-                             '/verify_passkey_auth', '/setup_passkey', '/request_passkey_reg',
-                             '/finish_passkey_reg', '/skip_passkey_reg']
+    def __init__(self,
+                 app,             # FastHTML app instance
+                 send_email,      # `f(email, magic_url)` — sends the magic link
+                 public_origin,   # Full origin URL, e.g. `https://example.com`
+                 rp_id=None,      # WebAuthn relying party ID (default: hostname from `public_origin`)
+                 rp_name=None,    # WebAuthn relying party display name (default: `rp_id`)
+                 skip=None,       # Routes to skip auth beforeware (default: all MagicKey routes)
+                 login_path='/login',   # Login page route
+                 logout_path='/logout', # Logout route
+                 token_expiry=3600):    # Magic link validity in seconds
+        "Passwordless auth combining magic links and passkeys"
+        if not rp_id: rp_id = urlparse(public_origin).hostname
         self.magiclink_db = {}
         store_attr()
         async def _before(req, session):
             if 'auth' not in req.scope: req.scope['auth'] = session.get('auth')
             if not req.scope['auth']: return RedirectResponse(login_path, status_code=303)
+        if not skip: skip = [login_path, logout_path, '/finish_passkey_reg', '/send_magic_link', 
+                             '/request_passkey_auth', '/request_passkey_reg', '/setup_passkey',
+                             '/skip_passkey_reg', '/verify_magiclink', '/verify_passkey_auth',]
         app.before.append(Beforeware(_before, skip=skip))
         app.hdrs += (Script(src='https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@13.1.0/dist/bundle/index.umd.min.js'),)
         app.get(logout_path)(self._logout)
@@ -50,12 +67,11 @@ class MagicKey:
         session.pop('auth', None)
         return RedirectResponse(self.login_path, status_code=303)
 
-    def _send_magic_link(self, email: str, req):
+    def _send_magic_link(self, email: str):
         self.magiclink_db = {k:v for k,v in self.magiclink_db.items() if not v['used'] and time.time() - v['timestamp'] <= self.token_expiry}
         token = secrets.token_urlsafe(32)
         self.magiclink_db[token] = dict(email=email, timestamp=time.time(), used=False)
-        scheme = 'http' if req.url.hostname in ('localhost', '127.0.0.1') else 'https'
-        magic_url = f'{scheme}://{req.url.netloc}/verify_magiclink?token={token}'
+        magic_url = f'{self.public_origin}/verify_magiclink?token={token}'
         return self.send_email(email, magic_url)
 
     def _verify_magiclink(self, token: str, session, req):
@@ -65,13 +81,13 @@ class MagicKey:
         link['used'] = True
         return self.after_magiclink_verify(link['email'], session, req)
 
-    def _request_passkey_auth(self, session, req):
+    def _request_passkey_auth(self, session):
         auth_opts = generate_authentication_options(
-            rp_id=req.url.hostname, user_verification=UserVerificationRequirement.REQUIRED)
+            rp_id=self.rp_id, user_verification=UserVerificationRequirement.REQUIRED)
         session['auth_challenge'] = bytes_to_base64url(auth_opts.challenge)
         return _webauthn_js(auth_opts, 'startAuthentication', '/verify_passkey_auth')
 
-    def _verify_passkey_auth(self, response: str, id: str, rawId: str, type: str, session, req):
+    def _verify_passkey_auth(self, response: str, id: str, rawId: str, type: str, session):
         challenge_b64 = session.pop('auth_challenge', None)
         if not challenge_b64: return HttpHeader('HX-Redirect', f'{self.login_path}?error=no_challenge')
         stored = self.get_passkey(id)
@@ -82,30 +98,32 @@ class MagicKey:
                 credential_public_key=stored['public_key'], 
                 credential_current_sign_count=stored['sign_count'],
                 expected_challenge=base64url_to_bytes(challenge_b64), 
-                require_user_verification=True, **_origin_kw(req))
+                require_user_verification=True,
+                expected_origin=self.public_origin, expected_rp_id=self.rp_id)
         except Exception: return HttpHeader('HX-Redirect', f'{self.login_path}?error=passkey_failed')
         self.update_passkey(id, res.new_sign_count)
         session['auth'] = self.get_user_id(stored['email'])
         return self._do_auth(session['auth'], session, htmx=True)
 
-    def _request_passkey_reg(self, session, req):
+    def _request_passkey_reg(self, session):
         email = session.get('pending_email')
         if not email: return RedirectResponse(f'{self.login_path}?error=no_pending_reg', status_code=303)
         opts = generate_registration_options(
-            rp_id=req.url.hostname, rp_name=self.rp_name or req.url.hostname, user_name=email, 
+            rp_id=self.rp_id, rp_name=self.rp_name or self.rp_id, user_name=email, 
             user_id=str(self.get_user_id(email)).encode(), 
             authenticator_selection=AuthenticatorSelectionCriteria(resident_key=ResidentKeyRequirement.REQUIRED))
         session['reg_challenge'] = bytes_to_base64url(opts.challenge)
         return _webauthn_js(opts, 'startRegistration', '/finish_passkey_reg')
 
-    def _finish_passkey_reg(self, response: str, id: str, rawId: str, type: str, session, req):
+    def _finish_passkey_reg(self, response: str, id: str, rawId: str, type: str, session):
         email = session.pop('pending_email', None)
         if not email: return RedirectResponse(f'{self.login_path}?error=no_pending_reg', status_code=303)
         challenge_b64 = session.pop('reg_challenge', None)
         if not challenge_b64: return RedirectResponse('/setup_passkey?error=no_challenge', status_code=303)
         try: res = verify_registration_response(credential=dict(id=id, rawId=rawId, response=loads(response), type=type),
                                                 expected_challenge=base64url_to_bytes(challenge_b64),
-                                                require_user_verification=True, **_origin_kw(req))
+                                                require_user_verification=True,
+                                                expected_origin=self.public_origin, expected_rp_id=self.rp_id)
         except Exception: return RedirectResponse('/setup_passkey?error=reg_failed', status_code=303)
         self.save_passkey(bytes_to_base64url(res.credential_id), email, res.credential_public_key, res.sign_count)
         session['auth'] = self.get_user_id(email)
