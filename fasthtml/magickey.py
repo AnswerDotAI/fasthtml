@@ -20,6 +20,7 @@ from fastlite import *
 from .basics import *
 from .starlette import *
 from .fastapp import *
+from .ratelimit import *
 
 # %% ../nbs/api/10_magickey.ipynb #03d86e44
 # _origin_kw removed; public_origin / rp_id inlined at call sites
@@ -41,11 +42,15 @@ class MagicKey:
                  skip=None,       # Routes to skip auth beforeware (default: all MagicKey routes)
                  login_path='/login',   # Login page route
                  logout_path='/logout', # Logout route
-                 token_expiry=3600,    # Magic link validity in seconds
-                 webauthn_js=None):    # Script tag or URL for SimpleWebAuthn browser JS (default: jsdelivr CDN)
+                 token_expiry=3600,      # Magic link validity in seconds
+                 email_rate='3/m',       # Per-email rate limit on magic link sends (None to disable)
+                 ip_rate='10/m',         # Per-IP rate limit on magic link sends (None to disable)
+                 webauthn_js=None):      # Script tag or URL for SimpleWebAuthn browser JS (default: jsdelivr CDN)
         "Passwordless auth combining magic links and passkeys"
         if not rp_id: rp_id = urlparse(public_origin).hostname
         self.magiclink_db = {}
+        self._email_bucket = TokenBucket(email_rate) if email_rate else None
+        self._ip_bucket = TokenBucket(ip_rate) if ip_rate else None
         store_attr()
         async def _before(req, session):
             if 'auth' not in req.scope: req.scope['auth'] = session.get('auth')
@@ -70,7 +75,9 @@ class MagicKey:
         session.pop('auth', None)
         return RedirectResponse(self.login_path, status_code=303)
 
-    def _send_magic_link(self, email: str):
+    def _send_magic_link(self, email: str, req):
+        for bucket,key in ((self._ip_bucket, client_ip(req)), (self._email_bucket, email)):
+            if bucket and (w:=bucket.wait(key)): return Response('Too many requests', status_code=429, headers={'Retry-After': str(int(w)+1)})
         self.magiclink_db = {k:v for k,v in self.magiclink_db.items() if not v['used'] and time.time() - v['timestamp'] <= self.token_expiry}
         token = secrets.token_urlsafe(32)
         self.magiclink_db[token] = dict(email=email, timestamp=time.time(), used=False)
