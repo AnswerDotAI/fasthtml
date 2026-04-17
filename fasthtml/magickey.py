@@ -41,7 +41,8 @@ class MagicKey:
                  skip=None,       # Routes to skip auth beforeware (default: all MagicKey routes)
                  login_path='/login',   # Login page route
                  logout_path='/logout', # Logout route
-                 token_expiry=3600):    # Magic link validity in seconds
+                 token_expiry=3600,    # Magic link validity in seconds
+                 webauthn_js=None):    # Script tag or URL for SimpleWebAuthn browser JS (default: jsdelivr CDN)
         "Passwordless auth combining magic links and passkeys"
         if not rp_id: rp_id = urlparse(public_origin).hostname
         self.magiclink_db = {}
@@ -53,7 +54,9 @@ class MagicKey:
                              '/request_passkey_auth', '/request_passkey_reg', '/setup_passkey',
                              '/skip_passkey_reg', '/verify_magiclink', '/verify_passkey_auth',]
         app.before.append(Beforeware(_before, skip=skip))
-        app.hdrs += (Script(src='https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@13.1.0/dist/bundle/index.umd.min.js'),)
+        if not webauthn_js: webauthn_js = Script(src='https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@13.1.0/dist/bundle/index.umd.min.js')
+        elif isinstance(webauthn_js, str): webauthn_js = Script(src=webauthn_js)
+        app.hdrs += (webauthn_js,)
         app.get(logout_path)(self._logout)
         app.post('/send_magic_link')(self._send_magic_link)
         app.get('/verify_magiclink')(self._verify_magiclink)
