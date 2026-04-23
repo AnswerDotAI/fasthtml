@@ -187,9 +187,11 @@ class ApiReturn:
 # %% ../nbs/api/00_core.ipynb #7cc39ba9
 class JSONResponse(JSONResponseOrig):
     "Same as starlette's version, but auto-stringifies non serializable types"
-    def render(self, content: Any) -> bytes:
-        res = json.dumps(content, ensure_ascii=False, allow_nan=False, indent=None, separators=(",", ":"), default=str)
+    def render(self, content:Any)->bytes:
+        def _default(o): return list(o) if is_listy(o) else str(o)
+        res = json.dumps(content, ensure_ascii=False, allow_nan=False, indent=None, separators=(",",":"), default=_default)
         return res.encode("utf-8")
+
 
 # %% ../nbs/api/00_core.ipynb #5fa96e3a
 async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
