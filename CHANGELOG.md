@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.13.4
+
+### New Features
+
+- JSONResponse: serialize listy types as lists in addition to stringifying others ([#865](https://github.com/AnswerDotAI/fasthtml/issues/865))
+- Do not wrap `scope` in `dict2obj` ([#859](https://github.com/AnswerDotAI/fasthtml/issues/859))
+
+### Bugs Squashed
+
+- `_apply_ft` is not needed ([#860](https://github.com/AnswerDotAI/fasthtml/issues/860))
+
+
 ## 0.13.3
 
 ### New Features
