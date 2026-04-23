@@ -664,7 +664,7 @@ all_meths = 'get post put delete patch head trace options'.split()
 
 # %% ../nbs/api/00_core.ipynb #26b147ba
 @patch
-def _endp(self:FastHTML, f, body_wrap):
+def _endp(self:FastHTML, f, body_wrap, before=None):
     "Create endpoint wrapper with before/after middleware processing"
     sig = signature_ex(f, True)
     for n,p in sig.parameters.items(): (msg:=_check_anno(n,p.annotation)) and warn(msg)
@@ -679,6 +679,7 @@ def _endp(self:FastHTML, f, body_wrap):
                 else: bf,skip = b,[]
                 if not any(re.fullmatch(r, req.url.path) for r in skip):
                     resp = await _wrap_call(bf, req, _params(bf))
+        if not resp and before: resp = await _wrap_call(before, req, _params(before))
         req.body_wrap = body_wrap
         if not resp: resp = await _wrap_call(f, req, sig.parameters)
         for a in self.after:
@@ -733,7 +734,7 @@ def nested_name(f):
 
 # %% ../nbs/api/00_core.ipynb #72760b09
 @patch
-def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body_wrap, host=None):
+def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body_wrap, host=None, before=None):
     "Add HTTP route to FastHTML app with automatic method detection"
     n,fn,p = name,nested_name(func),None if callable(path) else path
     if methods: m = [methods] if isinstance(methods,str) else methods
@@ -741,7 +742,7 @@ def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body
     else: m = ['get','post']
     if not n: n = fn
     if not p: p = '/'+('' if fn=='index' else fn)
-    endp = self._endp(func, body_wrap or self.body_wrap)
+    endp = self._endp(func, body_wrap or self.body_wrap, before=before)
     route = HostRoute(p, endpoint=endp, methods=m, name=n, include_in_schema=include_in_schema, host=host)
     self.add_route(route)
     lf = _mk_locfunc(func, p, app=self)
@@ -750,10 +751,10 @@ def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body
 
 # %% ../nbs/api/00_core.ipynb #f5cb2c2b
 @patch
-def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=None, host=None):
+def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=None, host=None, before=None):
     "Add a route at `path`"
     def f(func):
-        return self._add_route(func, path, methods, name=name, include_in_schema=include_in_schema, body_wrap=body_wrap, host=host)
+        return self._add_route(func, path, methods, name=name, include_in_schema=include_in_schema, body_wrap=body_wrap, host=host, before=before)
     return f(path) if callable(path) else f
 
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
