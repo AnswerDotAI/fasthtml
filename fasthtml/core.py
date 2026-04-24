@@ -9,7 +9,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body',
            'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML', 'HostRoute',
            'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache',
-           'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
+           'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid', 'FastHTMLTestClient']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
 import json,uuid,inspect,types,asyncio,inspect,random,contextlib,httpx,itsdangerous,uvicorn
@@ -32,7 +32,7 @@ from warnings import warn
 from dateutil import parser as dtparse
 from anyio import from_thread
 from uuid import uuid4, UUID
-from base64 import b64encode
+from base64 import b64encode,b64decode
 from email.utils import format_datetime
 
 from .starlette import *
@@ -1008,3 +1008,25 @@ def get_client(self:FastHTML, asink=False, **kw):
     client = httpx.AsyncClient() if asink else httpx.Client()
     client.cookies.update({self.session_cookie: data.decode()})
     return client
+
+# %% ../nbs/api/00_core.ipynb #c845f437
+@patch
+def decode_session(self:FastHTML, cookie):
+    "Decode a signed session cookie"
+    if not cookie or cookie == 'null': return {}
+    unsigned = itsdangerous.TimestampSigner(self.secret_key).unsign(cookie, max_age=None)
+    return loads(b64decode(unsigned).decode())
+
+# %% ../nbs/api/00_core.ipynb #49260e9b
+class FastHTMLTestClient(TestClient):
+    "A Starlette TestClient with a `session` property"
+    @property
+    def session(self):
+        cookie = next((c.value for c in reversed(list(self.cookies.jar))
+            if c.name == self.app.session_cookie), None)
+        return self.app.decode_session(cookie)
+
+@patch
+def get_testclient(self:FastHTML, **kw):
+    "Get a Starlette `TestClient` with session cookies set from `**kw`"
+    return FastHTMLTestClient(self, cookies=self.get_client(**kw).cookies)
