@@ -35,6 +35,7 @@ from uuid import uuid4, UUID
 from base64 import b64encode,b64decode
 from email.utils import format_datetime
 
+from starlette.testclient import TestClient
 from .starlette import *
 
 # %% ../nbs/api/00_core.ipynb #19d3f2a7
