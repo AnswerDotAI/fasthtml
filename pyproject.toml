@@ -36,8 +36,8 @@ version = {attr = "fasthtml.__version__"}
 include = ["fasthtml"]
 
 [tool.nbdev]
-allowed_metadata_keys = ['solveit_dialog_mode', 'solveit_ver']
-allowed_cell_metadata_keys = ["solveit_ai"]
+allowed_metadata_keys = ['solveit']
+allowed_cell_metadata_keys = ['solveit_ai']
 jupyter_hooks = true
 custom_sidebar = false
 lib_path = "fasthtml"
