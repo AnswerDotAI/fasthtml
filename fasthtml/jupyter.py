@@ -19,12 +19,12 @@ except ImportError: pass
 
 # %% ../nbs/api/06_jupyter.ipynb #a5d3a8f7
 def nb_serve(app, log_level="error", port=8000, host='0.0.0.0', daemon=False, **kwargs):
+    "Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`; use `daemon=True` for notebook tests so failed runs don't block process shutdown"
     server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, host=host, port=port, **kwargs))
     server.thread = Thread(target=lambda: asyncio.run(server.serve()), daemon=daemon)
     server.thread.start()
     while not server.started: time.sleep(0.01)
     return server
-
 
 # %% ../nbs/api/06_jupyter.ipynb #3242080c
 async def nb_serve_async(app, log_level="error", port=8000, host='0.0.0.0', **kwargs):
