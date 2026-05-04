@@ -168,6 +168,8 @@ async def parse_form(req: Request) -> FormData:
 async def _from_body(conn, p, data):
     "Create an instance of the annotated type from pre-parsed `data`"
     anno = p.annotation
+    # param params take precedence
+    data = dict(data) | getattr(conn, 'path_params', {})
     ctor = getattr(anno, '__from_request__', None)
     if ctor:
         ps = {k:v for k,v in _params(ctor).items() if k != 'cls'}
@@ -734,16 +736,36 @@ def nested_name(f):
     "Get name of function `f` using '_' to join nested function names"
     return f.__qualname__.replace('.<locals>.', '_')
 
-# %% ../nbs/api/00_core.ipynb #72760b09
+# %% ../nbs/api/00_core.ipynb #daafe4fc
+@patch
+def _add_routes(self:FastHTML, cls, path, methods, name, include_in_schema, body_wrap, host=None, before:Optional[Callable|tuple]=None):
+    "Add HTTP routes from methods on endpoint class `cls`"
+    assert not methods, '`methods` is not supported for class route groups; define HTTP methods as class methods instead'
+    lf = _mk_locfunc(cls, path, app=self)
+    lf.__routename__ = name
+    for meth in all_meths:
+        handler = getattr(cls, meth, None)
+        if handler: self._add_route(handler, path, meth, name, include_in_schema, body_wrap, host=host, before=before)
+    return lf
+
+# %% ../nbs/api/00_core.ipynb #3710e48b
+def _route_pn(func, path, name):
+    "Infer route name/function name/path from an endpoint or endpoint class"
+    fn = nested_name(func)
+    if isinstance(func, type): fn = fn[0].lower()+fn[1:]
+    p = None if callable(path) else path
+    if not name: name = fn
+    if not p: p = '/'+('' if fn=='index' else fn)
+    return name,fn,p
+
 @patch
 def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body_wrap, host=None, before:Optional[Callable|tuple]=None):
     "Add HTTP route to FastHTML app with automatic method detection"
-    n,fn,p = name,nested_name(func),None if callable(path) else path
+    n,fn,p = _route_pn(func, path, name)
+    if isinstance(func, type): return self._add_routes(func, p, methods, n, include_in_schema, body_wrap, host=host, before=before)
     if methods: m = [methods] if isinstance(methods,str) else methods
     elif fn in all_meths and p is not None: m = [fn]
     else: m = ['get','post']
-    if not n: n = fn
-    if not p: p = '/'+('' if fn=='index' else fn)
     endp = self._endp(func, body_wrap or self.body_wrap, before=before)
     route = HostRoute(p, endpoint=endp, methods=m, name=n, include_in_schema=include_in_schema, host=host)
     self.add_route(route)
@@ -822,20 +844,20 @@ class APIRouter:
         self.prefix = prefix if prefix else ""
         self.body_wrap = body_wrap
 
-    def _wrap_func(self, func, path=None):
-        name = func.__name__
+    def _wrap_func(self, func, path=None, name=None):
         wrapped = _mk_locfunc(func, path)
         wrapped.__routename__ = name
-        # If you are using the def get or def post method names, this approach is not supported
+        # If you are using def get/post/etc method names, this approach is not supported
         if name not in all_meths: setattr(self.rt_funcs, name, wrapped)
         return wrapped
 
     def __call__(self, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=None):
         "Add a route at `path`"
         def f(func):
-            p = self.prefix + ("/" + ('' if path.__name__=='index' else func.__name__) if callable(path) else path)
-            wrapped = self._wrap_func(func, p)
-            self.routes.append((func, p, methods, name, include_in_schema, body_wrap or self.body_wrap))
+            n,_,p = _route_pn(func, path, name)
+            p = self.prefix + p
+            wrapped = self._wrap_func(func, p, n)
+            self.routes.append((func, p, methods, n, include_in_schema, body_wrap or self.body_wrap))
             return wrapped
         return f(path) if callable(path) else f
 
