@@ -79,16 +79,18 @@ document.body.addEventListener('htmx:configRequest', (event) => {
 });
 </script>''' % port))
 
-# %% ../nbs/api/06_jupyter.ipynb #29a834a5
+# %% ../nbs/api/06_jupyter.ipynb #79406618
 class JupyUvi:
     "Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`"
-    def __init__(self, app, log_level="error", host='0.0.0.0', port=8000, start=True, daemon=False, **kwargs):
+    def __init__(self, app, log_level="error", host='0.0.0.0', port=8000, start=True, live=False, live_rt='/_lr', daemon=False, **kwargs):
         self.kwargs = kwargs
-        store_attr(but='start')
+        store_attr(but='start,live')
         self.server = None
+        self._live_ver = 0
+        if live: self._setup_live(app)
         if start: self.start()
         if not os.environ.get('IN_SOLVEIT'): htmx_config_port(port)
-
+            
     def start(self):
         self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port,daemon=self.daemon, **self.kwargs)
 
@@ -99,6 +101,21 @@ class JupyUvi:
         self.server.should_exit = True
         wait_port_free(self.port)
 
+    def _setup_live(self, app):
+        rt = self.live_rt or '/_lr'
+        if not rt.startswith('/'): rt = f'/{rt}'
+        app.hdrs.append(Script(f"new EventSource({rt!r}).onmessage=e=>{{if(e.data==='reload')navigation.reload()}}"))
+        @app.get(rt)
+        async def _sse(): return EventStream(self._live_sse())
+        get_ipython().events.register('post_run_cell', lambda _: setattr(self, '_live_ver', self._live_ver+1))
+
+    async def _live_sse(self):
+        ver = self._live_ver
+        while not self.server.should_exit:
+            await asyncio.sleep(0.1)
+            if ver != self._live_ver:
+                ver = self._live_ver
+                yield 'data: reload\n\n'
 
 # %% ../nbs/api/06_jupyter.ipynb #9134035e
 class JupyUviAsync(JupyUvi):
