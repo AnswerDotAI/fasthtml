@@ -21,8 +21,8 @@ except ImportError: pass
 def nb_serve(app, log_level="error", port=8000, host='0.0.0.0', daemon=False, **kwargs):
     "Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`; use `daemon=True` for notebook tests so failed runs don't block process shutdown"
     server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, host=host, port=port, **kwargs))
-    server.thread = Thread(target=lambda: asyncio.run(server.serve()), daemon=daemon)
-    server.thread.start()
+    @startthread(daemon=daemon)
+    def run_server(): asyncio.run(server.serve())
     while not server.started: time.sleep(0.01)
     return server
 
@@ -82,7 +82,7 @@ document.body.addEventListener('htmx:configRequest', (event) => {
 # %% ../nbs/api/06_jupyter.ipynb #29a834a5
 class JupyUvi:
     "Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`"
-    def __init__(self, app, log_level="error", host='0.0.0.0', port=8000, start=True, **kwargs):
+    def __init__(self, app, log_level="error", host='0.0.0.0', port=8000, start=True, daemon=False, **kwargs):
         self.kwargs = kwargs
         store_attr(but='start')
         self.server = None
@@ -90,14 +90,13 @@ class JupyUvi:
         if not os.environ.get('IN_SOLVEIT'): htmx_config_port(port)
 
     def start(self):
-        self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
+        self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port,daemon=self.daemon, **self.kwargs)
 
     async def start_async(self):
         self.server = await nb_serve_async(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
 
     def stop(self):
         self.server.should_exit = True
-        if hasattr(self.server, 'thread'): self.server.thread.join(timeout=3)
         wait_port_free(self.port)
 
 
