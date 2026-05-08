@@ -13,7 +13,7 @@ from fastcore.utils import *
 from fastcore.meta import delegates
 from .common import *
 from .common import show as _show
-from fastcore.parallel import threaded
+from fastcore.parallel import startthread
 try: from IPython.display import HTML,Markdown,display
 except ImportError: pass
 
@@ -21,9 +21,8 @@ except ImportError: pass
 def nb_serve(app, log_level="error", port=8000, host='0.0.0.0', daemon=False, **kwargs):
     "Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`; use `daemon=True` for notebook tests so failed runs don't block process shutdown"
     server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, host=host, port=port, **kwargs))
-    @threaded(daemon=daemon)
+    @startthread(daemon=daemon)
     def run_server(): asyncio.run(server.serve())
-    run_server()
     while not server.started: time.sleep(0.01)
     return server
 
