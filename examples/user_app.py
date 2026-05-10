@@ -1,6 +1,7 @@
 # Run with: python user_app.py
 # At signin, enter a user/pw combination and if it doesn't exist, it will be created.
 from fasthtml.common import *
+from fastlite import *
 
 db = database('data/utodos.db')
 class User: name:str; pwd:str
