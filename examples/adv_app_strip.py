@@ -1,5 +1,6 @@
 from fasthtml.common import *
 from fastlite import *
+from fasthtml.pico import *
 from hmac import compare_digest
 
 db = database('data/utodos.db')
