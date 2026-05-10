@@ -1,3 +1,24 @@
+{'title': 'FastHTML concise guide', 'url': 'https://www.fastht.ml/docs/ref/concise_guide.html.md', 'desc': 'A brief overview of idiomatic FastHTML apps'}
+{'title': 'HTMX reference', 'url': 'https://raw.githubusercontent.com/bigskysoftware/htmx/master/www/content/reference.md', 'desc': 'Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options'}
+{'title': 'Starlette quick guide', 'url': 'https://gist.githubusercontent.com/jph00/e91192e9bdc1640f5421ce3c904f2efb/raw/61a2774912414029edaf1a55b506f0e283b93c46/starlette-quick.md', 'desc': 'A quick overview of some Starlette features useful to FastHTML devs.'}
+{'title': 'API List', 'url': 'https://www.fastht.ml/docs/apilist.txt', 'desc': 'A succint list of all functions and methods in fasthtml.'}
+{'title': 'MonsterUI API List', 'url': 'https://raw.githubusercontent.com/AnswerDotAI/MonsterUI/refs/heads/main/docs/apilist.txt', 'desc': 'Complete API Reference for Monster UI, a component framework similar to shadcn, but for FastHTML'}
+{'title': 'Websockets application', 'url': 'https://raw.githubusercontent.com/AnswerDotAI/fasthtml/main/examples/basic_ws.py', 'desc': 'Very brief example of using websockets with HTMX and FastHTML'}
+{'title': 'Todo list application', 'url': 'https://raw.githubusercontent.com/AnswerDotAI/fasthtml/main/examples/adv_app.py', 'desc': 'Detailed walk-thru of a complete CRUD app in FastHTML showing idiomatic use of FastHTML and HTMX patterns.'}
+{'title': 'Surreal', 'url': 'https://raw.githubusercontent.com/AnswerDotAI/surreal/main/README.md', 'desc': 'Tiny jQuery alternative for plain Javascript with inline Locality of Behavior, providing `me` and `any` functions'}
+{'title': 'Starlette full documentation', 'url': 'https://gist.githubusercontent.com/jph00/809e4a4808d4510be0e3dc9565e9cbd3/raw/9b717589ca44cedc8aaf00b2b8cacef922964c0f/starlette-sml.md', 'desc': 'A subset of the Starlette documentation useful for FastHTML development.'}
+{'title': 'JS App Walkthrough', 'url': 'https://www.fastht.ml/docs/tutorials/e2e.html.md', 'desc': 'An end-to-end walkthrough of a complete FastHTML app, including deployment to railway.'}
+{'title': 'FastHTML by Example', 'url': 'https://www.fastht.ml/docs/tutorials/by_example.html.md', 'desc': 'A collection of 4 FastHTML apps showcasing idiomatic use of FastHTML and HTMX patterns.'}
+{'title': 'Using Jupyter to write FastHTML', 'url': 'https://www.fastht.ml/docs/tutorials/jupyter_and_fasthtml.html.md', 'desc': 'A guide to developing FastHTML apps inside Jupyter notebooks.'}
+{'title': 'FT Components', 'url': 'https://www.fastht.ml/docs/explains/explaining_xt_components.html.md', 'desc': 'Explanation of the `FT` components, which are a way to write HTML in a Pythonic way.'}
+{'title': 'FAQ', 'url': 'https://www.fastht.ml/docs/explains/faq.html.md', 'desc': 'Answers to common questions about FastHTML.'}
+{'title': 'MiniDataAPI Spec', 'url': 'https://www.fastht.ml/docs/explains/minidataapi.html.md', 'desc': 'Explanation of the MiniDataAPI specification, which allows us to use the same API for many different database engines.'}
+{'title': 'OAuth', 'url': 'https://www.fastht.ml/docs/explains/oauth.html.md', 'desc': 'Tutorial and explanation of how to use OAuth in FastHTML apps.'}
+{'title': 'Routes', 'url': 'https://www.fastht.ml/docs/explains/routes.html.md', 'desc': 'Explanation of how routes work in FastHTML.'}
+{'title': 'WebSockets', 'url': 'https://www.fastht.ml/docs/explains/websockets.html.md', 'desc': 'Explanation of websockets and how they work in FastHTML.'}
+{'title': 'Custom Components', 'url': 'https://www.fastht.ml/docs/ref/defining_xt_component.md', 'desc': 'Explanation of how to create custom components in FastHTML.'}
+{'title': 'Handling Handlers', 'url': 'https://www.fastht.ml/docs/ref/handlers.html.md', 'desc': 'Explanation of how to request and response handlers work in FastHTML as routes.'}
+{'title': 'Live Reloading', 'url': 'https://www.fastht.ml/docs/ref/live_reload.html.md', 'desc': 'Explanation of how to use live reloading for FastHTML development.'}
 <project title="FastHTML" summary='FastHTML is a python library which brings together Starlette, Uvicorn, HTMX, and fastcore&#39;s `FT` "FastTags" into a library for creating server-rendered hypermedia applications. The `FastHTML` class itself inherits from `Starlette`, and adds decorator-based routing with many additions, Beforeware, automatic `FT` to HTML rendering, and much more.'>Things to remember when writing FastHTML apps:
 
 - Although parts of its API are inspired by FastAPI, it is *not* compatible with FastAPI syntax and is not targeted at creating API services
@@ -1044,6 +1065,7 @@ listed below:
 | `htmx.config.responseHandling`         | the default [Response Handling](@/docs.md#response-handling) behavior for response status codes can be configured here to either swap or error                             |
 | `htmx.config.allowNestedOobSwaps`      | defaults to `true`, whether to process OOB swaps on elements that are nested within the main response element. See [Nested OOB Swaps](@/attributes/hx-swap-oob.md#nested-oob-swaps). |
 | `htmx.config.historyRestoreAsHxRequest`| defaults to `true`, Whether to treat history cache miss full page reload requests as a "HX-Request" by returning this response header. This should always be disabled when using HX-Request header to optionally return partial responses                                                                                                         |
+| `htmx.config.reportValidityOfForms`    | defaults to `false`, Whether to report input validation errors to the end user and update focus to the first input that fails validation. This should always be enabled as this matches default browser form submit behaviour                                                                                                                     |
 
 
 </div>
@@ -2310,8 +2332,8 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Members: underline, bold
 
 
-- `def NavBar(*c)`
-    Creates a responsive navigation bar with mobile menu support
+- `def NavBar(*c, **kwargs)`
+    Responsive navbar with mobile hamburger menu
 
 - `def SliderContainer(*c, **kwargs)`
     Creates a slider container
@@ -2370,11 +2392,16 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def apply_classes(html_str, class_map, class_map_mods)`
     Apply classes to html string
 
-- `def render_md(md_content, class_map, class_map_mods)`
-    Renders markdown using mistletoe and lxml
+- `class FrankenRenderer`
+    Custom renderer for Franken UI that handles image paths
 
-- `def get_franken_renderer(img_dir)`
-    Create a renderer class with the specified img_dir
+    - `def __init__(self, *args, **kwargs)`
+    - `def render_image(self, token)`
+        Modify image paths if they're relative and self.img_dir is specified
+
+
+- `def render_md(md_content, class_map, class_map_mods, img_dir, renderer)`
+    Renders markdown using mistletoe and lxml with custom image handling
 
 - `def ThemePicker(color, radii, shadows, font, mode, cls, custom_themes)`
     Theme picker component with configurable sections
@@ -2387,6 +2414,15 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def ApexChart(**kws)`
     Apex chart component
+
+- `def ScrollSpy(headings, target_sel, offset, nav_id, smooth_scroll, auto_scroll, cls, **kwargs)`
+    Standalone Scrollspy nav menu, mapping heading tags from target into link
+
+- `def LoaderButton(*c, **kwargs)`
+    A button that displays a loading spinner when an HTMX request is in flight
+
+- `def ToggleBtn(*c, **kwargs)`
+    Styled toggle button component, acts like a switch
 </doc></api><examples><doc title="Websockets application" desc="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
 from fasthtml.common import *
 
@@ -7058,7 +7094,7 @@ you can disable it entirely by adding this to your settings:
 ## Why the distinctive coding style?
 
 FastHTML coding style is the [fastai coding
-style](https://docs.fast.ai/dev/style.html).
+style](https://fast.ai/docs/dev/style.html).
 
 If you are coming from a data science background the **fastai coding
 style** may already be your preferred style.

@@ -51,7 +51,7 @@
 
 ## fasthtml.core
 
-> The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses.
+> The `FastHTML` subclass of `Starlette`.
 
 - `def parsed_date(s)`
     Convert `s` to a datetime
@@ -75,6 +75,12 @@
 - `def parse_form(req)`
     Starlette errors on empty multipart forms, so this checks for that situation
 
+- `class ApiReturn`
+    - `@classmethod def __from_request__(cls, data, req)`
+    - `def __init__(self, isapi)`
+    - `def __call__(self, norm, **kw)`
+    - `def __bool__(self)`
+
 - `class JSONResponse`
     Same as starlette's version, but auto-stringifies non serializable types
 
@@ -85,17 +91,22 @@
 
 - `class Beforeware`
     - `def __init__(self, f, skip)`
+    - `def __repr__(self)`
 
 - `def EventStream(s)`
     Create a text/event-stream response from `s`
 
 - `def signal_shutdown()`
 - `def uri(_arg, **kwargs)`
+    Create a URI by URL-encoding `_arg` and appending query parameters from `kwargs`
+
 - `def decode_uri(s)`
+    Decode a URI created by `uri()` back into argument and keyword dict
+
 - `@patch def to_string(self, value)`
 - `@patch def url_path_for(self, name, **path_params)`
 - `def flat_tuple(o)`
-    Flatten lists
+    Flatten nested iterables into a single tuple
 
 - `def noop_body(c, req)`
     Default Body wrap function which just returns the content
@@ -104,6 +115,8 @@
     Default FT response creation function
 
 - `def is_full_page(req, resp)`
+    Check if response should be rendered as full page or fragment
+
 - `class Redirect`
     Use HTMX or Starlette RedirectResponse as required to redirect to `loc`
 
@@ -111,27 +124,49 @@
     - `def __response__(self, req)`
 
 - `def get_key(key, fname)`
+    Get session key from `key` param or read/create from file `fname`
+
 - `def qp(p, **kw)`
     Add parameters kw to path p
 
 - `def def_hdrs(htmx, surreal)`
     Default headers for a FastHTML app
 
+- `class Lifespan`
+    - `def __init__(self, startup, shutdown, ls)`
+    - `def __call__(self, app)`
+    - `def on_event(self, event_type)`
+
 - `class FastHTML`
     - `def __init__(self, debug, routes, middleware, title, exception_handlers, on_startup, on_shutdown, lifespan, hdrs, ftrs, exts, before, after, surreal, htmx, default_hdrs, sess_cls, secret_key, session_cookie, max_age, sess_path, same_site, sess_https_only, sess_domain, key_fname, body_wrap, htmlkw, nb_hdrs, canonical, **bodykw)`
+    - `def on_event(self, event_type)`
+
+- `class HostRoute`
+    Route with optional host-header constraint using Starlette's {param} pattern syntax
+
+    - `def __init__(self, path, endpoint, **kwargs)`
+    - `def matches(self, scope)`
+    - `def __repr__(self)`
 
 - `@patch def add_route(self, route)`
+    Add or replace a route in the FastHTML app
+
 - `@patch def ws(self, path, conn, disconn, name, middleware)`
     Add a websocket route at `path`
+
+- `@patch def add_websocket_route(self, path, func, conn, disconn, name, middleware)`
+    Add a websocket route at `path` (Starlette-compatible API)
 
 - `def nested_name(f)`
     Get name of function `f` using '_' to join nested function names
 
-- `@patch def route(self, path, methods, name, include_in_schema, body_wrap)`
+- `@patch def route(self, path, methods, name, include_in_schema, body_wrap, host, before)`
     Add a route at `path`
 
 - `@patch def set_lifespan(self, value)`
-- `def serve(appname, app, host, port, reload, reload_includes, reload_excludes)`
+    Set the lifespan context manager for the FastHTML app
+
+- `def serve(appname, app, host, port, reload, **kwargs)`
     Run the app in an async server, with live reload set as the default.
 
 - `class Client`
@@ -170,6 +205,18 @@
 - `@patch def static_route(self, ext, prefix, static_path)`
     Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')
 
+- `class StaticNoCache`
+    - `def file_response(self, *args, **kwargs)`
+
+- `def add_sig_param(f, name, typ, kind, default)`
+    Add a parameter to a function's signature
+
+- `class into`
+    Decorator to pass a route's return value into `func`, with keyword params added to the route signature
+
+    - `def __init__(self, func)`
+    - `def __call__(self, f)`
+
 - `class MiddlewareBase`
     - `def __call__(self, scope, receive, send)`
 
@@ -179,9 +226,17 @@
     - `def __init__(self, content, status_code, headers, cls, media_type, background)`
     - `def __response__(self, req)`
 
-- `def unqid(seeded)`
 - `@patch def setup_ws(app, f)`
 - `@patch def devtools_json(self, path, uuid)`
+- `@patch def get_client(self, asink, **kw)`
+    Get an httpx client with session cookes set from `**kw`
+
+- `@patch def decode_session(self, cookie)`
+    Decode a signed session cookie
+
+- `@patch def get_testclient(self, **kw)`
+    Get a Starlette `TestClient` with session cookies set from `**kw`
+
 ## fasthtml.fastapp
 
 > The `fast_app` convenience wrapper
@@ -214,8 +269,8 @@
 
 > Use FastHTML in Jupyter notebooks
 
-- `def nb_serve(app, log_level, port, host, **kwargs)`
-    Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
+- `def nb_serve(app, log_level, port, host, daemon, **kwargs)`
+    Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`; use `daemon=True` for notebook tests so failed runs don't block process shutdown
 
 - `def nb_serve_async(app, log_level, port, host, **kwargs)`
     Async version of `nb_serve`
@@ -226,7 +281,9 @@
 - `def wait_port_free(port, host, max_wait)`
     Wait for `port` to be free on `host`
 
-- `def render_ft()`
+- `def render_ft(**kw)`
+    Call once in a notebook or solveit dialog to auto-render components with HTMX support
+
 - `def htmx_config_port(port)`
 - `class JupyUvi`
     Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`
@@ -243,7 +300,7 @@
     - `def start(self)`
     - `def stop(self)`
 
-- `def HTMX(path, host, app, port, height, link, iframe)`
+- `def HTMX(path, host, app, port, height, link, iframe, client)`
     An iframe which displays the HTMX application in a notebook.
 
 - `def ws_client(app, nm, host, port, ws_connect, frame, link, **kwargs)`
@@ -309,10 +366,22 @@
     - `def __init__(self, domain, client_id, client_secret, code, scope, redirect_uri, **kwargs)`
     - `def login_link(self, req)`
 
+- `class AppleAppClient`
+    A `WebApplicationClient` for Apple Sign In
+
+    - `def __init__(self, client_id, key_id, team_id, private_key, code, scope, **kwargs)`
+    - `@property def client_secret`
+    - `def get_info(self, token)`
+        Decode user info from the ID token
+
+
 - `@patch def login_link(self, redirect_uri, scope, state, **kwargs)`
     Get a login link for this client
 
-- `def redir_url(request, redir_path, scheme)`
+- `def get_host(request)`
+    Get the host, preferring X-Forwarded-Host if available
+
+- `def redir_url(req, redir_path, scheme)`
     Get the redir url for the host in `request`
 
 - `@patch def parse_response(self, code, redirect_uri)`
@@ -324,12 +393,21 @@
 - `@patch def retr_info(self, code, redirect_uri)`
     Combines `parse_response` and `get_info`
 
+- `@patch def parse_response_async(self, code, redirect_uri)`
+    Get the token from the oauth2 server response
+
+- `@patch def get_info_async(self, token)`
+    Get the info for authenticated user
+
+- `@patch def retr_info_async(self, code, redirect_uri)`
+    Combines `parse_response` and `get_info`
+
 - `@patch def retr_id(self, code, redirect_uri)`
     Call `retr_info` and then return id/subscriber value
 
-- `def url_match(url, patterns)`
+- `def url_match(request, patterns)`
 - `class OAuth`
-    - `def __init__(self, app, cli, skip, redir_path, error_path, logout_path, login_path, https, http_patterns)`
+    - `def __init__(self, app, cli, skip, redir_path, error_path, logout_path, login_path, https, http_patterns, redir_method)`
     - `def redir_login(self, session)`
     - `def redir_url(self, req)`
     - `def login_link(self, req, scope, state)`
@@ -339,6 +417,9 @@
 
 - `@patch() def consent_url(self, proj)`
     Get Google OAuth consent screen URL
+
+- `@patch def update(self)`
+    Refresh the credentials if they are expired, and return them
 
 - `@patch def save(self, fname)`
     Save credentials to `fname`
@@ -557,3 +638,30 @@
 
 - `def clear(id)`
 - `def with_sid(app, dest, path)`
+- `def LdJson(typ, data, script, extra, **kwargs)`
+    A script tag containing JSON-LD structured data
+
+- `def LdContactPoint(contact_type, email, phone, script, **extra)`
+    Create a ContactPoint for JSON-LD
+
+- `def LdOrg(name, url, logo, alt_name, same_as, contact_points, script, **extra)`
+    JSON-LD Organization structured data
+
+- `def LdWebsite(name, url, script, **extra)`
+    Create JSON-LD WebSite structured data
+
+- `def LdCourseInstance(course_mode, start_date, end_date, location, instructor, script, **extra)`
+    Create a CourseInstance for JSON-LD
+
+- `def LdCourse(name, description, provider, course_instance, script, **extra)`
+    Create JSON-LD Course structured data
+
+- `def robots_txt(app, allow_all, disallow_paths, sitemap_url, crawl_delay)`
+    Add a /robots.txt route to the app
+
+- `def sitemap_url(url_info, loc_base)`
+    Create a sitemap URL element from url_info (string or dict)
+
+- `def sitemap_xml(app, urls, loc_base)`
+    Add a /sitemap.xml route to the app with list of URLs
+

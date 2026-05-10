@@ -18,7 +18,6 @@ __all__ = ['named', 'html_attrs', 'hx_attrs', 'hx_evts', 'js_evts', 'hx_attrs_an
 
 # %% ../nbs/api/01_components.ipynb #8e2d405b
 from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
-from bs4 import BeautifulSoup, Comment
 from typing import Literal, Mapping, Optional
 
 from fastcore.utils import *
@@ -28,9 +27,6 @@ from fastcore.test import *
 from .core import fh_cfg, unqid
 
 import types, json
-
-try: from IPython import display
-except ImportError: display=None
 
 # %% ../nbs/api/01_components.ipynb #dc101f0f
 @patch
@@ -127,6 +123,7 @@ def File(fname):
 # %% ../nbs/api/01_components.ipynb #7861dfe6
 def show(ft, *rest, iframe=False, height='auto', style=None):
     "Renders FT Components into HTML within a Jupyter notebook."
+    from IPython import display
     if isinstance(ft, str): ft = Safe(ft)
     if rest: ft = (ft,)+rest
     res = to_xml(ft)
@@ -206,6 +203,7 @@ def __getattr__(tag):
 _re_h2x_attr_key = re.compile(r'^[A-Za-z_-][\w-]*$')
 def html2ft(html, attr1st=False):
     """Convert HTML to an `ft` expression"""
+    from bs4 import BeautifulSoup, Comment
     rev_map = {'class': 'cls', 'for': 'fr'}
 
     def _parse(elm, lvl=0, indent=4):

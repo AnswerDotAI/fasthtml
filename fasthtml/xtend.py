@@ -20,9 +20,6 @@ from fastcore.meta import use_kwargs, delegates
 from .core import *
 from .components import *
 
-try: from IPython import display
-except ImportError: display=None
-
 # %% ../nbs/api/02_xtend.ipynb #254f4744
 @delegates(ft_hx, keep=True)
 def A(*c, hx_get=None, target_id=None, hx_swap=None, href='#', **kwargs)->FT:

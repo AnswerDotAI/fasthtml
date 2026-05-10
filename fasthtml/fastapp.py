@@ -1,12 +1,9 @@
 """The `fast_app` convenience wrapper"""
 
-import inspect,uvicorn
+import inspect
 from fastcore.utils import *
-from fastlite import *
 from .basics import *
-from .pico import *
 from .starlette import *
-from .live_reload import FastHTMLWithLiveReload
 
 __all__ = ['fast_app']
 
@@ -19,8 +16,9 @@ def _get_tbl(dt, nm, schema):
     if render: dc.__ft__ = render
     return tbl,dc
 
-def _app_factory(*args, **kwargs) -> FastHTML | FastHTMLWithLiveReload:
+def _app_factory(*args, **kwargs):
     "Creates a FastHTML or FastHTMLWithLiveReload app instance"
+    from .live_reload import FastHTMLWithLiveReload
     if kwargs.pop('live', False): return FastHTMLWithLiveReload(*args, **kwargs)
     kwargs.pop('reload_attempts', None)
     kwargs.pop('reload_interval', None)
@@ -65,6 +63,7 @@ def fast_app(
         nb_hdrs:bool=False, # If in notebook include headers inject headers in notebook DOM?
         **kwargs):
     "Create a FastHTML or FastHTMLWithLiveReload app."
+    from .pico import picolink
     h = (picolink,) if pico or (pico is None and default_hdrs) else ()
     if hdrs: h += tuple(hdrs)
 
@@ -76,6 +75,7 @@ def fast_app(
     app.static_route_exts(static_path=static_path)
     if not db_file: return app,app.route
 
+    from fastlite import database
     db = database(db_file)
     if not tbls: tbls={}
     if kwargs:
