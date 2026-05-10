@@ -2,6 +2,28 @@
 
 <!-- do not remove -->
 
+## 0.14.0
+
+### Breaking changes
+
+The following imports have been removed from `fasthtml.common`:
+```py
+import uvicorn
+from apswutils import Database
+from fastlite import *
+from .pico import *
+```
+
+### New Features
+
+- Speed up imports ([#876](https://github.com/AnswerDotAI/fasthtml/issues/876))
+- Add class-based route groups: `@rt` on a class registers each HTTP method handler at the same path ([#872](https://github.com/AnswerDotAI/fasthtml/issues/872))
+- daemon JupyUvi for notebook testing ([#869](https://github.com/AnswerDotAI/fasthtml/pull/869)), thanks to [@kafkasl](https://github.com/kafkasl)
+- Add FastHTMLTestClient with session decoding and get_testclient method ([#868](https://github.com/AnswerDotAI/fasthtml/issues/868))
+- allow multiple route before functions ([#867](https://github.com/AnswerDotAI/fasthtml/pull/867)), thanks to [@RensDimmendaal](https://github.com/RensDimmendaal)
+- Add "route beforeware" ([#866](https://github.com/AnswerDotAI/fasthtml/issues/866))
+
+
 ## 0.13.4
 
 ### New Features
