@@ -810,7 +810,7 @@ def serve(
         if not port: port=int(os.getenv("PORT", default=5001))
         link = f'http://{"localhost" if host=="0.0.0.0" else host}:{port}'
         print('Link: '+ S.light_red.bold(link))
-        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload, **kwargs)
+        run(f'{appname}:{app}', host=host, port=port, reload=reload, **kwargs)
 
 # %% ../nbs/api/00_core.ipynb #8121968a
 class Client:
