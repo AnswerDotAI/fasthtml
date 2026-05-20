@@ -36,28 +36,28 @@ async def nb_serve_async(app, log_level="error", port=8000, host='0.0.0.0', **kw
 
 # %% ../nbs/api/06_jupyter.ipynb #508917bc
 def is_port_free(port, host='localhost'):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
-        s.bind((host, port))
-        s.listen(1)
+        sock.bind((host, port))
+        sock.listen(1)
         return True
-    except OSError as e: return False
-    finally: s.close()
+    except OSError: return False
+    finally: sock.close()
 
 # %% ../nbs/api/06_jupyter.ipynb #1779cb76
 def wait_port_free(port, host='localhost', max_wait=20):
     "Wait for `port` to be free on `host`"
-    start = time.time()
+    start_time = time.time()
     while not is_port_free(port, host):
-        if time.time() - start > max_wait: raise TimeoutError(f"Port {host}:{port} not free after {max_wait}s")
+        if time.time() - start_time > max_wait: raise TimeoutError(f"Port {host}:{port} not free after {max_wait}s")
         time.sleep(0.1)
 
 async def wait_port_free_async(port, host='localhost', max_wait=20):
     "Async wait for `port` to be free on `host`"
-    start = time.time()
+    start_time   = time.time()
     while not is_port_free(port, host):
-        if time.time() - start > max_wait: raise TimeoutError(f"Port {host}:{port} not free after {max_wait}s")
+        if time.time() - start_time > max_wait: raise TimeoutError(f"Port {host}:{port} not free after {max_wait}s")
         await asyncio.sleep(0.1)
 
 
