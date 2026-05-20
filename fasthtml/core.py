@@ -12,7 +12,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc',
            'StaticNoCache', 'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
-import json,uuid,inspect,types,asyncio,inspect,random,contextlib,httpx,itsdangerous,uvicorn
+import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -20,7 +20,7 @@ from fastcore.meta import use_kwargs_dict,delegates
 from fastcore.style import S
 
 from types import UnionType, SimpleNamespace as ns, GenericAlias
-from typing import get_args, get_origin, Union, Mapping, List, Any
+from typing import get_args, get_origin, Union, Mapping, List, Any, Callable
 from datetime import datetime,date
 from dataclasses import dataclass
 from inspect import Parameter,get_annotations
@@ -32,7 +32,7 @@ from warnings import warn
 from dateutil import parser as dtparse
 from anyio import from_thread
 from uuid import uuid4, UUID
-from base64 import b64encode
+from base64 import b64encode,b64decode
 from email.utils import format_datetime
 
 from .starlette import *
@@ -170,6 +170,8 @@ async def parse_form(req: Request) -> FormData:
 async def _from_body(conn, p, data):
     "Create an instance of the annotated type from pre-parsed `data`"
     anno = p.annotation
+    # param params take precedence
+    data = dict(data) | getattr(conn, 'path_params', {})
     ctor = getattr(anno, '__from_request__', None)
     if ctor:
         ps = {k:v for k,v in _params(ctor).items() if k != 'cls'}
@@ -190,9 +192,11 @@ class ApiReturn:
 # %% ../nbs/api/00_core.ipynb #7cc39ba9
 class JSONResponse(JSONResponseOrig):
     "Same as starlette's version, but auto-stringifies non serializable types"
-    def render(self, content: Any) -> bytes:
-        res = json.dumps(content, ensure_ascii=False, allow_nan=False, indent=None, separators=(",", ":"), default=str)
+    def render(self, content:Any)->bytes:
+        def _default(o): return list(o) if is_listy(o) else str(o)
+        res = json.dumps(content, ensure_ascii=False, allow_nan=False, indent=None, separators=(",",":"), default=_default)
         return res.encode("utf-8")
+
 
 # %% ../nbs/api/00_core.ipynb #5fa96e3a
 async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
@@ -692,7 +696,7 @@ all_meths = 'get post put delete patch head trace options'.split()
 
 # %% ../nbs/api/00_core.ipynb #26b147ba
 @patch
-def _endp(self:FastHTML, f, body_wrap):
+def _endp(self:FastHTML, f, body_wrap, before:Optional[Callable|tuple]=None):
     "Create endpoint wrapper with before/after middleware processing"
     sig = signature_ex(f, True)
     for n,p in sig.parameters.items(): (msg:=_check_anno(n,p.annotation)) and warn(msg)
@@ -707,6 +711,8 @@ def _endp(self:FastHTML, f, body_wrap):
                 else: bf,skip = b,[]
                 if not any(re.fullmatch(r, req.url.path) for r in skip):
                     resp = await _wrap_call(bf, req, _params(bf))
+        for b in listify(before):
+            if not resp: resp = await _wrap_call(b, req, _params(b))
         req.body_wrap = body_wrap
         if not resp: resp = await _wrap_call(f, req, sig.parameters)
         for a in self.after:
@@ -759,17 +765,37 @@ def nested_name(f):
     "Get name of function `f` using '_' to join nested function names"
     return f.__qualname__.replace('.<locals>.', '_')
 
-# %% ../nbs/api/00_core.ipynb #72760b09
+# %% ../nbs/api/00_core.ipynb #daafe4fc
 @patch
-def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body_wrap, host=None):
+def _add_routes(self:FastHTML, cls, path, methods, name, include_in_schema, body_wrap, host=None, before:Optional[Callable|tuple]=None):
+    "Add HTTP routes from methods on endpoint class `cls`"
+    assert not methods, '`methods` is not supported for class route groups; define HTTP methods as class methods instead'
+    lf = _mk_locfunc(cls, path, app=self)
+    lf.__routename__ = name
+    for meth in all_meths:
+        handler = getattr(cls, meth, None)
+        if handler: self._add_route(handler, path, meth, name, include_in_schema, body_wrap, host=host, before=before)
+    return lf
+
+# %% ../nbs/api/00_core.ipynb #3710e48b
+def _route_pn(func, path, name):
+    "Infer route name/function name/path from an endpoint or endpoint class"
+    fn = nested_name(func)
+    if isinstance(func, type): fn = fn[0].lower()+fn[1:]
+    p = None if callable(path) else path
+    if not name: name = fn
+    if not p: p = '/'+('' if fn=='index' else fn)
+    return name,fn,p
+
+@patch
+def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body_wrap, host=None, before:Optional[Callable|tuple]=None):
     "Add HTTP route to FastHTML app with automatic method detection"
-    n,fn,p = name,nested_name(func),None if callable(path) else path
+    n,fn,p = _route_pn(func, path, name)
+    if isinstance(func, type): return self._add_routes(func, p, methods, n, include_in_schema, body_wrap, host=host, before=before)
     if methods: m = [methods] if isinstance(methods,str) else methods
     elif fn in all_meths and p is not None: m = [fn]
     else: m = ['get','post']
-    if not n: n = fn
-    if not p: p = '/'+('' if fn=='index' else fn)
-    endp = self._endp(func, body_wrap or self.body_wrap)
+    endp = self._endp(func, body_wrap or self.body_wrap, before=before)
     route = HostRoute(p, endpoint=endp, methods=m, name=n, include_in_schema=include_in_schema, host=host)
     self.add_route(route)
     lf = _mk_locfunc(func, p, app=self)
@@ -778,10 +804,10 @@ def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body
 
 # %% ../nbs/api/00_core.ipynb #f5cb2c2b
 @patch
-def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=None, host=None):
+def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=None, host=None, before:Optional[Callable|tuple]=None):
     "Add a route at `path`"
     def f(func):
-        return self._add_route(func, path, methods, name=name, include_in_schema=include_in_schema, body_wrap=body_wrap, host=host)
+        return self._add_route(func, path, methods, name=name, include_in_schema=include_in_schema, body_wrap=body_wrap, host=host, before=before)
     return f(path) if callable(path) else f
 
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
@@ -794,7 +820,6 @@ def set_lifespan(self:FastHTML, value):
     self.router.lifespan_context = value
 
 # %% ../nbs/api/00_core.ipynb #3a348474
-@delegates(uvicorn.run)
 def serve(
         appname=None, # Name of the module
         app='app', # App instance to be served
@@ -804,6 +829,7 @@ def serve(
         **kwargs
     ):
     "Run the app in an async server, with live reload set as the default."
+    from uvicorn import run
     bk = inspect.currentframe().f_back
     glb = bk.f_globals
     code = bk.f_code
@@ -814,12 +840,13 @@ def serve(
         if not port: port=int(os.getenv("PORT", default=5001))
         link = f'http://{"localhost" if host=="0.0.0.0" else host}:{port}'
         print('Link: '+ S.light_red.bold(link))
-        uvicorn.run(f'{appname}:{app}', host=host, port=port, reload=reload, **kwargs)
+        run(f'{appname}:{app}', host=host, port=port, reload=reload, **kwargs)
 
 # %% ../nbs/api/00_core.ipynb #8121968a
 class Client:
     "A simple httpx ASGI client that doesn't require `async`"
     def __init__(self, app, url="http://testserver"):
+        import httpx
         self.cli = httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url=url)
 
     def _sync(self, method, url, **kwargs):
@@ -847,20 +874,20 @@ class APIRouter:
         self.prefix = prefix if prefix else ""
         self.body_wrap = body_wrap
 
-    def _wrap_func(self, func, path=None):
-        name = func.__name__
+    def _wrap_func(self, func, path=None, name=None):
         wrapped = _mk_locfunc(func, path)
         wrapped.__routename__ = name
-        # If you are using the def get or def post method names, this approach is not supported
+        # If you are using def get/post/etc method names, this approach is not supported
         if name not in all_meths: setattr(self.rt_funcs, name, wrapped)
         return wrapped
 
     def __call__(self, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=None):
         "Add a route at `path`"
         def f(func):
-            p = self.prefix + ("/" + ('' if path.__name__=='index' else func.__name__) if callable(path) else path)
-            wrapped = self._wrap_func(func, p)
-            self.routes.append((func, p, methods, name, include_in_schema, body_wrap or self.body_wrap))
+            n,_,p = _route_pn(func, path, name)
+            p = self.prefix + p
+            wrapped = self._wrap_func(func, p, n)
+            self.routes.append((func, p, methods, n, include_in_schema, body_wrap or self.body_wrap))
             return wrapped
         return f(path) if callable(path) else f
 
@@ -1029,9 +1056,34 @@ def devtools_json(self:FastHTML, path=None, uuid=None):
 @patch
 def get_client(self:FastHTML, asink=False, **kw):
     "Get an httpx client with session cookes set from `**kw`"
+    import httpx
     signer = itsdangerous.TimestampSigner(self.secret_key)
     data = b64encode(dumps(kw).encode())
     data = signer.sign(data)
     client = httpx.AsyncClient() if asink else httpx.Client()
     client.cookies.update({self.session_cookie: data.decode()})
     return client
+
+# %% ../nbs/api/00_core.ipynb #c845f437
+@patch
+def decode_session(self:FastHTML, cookie):
+    "Decode a signed session cookie"
+    if not cookie or cookie == 'null': return {}
+    unsigned = itsdangerous.TimestampSigner(self.secret_key).unsign(cookie, max_age=None)
+    return loads(b64decode(unsigned).decode())
+
+# %% ../nbs/api/00_core.ipynb #49260e9b
+@patch
+def get_testclient(self:FastHTML, **kw):
+    "Get a Starlette `TestClient` with session cookies set from `**kw`"
+    from starlette.testclient import TestClient
+    
+    class FastHTMLTestClient(TestClient):
+        "A Starlette TestClient with a `session` property"
+        @property
+        def session(self):
+            cookie = next((c.value for c in reversed(list(self.cookies.jar))
+                if c.name == self.app.session_cookie), None)
+            return self.app.decode_session(cookie)
+
+    return FastHTMLTestClient(self, cookies=self.get_client(**kw).cookies)

@@ -1,25 +1,25 @@
-"""The `FastHTML` subclass of `Starlette`, along with the `RouterX` and `RouteX` classes it automatically uses."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'FastHTML', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'MiddlewareBase', 'FtResponse', 'unqid']
-import json, uuid, inspect, types, signal, asyncio, threading, inspect, random, contextlib
+"""The `FastHTML` subclass of `Starlette`."""
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'ApiReturn', 'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML', 'HostRoute', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
+import json, uuid, inspect, types, asyncio, inspect, random, contextlib, itsdangerous
 from fastcore.utils import *
 from fastcore.xml import *
-from fastcore.meta import use_kwargs_dict
+from fastcore.meta import use_kwargs_dict, delegates
+from fastcore.style import S
 from types import UnionType, SimpleNamespace as ns, GenericAlias
-from typing import Optional, get_type_hints, get_args, get_origin, Union, Mapping, TypedDict, List, Any
+from typing import get_args, get_origin, Union, Mapping, List, Any, Callable
 from datetime import datetime, date
-from dataclasses import dataclass, fields
-from collections import namedtuple
-from inspect import isfunction, ismethod, Parameter, get_annotations
-from functools import wraps, partialmethod, update_wrapper
+from dataclasses import dataclass
+from inspect import Parameter, get_annotations
+from functools import partialmethod, update_wrapper
 from http import cookies
 from urllib.parse import urlencode, parse_qs, quote, unquote
-from copy import copy, deepcopy
+from copy import deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
-from httpx import ASGITransport, AsyncClient
 from anyio import from_thread
 from uuid import uuid4, UUID
-from base64 import b85encode, b64encode
+from base64 import b64encode, b64decode
+from email.utils import format_datetime
 from .starlette import *
 
 def _params(f):
@@ -55,6 +55,11 @@ def _get_htmx(h):
 def _mk_list(t, v):
     ...
 fh_cfg = AttrDict(indent=True)
+_special_names = {'ws', 'request', 'session', 'scope', 'data', 'htmx', 'app', 'state', 'auth', 'send', 'api', 'body', 'hdrs', 'ftrs', 'bodykw', 'htmlkw', 'resp', 'self'}
+
+def _check_anno(arg, anno):
+    """Check for common annotation issues; returns warning string or None"""
+    ...
 
 def _fix_anno(t, o):
     """Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"""
@@ -97,8 +102,24 @@ async def parse_form(req: Request) -> FormData:
     """Starlette errors on empty multipart forms, so this checks for that situation"""
     ...
 
-async def _from_body(req, p):
+async def _from_body(conn, p, data):
+    """Create an instance of the annotated type from pre-parsed `data`"""
     ...
+
+class ApiReturn:
+
+    @classmethod
+    async def __from_request__(cls, data, req):
+        ...
+
+    def __init__(self, isapi=False):
+        ...
+
+    def __call__(self, norm=None, **kw):
+        ...
+
+    def __bool__(self):
+        ...
 
 class JSONResponse(JSONResponseOrig):
     """Same as starlette's version, but auto-stringifies non serializable types"""
@@ -106,8 +127,11 @@ class JSONResponse(JSONResponseOrig):
     def render(self, content: Any) -> bytes:
         ...
 
-async def _find_p(req, arg: str, p: Parameter):
-    """In `req` find param named `arg` of type in `p` (`arg` is ignored for body types)"""
+async def _find_p(conn, data, hdrs, arg: str, p: Parameter):
+    """In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"""
+    ...
+
+async def _find_ps(conn, data, hdrs, params):
     ...
 
 async def _wrap_req(req, params):
@@ -122,14 +146,13 @@ class Beforeware:
     def __init__(self, f, skip=None):
         ...
 
-async def _handle(f, args, **kwargs):
+    def __repr__(self):
+        ...
+
+async def _handle(f, *args, **kwargs):
     ...
 
-def _find_wsp(ws, data, hdrs, arg: str, p: Parameter):
-    """In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"""
-    ...
-
-def _wrap_ws(ws, data, params):
+async def _wrap_ws(ws, data, params):
     ...
 
 async def _send_ws(ws, resp):
@@ -146,9 +169,11 @@ def signal_shutdown():
     ...
 
 def uri(_arg, **kwargs):
+    """Create a URI by URL-encoding `_arg` and appending query parameters from `kwargs`"""
     ...
 
 def decode_uri(s):
+    """Decode a URI created by `uri()` back into argument and keyword dict"""
     ...
 from starlette.convertors import StringConvertor
 StringConvertor.regex = '[^/]*'
@@ -160,23 +185,23 @@ def to_string(self: StringConvertor, value: str) -> str:
 @patch
 def url_path_for(self: HTTPConnection, name: str, **path_params):
     ...
-_verbs = dict(get='hx-get', post='hx-post', put='hx-post', delete='hx-delete', patch='hx-patch', link='href')
+_verbs = dict(get='hx-get', post='hx-post', put='hx-put', delete='hx-delete', patch='hx-patch', link='href')
 
 def _url_for(req, t):
+    """Generate URL for route `t` using request `req`"""
     ...
 
 def _find_targets(req, resp):
-    ...
-
-def _apply_ft(o):
+    """Find and convert route targets in response attributes to URLs"""
     ...
 
 def _to_xml(req, resp, indent):
+    """Convert response to XML string with target URL resolution"""
     ...
 _iter_typs = (tuple, list, map, filter, range, types.GeneratorType)
 
 def flat_tuple(o):
-    """Flatten lists"""
+    """Flatten nested iterables into a single tuple"""
     ...
 
 def noop_body(c, req):
@@ -188,18 +213,26 @@ def respond(req, heads, bdy):
     ...
 
 def is_full_page(req, resp):
+    """Check if response should be rendered as full page or fragment"""
     ...
 
 def _part_resp(req, resp):
+    """Partition response into HTTP headers, background tasks, and content"""
+    ...
+
+def _canonical(req):
     ...
 
 def _xt_cts(req, resp):
+    """Extract content and headers, render as full page or fragment"""
     ...
 
 def _is_ft_resp(resp):
+    """Check if response is a FastTag-compatible type"""
     ...
 
 def _resp(req, resp, cls=empty, status_code=200):
+    """Create appropriate HTTP response from request and response data"""
     ...
 
 class Redirect:
@@ -212,9 +245,10 @@ class Redirect:
         ...
 
 async def _wrap_call(f, req, params):
+    """Wrap function call with request parameter injection"""
     ...
-htmx_exts = {'morph': 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js', 'head-support': 'https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.3/head-support.js', 'preload': 'https://cdn.jsdelivr.net/npm/htmx-ext-preload@2.1.0/preload.js', 'class-tools': 'https://cdn.jsdelivr.net/npm/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://cdn.jsdelivr.net/npm/htmx-ext-loading-states@2.0.0/loading-states.js', 'multi-swap': 'https://cdn.jsdelivr.net/npm/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://cdn.jsdelivr.net/npm/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js', 'ws': 'https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.3/ws.js', 'chunked-transfer': 'https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js'}
-htmxsrc = Script(src='https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js')
+htmx_exts = {'morph': 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js', 'head-support': 'https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.4/head-support.js', 'preload': 'https://cdn.jsdelivr.net/npm/htmx-ext-preload@2.1.1/preload.js', 'class-tools': 'https://cdn.jsdelivr.net/npm/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://cdn.jsdelivr.net/npm/htmx-ext-loading-states@2.0.1/loading-states.js', 'multi-swap': 'https://cdn.jsdelivr.net/npm/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://cdn.jsdelivr.net/npm/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js', 'debug': 'https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js', 'ws': 'https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.3/ws.js', 'chunked-transfer': 'https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js'}
+htmxsrc = Script(src='https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.js')
 fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js')
 surrsrc = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js')
 scopesrc = Script(src='https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js')
@@ -222,12 +256,15 @@ viewport = Meta(name='viewport', content='width=device-width, initial-scale=1, v
 charset = Meta(charset='utf-8')
 
 def get_key(key=None, fname='.sesskey'):
+    """Get session key from `key` param or read/create from file `fname`"""
     ...
 
 def _list(o):
+    """Wrap non-list item in a list, returning empty list if None"""
     ...
 
 def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
+    """Wrap exception handler with FastHTML request processing"""
     ...
 
 def qp(p: str, **kw) -> str:
@@ -240,32 +277,79 @@ def def_hdrs(htmx=True, surreal=True):
 cors_allow = Middleware(CORSMiddleware, allow_credentials=True, allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])
 iframe_scr = Script(NotStr("\n    function sendmsg() {\n        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');\n    }\n    window.onload = function() {\n        sendmsg();\n        document.body.addEventListener('htmx:afterSettle',    sendmsg);\n        document.body.addEventListener('htmx:wsAfterMessage', sendmsg);\n    };"))
 
+class _LifespanCtx:
+
+    def __init__(self, gen):
+        ...
+
+    async def __aenter__(self):
+        ...
+
+    async def __aexit__(self, *_):
+        ...
+
+    def __aiter__(self):
+        ...
+
+    async def __anext__(self):
+        ...
+
+class Lifespan:
+
+    def __init__(self, startup=None, shutdown=None, ls=None):
+        ...
+
+    def __call__(self, app):
+        ...
+
+    async def _run(self, app):
+        ...
+
+    def on_event(self, event_type):
+        ...
+
 class FastHTML(Starlette):
 
     def __init__(self, debug=False, routes=None, middleware=None, title: str='FastHTML page', exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, **bodykw):
         ...
 
-    def add_route(self, route):
+    def on_event(self, event_type):
         ...
 
-    def _endp(self, f, body_wrap):
+    def add_route(self, route):
+        """Add or replace a route in the FastHTML app"""
+        ...
+
+    def _endp(self, f, body_wrap, before: Optional[Callable | tuple]=None):
+        """Create endpoint wrapper with before/after middleware processing"""
         ...
 
     def _add_ws(self, func, path, conn, disconn, name, middleware):
+        """Add websocket route to FastHTML app"""
         ...
 
     def ws(self, path: str, conn=None, disconn=None, name=None, middleware=None):
         """Add a websocket route at `path`"""
         ...
 
-    def _add_route(self, func, path, methods, name, include_in_schema, body_wrap):
+    def add_websocket_route(self, path, func, conn=None, disconn=None, name=None, middleware=None):
+        """Add a websocket route at `path` (Starlette-compatible API)"""
         ...
 
-    def route(self, path: str=None, methods=None, name=None, include_in_schema=True, body_wrap=None):
+    def _add_routes(self, cls, path, methods, name, include_in_schema, body_wrap, host=None, before: Optional[Callable | tuple]=None):
+        """Add HTTP routes from methods on endpoint class `cls`"""
+        ...
+
+    def _add_route(self, func, path, methods, name, include_in_schema, body_wrap, host=None, before: Optional[Callable | tuple]=None):
+        """Add HTTP route to FastHTML app with automatic method detection"""
+        ...
+
+    def route(self, path: str=None, methods=None, name=None, include_in_schema=True, body_wrap=None, host=None, before: Optional[Callable | tuple]=None):
         """Add a route at `path`"""
         ...
 
     def set_lifespan(self, value):
+        """Set the lifespan context manager for the FastHTML app"""
         ...
 
     def static_route_exts(self, prefix='/', static_path='.', exts='static'):
@@ -281,18 +365,47 @@ class FastHTML(Starlette):
 
     def devtools_json(self, path=None, uuid=None):
         ...
+
+    def get_client(self, asink=False, **kw):
+        """Get an httpx client with session cookes set from `**kw`"""
+        ...
+
+    def decode_session(self, cookie):
+        """Decode a signed session cookie"""
+        ...
+
+    def get_testclient(self, **kw):
+        """Get a Starlette `TestClient` with session cookies set from `**kw`"""
+        ...
+
+class HostRoute(Route):
+    """Route with optional host-header constraint using Starlette's {param} pattern syntax"""
+
+    def __init__(self, path, endpoint, *, host=None, **kwargs):
+        ...
+
+    def matches(self, scope):
+        ...
+
+    def __repr__(self) -> str:
+        ...
 all_meths = 'get post put delete patch head trace options'.split()
 
-def _mk_locfunc(f, p):
+def _mk_locfunc(f, p, app=None):
+    """Create a location function wrapper with route path and to() method"""
     ...
 
 def nested_name(f):
     """Get name of function `f` using '_' to join nested function names"""
     ...
+
+def _route_pn(func, path, name):
+    """Infer route name/function name/path from an endpoint or endpoint class"""
+    ...
 for o in all_meths:
     setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
-def serve(appname=None, app='app', host='0.0.0.0', port=None, reload=True, reload_includes: list[str] | str | None=None, reload_excludes: list[str] | str | None=None):
+def serve(appname=None, app='app', host='0.0.0.0', port=None, reload=True, **kwargs):
     """Run the app in an async server, with live reload set as the default."""
     ...
 
@@ -327,7 +440,7 @@ class APIRouter:
     def __init__(self, prefix: str | None=None, body_wrap=noop_body):
         ...
 
-    def _wrap_func(self, func, path=None):
+    def _wrap_func(self, func, path=None, name=None):
         ...
 
     def __call__(self, path: str=None, methods=None, name=None, include_in_schema=True, body_wrap=None):
@@ -356,6 +469,26 @@ def reg_re_param(m, s):
 reg_re_param('path', '.*?')
 _static_exts = 'ico gif jpg jpeg webm css js woff png svg mp4 webp ttf otf eot woff2 txt html map pdf zip tgz gz csv mp3 wav ogg flac aac doc docx xls xlsx ppt pptx epub mobi bmp tiff avi mov wmv mkv xml yaml yml rar 7z tar bz2 htm xhtml apk dmg exe msi swf iso'.split()
 reg_re_param('static', '|'.join(_static_exts))
+
+class StaticNoCache(StaticFiles):
+
+    def file_response(self, *args, **kwargs):
+        ...
+from functools import wraps
+from inspect import signature, isawaitable
+
+def add_sig_param(f, name, typ=NoneType, kind=Parameter.KEYWORD_ONLY, default=Parameter.empty):
+    """Add a parameter to a function's signature"""
+    ...
+
+class into:
+    """Decorator to pass a route's return value into `func`, with keyword params added to the route signature"""
+
+    def __init__(self, func):
+        ...
+
+    def __call__(self, f):
+        ...
 
 class MiddlewareBase:
 

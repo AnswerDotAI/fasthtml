@@ -4,6 +4,8 @@
 # Run with: `python adv_app.py`
 # Importing from `fasthtml.common` brings the key parts of all of these together. We recommend using a wildcard import since only necessary parts are exported by the module.
 from fasthtml.common import *
+from fasthtml.pico import *
+from fastlite import *
 from hmac import compare_digest
 
 # We recommend using sqlite for most apps, as it is simple, fast, and scalable. `database()` creates the db if it doesn't exist.

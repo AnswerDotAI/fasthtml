@@ -1,5 +1,5 @@
 """Simple extensions to standard HTML components, such as adding sensible defaults"""
-__all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'jsd', 'Fragment', 'Titled', 'Socials', 'YouTubeEmbed', 'Favicon', 'clear', 'with_sid']
+__all__ = ['sid_scr', 'A', 'AX', 'Form', 'Hidden', 'CheckboxX', 'Script', 'Style', 'double_braces', 'undouble_braces', 'loose_format', 'ScriptX', 'replace_css_vars', 'StyleX', 'Nbsp', 'Surreal', 'On', 'Prev', 'Now', 'AnyNow', 'run_js', 'HtmxOn', 'jsd', 'Fragment', 'Titled', 'Socials', 'YouTubeEmbed', 'Favicon', 'clear', 'with_sid', 'LdJson', 'LdContactPoint', 'LdOrg', 'LdWebsite', 'LdCourseInstance', 'LdCourse', 'robots_txt', 'sitemap_url', 'sitemap_xml']
 from dataclasses import dataclass, asdict
 from typing import Any
 from fastcore.utils import *
@@ -8,10 +8,6 @@ from fastcore.xml import *
 from fastcore.meta import use_kwargs, delegates
 from .core import *
 from .components import *
-try:
-    from IPython import display
-except ImportError:
-    display = None
 
 def A(*c, hx_get=None, target_id=None, hx_swap=None, href='#', hx_vals=None, hx_target=None, id=None, cls=None, title=None, style=None, accesskey=None, contenteditable=None, dir=None, draggable=None, enterkeyhint=None, hidden=None, inert=None, inputmode=None, lang=None, popover=None, spellcheck=None, tabindex=None, translate=None, hx_post=None, hx_put=None, hx_delete=None, hx_patch=None, hx_trigger=None, hx_swap_oob=None, hx_include=None, hx_select=None, hx_select_oob=None, hx_indicator=None, hx_push_url=None, hx_confirm=None, hx_disable=None, hx_replace_url=None, hx_disabled_elt=None, hx_ext=None, hx_headers=None, hx_history=None, hx_history_elt=None, hx_inherit=None, hx_params=None, hx_preserve=None, hx_prompt=None, hx_request=None, hx_sync=None, hx_validate=None, hx_on_blur=None, hx_on_change=None, hx_on_contextmenu=None, hx_on_focus=None, hx_on_input=None, hx_on_invalid=None, hx_on_reset=None, hx_on_select=None, hx_on_submit=None, hx_on_keydown=None, hx_on_keypress=None, hx_on_keyup=None, hx_on_click=None, hx_on_dblclick=None, hx_on_mousedown=None, hx_on_mouseenter=None, hx_on_mouseleave=None, hx_on_mousemove=None, hx_on_mouseout=None, hx_on_mouseover=None, hx_on_mouseup=None, hx_on_wheel=None, hx_on__abort=None, hx_on__after_on_load=None, hx_on__after_process_node=None, hx_on__after_request=None, hx_on__after_settle=None, hx_on__after_swap=None, hx_on__before_cleanup_element=None, hx_on__before_on_load=None, hx_on__before_process_node=None, hx_on__before_request=None, hx_on__before_swap=None, hx_on__before_send=None, hx_on__before_transition=None, hx_on__config_request=None, hx_on__confirm=None, hx_on__history_cache_error=None, hx_on__history_cache_miss=None, hx_on__history_cache_miss_error=None, hx_on__history_cache_miss_load=None, hx_on__history_restore=None, hx_on__before_history_save=None, hx_on__load=None, hx_on__no_sse_source_error=None, hx_on__on_load_error=None, hx_on__oob_after_swap=None, hx_on__oob_before_swap=None, hx_on__oob_error_no_target=None, hx_on__prompt=None, hx_on__pushed_into_history=None, hx_on__replaced_in_history=None, hx_on__response_error=None, hx_on__send_abort=None, hx_on__send_error=None, hx_on__sse_error=None, hx_on__sse_open=None, hx_on__swap_error=None, hx_on__target_error=None, hx_on__timeout=None, hx_on__validation_validate=None, hx_on__validation_failed=None, hx_on__validation_halted=None, hx_on__xhr_abort=None, hx_on__xhr_loadend=None, hx_on__xhr_loadstart=None, hx_on__xhr_progress=None, **kwargs) -> FT:
     """An A tag; `href` defaults to '#' for more concise use with HTMX"""
@@ -127,4 +123,41 @@ def clear(id):
 sid_scr = Script('\nfunction uuid() {\n    return [...crypto.getRandomValues(new Uint8Array(10))].map(b=>b.toString(36)).join(\'\');\n}\n\nsessionStorage.setItem("sid", sessionStorage.getItem("sid") || uuid());\n\nhtmx.on("htmx:configRequest", (e) => {\n    const sid = sessionStorage.getItem("sid");\n    if (sid) {\n        const url = new URL(e.detail.path, window.location.origin);\n        url.searchParams.set(\'sid\', sid);\n        e.detail.path = url.pathname + url.search;\n    }\n});\n')
 
 def with_sid(app, dest, path='/'):
+    ...
+
+def LdJson(typ, data: dict, script=False, extra=None, **kwargs) -> FT:
+    """A script tag containing JSON-LD structured data"""
+    ...
+
+def LdContactPoint(contact_type: str, email: str=None, phone: str=None, script=False, **extra) -> dict:
+    """Create a ContactPoint for JSON-LD"""
+    ...
+
+def LdOrg(name: str, url: str=None, logo: str=None, alt_name: str=None, same_as: list=None, contact_points: list=None, script=False, **extra) -> dict:
+    """JSON-LD Organization structured data"""
+    ...
+
+def LdWebsite(name: str, url: str, script=False, **extra) -> dict:
+    """Create JSON-LD WebSite structured data"""
+    ...
+
+def LdCourseInstance(course_mode: str='Online', start_date: str=None, end_date: str=None, location: dict=None, instructor: dict=None, script=False, **extra) -> dict:
+    """Create a CourseInstance for JSON-LD"""
+    ...
+
+def LdCourse(name: str, description: str, provider: dict, course_instance: dict=None, script=False, **extra) -> dict:
+    """Create JSON-LD Course structured data"""
+    ...
+
+def robots_txt(app, allow_all=True, disallow_paths=None, sitemap_url=None, crawl_delay=None):
+    """Add a /robots.txt route to the app"""
+    ...
+from fastcore.xml import Url, Loc, Lastmod, Changefreq, Priority, Urlset
+
+def sitemap_url(url_info, loc_base=''):
+    """Create a sitemap URL element from url_info (string or dict)"""
+    ...
+
+def sitemap_xml(app, urls, loc_base=''):
+    """Add a /sitemap.xml route to the app with list of URLs"""
     ...

@@ -1,4 +1,5 @@
 from fasthtml.common import *
+from fastlite import *
 
 db = database('data/todos.db')
 todos = db.t.todos

@@ -18,12 +18,11 @@ try: from IPython.display import HTML,Markdown,display
 except ImportError: pass
 
 # %% ../nbs/api/06_jupyter.ipynb #a5d3a8f7
-def nb_serve(app, log_level="error", port=8000, host='0.0.0.0', **kwargs):
-    "Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`"
+def nb_serve(app, log_level="error", port=8000, host='0.0.0.0', daemon=False, **kwargs):
+    "Start a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`; use `daemon=True` for notebook tests so failed runs don't block process shutdown"
     server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, host=host, port=port, **kwargs))
-    async def async_run_server(server): await server.serve()
-    @startthread
-    def run_server(): asyncio.run(async_run_server(server))
+    @startthread(daemon=daemon)
+    def run_server(): asyncio.run(server.serve())
     while not server.started: time.sleep(0.01)
     return server
 
@@ -87,18 +86,20 @@ document.body.addEventListener('{evt}', (event) => {{
 </script>'''))
 
 
-# %% ../nbs/api/06_jupyter.ipynb #29a834a5
+# %% ../nbs/api/06_jupyter.ipynb #79406618
 class JupyUvi:
     "Start and stop a Jupyter compatible uvicorn server with ASGI `app` on `port` with `log_level`"
-    def __init__(self, app, log_level="error", host='0.0.0.0', port=8000, start=True, **kwargs):
+    def __init__(self, app, log_level="error", host='0.0.0.0', port=8000, start=True, live=False, live_rt='/_lr', daemon=False, **kwargs):
         self.kwargs = kwargs
-        store_attr(but='start')
+        store_attr(but='start,live')
         self.server = None
+        self._live_ver = 0
+        if live: self._setup_live(app)
         if start: self.start()
         if not os.environ.get('IN_SOLVEIT'): htmx_config_port(port, htmx4=app.htmx4)
 
     def start(self):
-        self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
+        self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port,daemon=self.daemon, **self.kwargs)
 
     async def start_async(self):
         self.server = await nb_serve_async(self.app, log_level=self.log_level, host=self.host, port=self.port, **self.kwargs)
@@ -106,6 +107,22 @@ class JupyUvi:
     def stop(self):
         self.server.should_exit = True
         wait_port_free(self.port)
+
+    def _setup_live(self, app):
+        rt = self.live_rt or '/_lr'
+        if not rt.startswith('/'): rt = f'/{rt}'
+        app.hdrs.append(Script(f"new EventSource({rt!r}).onmessage=e=>{{if(e.data==='reload')navigation.reload()}}"))
+        @app.get(rt)
+        async def _sse(): return EventStream(self._live_sse())
+        get_ipython().events.register('post_run_cell', lambda _: setattr(self, '_live_ver', self._live_ver+1))
+
+    async def _live_sse(self):
+        ver = self._live_ver
+        while not self.server.should_exit:
+            await asyncio.sleep(0.1)
+            if ver != self._live_ver:
+                ver = self._live_ver
+                yield 'data: reload\n\n'
 
 # %% ../nbs/api/06_jupyter.ipynb #9134035e
 class JupyUviAsync(JupyUvi):

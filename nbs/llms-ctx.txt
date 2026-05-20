@@ -1,3 +1,10 @@
+{'title': 'FastHTML concise guide', 'url': 'https://www.fastht.ml/docs/ref/concise_guide.html.md', 'desc': 'A brief overview of idiomatic FastHTML apps'}
+{'title': 'HTMX reference', 'url': 'https://raw.githubusercontent.com/bigskysoftware/htmx/master/www/content/reference.md', 'desc': 'Brief description of all HTMX attributes, CSS classes, headers, events, extensions, js lib methods, and config options'}
+{'title': 'Starlette quick guide', 'url': 'https://gist.githubusercontent.com/jph00/e91192e9bdc1640f5421ce3c904f2efb/raw/61a2774912414029edaf1a55b506f0e283b93c46/starlette-quick.md', 'desc': 'A quick overview of some Starlette features useful to FastHTML devs.'}
+{'title': 'API List', 'url': 'https://www.fastht.ml/docs/apilist.txt', 'desc': 'A succint list of all functions and methods in fasthtml.'}
+{'title': 'MonsterUI API List', 'url': 'https://raw.githubusercontent.com/AnswerDotAI/MonsterUI/refs/heads/main/docs/apilist.txt', 'desc': 'Complete API Reference for Monster UI, a component framework similar to shadcn, but for FastHTML'}
+{'title': 'Websockets application', 'url': 'https://raw.githubusercontent.com/AnswerDotAI/fasthtml/main/examples/basic_ws.py', 'desc': 'Very brief example of using websockets with HTMX and FastHTML'}
+{'title': 'Todo list application', 'url': 'https://raw.githubusercontent.com/AnswerDotAI/fasthtml/main/examples/adv_app.py', 'desc': 'Detailed walk-thru of a complete CRUD app in FastHTML showing idiomatic use of FastHTML and HTMX patterns.'}
 <project title="FastHTML" summary='FastHTML is a python library which brings together Starlette, Uvicorn, HTMX, and fastcore&#39;s `FT` "FastTags" into a library for creating server-rendered hypermedia applications. The `FastHTML` class itself inherits from `Starlette`, and adds decorator-based routing with many additions, Beforeware, automatic `FT` to HTML rendering, and much more.'>Things to remember when writing FastHTML apps:
 
 - Although parts of its API are inspired by FastAPI, it is *not* compatible with FastAPI syntax and is not targeted at creating API services
@@ -1044,6 +1051,7 @@ listed below:
 | `htmx.config.responseHandling`         | the default [Response Handling](@/docs.md#response-handling) behavior for response status codes can be configured here to either swap or error                             |
 | `htmx.config.allowNestedOobSwaps`      | defaults to `true`, whether to process OOB swaps on elements that are nested within the main response element. See [Nested OOB Swaps](@/attributes/hx-swap-oob.md#nested-oob-swaps). |
 | `htmx.config.historyRestoreAsHxRequest`| defaults to `true`, Whether to treat history cache miss full page reload requests as a "HX-Request" by returning this response header. This should always be disabled when using HX-Request header to optionally return partial responses                                                                                                         |
+| `htmx.config.reportValidityOfForms`    | defaults to `false`, Whether to report input validation errors to the end user and update focus to the first input that fails validation. This should always be enabled as this matches default browser form submit behaviour                                                                                                                     |
 
 
 </div>
@@ -2310,8 +2318,8 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
     Members: underline, bold
 
 
-- `def NavBar(*c)`
-    Creates a responsive navigation bar with mobile menu support
+- `def NavBar(*c, **kwargs)`
+    Responsive navbar with mobile hamburger menu
 
 - `def SliderContainer(*c, **kwargs)`
     Creates a slider container
@@ -2370,11 +2378,16 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 - `def apply_classes(html_str, class_map, class_map_mods)`
     Apply classes to html string
 
-- `def render_md(md_content, class_map, class_map_mods)`
-    Renders markdown using mistletoe and lxml
+- `class FrankenRenderer`
+    Custom renderer for Franken UI that handles image paths
 
-- `def get_franken_renderer(img_dir)`
-    Create a renderer class with the specified img_dir
+    - `def __init__(self, *args, **kwargs)`
+    - `def render_image(self, token)`
+        Modify image paths if they're relative and self.img_dir is specified
+
+
+- `def render_md(md_content, class_map, class_map_mods, img_dir, renderer)`
+    Renders markdown using mistletoe and lxml with custom image handling
 
 - `def ThemePicker(color, radii, shadows, font, mode, cls, custom_themes)`
     Theme picker component with configurable sections
@@ -2387,6 +2400,15 @@ class CustomHeaderMiddleware(BaseHTTPMiddleware):
 
 - `def ApexChart(**kws)`
     Apex chart component
+
+- `def ScrollSpy(headings, target_sel, offset, nav_id, smooth_scroll, auto_scroll, cls, **kwargs)`
+    Standalone Scrollspy nav menu, mapping heading tags from target into link
+
+- `def LoaderButton(*c, **kwargs)`
+    A button that displays a loading spinner when an HTMX request is in flight
+
+- `def ToggleBtn(*c, **kwargs)`
+    Styled toggle button component, acts like a switch
 </doc></api><examples><doc title="Websockets application" desc="Very brief example of using websockets with HTMX and FastHTML">from asyncio import sleep
 from fasthtml.common import *
 
