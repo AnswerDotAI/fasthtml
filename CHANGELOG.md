@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.14.2
+
+- Bump Starlette min to 1.0.1 to avoid CVE
+
+
 ## 0.14.1
 
 ### Breaking changes
