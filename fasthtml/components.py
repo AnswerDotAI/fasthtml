@@ -98,6 +98,7 @@ def ft_html(tag: str, *c, id=None, cls=None, title=None, style=None, attrmap=Non
 # %% ../nbs/api/01_components.ipynb #d5158b3d
 @use_kwargs(hx_attrs+evt_attrs, keep=True)
 def ft_hx(tag: str, *c, target_id=None, hx_vals=None, hx_target=None, **kwargs):
+    kwargs = {k: (str(v) if callable(v) else v) for k, v in kwargs.items()}
     if hx_vals: kwargs['hx_vals'] = json.dumps(hx_vals) if isinstance (hx_vals,dict) else hx_vals
     if hx_target: kwargs['hx_target'] = '#'+hx_target.id if isinstance(hx_target,FT) else hx_target
     if target_id: kwargs['hx_target'] = '#'+target_id
