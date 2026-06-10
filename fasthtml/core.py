@@ -818,8 +818,8 @@ def serve(
 class Client:
     "A simple httpx ASGI client that doesn't require `async`"
     def __init__(self, app, url="http://testserver"):
-        import httpx
-        self.cli = httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url=url)
+        import httpx2
+        self.cli = httpx2.AsyncClient(transport=httpx2.ASGITransport(app), base_url=url)
 
     def _sync(self, method, url, **kwargs):
         async def _request(): return await self.cli.request(method, url, **kwargs)
@@ -1028,11 +1028,11 @@ def devtools_json(self:FastHTML, path=None, uuid=None):
 @patch
 def get_client(self:FastHTML, asink=False, **kw):
     "Get an httpx client with session cookes set from `**kw`"
-    import httpx
+    import httpx2
     signer = itsdangerous.TimestampSigner(self.secret_key)
     data = b64encode(dumps(kw).encode())
     data = signer.sign(data)
-    client = httpx.AsyncClient() if asink else httpx.Client()
+    client = httpx2.AsyncClient() if asink else httpx2.Client()
     client.cookies.update({self.session_cookie: data.decode()})
     return client
 
