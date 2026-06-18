@@ -12,7 +12,7 @@ __all__ = ['log', 'http_patterns', 'GoogleAppClient', 'GitHubAppClient', 'Huggin
 from .common import *
 from oauthlib.oauth2 import WebApplicationClient
 from urllib.parse import urlparse, urlencode, parse_qs, quote, unquote
-import secrets, httpx, time, asyncio, logging
+import secrets, httpx2, time, asyncio, logging
 
 # %% ../nbs/api/08_oauth.ipynb #44aa4a88
 log = logging.getLogger(__name__)
@@ -95,7 +95,7 @@ class DiscordAppClient(_AppClient):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         data = dict(grant_type='authorization_code', code=code)
         if redirect_uri: data['redirect_uri'] = redirect_uri
-        r = httpx.post(self.token_url, data=data, headers=headers, auth=(self.client_id, self.client_secret)
+        r = httpx2.post(self.token_url, data=data, headers=headers, auth=(self.client_id, self.client_secret)
             ).raise_for_status()
         self.parse_request_body_response(r.text)
 
@@ -109,7 +109,7 @@ class Auth0AppClient(_AppClient):
         super().__init__(client_id, client_secret, code=code, scope=scope, redirect_uri=redirect_uri, **kwargs)
 
     def _fetch_openid_config(self):
-        return httpx.get(f"https://{self.domain}/.well-known/openid-configuration").raise_for_status().json()
+        return httpx2.get(f"https://{self.domain}/.well-known/openid-configuration").raise_for_status().json()
 
     def login_link(self, req):
         d = dict(response_type="code", client_id=self.client_id, scope=self.scope, redirect_uri=redir_url(req, self.redirect_uri))
@@ -169,7 +169,7 @@ def parse_response(self:_AppClient, code, redirect_uri):
     "Get the token from the oauth2 server response"
     payload = dict(code=code, redirect_uri=redirect_uri, client_id=self.client_id,
                    client_secret=self.client_secret, grant_type='authorization_code')
-    r = httpx.post(self.token_url, data=payload).raise_for_status()
+    r = httpx2.post(self.token_url, data=payload).raise_for_status()
     self.parse_request_body_response(r.text)
 
 @patch
@@ -177,7 +177,7 @@ def get_info(self:_AppClient, token=None):
     "Get the info for authenticated user"
     if not token: token = self.token["access_token"]
     headers = {'Authorization': f'Bearer {token}'}
-    return httpx.get(self.info_url, headers=headers).json()
+    return httpx2.get(self.info_url, headers=headers).json()
 
 @patch
 def retr_info(self:_AppClient, code, redirect_uri):
@@ -192,7 +192,7 @@ async def parse_response_async(self:_AppClient, code, redirect_uri):
     payload = dict(code=code, redirect_uri=redirect_uri, client_id=self.client_id,
                    client_secret=self.client_secret, grant_type='authorization_code')
     log.debug(f"OAuth token request: redirect_uri={redirect_uri}, code={code[:20]}...")
-    async with httpx.AsyncClient() as c:
+    async with httpx2.AsyncClient() as c:
         r = (await c.post(self.token_url, data=payload))
         log.debug(f"OAuth response: {r.status_code} - {r.text}")
         r.raise_for_status()
@@ -203,7 +203,7 @@ async def get_info_async(self:_AppClient, token=None):
     "Get the info for authenticated user"
     if not token: token = self.token["access_token"]
     headers = {'Authorization': f'Bearer {token}'}
-    async with httpx.AsyncClient() as c:
+    async with httpx2.AsyncClient() as c:
         return (await c.get(self.info_url, headers=headers)).raise_for_status().json()
 
 @patch
