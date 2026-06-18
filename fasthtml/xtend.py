@@ -166,10 +166,11 @@ def run_js(js, id=None, **kw):
     return Script(js.format(**kw), id=id, hx_swap_oob='true')
 
 # %% ../nbs/api/02_xtend.ipynb #365f57a8
-def HtmxOn(eventname:str, code:str):
+def HtmxOn(eventname:str, code:str, htmx4=False, metaChar=None):
+    if metaChar is None: metaChar = '-' if htmx4 else ':'
     return Script('''domReadyExecute(function() {
-document.body.addEventListener("htmx:%s", function(event) { %s })
-})''' % (eventname, code))
+document.body.addEventListener("htmx%s%s", function(event) { %s })
+})''' % (metaChar, eventname, code))
 
 # %% ../nbs/api/02_xtend.ipynb #39f20784
 def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **kwargs)->FT:
@@ -242,23 +243,24 @@ def Favicon(light_icon, dark_icon):
 # %% ../nbs/api/02_xtend.ipynb #50444181
 def clear(id): return Div(hx_swap_oob='innerHTML', id=id)
 
-# %% ../nbs/api/02_xtend.ipynb #09b2e3a5
-sid_scr = Script('''
+# %% ../nbs/api/02_xtend.ipynb #f46160fb
+sid_scr = Script("""
 function uuid() {
     return [...crypto.getRandomValues(new Uint8Array(10))].map(b=>b.toString(36)).join('');
 }
-
 sessionStorage.setItem("sid", sessionStorage.getItem("sid") || uuid());
 
-htmx.on("htmx:configRequest", (e) => {
-    const sid = sessionStorage.getItem("sid");
-    if (sid) {
-        const url = new URL(e.detail.path, window.location.origin);
-        url.searchParams.set('sid', sid);
-        e.detail.path = url.pathname + url.search;
-    }
-});
-''')
+function addSid(url, sid) {
+    const u = new URL(url, window.location.origin);
+    u.searchParams.set('sid', sid);
+    return u.pathname + u.search;
+}
+                 
+const mc = htmx.config?.metaCharacter || ':';
+
+htmx.on("htmx:configRequest",  (e) => { const sid = sessionStorage.getItem("sid"); if (sid) e.detail.path = addSid(e.detail.path, sid); }); // htmx v2
+htmx.on(`htmx${mc}config${mc}request`, (e) => { const sid = sessionStorage.getItem("sid"); if (sid) e.detail.ctx.request.action = addSid(e.detail.ctx.request.action, sid); }); // htmx v4
+""")
 
 # %% ../nbs/api/02_xtend.ipynb #579e1f33
 def with_sid(app, dest, path='/'):
