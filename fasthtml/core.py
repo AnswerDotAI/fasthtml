@@ -458,7 +458,7 @@ def _is_ft_resp(resp):
 # %% ../nbs/api/00_core.ipynb #968d9245
 def _resp(req, resp, cls=empty, status_code=200):
     "Create appropriate HTTP response from request and response data"
-    if not resp: resp=''
+    if resp is None: resp=''
     if hasattr(resp, '__response__'): resp = resp.__response__(req)
     if not (isinstance(cls, type) and issubclass(cls, Response)): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
