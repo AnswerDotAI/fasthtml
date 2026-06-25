@@ -916,14 +916,14 @@ reg_re_param("static", '|'.join(_static_exts))
 @patch
 def static_route_exts(self:FastHTML, prefix='/', static_path='.', exts='static'):
     "Add a static route at URL path `prefix` with files from `static_path` and `exts` defined by `reg_re_param()`"
-    @self.route(f"{prefix}{{fname:path}}.{{ext:{exts}}}")
+    @self.get(f"{prefix}{{fname:path}}.{{ext:{exts}}}")
     async def get(fname:str, ext:str): return FileResponse(f'{static_path}/{fname}.{ext}')
 
 # %% ../nbs/api/00_core.ipynb #b31de65a
 @patch
 def static_route(self:FastHTML, ext='', prefix='/', static_path='.'):
     "Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')"
-    @self.route(f"{prefix}{{fname:path}}{ext}")
+    @self.get(f"{prefix}{{fname:path}}{ext}")
     async def get(fname:str): return FileResponse(f'{static_path}/{fname}{ext}')
 
 # %% ../nbs/api/00_core.ipynb #f63b7a03
