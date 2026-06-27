@@ -339,4 +339,5 @@ d = { 'settings': { 'branch': 'main',
                                 'fasthtml.xtend.sitemap_url': ('api/xtend.html#sitemap_url', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.sitemap_xml': ('api/xtend.html#sitemap_xml', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.undouble_braces': ('api/xtend.html#undouble_braces', 'fasthtml/xtend.py'),
+                                'fasthtml.xtend.upload_pb_attrs': ('api/xtend.html#upload_pb_attrs', 'fasthtml/xtend.py'),
                                 'fasthtml.xtend.with_sid': ('api/xtend.html#with_sid', 'fasthtml/xtend.py')}}}
