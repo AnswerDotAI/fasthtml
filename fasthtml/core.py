@@ -157,7 +157,7 @@ DEF_MAXPART = 100*1024*1024
 
 # %% ../nbs/api/00_core.ipynb #42c9cea0
 async def parse_form(req: Request) -> FormData:
-    "Starlette errors on empty multipart forms, so this checks for that situation"
+    "Starlette errors on empty multipart/json forms, so this checks for that situation"
     ctype = req.headers.get("Content-Type", "")
     maxpart = getattr(req, "max_part_size", DEF_MAXPART)
     if ctype.startswith("multipart/form-data"):
@@ -165,8 +165,9 @@ async def parse_form(req: Request) -> FormData:
         except IndexError: raise HTTPException(400, "Invalid form-data: no boundary")
         if int(req.headers.get("Content-Length", "0")) <= len(boundary) + 6: return FormData()
         return await req.form(max_part_size=maxpart)
-    await req.body()  # Cache body for non-multipart request types
-    return await req.json() if ctype == 'application/json' else await req.form(max_part_size=maxpart)
+    body = await req.body()  # Cache body for non-multipart request types
+    if ctype == 'application/json': return await req.json() if body else {}
+    return await req.form(max_part_size=maxpart)
 
 # %% ../nbs/api/00_core.ipynb #0caedd04
 async def _from_body(conn, p, data):
