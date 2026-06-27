@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.14.4
+
+### New Features
+
+- Add `upload_pb_attrs` helper for upload progress bars ([#892](https://github.com/AnswerDotAI/fasthtml/issues/892))
+
+### Bugs Squashed
+
+- Use GET method for static file routes instead of generic route ([#893](https://github.com/AnswerDotAI/fasthtml/issues/893))
+- Fix Route handlers convert falsy values (0, False) to empty strings #572 ([#890](https://github.com/AnswerDotAI/fasthtml/pull/890)), thanks to [@civvic](https://github.com/civvic)
+- Treat an empty application/json body as {} in `parse_form` ([#880](https://github.com/AnswerDotAI/fasthtml/pull/880)), thanks to [@linguistic76](https://github.com/linguistic76)
 
 
 ## 0.14.3
