@@ -2,6 +2,22 @@
 
 <!-- do not remove -->
 
+
+
+## 0.14.3
+
+### New Features
+
+- Add configurable `max_part_size` for multipart form uploads (default 100MB) ([#889](https://github.com/AnswerDotAI/fasthtml/issues/889))
+- Update to httpx2 as required by starlette ([#885](https://github.com/AnswerDotAI/fasthtml/issues/885))
+- Improve `JupyUvi.stop` and async waiting ([#879](https://github.com/AnswerDotAI/fasthtml/pull/879)), thanks to [@kafkasl](https://github.com/kafkasl)
+
+
+## 0.14.2
+
+- Bump Starlette min to 1.0.1 to avoid CVE
+
+
 ## 0.14.1
 
 ### Breaking changes
