@@ -197,7 +197,7 @@ def find_inputs(e, tags='input', **kw):
 # %% ../nbs/api/01_components.ipynb #1d8a28b1
 def __getattr__(tag):
     if tag.startswith('_') or tag[0].islower(): raise AttributeError
-    tag = tag.replace("_", "-")
+    tag = re.sub(r'(?<=[a-z0-9])(?=[A-Z])', '-', tag.replace("_", "-")).lower()
     def _f(*c, target_id=None, **kwargs): return ft_hx(tag, *c, target_id=target_id, **kwargs)
     return _f
 
