@@ -41,3 +41,6 @@ allowed_cell_metadata_keys = ['solveit_ai']
 jupyter_hooks = true
 custom_sidebar = false
 lib_path = "fasthtml"
+
+[tool.chkstyle]
+skip_paths = ["_modidx.py"]
