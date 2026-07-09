@@ -10,15 +10,16 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_ex
            'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'ApiReturn',
            'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple',
            'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML',
-           'HostRoute', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param',
-           'StaticNoCache', 'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
+           'HostRoute', 'nested_name', 'serve', 'until_disconnect', 'cancel_on_disconnect', 'Client', 'RouteFuncs',
+           'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'add_sig_param', 'into', 'MiddlewareBase',
+           'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
 import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous
 
 from fastcore.utils import *
 from fastcore.xml import *
-from fastcore.meta import use_kwargs_dict,delegates
+from fastcore.meta import use_kwargs_dict,delegates,splice_sig
 from fastcore.style import S
 
 from types import UnionType, SimpleNamespace as ns, GenericAlias
@@ -818,6 +819,35 @@ def serve(
         link = f'http://{"localhost" if host=="0.0.0.0" else host}:{port}'
         print('Link: '+ S.light_red.bold(link))
         run(f'{appname}:{app}', host=host, port=port, reload=reload, **kwargs)
+
+# %% ../nbs/api/00_core.ipynb #c5220a0e
+async def _wait_disconnect(req):
+    while (await req.receive())["type"] != "http.disconnect": pass
+
+async def until_disconnect(req, coro):
+    "Await `coro`, cancelling it (and returning an empty response) if the client disconnects first"
+    work,watch = asyncio.ensure_future(coro),asyncio.ensure_future(_wait_disconnect(req))
+    try:
+        done,_ = await asyncio.wait({work,watch}, return_when=asyncio.FIRST_COMPLETED)
+        if work in done: return work.result()
+        return Response(status_code=204)
+    finally:
+        watch.cancel()
+        if not work.done(): work.cancel()
+
+# %% ../nbs/api/00_core.ipynb #c5721d76
+def cancel_on_disconnect(
+    f=None, # Async route handler to wrap
+    *,
+    timeout=None, # Also cancel the handler after this many seconds
+):
+    "Route decorator: cancel the handler when the client disconnects"
+    if f is None: return partial(cancel_on_disconnect, timeout=timeout)
+    assert is_async_callable(f), "cancel_on_disconnect requires an async handler"
+    async def _f(__req: Request, *args, **kw):
+        c = until_disconnect(__req, f(**kw))
+        return await (asyncio.wait_for(c, timeout) if timeout is not None else c)
+    return splice_sig(_f, f)
 
 # %% ../nbs/api/00_core.ipynb #8121968a
 class Client:
