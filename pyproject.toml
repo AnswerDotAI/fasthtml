@@ -22,7 +22,7 @@ Documentation = "https://www.fastht.ml/docs/"
 fasthtml = "fasthtml._modidx:d"
 
 [project.optional-dependencies]
-dev = ['ipython', 'lxml', 'pysymbol_llm', 'monsterui', 'PyJWT']
+dev = ['ipython', 'lxml', 'pysymbol_llm>=0.0.6', 'monsterui', 'PyJWT']
 
 
 [project.scripts]
