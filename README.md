@@ -147,6 +147,8 @@ tutorials, notebooks, libraries, and components:
 - [How to Build a Simple Login System in
   FastHTML](https://blog.mariusvach.com/posts/login-fasthtml) by Marius
   Vach
+- [Building My First FastHTML App and What I Learned](https://fast-html.blogspot.com/2026/07/building-my-first-fasthtml-app-and-what.html)
+- [My First FastHTML App](https://your-link-here.com) by Adish Meetei
 - Your tutorial here!
 
 Finally, join the FastHTML community to ask questions, share your work,
