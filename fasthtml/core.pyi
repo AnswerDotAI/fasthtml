@@ -22,6 +22,11 @@ from base64 import b64encode, b64decode
 from email.utils import format_datetime
 from .starlette import *
 
+@patch
+def __deepcopy__(self: FT, memo):
+    """Fast `deepcopy` for `FT`, avoiding the slow generic object fallback. Unknown attr/child value types are delegated to `deepcopy` itself, so a user's own `__deepcopy__` is still respected"""
+    ...
+
 def _params(f):
     ...
 empty = Parameter.empty

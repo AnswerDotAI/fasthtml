@@ -40,6 +40,19 @@ from email.utils import format_datetime
 
 from .starlette import *
 
+# %% ../nbs/api/00_core.ipynb #2b18bf01
+@patch
+def __deepcopy__(self:FT, memo):
+    "Fast `deepcopy` for `FT`, avoiding the slow generic object fallback. Unknown attr/child value types are delegated to `deepcopy` itself, so a user's own `__deepcopy__` is still respected"
+    y = self.__class__.__new__(self.__class__)
+    memo[id(self)] = y
+    y.tag = self.tag
+    y.children = tuple(deepcopy(c, memo) for c in self.children)
+    y.attrs = deepcopy(self.attrs, memo)
+    y.void_ = self.void_
+    y.listeners_ = deepcopy(self.listeners_, memo)
+    return y
+
 # %% ../nbs/api/00_core.ipynb #19d3f2a7
 def _params(f): return signature_ex(f, True).parameters
 
