@@ -16,6 +16,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_ex
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
 import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous
+from uuid import uuid5, NAMESPACE_URL
 
 from fastcore.utils import *
 from fastcore.xml import *
@@ -1054,10 +1055,10 @@ devtools_loc = "/.well-known/appspecific/com.chrome.devtools.json"
 @patch
 def devtools_json(self:FastHTML, path=None, uuid=None):
     if not path: path = Path().absolute()
-    if not uuid: uuid = get_key()
+    if not uuid: uuid = str(uuid5(NAMESPACE_URL, str(path)))
     @self.route(devtools_loc)
     def devtools():
-        return dict(workspace=dict(root=path, uuid=uuid))
+        return dict(workspace=dict(root=str(path), uuid=uuid))
 
 # %% ../nbs/api/00_core.ipynb #e27908c0
 @patch
