@@ -11,11 +11,11 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_ex
            'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple',
            'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML',
            'HostRoute', 'nested_name', 'serve', 'until_disconnect', 'cancel_on_disconnect', 'Client', 'RouteFuncs',
-           'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'add_sig_param', 'into', 'MiddlewareBase',
-           'FtResponse', 'unqid']
+           'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'StaticImmutable', 'vurl', 'add_sig_param', 'into',
+           'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
-import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous
+import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous,hashlib
 from uuid import uuid5, NAMESPACE_URL
 
 from fastcore.utils import *
@@ -30,7 +30,7 @@ from dataclasses import dataclass
 from inspect import Parameter,get_annotations
 from functools import partialmethod, update_wrapper
 from http import cookies
-from urllib.parse import urlencode, parse_qs, quote, unquote
+from urllib.parse import urlencode, parse_qs, quote, unquote, urlsplit, urlunsplit
 from copy import deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
@@ -964,6 +964,26 @@ class StaticNoCache(StaticFiles):
         resp = super().file_response(*args, **kwargs)
         resp.headers.setdefault("Cache-Control", "no-cache")
         return resp
+
+# %% ../nbs/api/00_core.ipynb #74801f94
+class StaticImmutable(StaticFiles):
+    "Like `StaticNoCache`, but marks responses as cacheable forever: for versioned URLs such as `vurl` links or content-hashed filenames"
+    def file_response(self, *args, **kwargs):
+        resp = super().file_response(*args, **kwargs)
+        resp.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
+        return resp
+
+# %% ../nbs/api/00_core.ipynb #e38fd6c7
+@flexicache(mtime_policy(arg=0))
+def _vhash(p): return hashlib.blake2b(p.read_bytes(), digest_size=4).hexdigest()
+
+def vurl(path, root='.'):
+    "Return `path` as a URL with a `v` query param hashing the file's contents, so the URL changes when the file does"
+    u = urlsplit(str(path))
+    p = Path(root)/u.path.lstrip('/')
+    q = f'{u.query}&' if u.query else ''
+    return urlunsplit(u._replace(query=f'{q}v={_vhash(p)}'))
+
 
 # %% ../nbs/api/00_core.ipynb #7189daf8
 from functools import wraps
