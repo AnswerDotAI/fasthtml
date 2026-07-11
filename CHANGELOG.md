@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.14.6
+
+### New Features
+
+- Add StaticImmutable class and vurl helper for versioned static file URLs ([#904](https://github.com/AnswerDotAI/fasthtml/issues/904))
+- Use deterministic uuid5 for devtools workspace and return root as string ([#901](https://github.com/AnswerDotAI/fasthtml/issues/901))
+
+
 ## 0.14.5
 
 ### New Features
