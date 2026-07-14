@@ -278,8 +278,8 @@ class Beforeware:
     def __repr__(self): return f'Beforeware({self.f}, skip={self.skip})'
 
 # %% ../nbs/api/00_core.ipynb #78c3c357
-async def _handle(f, *args, **kwargs):
-    return (await f(*args, **kwargs)) if is_async_callable(f) else await run_in_threadpool(f, *args, **kwargs)
+async def _handle(_f, *args, **kwargs):
+    return (await _f(*args, **kwargs)) if is_async_callable(_f) else await run_in_threadpool(_f, *args, **kwargs)
 
 # %% ../nbs/api/00_core.ipynb #ad0f0e87
 async def _wrap_ws(ws, data, params):
