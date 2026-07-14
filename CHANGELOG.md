@@ -2,6 +2,27 @@
 
 <!-- do not remove -->
 
+## 0.14.6
+
+### New Features
+
+- Add StaticImmutable class and vurl helper for versioned static file URLs ([#904](https://github.com/AnswerDotAI/fasthtml/issues/904))
+- Use deterministic uuid5 for devtools workspace and return root as string ([#901](https://github.com/AnswerDotAI/fasthtml/issues/901))
+
+
+## 0.14.5
+
+### New Features
+
+- Add `cancel_on_disconnect` decorator and `until_disconnect` helper ([#900](https://github.com/AnswerDotAI/fasthtml/issues/900))
+- use `mk_getattr` from fastcore to unify `__getattr__` implementation ([#899](https://github.com/AnswerDotAI/fasthtml/pull/899)), thanks to [@jackhogan](https://github.com/jackhogan)
+- convert CamelCase tags to kebab-case ([#896](https://github.com/AnswerDotAI/fasthtml/pull/896)), thanks to [@jackhogan](https://github.com/jackhogan)
+
+### Bugs Squashed
+
+- Treat an empty application/json body as {} in `parse_form` ([#880](https://github.com/AnswerDotAI/fasthtml/pull/880)), thanks to [@linguistic76](https://github.com/linguistic76)
+
+
 ## 0.14.4
 
 ### New Features
