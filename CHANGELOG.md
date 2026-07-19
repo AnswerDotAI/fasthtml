@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.14.8
+
+- New name
+
+
 ## 0.14.7
 
 ### New Features
