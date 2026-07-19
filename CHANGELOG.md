@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.7
+
+### New Features
+
+- Replace local port-waiting helpers with imports from fastcore.net ([#906](https://github.com/AnswerDotAI/fasthtml/issues/906))
+
+
 ## 0.14.6
 
 ### New Features
