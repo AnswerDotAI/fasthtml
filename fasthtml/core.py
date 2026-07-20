@@ -505,15 +505,15 @@ htmx_exts = {
     "remove-me": "https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js",
     "debug": "https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js",
     "ws": "https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.3/ws.js",
-    "ws4": "https://unpkg.com/htmx.org@4.0.0-beta4/dist/ext/hx-ws.js",
+    "ws4": "https://unpkg.com/htmx.org@4.0.0-beta5/dist/ext/hx-ws.js",
     "chunked-transfer": "https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js",
-    "sse4": "https://unpkg.com/htmx.org@4.0.0-beta4/dist/ext/hx-sse.js",
-    "live": "https://unpkg.com/htmx.org@4.0.0-beta4/dist/ext/hx-live.js"
+    "sse4": "https://unpkg.com/htmx.org@4.0.0-beta5/dist/ext/hx-sse.js",
+    "live": "https://unpkg.com/htmx.org@4.0.0-beta5/dist/ext/hx-live.js"
 }
 
 # %% ../nbs/api/00_core.ipynb #60cb52ea
 htmxsrc   = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.js")
-htmx4src  = Script(src="https://unpkg.com/htmx.org@4.0.0-beta4/dist/htmx.js")
+htmx4src  = Script(src="https://unpkg.com/htmx.org@4.0.0-beta5/dist/htmx.js")
 fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
