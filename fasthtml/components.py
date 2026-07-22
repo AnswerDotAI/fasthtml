@@ -45,7 +45,7 @@ def __add__(self:FT, b): return f'{self}{b}'
 # %% ../nbs/api/01_components.ipynb #0ff9acc3
 named = set('a button form frame iframe img input map meta object param select textarea'.split())
 html_attrs = 'id cls title style accesskey contenteditable dir draggable enterkeyhint hidden inert inputmode lang popover spellcheck tabindex translate'.split()
-hx_attrs = 'get post put delete patch trigger target swap swap_oob include select select_oob indicator push_url confirm disable replace_url vals disabled_elt ext headers history history_elt indicator inherit params preserve prompt replace_url request sync validate'
+hx_attrs = 'get post put delete patch trigger target swap swap_oob include select select_oob indicator push_url confirm disable replace_url vals disabled_elt ext headers history history_elt inherit params preserve prompt request sync validate'
 
 hx_evts = 'abort afterOnLoad afterProcessNode afterRequest afterSettle afterSwap beforeCleanupElement beforeOnLoad beforeProcessNode beforeRequest beforeSwap beforeSend beforeTransition configRequest confirm historyCacheError historyCacheMiss historyCacheMissError historyCacheMissLoad historyRestore beforeHistorySave load noSSESourceError onLoadError oobAfterSwap oobBeforeSwap oobErrorNoTarget prompt pushedIntoHistory replacedInHistory responseError sendAbort sendError sseError sseOpen swapError targetError timeout validation:validate validation:failed validation:halted xhr:abort xhr:loadend xhr:loadstart xhr:progress'
 js_evts = "blur change contextmenu focus input invalid reset select submit keydown keypress keyup click dblclick mousedown mouseenter mouseleave mousemove mouseout mouseover mouseup wheel"
