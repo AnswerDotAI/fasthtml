@@ -2,6 +2,56 @@
 
 <!-- do not remove -->
 
+## 0.14.9
+
+### New Features
+
+- Replace local port-waiting helpers with imports from fastcore.net ([#906](https://github.com/AnswerDotAI/fasthtml/issues/906))
+
+
+## 0.14.6
+
+### New Features
+
+- Add StaticImmutable class and vurl helper for versioned static file URLs ([#904](https://github.com/AnswerDotAI/fasthtml/issues/904))
+- Use deterministic uuid5 for devtools workspace and return root as string ([#901](https://github.com/AnswerDotAI/fasthtml/issues/901))
+
+
+## 0.14.5
+
+### New Features
+
+- Add `cancel_on_disconnect` decorator and `until_disconnect` helper ([#900](https://github.com/AnswerDotAI/fasthtml/issues/900))
+- use `mk_getattr` from fastcore to unify `__getattr__` implementation ([#899](https://github.com/AnswerDotAI/fasthtml/pull/899)), thanks to [@jackhogan](https://github.com/jackhogan)
+- convert CamelCase tags to kebab-case ([#896](https://github.com/AnswerDotAI/fasthtml/pull/896)), thanks to [@jackhogan](https://github.com/jackhogan)
+
+### Bugs Squashed
+
+- Treat an empty application/json body as {} in `parse_form` ([#880](https://github.com/AnswerDotAI/fasthtml/pull/880)), thanks to [@linguistic76](https://github.com/linguistic76)
+
+
+## 0.14.4
+
+### New Features
+
+- Add `upload_pb_attrs` helper for upload progress bars ([#892](https://github.com/AnswerDotAI/fasthtml/issues/892))
+
+### Bugs Squashed
+
+- Use GET method for static file routes instead of generic route ([#893](https://github.com/AnswerDotAI/fasthtml/issues/893))
+- Fix Route handlers convert falsy values (0, False) to empty strings #572 ([#890](https://github.com/AnswerDotAI/fasthtml/pull/890)), thanks to [@civvic](https://github.com/civvic)
+- Treat an empty application/json body as {} in `parse_form` ([#880](https://github.com/AnswerDotAI/fasthtml/pull/880)), thanks to [@linguistic76](https://github.com/linguistic76)
+
+
+## 0.14.3
+
+### New Features
+
+- Add configurable `max_part_size` for multipart form uploads (default 100MB) ([#889](https://github.com/AnswerDotAI/fasthtml/issues/889))
+- Update to httpx2 as required by starlette ([#885](https://github.com/AnswerDotAI/fasthtml/issues/885))
+- Improve `JupyUvi.stop` and async waiting ([#879](https://github.com/AnswerDotAI/fasthtml/pull/879)), thanks to [@kafkasl](https://github.com/kafkasl)
+
+
 ## 0.14.2
 
 - Bump Starlette min to 1.0.1 to avoid CVE
