@@ -45,4 +45,3 @@ lib_path = "fasthtml"
 [tool.chkstyle]
 skip_paths = ["_modidx.py"]
 ignore = ["closing-bracket", "inefficient-multiline-signature", "inefficient-multiline-expression"]
-

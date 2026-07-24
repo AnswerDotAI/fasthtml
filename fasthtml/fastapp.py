@@ -44,6 +44,7 @@ def fast_app(
         pico:Optional[bool]=None, # Include PicoCSS header?
         surreal:Optional[bool]=True, # Include surreal.js/scope headers?
         htmx:Optional[bool]=True, # Include HTMX header?
+        htmx4:Optional[bool]=False,
         exts:Optional[list|str]=None, # HTMX extension names to include
         canonical:bool=True, # Automatically include canonical link?
         secret_key:Optional[str]=None, # Signing key for sessions
@@ -70,7 +71,7 @@ def fast_app(
     app = _app_factory(hdrs=h, ftrs=ftrs, before=before, middleware=middleware, live=live, debug=debug, title=title, routes=routes, exception_handlers=exception_handlers,
                   on_startup=on_startup, on_shutdown=on_shutdown, lifespan=lifespan, default_hdrs=default_hdrs, secret_key=secret_key, canonical=canonical,
                   session_cookie=session_cookie, max_age=max_age, sess_path=sess_path, same_site=same_site, sess_https_only=sess_https_only,
-                  sess_domain=sess_domain, key_fname=key_fname, exts=exts, surreal=surreal, htmx=htmx, htmlkw=htmlkw,
+                  sess_domain=sess_domain, key_fname=key_fname, exts=exts, surreal=surreal, htmx=htmx, htmx4=htmx4, htmlkw=htmlkw,
                   reload_attempts=reload_attempts, reload_interval=reload_interval, body_wrap=body_wrap, nb_hdrs=nb_hdrs, **(bodykw or {}))
     app.static_route_exts(static_path=static_path)
     if not db_file: return app,app.route
@@ -86,4 +87,3 @@ def fast_app(
     dbtbls = [_get_tbl(db.t, k, v) for k,v in tbls.items()]
     if len(dbtbls)==1: dbtbls=dbtbls[0]
     return app,app.route,*dbtbls
-
