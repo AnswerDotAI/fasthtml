@@ -511,7 +511,8 @@ htmx_exts = {
     "ws4": "https://unpkg.com/htmx.org@4.0.0-beta6/dist/ext/hx-ws.js",
     "chunked-transfer": "https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js",
     "sse4": "https://unpkg.com/htmx.org@4.0.0-beta6/dist/ext/hx-sse.js",
-    "live": "https://unpkg.com/htmx.org@4.0.0-beta6/dist/ext/hx-live.js"
+    "live": "https://unpkg.com/htmx.org@4.0.0-beta6/dist/ext/hx-live.js",
+    "multipart": "https://cdn.jsdelivr.net/gh/bigskysoftware/htmx@four/src/ext/hx-multipart.min.js"
 }
 
 # %% ../nbs/api/00_core.ipynb #60cb52ea
