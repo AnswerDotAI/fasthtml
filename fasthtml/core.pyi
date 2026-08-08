@@ -149,7 +149,7 @@ class Beforeware:
     def __repr__(self):
         ...
 
-async def _handle(f, *args, **kwargs):
+async def _handle(_f, *args, **kwargs):
     ...
 
 async def _wrap_ws(ws, data, params):
