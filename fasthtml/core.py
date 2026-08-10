@@ -245,7 +245,7 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
     if res in (empty,None): res = conn.query_params.getlist(arg)
     if res==[]: res = None
     if res in (empty,None): res = data.get(arg, None)
-    if res in (empty,None) and getattr(conn.scope['app'], 'htmx4', False): res = data.get('values', {}).get(arg, None)
+    if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = vals.get(arg)  # htmx v4 nests form data under `values`
     if res in (empty,None):
         if p.default is empty:
             if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {arg}")
@@ -287,7 +287,7 @@ async def _handle(f, /, *args, **kwargs):
 
 # %% ../nbs/api/00_core.ipynb #ad0f0e87
 async def _wrap_ws(ws, data, params):
-    raw = data.pop('HEADERS', {}) or (data.pop('headers', {}) if getattr(ws.scope['app'], 'htmx4', False) else {})
+    raw = data.pop('HEADERS', {}) or (data.pop('headers') if isinstance(data.get('headers'), dict) else {})  # htmx v4 sends lowercase `headers`
     hdrs = Headers({k.lower():v for k,v in raw.items() if v is not None})
     return await _find_ps(ws, data, hdrs, params)
 
@@ -640,10 +640,9 @@ class FastHTML(Starlette):
                  body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, max_part_size=DEF_MAXPART, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
         self.title,self.canonical,self.session_cookie,self.key_fname = title,canonical,session_cookie,key_fname
-        self.htmx4 = htmx4
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         if htmx4 and exts:
-            exts = ['ws4' if e in ('ws', 'ws4') else 'sse4' if e in ('sse', 'sse4') else e for e in exts]
+            exts = ['ws4' if e in ('ws', 'ws4') else e for e in exts]
         exts = {k:htmx_exts[k] for k in exts}
         htmlkw = htmlkw or {}
         if default_hdrs: hdrs = def_hdrs(htmx, htmx4, surreal=surreal) + hdrs
@@ -842,11 +841,10 @@ def serve(
     "Run the app in an async server, with live reload set as the default."
     from uvicorn import run
     bk = inspect.currentframe().f_back
-    glb = bk.f_globals
-    code = bk.f_code
+    glb,back = bk.f_globals,bk.f_back
     if not appname:
         if glb.get('__name__')=='__main__': appname = Path(glb.get('__file__', '')).stem
-        elif code.co_name=='main' and bk.f_back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
+        elif back and back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
     if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
         link = f'http://{"localhost" if host=="0.0.0.0" else host}:{port}'

@@ -9,10 +9,10 @@ FastHTML now supports htmx v4 via `htmx4=True`. Here are the key changes at the 
 | Area | htmx v2 (default) | htmx v4 (`htmx4=True`) |
 |------|-------------------|------------------------|
 | **Init** | `fast_app()` or `FastHTML()` | Add `htmx4=True` |
-| **Extensions** | `exts='ws'`, `exts='sse'` | Same, auto-maps to v4 versions when htmx4=True |
+| **Extensions** | `exts='ws'` | Same, auto-maps to the v4 script when htmx4=True; SSE uses `exts='sse4'` |
 | **WS attributes** | `ws_connect`, `ws_send`, `hx_ext='ws'` | `hx_ws_connect`, `hx_ws_send` (no `hx_ext`) |
 | **SSE** | `sse_connect`, `sse_swap`, `hx_ext='sse'` | `hx_sse_connect` (no `hx_ext`, no `sse_swap`) |
-| **SSE message** | `sse_message(data)` | `sse_message(data, htmx4=True)` |
+| **SSE message** | `sse_message(data)` | Same (the default `message` event never emits an `event:` line) |
 | **Multi-target** | `hx_swap_oob` or named SSE events | `HxPartial(content, hx_target='#id')` |
 | **Request headers** | `hx_trigger` (value: `id`) | `hx_source` (value: `tag#id`) |
 | **Events in JS** | camelCase (`htmx:beforeRequest`) | colon-separated (`htmx:before:request`) |
@@ -87,14 +87,12 @@ In v4, the flat `event.detail` properties were reorganized into a unified `ctx` 
 
 ### Examples affected
 
-**PicoBusy** updated event names and detail path:
+**PicoBusy** needs no changes: it binds both event spellings and falls back across detail shapes:
 ```python
-def PicoBusy(htmx4=False, metaChar=None):
-    if metaChar is None: metaChar = '-' if htmx4 else ':'
-    evt = (f'before{metaChar}request', f'after{metaChar}request') if htmx4 else ('beforeRequest', 'afterRequest')
-    elt = 'event.detail.ctx.sourceElement' if htmx4 else 'event.detail.elt'
-    return (HtmxOn(evt[0], f"{elt}.setAttribute('aria-busy', 'true' )", htmx4=htmx4),
-            HtmxOn(evt[1], f"{elt}.setAttribute('aria-busy', 'false')", htmx4=htmx4))
+def PicoBusy():
+    elt = "(event.detail.ctx?.sourceElement || event.detail.elt)"
+    return (HtmxOn('beforeRequest', f"{elt}.setAttribute('aria-busy', 'true' )"),
+            HtmxOn('afterRequest',  f"{elt}.setAttribute('aria-busy', 'false')"))
 ```
 
 ---
@@ -227,20 +225,15 @@ Div(hx_sse_connect="/stream")
 
 ### `sse_message`
 
-In v4, the `event:` line must be omitted for default swaps; including it triggers a custom DOM event instead. Pass `htmx4=True`:
+In v4, the `event:` line must be omitted for default swaps; including it triggers a custom DOM event instead. `sse_message` omits it for the default `message` event (which the SSE spec delivers identically), so the same call works for v2 and v4:
 
 ```python
-# v2
-yield sse_message(data)              # sends "event: message\ndata: ...\n\n"
-
-# v4
-yield sse_message(data, htmx4=True)  # sends "data: ...\n\n" (no event line)
+yield sse_message(data)              # sends "data: ...\n\n" (no event line)
 ```
 
 For updating multiple targets (multiplexing), use `HxPartial` in a single message:
 
 ```python
 yield sse_message(
-    (HxPartial(content_a, hx_target="#a"), HxPartial(content_b, hx_target="#b")),
-    htmx4=True)
+    (HxPartial(content_a, hx_target="#a"), HxPartial(content_b, hx_target="#b")))
 ```

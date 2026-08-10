@@ -247,9 +247,9 @@ def html2ft(html, attr1st=False):
     return _parse(soup, 1)
 
 # %% ../nbs/api/01_components.ipynb #c6203402
-def sse_message(elm, event='message', htmx4=False):
+def sse_message(elm, event='message'):
     "Convert element `elm` into a format suitable for SSE streaming"
     data = '\n'.join(f'data: {o}' for o in to_xml(elm).splitlines())
-    # In htmx v4, if only want swap -> omit event. Including it triggers custom DOM event
-    if htmx4 and event == 'message': return f'{data}\n\n'
+    # SSE delivers a message with no event field as type 'message', so the line is redundant for the default (and htmx v4 requires its absence for plain swaps)
+    if event=='message': return f'{data}\n\n'
     return f'event: {event}\n{data}\n\n'

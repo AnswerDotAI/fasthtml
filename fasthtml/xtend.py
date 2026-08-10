@@ -166,11 +166,11 @@ def run_js(js, id=None, **kw):
     return Script(js.format(**kw), id=id, hx_swap_oob='true')
 
 # %% ../nbs/api/02_xtend.ipynb #365f57a8
-def HtmxOn(eventname:str, code:str, htmx4=False, metaChar=None):
-    if metaChar is None: metaChar = '-' if htmx4 else ':'
+def HtmxOn(eventname:str, code:str):
+    "Run `code` on htmx event `eventname`; both the v2 (`htmx:camelCase`) and v4 (`htmx-dash-case`) spellings are bound, and only the loaded version's fires"
     return Script('''domReadyExecute(function() {
-document.body.addEventListener("htmx%s%s", function(event) { %s })
-})''' % (metaChar, eventname, code))
+["htmx:%s","htmx-%s"].forEach(evt => document.body.addEventListener(evt, function(event) { %s }))
+})''' % (to_camel(eventname), to_kebab(eventname), code))
 
 # %% ../nbs/api/02_xtend.ipynb #39f20784
 def jsd(org, repo, root, path, prov='gh', typ='script', ver=None, esm=False, **kwargs)->FT:

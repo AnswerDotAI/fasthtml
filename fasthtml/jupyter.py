@@ -52,21 +52,18 @@ def render_ft(**kw):
         return to_xml(Div(self, scr_proc, **kw))
 
 # %% ../nbs/api/06_jupyter.ipynb #1daaa0e1
-def htmx_config_port(port=8000, htmx4=False):
-    evt = 'htmx-config-request' if htmx4 else 'htmx:configRequest'
-
-    display(HTML(f'''
+def htmx_config_port(port=8000):
+    display(HTML('''
 <script>
-document.body.addEventListener('{evt}', (event) => {{
-    const path = {'event.detail.ctx.request.action' if htmx4 else 'event.detail.path'};
+["htmx:configRequest","htmx-config-request"].forEach(evt => document.body.addEventListener(evt, (event) => {
+    const ctx = event.detail.ctx;
+    const path = ctx ? ctx.request.action : event.detail.path;
     if (path.includes('://')) return;
-
-    const full = `${{location.protocol}}//${{location.hostname}}:{port}${{path}}`;
-
-    {'event.detail.ctx.request.mode = "cors";' if htmx4 else 'htmx.config.selfRequestsOnly = false;'}
-    {'event.detail.ctx.request.action = full;' if htmx4 else 'event.detail.path = full;'}
-}});
-</script>'''))
+    const full = `${location.protocol}//${location.hostname}:%s${path}`;
+    if (ctx) { ctx.request.mode = "cors"; ctx.request.action = full; }
+    else { htmx.config.selfRequestsOnly = false; event.detail.path = full; }
+}));
+</script>''' % port))
 
 
 # %% ../nbs/api/06_jupyter.ipynb #79406618
@@ -79,7 +76,7 @@ class JupyUvi:
         self._live_ver = 0
         if live: self._setup_live(app)
         if start: self.start()
-        if not os.environ.get('IN_SOLVEIT'): htmx_config_port(port, htmx4=app.htmx4)
+        if not os.environ.get('IN_SOLVEIT'): htmx_config_port(port)
 
     def start(self):
         self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port,daemon=self.daemon, **self.kwargs)
