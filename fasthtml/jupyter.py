@@ -55,12 +55,16 @@ def render_ft(**kw):
 def htmx_config_port(port=8000):
     display(HTML('''
 <script>
-document.body.addEventListener('htmx:configRequest', (event) => {
-    if(event.detail.path.includes('://')) return;
-    htmx.config.selfRequestsOnly=false;
-    event.detail.path = `${location.protocol}//${location.hostname}:%s${event.detail.path}`;
-});
+["htmx:configRequest","htmx-config-request"].forEach(evt => document.body.addEventListener(evt, (event) => {
+    const ctx = event.detail.ctx;
+    const path = ctx ? ctx.request.action : event.detail.path;
+    if (path.includes('://')) return;
+    const full = `${location.protocol}//${location.hostname}:%s${path}`;
+    if (ctx) { ctx.request.mode = "cors"; ctx.request.action = full; }
+    else { htmx.config.selfRequestsOnly = false; event.detail.path = full; }
+}));
 </script>''' % port))
+
 
 # %% ../nbs/api/06_jupyter.ipynb #79406618
 class JupyUvi:
@@ -73,7 +77,7 @@ class JupyUvi:
         if live: self._setup_live(app)
         if start: self.start()
         if not os.environ.get('IN_SOLVEIT'): htmx_config_port(port)
-            
+
     def start(self):
         self.server = nb_serve(self.app, log_level=self.log_level, host=self.host, port=self.port,daemon=self.daemon, **self.kwargs)
 

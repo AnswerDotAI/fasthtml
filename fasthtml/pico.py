@@ -85,7 +85,8 @@ def Container(*args, **kwargs)->FT:
     "A PicoCSS Container, implemented as a Main with class 'container'"
     return Main(*args, cls="container", **kwargs)
 
-# %% ../nbs/api/04_pico.ipynb #138dc298
+# %% ../nbs/api/04_pico.ipynb #b8c98614
 def PicoBusy():
-    return (HtmxOn('beforeRequest', "event.detail.elt.setAttribute('aria-busy', 'true' )"),
-            HtmxOn('afterRequest',  "event.detail.elt.setAttribute('aria-busy', 'false')"))
+    elt = "(event.detail.ctx?.sourceElement || event.detail.elt)"
+    return (HtmxOn('beforeRequest', f"{elt}.setAttribute('aria-busy', 'true' )"),
+            HtmxOn('afterRequest',  f"{elt}.setAttribute('aria-busy', 'false')"))
