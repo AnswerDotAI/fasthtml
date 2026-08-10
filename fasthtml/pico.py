@@ -30,7 +30,7 @@ picocondlink = (Link(rel="stylesheet", href=picocondcss),
 
 # %% ../nbs/api/04_pico.ipynb #36d26fb7
 def set_pico_cls():
-    js = """var sel = '.cell-output, .output_area, .card-out .msg-content';
+    js = """var sel = '.cell-output, .output_area';
 document.querySelectorAll(sel).forEach(e => e.classList.add('pico'));
 
 new MutationObserver(ms => {
