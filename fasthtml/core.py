@@ -245,7 +245,7 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
     if res in (empty,None): res = conn.query_params.getlist(arg)
     if res==[]: res = None
     if res in (empty,None): res = data.get(arg, None)
-    if res in (empty, None) and conn.scope['app'].htmx4: res = data.get('values', {}).get(arg, None) 
+    if res in (empty,None) and getattr(conn.scope['app'], 'htmx4', False): res = data.get('values', {}).get(arg, None)
     if res in (empty,None):
         if p.default is empty:
             if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {arg}")
@@ -287,7 +287,8 @@ async def _handle(f, /, *args, **kwargs):
 
 # %% ../nbs/api/00_core.ipynb #ad0f0e87
 async def _wrap_ws(ws, data, params):
-    hdrs = Headers({k.lower():v for k,v in (data.pop('HEADERS', {}) or data.pop('headers', {})).items() if v is not None})
+    raw = data.pop('HEADERS', {}) or (data.pop('headers', {}) if getattr(ws.scope['app'], 'htmx4', False) else {})
+    hdrs = Headers({k.lower():v for k,v in raw.items() if v is not None})
     return await _find_ps(ws, data, hdrs, params)
 
 # %% ../nbs/api/00_core.ipynb #dcc15129
