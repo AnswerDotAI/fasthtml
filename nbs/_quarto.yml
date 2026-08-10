@@ -50,12 +50,12 @@ website:
       - text: "Get Started"
         href: index.ipynb
       - section: Tutorials
-        contents: tutorials/*
+        contents: tutorials
       - section: Explanations
-        contents: explains/*
+        contents: explains
       - section: Reference
-        contents: ref/*
+        contents: ref
       - section: Source
-        contents: api/*
+        contents: api
 
 metadata-files: [nbdev.yml]
