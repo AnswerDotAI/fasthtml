@@ -2,6 +2,15 @@
 
 <!-- do not remove -->
 
+
+## 0.14.10
+
+### Bugs Squashed
+
+- Fix duplicate HTMX component parameters ([#909](https://github.com/AnswerDotAI/fasthtml/pull/909)), thanks to [@erikgaas](https://github.com/erikgaas)
+- Duplicated attributes in components.pyi ([#529](https://github.com/AnswerDotAI/fasthtml/issues/529))
+
+
 ## 0.14.9
 
 ### New Features
@@ -1530,4 +1539,3 @@ Note: problem #1 might have been because I was using an earlier version of fasth
 ## 0.0.3
 
 - Init release
-

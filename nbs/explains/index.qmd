@@ -1,0 +1,11 @@
+---
+order: 1
+title: Explanations
+listing:
+  fields: [title, description]
+  type: table
+  sort-ui: false
+  filter-ui: false
+---
+
+These docs go into depth on how FastHTML's features work.

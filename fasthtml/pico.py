@@ -21,10 +21,10 @@ try: from IPython import display
 except ImportError: display=None
 
 # %% ../nbs/api/04_pico.ipynb #100414ae
-picocss = "https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css"
+picocss = "https://cdn.jsdelivr.net/npm/@anyblades/pico@latest/css/pico.min.css"
 picolink = (Link(rel="stylesheet", href=picocss),
             Style(":root { --pico-font-size: 100%; }"))
-picocondcss = "https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.conditional.min.css"
+picocondcss = "https://cdn.jsdelivr.net/npm/@anyblades/pico@latest/css/pico.conditional.min.css"
 picocondlink = (Link(rel="stylesheet", href=picocondcss),
                 Style(":root { --pico-font-size: 100%; }"))
 
@@ -37,8 +37,7 @@ new MutationObserver(ms => {
   ms.forEach(m => {
     m.addedNodes.forEach(n => {
       if (n.nodeType === 1) {
-        var nc = n.classList;
-        if (nc && (nc.contains('cell-output') || nc.contains('output_area'))) nc.add('pico');
+        if (n.matches(sel)) n.classList.add('pico');
         n.querySelectorAll(sel).forEach(e => e.classList.add('pico'));
       }
     });
