@@ -975,18 +975,27 @@ reg_re_param("path", ".*?")
 _static_exts = "ico gif jpg jpeg webm css js woff png svg mp4 webp ttf otf eot woff2 txt html map pdf zip tgz gz csv mp3 wav ogg flac aac doc docx xls xlsx ppt pptx epub mobi bmp tiff avi mov wmv mkv xml yaml yml rar 7z tar bz2 htm xhtml apk dmg exe msi swf iso".split()
 reg_re_param("static", '|'.join(_static_exts))
 
+def _static_fpath(static_path, relpath):
+    "Real path of `relpath` under `static_path`; 404 if it escapes `static_path` (e.g. `..` traversal)."
+    base = os.path.realpath(static_path)
+    fpath = os.path.realpath(os.path.join(base, relpath))
+    if fpath != base and not fpath.startswith(base + os.sep): raise HTTPException(404)
+    return fpath
+
 @patch
 def static_route_exts(self:FastHTML, prefix='/', static_path='.', exts='static'):
     "Add a static route at URL path `prefix` with files from `static_path` and `exts` defined by `reg_re_param()`"
     @self.get(f"{prefix}{{fname:path}}.{{ext:{exts}}}")
-    async def get(fname:str, ext:str): return FileResponse(f'{static_path}/{fname}.{ext}')
+    async def get(fname:str, ext:str): return FileResponse(_static_fpath(static_path, f'{fname}.{ext}'))
+
 
 # %% ../nbs/api/00_core.ipynb #b31de65a
 @patch
 def static_route(self:FastHTML, ext='', prefix='/', static_path='.'):
     "Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')"
     @self.get(f"{prefix}{{fname:path}}{ext}")
-    async def get(fname:str): return FileResponse(f'{static_path}/{fname}{ext}')
+    async def get(fname:str): return FileResponse(_static_fpath(static_path, f'{fname}{ext}'))
+
 
 # %% ../nbs/api/00_core.ipynb #f63b7a03
 class StaticNoCache(StaticFiles):
