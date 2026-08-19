@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.12
+
+### Bugs Squashed
+
+- Fix: `add_sig_param`: pass annotation to Parameter ([#917](https://github.com/AnswerDotAI/fasthtml/pull/917)), thanks to [@RensDimmendaal](https://github.com/RensDimmendaal)
+- [BUG] "`_handle` got multiple values for argument f" when a POST route takes `f` as an argument ([#834](https://github.com/AnswerDotAI/fasthtml/issues/834))
+
 
 ## 0.14.10
 
