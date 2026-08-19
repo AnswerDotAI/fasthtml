@@ -1025,7 +1025,7 @@ def add_sig_param(f, name, typ=NoneType, kind=Parameter.KEYWORD_ONLY, default=Pa
     sig = signature(f)
     if name in sig.parameters: return f
     kw = {} if default is Parameter.empty else {'default': default}
-    new_params = list(sig.parameters.values()) + [Parameter(name, kind, **kw)]
+    new_params = list(sig.parameters.values()) + [Parameter(name, kind, annotation=typ, **kw)]
     f.__signature__ = sig.replace(parameters=new_params)
     f.__annotations__[name] = typ
     return f
