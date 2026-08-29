@@ -8,7 +8,7 @@ This project uses [nbdev](https://nbdev.fast.ai/getting_started.html) for develo
 You may want to set up a `prep` alias in `~/.zshrc` or other shell startup file:
 
 ```sh
-alias prep='nbdev_export && nbdev_clean && nbdev_trust'
+alias prep='nbdev-export && nbdev-clean && nbdev-trust'
 ```
 
 Run `prep` before each commit to ensure your python files are up to date, and you notebooks cleaned of metadata and notarized.
