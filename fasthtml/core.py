@@ -475,6 +475,7 @@ def is_full_page(req, resp):
 def _part_resp(req, resp):
     "Partition response into HTTP headers, background tasks, and content"
     resp = flat_tuple(resp)
+    resp = flat_tuple(o.__response__(req) if hasattr(o, '__response__') else o for o in resp)
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     tasks,resp = partition(resp, risinstance(BackgroundTask))
@@ -517,7 +518,11 @@ def _resp(req, resp, cls=empty, status_code=200):
     if not (isinstance(cls, type) and issubclass(cls, Response)): cls=empty
     if isinstance(resp, FileResponse) and not os.path.exists(resp.path): raise HTTPException(404, resp.path)
     resp,kw = _part_resp(req, resp)
-    if isinstance(resp, Response): return resp
+    if isinstance(resp, Response):
+        if tasks := kw.get('background'):
+            if resp.background: tasks.tasks.insert(0, resp.background)
+            resp.background = tasks
+        return resp
     if cls is not empty: return cls(resp, status_code=status_code, **kw)
     if _is_ft_resp(resp):
         cts = _xt_cts(req, resp)
