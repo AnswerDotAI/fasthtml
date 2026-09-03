@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.14.13
+
+### New Features
+
+- Add `procs` to `serve` for running the app as several processes ([#927](https://github.com/AnswerDotAI/fasthtml/pull/927)), thanks to [@jph00](https://github.com/jph00)
+
+### Bugs Squashed
+
+- Update CLI flags for fastcore.script hyphenation ([#922](https://github.com/AnswerDotAI/fasthtml/pull/922)), thanks to [@jph00](https://github.com/jph00)
+
+
 ## 0.14.12
 
 ### Bugs Squashed

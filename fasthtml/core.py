@@ -169,7 +169,7 @@ class HttpHeader:
 def _to_htmx_header(s): return 'HX-' + s.replace('_', '-').title()
 
 htmx_resps = dict(location=None, push_url=None, redirect=None, refresh=None, replace_url=None,
-                 reswap=None, retarget=None, reselect=None, trigger=None, trigger_after_settle=None, trigger_after_swap=None)
+    reswap=None, retarget=None, reselect=None, trigger=None, trigger_after_settle=None, trigger_after_swap=None)
 
 # %% ../nbs/api/00_core.ipynb #f6a2e62e
 @use_kwargs_dict(**htmx_resps)
@@ -544,6 +544,7 @@ async def _wrap_call(f, req, params):
     return await _handle(f, **wreq)
 
 # %% ../nbs/api/00_core.ipynb #b0d1cbbf
+# chkstyle: skip
 htmx_exts = {
     "morph": "https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js",
     "head-support": "https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.4/head-support.js",
@@ -618,13 +619,11 @@ def def_hdrs(htmx=True, htmx4=False, surreal=True):
         meta_cfg = Meta(name="htmx-config", content=json.dumps({"metaCharacter": "-"}))
         hdrs = [meta_cfg, htmx4src,fhjsscr] + hdrs 
         # TODO: Check if fhjsscr works with htmx4
-    elif htmx:
-        hdrs = [htmxsrc,fhjsscr] + hdrs
+    elif htmx: hdrs = [htmxsrc,fhjsscr] + hdrs
     return [charset, viewport] + hdrs
 
 # %% ../nbs/api/00_core.ipynb #2c5285ae
-cors_allow = Middleware(CORSMiddleware, allow_credentials=True,
-                        allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+cors_allow = Middleware(CORSMiddleware, allow_credentials=True, allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])
 
 iframe_scr = Script(NotStr("""
     function sendmsg() {
@@ -674,23 +673,21 @@ class Lifespan:
         else: yield
         for f in self.shutdown: await _handle(f)
 
-    def on_event(self, event_type):
-        return lambda f: (getattr(self, event_type)).append(f)
+    def on_event(self, event_type): return lambda f: (getattr(self, event_type)).append(f)
 
 # %% ../nbs/api/00_core.ipynb #3327a1e9
 class FastHTML(Starlette):
     "An HTML-first Starlette app: handler params filled from the request, FT returns rendered as pages or HTMX fragments"
     def __init__(self, debug=False, routes=None, middleware=None, title: str = "FastHTML page", exception_handlers=None,
-                 on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None,
-                 before=None, after=None, surreal=True, htmx=True, htmx4=False, default_hdrs=True, sess_cls=SessionMiddleware,
-                 secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
-                 same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
-                 body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, max_part_size=DEF_MAXPART, **bodykw):
+        on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None,
+        before=None, after=None, surreal=True, htmx=True, htmx4=False, default_hdrs=True, sess_cls=SessionMiddleware,
+        secret_key=None, session_cookie='session_', max_age=365*24*3600, sess_path='/',
+        same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
+        body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, max_part_size=DEF_MAXPART, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
         self.title,self.canonical,self.session_cookie,self.key_fname = title,canonical,session_cookie,key_fname
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
-        if htmx4 and exts:
-            exts = ['ws4' if e in ('ws', 'ws4') else e for e in exts]
+        if htmx4 and exts: exts = ['ws4' if e in ('ws', 'ws4') else e for e in exts]
         exts = {k:htmx_exts[k] for k in exts}
         htmlkw = htmlkw or {}
         if default_hdrs: hdrs = def_hdrs(htmx, htmx4, surreal=surreal) + hdrs
@@ -705,9 +702,8 @@ class FastHTML(Starlette):
         self.body_wrap,self.before,self.after,self.htmlkw,self.bodykw,self.max_part_size = body_wrap,before,after,htmlkw,bodykw,max_part_size
         self.secret_key = get_key(secret_key, key_fname)
         if sess_cls:
-            sess = Middleware(sess_cls, secret_key=self.secret_key,session_cookie=session_cookie,
-                                max_age=max_age, path=sess_path, same_site=same_site,
-                                https_only=sess_https_only, domain=sess_domain)
+            sess = Middleware(sess_cls, secret_key=self.secret_key, session_cookie=session_cookie, max_age=max_age, path=sess_path,
+                same_site=same_site, https_only=sess_https_only, domain=sess_domain)
             middleware.append(sess)
         exception_handlers = ifnone(exception_handlers, {})
         if 404 not in exception_handlers:
@@ -742,8 +738,8 @@ def add_route(self:FastHTML, route):
     "Add or replace a route in the FastHTML app"
     route.methods = [m.upper() for m in listify(route.methods)]
     self.router.routes = [r for r in self.router.routes if not
-                   (r.path==route.path and r.name == route.name and
-                    ((route.methods is None) or (set(r.methods) == set(route.methods))))]
+        (r.path==route.path and r.name == route.name and
+            ((route.methods is None) or (set(r.methods) == set(route.methods))))]
     self.router.routes.append(route)
     self.router.routes.sort(key=lambda r: not getattr(r, 'host', None))
 
@@ -767,8 +763,7 @@ def _endp(self:FastHTML, f, body_wrap, before:Optional[Callable|tuple]=None):
             if not resp:
                 if isinstance(b, Beforeware): bf,skip = b.f,b.skip
                 else: bf,skip = b,[]
-                if not any(re.fullmatch(r, req.url.path) for r in skip):
-                    resp = await _wrap_call(bf, req, _params(bf))
+                if not any(re.fullmatch(r, req.url.path) for r in skip): resp = await _wrap_call(bf, req, _params(bf))
         for b in listify(before):
             if not resp: resp = await _wrap_call(b, req, _params(b))
         req.body_wrap = body_wrap
@@ -879,13 +874,13 @@ def set_lifespan(self:FastHTML, value):
 
 # %% ../nbs/api/00_core.ipynb #3a348474
 def serve(
-        appname=None, # Name of the module
-        app='app', # App instance to be served
-        host='0.0.0.0', # If host is 0.0.0.0 will convert to localhost
-        port=None, # If port is None it will default to 5001 or the PORT environment variable
-        reload=True, # Default is to reload the app upon code changes
-        procs=None, # Processes to run on consecutive ports from `port`; default 1 or the PROCS environment variable
-        **kwargs
+    appname=None, # Name of the module
+    app='app', # App instance to be served
+    host='0.0.0.0', # If host is 0.0.0.0 will convert to localhost
+    port=None, # If port is None it will default to 5001 or the PORT environment variable
+    reload=True, # Default is to reload the app upon code changes
+    procs=None, # Processes to run on consecutive ports from `port`; default 1 or the PROCS environment variable
+    **kwargs
     ):
     "Run the app in an async server, with live reload set as the default."
     from uvicorn import run
@@ -1012,8 +1007,7 @@ def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None
     cookie = cookies.SimpleCookie()
     cookie[key] = value
     if max_age is not None: cookie[key]["max-age"] = max_age
-    if expires is not None:
-        cookie[key]["expires"] = format_datetime(expires, usegmt=True) if isinstance(expires, datetime) else expires
+    if expires is not None: cookie[key]["expires"] = format_datetime(expires, usegmt=True) if isinstance(expires, datetime) else expires
     if path is not None: cookie[key]["path"] = path
     if domain is not None: cookie[key]["domain"] = domain
     if secure: cookie[key]["secure"] = True
@@ -1170,8 +1164,7 @@ def devtools_json(self:FastHTML, path=None, uuid=None):
     if not path: path = Path().absolute()
     if not uuid: uuid = str(uuid5(NAMESPACE_URL, str(path)))
     @self.route(devtools_loc)
-    def devtools():
-        return dict(workspace=dict(root=str(path), uuid=uuid))
+    def devtools(): return dict(workspace=dict(root=str(path), uuid=uuid))
 
 # %% ../nbs/api/00_core.ipynb #e27908c0
 @patch
@@ -1203,8 +1196,7 @@ def get_testclient(self:FastHTML, **kw):
         "A Starlette TestClient with a `session` property"
         @property
         def session(self):
-            cookie = next((c.value for c in reversed(list(self.cookies.jar))
-                if c.name == self.app.session_cookie), None)
+            cookie = next((c.value for c in reversed(list(self.cookies.jar)) if c.name == self.app.session_cookie), None)
             return self.app.decode_session(cookie)
 
     return FastHTMLTestClient(self, cookies=self.get_client(**kw).cookies)
