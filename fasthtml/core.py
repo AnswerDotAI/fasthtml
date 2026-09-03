@@ -55,7 +55,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_ex
            'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
-import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous,hashlib
+import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous,hashlib,signal,subprocess
 from uuid import uuid5, NAMESPACE_URL
 
 from fastcore.utils import *
@@ -884,6 +884,7 @@ def serve(
         host='0.0.0.0', # If host is 0.0.0.0 will convert to localhost
         port=None, # If port is None it will default to 5001 or the PORT environment variable
         reload=True, # Default is to reload the app upon code changes
+        procs=None, # Processes to run on consecutive ports from `port`; default 1 or the PROCS environment variable
         **kwargs
     ):
     "Run the app in an async server, with live reload set as the default."
@@ -895,9 +896,19 @@ def serve(
         elif back and back.f_globals.get('__name__')=='__main__': appname = inspect.getmodule(bk).__name__
     if appname:
         if not port: port=int(os.getenv("PORT", default=5001))
+        if not procs: procs=int(os.getenv("PROCS", default=1))
+        if procs>1 and 'FH_PROCNUM' not in os.environ: return _spawn(procs)
+        port += int(os.getenv('FH_PROCNUM', 0))
         link = f'http://{"localhost" if host=="0.0.0.0" else host}:{port}'
         print('Link: '+ S.light_red.bold(link))
         run(f'{appname}:{app}', host=host, port=port, reload=reload, **kwargs)
+
+# %% ../nbs/api/00_core.ipynb #91b08e9a
+def _spawn(n):
+    "Run this script `n` times over, numbering each copy in `FH_PROCNUM`, and wait for them all"
+    ps = [subprocess.Popen([sys.executable, *sys.argv], env={**os.environ, 'FH_PROCNUM':str(i)}) for i in range(n)]
+    signal.signal(signal.SIGTERM, lambda *a: [p.terminate() for p in ps])
+    for p in ps: p.wait()
 
 # %% ../nbs/api/00_core.ipynb #c5220a0e
 async def _wait_disconnect(req):
