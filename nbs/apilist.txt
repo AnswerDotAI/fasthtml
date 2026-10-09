@@ -366,6 +366,26 @@
     - `def __init__(self, domain, client_id, client_secret, code, scope, redirect_uri, **kwargs)`
     - `def login_link(self, req)`
 
+- `class EntraAppClient`
+    A `WebApplicationClient` for Microsoft Entra ID (formerly Azure AD) oauth2
+
+    - `def __init__(self, client_id, client_secret, tenant_id, code, scope, **kwargs)`
+    - `def parse_request_body_response(self, body, scope, **kwargs)`
+        Entra reports granted scopes differently to those requested, so don't check for scope changes
+
+    - `def id_claims(self)`
+        Claims from the `id_token`, inc `oid` (user id), `tid` (tenant id) and `preferred_username`
+
+    - `def get_info(self, token)`
+        Graph user info, merged with the `id_token` claims
+
+    - `def get_info_async(self, token)`
+        Graph user info, merged with the `id_token` claims
+
+    - `def logout_link(self, post_logout_redirect_uri)`
+        Link to log out of Entra itself, not just this app
+
+
 - `class AppleAppClient`
     A `WebApplicationClient` for Apple Sign In
 
