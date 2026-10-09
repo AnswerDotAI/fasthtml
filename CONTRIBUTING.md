@@ -3,7 +3,7 @@
 Make sure you have read the [doc on code style](
 https://docs.fast.ai/dev/style.html) first. (Note that we don't follow PEP8, but instead follow a coding style designed specifically for numerical and interactive programming.)
 
-This project uses [nbdev](https://nbdev.fast.ai/getting_started.html) for development. Before beginning, make sure that nbdev and a jupyter-compatible client such as jupyterlab or nbclassic are installed. To make changes to the codebase, update the notebooks in the `nbs` folder, not the .py files directly. Then, run `nbdev_export`. For more details, have a look at the [nbdev tutorial](https://nbdev.fast.ai/tutorials/tutorial.html). Depending on the code changes, you might also need to run `tools/update.sh` to update python interface modules and [LLM reference material](https://github.com/AnswerDotAI/llms-txt).
+This project uses [nbdev](https://nbdev.fast.ai/getting_started.html) for development. Before beginning, make sure that nbdev and a jupyter-compatible client such as jupyterlab or nbclassic are installed. To make changes to the codebase, update the notebooks in the `nbs` folder, not the .py files directly. Then, run `nbdev-export`. For more details, have a look at the [nbdev tutorial](https://nbdev.fast.ai/tutorials/tutorial.html). Depending on the code changes, you might also need to run `tools/update.sh` to update python interface modules and [LLM reference material](https://github.com/AnswerDotAI/llms-txt).
 
 You may want to set up a `prep` alias in `~/.zshrc` or other shell startup file:
 
@@ -11,7 +11,7 @@ You may want to set up a `prep` alias in `~/.zshrc` or other shell startup file:
 alias prep='nbdev-export && nbdev-clean && nbdev-trust'
 ```
 
-Run `prep` before each commit to ensure your python files are up to date, and you notebooks cleaned of metadata and notarized.
+Run `prep` before each commit to ensure your python files are up to date, and your notebooks cleaned of metadata and notarized.
 
 ## Updating README.md
 
@@ -26,13 +26,13 @@ pip install -e '.[dev]'
 And install quarto too:
 
 ```
-nbdev_install_quarto
+nbdev-install-quarto
 ```
 
 Then, after you make subsequent changes to `nbs/index.ipynb`, run the following from the repo's root directory to (re)build `README.md`:
 
 ```
-nbdev_readme
+nbdev-readme
 ```
 
 ## Did you find a bug?
