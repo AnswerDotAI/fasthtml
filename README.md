@@ -92,7 +92,7 @@ The capabilities of FastHTML are vast and growing, and not all the features and 
 
 Then explore the small but growing third-party ecosystem of FastHTML tutorials, notebooks, libraries, and components:
 
-- [FastHTML Gallery](https://gallery.fastht.ml): Learn from minimal examples of components (ie chat bubbles, click-to-edit, infinite scroll, etc)
+- [FastHTML Gallery](https://gallery.fastht.ml): Learn from minimal examples of components (e.g. chat bubbles, click-to-edit, infinite scroll, etc.)
 - [How to Build a Simple Login System in FastHTML](https://blog.mariusvach.com/posts/login-fasthtml) by Marius Vach
 - Your tutorial here!
 
