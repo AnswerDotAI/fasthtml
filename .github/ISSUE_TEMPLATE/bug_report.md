@@ -35,7 +35,7 @@ Please provide the following version information:
 
 **Confirmation**
 Please confirm the following:
-- [ ] I have read the FAQ (https://docs.fastht.ml/explains/faq.html)
+- [ ] I have read the FAQ (https://www.fastht.ml/docs/explains/faq.html)
 - [ ] I have provided a minimal reproducible example
 - [ ] I have included the versions of fastlite, fastcore, and fasthtml
 - [ ] I understand that this is a volunteer open source project with no commercial support.
