@@ -229,7 +229,7 @@
 - `@patch def setup_ws(app, f)`
 - `@patch def devtools_json(self, path, uuid)`
 - `@patch def get_client(self, asink, **kw)`
-    Get an httpx client with session cookes set from `**kw`
+    Get an httpx client with session cookies set from `**kw`
 
 - `@patch def decode_session(self, cookie)`
     Decode a signed session cookie

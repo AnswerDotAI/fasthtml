@@ -5123,7 +5123,7 @@ tutorial we’ll be using Railway. To get started, make sure you create an
 CLI](https://docs.railway.app/guides/cli). Once installed, make sure to
 run `railway login` to log in to your account.
 
-To make deploying your website as easy as possible, FastHTMl comes with
+To make deploying your website as easy as possible, FastHTML comes with
 a built in CLI tool that will handle most of the deployment process for
 you. To deploy your website, run the following command in your terminal
 in the root directory of your project:
@@ -9691,7 +9691,7 @@ tags, which are both placed in the head.
 
 [`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter) is
 useful when you want to split your application routes across multiple
-`.py` files that are part of a single FastHTMl application. It accepts
+`.py` files that are part of a single FastHTML application. It accepts
 an optional `prefix` argument that will be applied to all routes within
 that instance of
 [`APIRouter`](https://www.fastht.ml/docs/api/core.html#apirouter).

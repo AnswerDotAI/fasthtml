@@ -367,7 +367,7 @@ class FastHTML(Starlette):
         ...
 
     def get_client(self, asink=False, **kw):
-        """Get an httpx client with session cookes set from `**kw`"""
+        """Get an httpx client with session cookies set from `**kw`"""
         ...
 
     def decode_session(self, cookie):

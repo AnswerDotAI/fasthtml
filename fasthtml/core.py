@@ -1175,7 +1175,7 @@ def devtools_json(self:FastHTML, path=None, uuid=None):
 # %% ../nbs/api/00_core.ipynb #e27908c0
 @patch
 def get_client(self:FastHTML, asink=False, **kw):
-    "Get an httpx client with session cookes set from `**kw`"
+    "Get an httpx client with session cookies set from `**kw`"
     import httpx2
     signer = itsdangerous.TimestampSigner(self.secret_key)
     data = b64encode(dumps(kw).encode())
