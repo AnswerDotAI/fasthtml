@@ -115,7 +115,7 @@ If you’re just interested in functional HTML components, rather than a full HT
 - [hiccl](https://github.com/garlic0x1/hiccl): HTML generation library for Common Lisp inspired by Clojure’s Hiccup
 - [Falco.Markup](https://github.com/pimbrouwers/Falco): F# HTML DSL and web framework with type-safe HTML generation
 - [Lucid](https://github.com/chrisdone/lucid): Type-safe HTML generation for Haskell using monad transformers
-- [dream-html](https://github.com/aantron/dream): Part of the Dream web framework for OCaml, provides type-safe HTML templating
+- [dream-html](https://github.com/yawaramin/dream-html): Type-safe HTML markup rendering for the OCaml Dream web framework
 
 For other hypermedia application platforms, not based on HTMX, take a look at:
 
