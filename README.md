@@ -69,7 +69,7 @@ Because FastHTML is newer than most LLMs, AI systems like Cursor, ChatGPT, Claud
 
 - [/llms-ctx.txt](https://www.fastht.ml/docs/llms-ctx.txt)
 
-This example is in a format based on recommendations from Anthropic for use with [Claude Projects](https://support.anthropic.com/en/articles/9517075-what-are-projects). This works so well that we’ve actually found that Claude can provide even better information than our own documentation! For instance, read through [this annotated Claude chat](https://gist.github.com/jph00/9559b0a563f6a370029bec1d1cc97b74) for some great getting-started information, entirely generated from a project using the above text file as context.
+This example is in a format based on recommendations from Anthropic for use with [Claude Projects](https://support.claude.com/en/articles/9517075-what-are-projects). This works so well that we’ve actually found that Claude can provide even better information than our own documentation! For instance, read through [this annotated Claude chat](https://gist.github.com/jph00/9559b0a563f6a370029bec1d1cc97b74) for some great getting-started information, entirely generated from a project using the above text file as context.
 
 If you use Cursor, type `@doc` then choose “*Add new doc*”, and use the /llms-ctx.txt link above. The context file is auto-generated from our [`llms.txt`](https://llmstxt.org/) (our proposed standard for providing AI-friendly information)—you can generate alternative versions suitable for other models as needed.
 
@@ -113,13 +113,13 @@ If you’re just interested in functional HTML components, rather than a full HT
 - [elm-html](https://package.elm-lang.org/packages/elm/html/latest/): Elm’s built-in HTML library with a type-safe functional approach
 - [hiccup](https://github.com/weavejester/hiccup): Popular library for representing HTML in Clojure using vectors
 - [hiccl](https://github.com/garlic0x1/hiccl): HTML generation library for Common Lisp inspired by Clojure’s Hiccup
-- [Falco.Markup](https://github.com/pimbrouwers/Falco): F# HTML DSL and web framework with type-safe HTML generation
+- [Falco.Markup](https://github.com/falcoframework/Falco): F# HTML DSL and web framework with type-safe HTML generation
 - [Lucid](https://github.com/chrisdone/lucid): Type-safe HTML generation for Haskell using monad transformers
 - [dream-html](https://github.com/yawaramin/dream-html): Type-safe HTML markup rendering for the OCaml Dream web framework
 
 For other hypermedia application platforms, not based on HTMX, take a look at:
 
 - [Hotwire/Turbo](https://turbo.hotwired.dev/): Rails-oriented framework that similarly uses HTML-over-the-wire
-- [LiveView](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html): Phoenix framework’s solution for building interactive web apps with minimal JavaScript
+- [LiveView](https://phoenix-live-view.hexdocs.pm/Phoenix.LiveView.html): Phoenix framework’s solution for building interactive web apps with minimal JavaScript
 - [Unpoly](https://unpoly.com/): Another HTML-over-the-wire framework with progressive enhancement
 - [Livewire](https://laravel-livewire.com/): Laravel’s take on building dynamic interfaces with minimal JavaScript
