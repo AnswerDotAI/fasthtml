@@ -6,6 +6,7 @@
 # Run with: `python adv_app.py`
 from fasthtml import common as fh
 from fasthtml import pico
+from fastlite import NotFoundError, database
 from hmac import compare_digest
 from dataclasses import dataclass
 from fastcore.utils import patch
@@ -25,7 +26,7 @@ class Todo:
     priority: int
 
 
-db = fh.database('data/todos_p8.db')
+db = database('data/todos_p8.db')
 users = db.create(User, pk='name')
 todos = db.create(Todo)
 
@@ -72,7 +73,7 @@ def login_post(login: Login, sess):
     # Indexing into a MiniDataAPI table queries by primary key, which is `name` here.
     try:
         u = users[login.name]
-    except fh.NotFoundError:
+    except NotFoundError:
         u = users.insert(login)
     if not compare_digest(u.pwd.encode("utf-8"), login.pwd.encode("utf-8")): return login_redir
     # Because the session is signed, we can securely add information to it.
