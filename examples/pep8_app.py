@@ -5,6 +5,7 @@
 # This fasthtml app includes functionality from fastcore, starlette, fastlite, and fasthtml itself.
 # Run with: `python adv_app.py`
 from fasthtml import common as fh
+from fasthtml import pico
 from hmac import compare_digest
 from dataclasses import dataclass
 from fastcore.utils import patch
@@ -108,16 +109,16 @@ def __ft__(self: Todo):
 @app.get("/")
 def get(auth):
     title = f"{auth}'s Todo list"
-    top = fh.Grid(fh.H1(title), fh.Div(fh.A('logout', href='/logout'), style='text-align: right'))
+    top = pico.Grid(fh.H1(title), fh.Div(fh.A('logout', href='/logout'), style='text-align: right'))
     new_inp = fh.Input(id="new-title", name="title", placeholder="New Todo")
-    grp = fh.Group(new_inp, fh.Button("Add"))
+    grp = pico.Group(new_inp, fh.Button("Add"))
     add = fh.Form(grp, hx_post="/", target_id='todo-list', hx_swap="afterbegin")
     # In the MiniDataAPI spec, treating a table as a callable (i.e with `todos(...)` here) queries the table.
     frm = fh.Form(*todos(order_by='priority'), id='todo-list', cls='sortable', hx_post="/reorder", hx_trigger="end")
     # We create an empty 'current-todo' Div at the bottom of our page, as a target for the details and editing views.
-    card = fh.Card(fh.Ul(frm), header=add, footer=fh.Div(id='current-todo'))
+    card = pico.Card(fh.Ul(frm), header=add, footer=fh.Div(id='current-todo'))
     # PicoCSS uses `<Main class='container'>` page content; `Container` is a tiny function that generates that.
-    return fh.Title(title), fh.Container(top, card)
+    return fh.Title(title), pico.Container(top, card)
 
 
 # This is the handler for the reordering of todos.
@@ -146,7 +147,7 @@ def delete(id: int):
 def edit(id: int):
     # The `hx_put` attribute tells HTMX to send a PUT request when the form is submitted.
     res = fh.Form(hx_put="/", target_id=f'todo-{id}', id="edit")(
-        fh.Group(fh.Input(id="title"), fh.Button("Save")),
+        pico.Group(fh.Input(id="title"), fh.Button("Save")),
         fh.Hidden(id="id"),
         fh.CheckboxX(id="done", label='Done'),
         fh.Textarea(id="details", name="details", rows=10),
