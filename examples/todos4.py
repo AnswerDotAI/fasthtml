@@ -1,4 +1,5 @@
 from fasthtml.common import *
+from fasthtml.pico import *
 from fastlite import *
 
 db = database('data/todos.db')

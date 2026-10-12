@@ -1,4 +1,5 @@
 from fasthtml.common import *
+from fasthtml.pico import *
 
 app,rt,todos,Todo = fast_app('data/todos.db', id=int, task=str, done=bool, pk='id')
 

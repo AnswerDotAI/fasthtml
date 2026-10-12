@@ -1,4 +1,5 @@
 from fasthtml.common import *
+from fasthtml.pico import *
 
 id_curr = 'current-todo'
 id_list = 'todo-list'

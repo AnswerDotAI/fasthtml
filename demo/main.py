@@ -1,4 +1,5 @@
 from fasthtml.common import *
+from fasthtml.pico import *
 
 def render(item:'Todo'):
     id = f'todo-{item.id}'

@@ -1,5 +1,6 @@
 # Run with: python basic_app.py
 from fasthtml.common import *
+from fasthtml.pico import *
 
 def render(todo):
     show = AX(todo.task, f'/todos/{todo.id}', 'current-todo')
