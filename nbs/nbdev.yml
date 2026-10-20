@@ -7,3 +7,8 @@ website:
   description: "The fastest way to create an HTML app"
   repo-branch: main
   repo-url: "https://github.com/AnswerDotAI/fasthtml"
+
+format-links:
+  - html
+  - format: commonmark
+    text: Markdown
