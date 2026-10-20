@@ -4,5 +4,5 @@ Modules:
 
 - `fasthtml.core`: The `FastHTML` subclass of `Starlette`."""
 
-__version__ = "0.14.14"
+__version__ = "0.14.15"
 from .core import *
