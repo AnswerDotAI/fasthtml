@@ -18,7 +18,7 @@ The decorated function doubles as a URL builder, so links never need hardcoded p
 
 Handlers return FT trees (from `fastcore.xml`), rendered as HTML automatically: a full page for regular requests, a bare fragment for HTMX requests. In a full page, top-level `Title`, `Meta`, `Link`, and `Style` items go in `<head>`; the rest goes in `<body>`. Strings are sent as HTML, dicts as JSON, and a Starlette `Response` is sent untouched. A return tuple may mix content with special items: any `HttpHeader` (e.g. from `cookie()` or `HtmxResponseHeaders()`) becomes a response header, any `BackgroundTask` runs after the response is sent, and the rest renders as content. `Redirect` picks the right redirect mechanism for HTMX vs regular requests, and `FtResponse` wraps FT content when you need the status code or headers.
 
-Handler parameters are filled from the request: each is looked up in path, cookie, header (snake_case names match Hyphen-Case headers), query, then form data, and cast by calling its annotation on the value. `bool`, `int`, and `date` get smart string parsing; `UploadFile` passes through. Repeated params take the last value unless annotated `list[T]`, which collects them all. A param with no annotation and no special name is ignored, with a warning. A dataclass, TypedDict, namedtuple, or any annotated class collects the whole form body; a `__from_request__` classmethod customizes construction. A missing required param is a 400, a failed cast a 404. These special names need no annotation:
+Handler parameters are filled from the request: each is looked up in path, cookie, header (snake_case names match Hyphen-Case headers), query, then form data, and cast by calling its annotation on the value. Hyphens in form/query names match underscores in handler parameters and typed body fields. Exact names take precedence within each source. Dictionary and request access retain the original keys. `bool`, `int`, and `date` get smart string parsing; `UploadFile` passes through. Repeated params take the last value unless annotated `list[T]`, which collects them all. A param with no annotation and no special name is ignored, with a warning. A dataclass, TypedDict, namedtuple, or any annotated class collects the whole form body; a `__from_request__` classmethod customizes construction. A missing required param is a 400, a failed cast a 404. These special names need no annotation:
 
     req, ws   the Request / WebSocket connection
     sess      session dict
@@ -190,7 +190,8 @@ def _is_body(anno): return issubclass(anno, (dict,ns)) or hasattr(anno,'__from_r
 
 # %% ../nbs/api/00_core.ipynb #ffdde66f
 def _formitem(form, k):
-    "Return single item `k` from `form` if len 1, otherwise return list"
+    "Return item `k`, accepting hyphens for underscores and unwrapping single-item form lists"
+    if k not in form: k = {o.replace('-', '_'):o for o in form}.get(k, k)
     if isinstance(form, dict): return form.get(k)
     o = form.getlist(k)
     return o[0] if len(o) == 1 else o if o else None
@@ -235,6 +236,7 @@ async def _from_body(conn, p, data):
         kwargs = await _find_ps(conn, data, conn.headers, ps)
         return await maybe_await(ctor(**kwargs))
     d = _annotations(anno)
+    if d: data = {k.replace('-', '_'):v for k,v in data.items()} | data
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
 
@@ -292,10 +294,9 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
     res = conn.path_params.get(arg, None)
     if res in (empty,None): res = conn.cookies.get(arg, None)
     if res in (empty,None): res = hdrs.get(snake2hyphens(arg), None)
-    if res in (empty,None): res = conn.query_params.getlist(arg)
-    if res==[]: res = None
-    if res in (empty,None): res = data.get(arg, None)
-    if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = vals.get(arg)  # htmx v4 nests form data under `values`
+    if res in (empty,None): res = _formitem(conn.query_params, arg)
+    if res in (empty,None): res = _formitem(data, arg)
+    if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = _formitem(vals, arg)  # htmx v4 nests form data under `values`
     if res in (empty,None):
         if p.default is empty:
             if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {arg}")
