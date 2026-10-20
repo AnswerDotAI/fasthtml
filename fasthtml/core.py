@@ -48,11 +48,11 @@ Docs: https://www.fastht.ml/docs/api/core.html.md"""
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_exts', 'htmxsrc', 'htmx4src', 'fhjsscr', 'surrsrc',
            'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date',
            'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'ApiReturn',
-           'JSONResponse', 'Alias', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri',
-           'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan',
-           'FastHTML', 'HostRoute', 'nested_name', 'serve', 'until_disconnect', 'cancel_on_disconnect', 'Client',
-           'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'StaticImmutable', 'vurl',
-           'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
+           'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple',
+           'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML',
+           'HostRoute', 'nested_name', 'serve', 'until_disconnect', 'cancel_on_disconnect', 'Client', 'RouteFuncs',
+           'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'StaticImmutable', 'vurl', 'add_sig_param', 'into',
+           'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
 import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous,hashlib,signal,subprocess
@@ -64,7 +64,7 @@ from fastcore.meta import use_kwargs_dict,delegates,splice_sig
 from fastcore.style import S
 
 from types import UnionType, SimpleNamespace as ns, GenericAlias
-from typing import get_args, get_origin, Union, Mapping, List, Any, Callable, Annotated
+from typing import get_args, get_origin, Union, Mapping, List, Any, Callable
 from datetime import datetime,date
 from dataclasses import dataclass
 from inspect import Parameter,get_annotations
@@ -119,14 +119,8 @@ class HtmxHeaders:
     trigger_name:str|None=None; trigger:str|None=None
     def __bool__(self): return any(hasattr(self,o) for o in htmx_hdrs)
 
-def _get_header(h, k):
-    k = k.lower()
-    res = h.get(k)
-    encoded = h.get(k+'-uri-autoencoded')=='true' or (k=='hx-prompt' and h.get('hx-request-type'))
-    return unquote(res) if res is not None and encoded else res
-
 def _get_htmx(h):
-    res = {k:_get_header(h, v) for k,v in htmx_hdrs.items()}
+    res = {k:h.get(v.lower(), None) for k,v in htmx_hdrs.items()}
     return HtmxHeaders(**res)
 
 # %% ../nbs/api/00_core.ipynb #1d53e8e7
@@ -196,8 +190,7 @@ def _is_body(anno): return issubclass(anno, (dict,ns)) or hasattr(anno,'__from_r
 
 # %% ../nbs/api/00_core.ipynb #ffdde66f
 def _formitem(form, k):
-    "Return item `k`, accepting hyphens for underscores and unwrapping single-item form lists"
-    if k not in form: k = {o.replace('-', '_'):o for o in form}.get(k, k)
+    "Return single item `k` from `form` if len 1, otherwise return list"
     if isinstance(form, dict): return form.get(k)
     o = form.getlist(k)
     return o[0] if len(o) == 1 else o if o else None
@@ -242,7 +235,6 @@ async def _from_body(conn, p, data):
         kwargs = await _find_ps(conn, data, conn.headers, ps)
         return await maybe_await(ctor(**kwargs))
     d = _annotations(anno)
-    if d: data = {k.replace('-', '_'):v for k,v in data.items()} | data
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
 
@@ -265,19 +257,8 @@ class JSONResponse(JSONResponseOrig):
 
 
 # %% ../nbs/api/00_core.ipynb #5fa96e3a
-@dataclass(frozen=True)
-class Alias:
-    "Read a handler param from request data under `name` instead of its Python name, e.g. `Annotated[str, Alias('user-id')]`"
-    name: str
-
 async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
     "In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"
-    alias = None
-    if get_origin(p.annotation) is Annotated:
-        anno, *meta = get_args(p.annotation)
-        p = p.replace(annotation=anno)
-        alias = next((m.name for m in meta if isinstance(m, Alias)), None)
-    key = alias or arg
     anno = p.annotation
     # Special annotation types
     if isinstance(anno, type) and not isinstance(anno, GenericAlias):
@@ -287,7 +268,7 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if issubclass(anno, State): return conn.scope['app'].state
         if anno is dict: return data
         if _is_body(anno):
-            if 'session'.startswith(key.lower()): return conn.scope.get('session', {})
+            if 'session'.startswith(arg.lower()): return conn.scope.get('session', {})
             return await _from_body(conn, p, data)
     if (msg := _check_anno(arg, anno)): return warn(msg)
     # Special param names with no annotations
@@ -308,16 +289,17 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(conn, arg.lower())
         return None
     # Not a special name or a special annotation
-    res = conn.path_params.get(key, None)
-    if res in (empty,None): res = conn.cookies.get(key, None)
-    if res in (empty,None): res = _get_header(hdrs, snake2hyphens(key))
-    if res in (empty,None): res = _formitem(conn.query_params, key)
-    if res in (empty,None): res = _formitem(data, key)
-    if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = _formitem(vals, key)  # htmx v4 nests form data under `values`
+    res = conn.path_params.get(arg, None)
+    if res in (empty,None): res = conn.cookies.get(arg, None)
+    if res in (empty,None): res = hdrs.get(snake2hyphens(arg), None)
+    if res in (empty,None): res = conn.query_params.getlist(arg)
+    if res==[]: res = None
+    if res in (empty,None): res = data.get(arg, None)
+    if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = vals.get(arg)  # htmx v4 nests form data under `values`
     if res in (empty,None):
         if p.default is empty:
-            if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {key}")
-            raise ValueError(f"Missing required field: {key}")
+            if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {arg}")
+            raise ValueError(f"Missing required field: {arg}")
         res = p.default
     try: return _fix_anno(anno, res)
     except ValueError as e:
@@ -580,17 +562,17 @@ htmx_exts = {
     "remove-me": "https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js",
     "debug": "https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js",
     "ws": "https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.3/ws.js",
-    "ws4": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.1/dist/ext/hx-ws.min.js",
+    "ws4": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/ext/hx-ws.min.js",
     "chunked-transfer": "https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js",
-    "sse4": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.1/dist/ext/hx-sse.min.js",
-    "live": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.1/dist/ext/hx-live.min.js",
-    "multipart": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.1/dist/ext/hx-multipart.min.js"
+    "sse4": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/ext/hx-sse.min.js",
+    "live": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/ext/hx-live.min.js",
+    "multipart": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/ext/hx-multipart.min.js"
 }
 
 # %% ../nbs/api/00_core.ipynb #60cb52ea
 htmxsrc   = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.js")
-htmx4src  = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@4.0.1/dist/htmx.min.js")
-fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.13/fasthtml.js")
+htmx4src  = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/htmx.min.js")
+fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js")
 surrsrc   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js")
 scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js")
 viewport  = Meta(name="viewport", content="width=device-width, initial-scale=1, viewport-fit=cover")
@@ -638,7 +620,7 @@ def def_hdrs(htmx=True, htmx4=False, surreal=True):
     "Default headers for a FastHTML app"
     hdrs = []
     if surreal: hdrs = [surrsrc,scopesrc] + hdrs
-    if htmx and htmx4:
+    if htmx4: 
         # metaCharacter="-" makes htmx4 use dashes instead of colons
         meta_cfg = Meta(name="htmx-config", content=json.dumps({"metaCharacter": "-"}))
         hdrs = [meta_cfg, htmx4src,fhjsscr] + hdrs 
@@ -709,7 +691,7 @@ class FastHTML(Starlette):
         same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
         body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, max_part_size=DEF_MAXPART, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
-        self.htmx4,self.title,self.canonical,self.session_cookie,self.key_fname = htmx4,title,canonical,session_cookie,key_fname
+        self.title,self.canonical,self.session_cookie,self.key_fname = title,canonical,session_cookie,key_fname
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         if htmx4 and exts: exts = ['ws4' if e in ('ws', 'ws4') else e for e in exts]
         exts = {k:htmx_exts[k] for k in exts}
@@ -1172,8 +1154,8 @@ def _add_ids(s):
 @patch
 def setup_ws(app:FastHTML, f=noop):
     conns = {}
-    async def on_connect(ws, send): conns[ws.client] = send
-    async def on_disconnect(ws): conns.pop(ws.client)
+    async def on_connect(scope, send): conns[scope.client] = send
+    async def on_disconnect(scope): conns.pop(scope.client)
     app.ws('/ws', conn=on_connect, disconn=on_disconnect)(f)
     async def send(s):
         for o in conns.values(): await o(s)
