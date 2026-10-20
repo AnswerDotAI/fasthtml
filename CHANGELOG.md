@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.14.14
+
+### New Features
+
+- Match hyphenated form/query names to underscore handler params and body fields, with exact names taking precedence ([#939](https://github.com/AnswerDotAI/fasthtml/issues/939))
+- Return 400 for malformed multipart and invalid JSON bodies; redirect to error path with `oauth_error` on OAuth token exchange failure ([#929](https://github.com/AnswerDotAI/fasthtml/issues/929))
+
+
 ## 0.14.13
 
 ### New Features
