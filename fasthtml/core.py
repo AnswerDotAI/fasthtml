@@ -18,7 +18,7 @@ The decorated function doubles as a URL builder, so links never need hardcoded p
 
 Handlers return FT trees (from `fastcore.xml`), rendered as HTML automatically: a full page for regular requests, a bare fragment for HTMX requests. In a full page, top-level `Title`, `Meta`, `Link`, and `Style` items go in `<head>`; the rest goes in `<body>`. Strings are sent as HTML, dicts as JSON, and a Starlette `Response` is sent untouched. A return tuple may mix content with special items: any `HttpHeader` (e.g. from `cookie()` or `HtmxResponseHeaders()`) becomes a response header, any `BackgroundTask` runs after the response is sent, and the rest renders as content. `Redirect` picks the right redirect mechanism for HTMX vs regular requests, and `FtResponse` wraps FT content when you need the status code or headers.
 
-Handler parameters are filled from the request: each is looked up in path, cookie, header (snake_case names match Hyphen-Case headers), query, then form data, and cast by calling its annotation on the value. Hyphens in form/query names match underscores in handler parameters and typed body fields. Exact names take precedence within each source. Dictionary and request access retain the original keys. `bool`, `int`, and `date` get smart string parsing; `UploadFile` passes through. Repeated params take the last value unless annotated `list[T]`, which collects them all. A param with no annotation and no special name is ignored, with a warning. A dataclass, TypedDict, namedtuple, or any annotated class collects the whole form body; a `__from_request__` classmethod customizes construction. A missing required param is a 400, a failed cast a 404. These special names need no annotation:
+Handler parameters are filled from the request: each is looked up in path, cookie, header (snake_case names match Hyphen-Case headers), query, then form data (use `Annotated[T, Alias('name')]` to read a different request name), and cast by calling its annotation on the value. Hyphens in form/query names match underscores in handler parameters and typed body fields. Exact names take precedence within each source. Dictionary and request access retain the original keys. `bool`, `int`, and `date` get smart string parsing; `UploadFile` passes through. Repeated params take the last value unless annotated `list[T]`, which collects them all. A param with no annotation and no special name is ignored, with a warning. A dataclass, TypedDict, namedtuple, or any annotated class collects the whole form body; a `__from_request__` classmethod customizes construction. A missing required param is a 400, a failed cast a 404. These special names need no annotation:
 
     req, ws   the Request / WebSocket connection
     sess      session dict
@@ -48,11 +48,11 @@ Docs: https://www.fastht.ml/docs/api/core.html.md"""
 __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_exts', 'htmxsrc', 'htmx4src', 'fhjsscr', 'surrsrc',
            'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date',
            'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'ApiReturn',
-           'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple',
-           'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML',
-           'HostRoute', 'nested_name', 'serve', 'until_disconnect', 'cancel_on_disconnect', 'Client', 'RouteFuncs',
-           'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'StaticImmutable', 'vurl', 'add_sig_param', 'into',
-           'MiddlewareBase', 'FtResponse', 'unqid']
+           'JSONResponse', 'Alias', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri',
+           'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan',
+           'FastHTML', 'HostRoute', 'nested_name', 'serve', 'until_disconnect', 'cancel_on_disconnect', 'Client',
+           'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'StaticImmutable', 'vurl',
+           'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
 import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous,hashlib,signal,subprocess
@@ -64,7 +64,7 @@ from fastcore.meta import use_kwargs_dict,delegates,splice_sig
 from fastcore.style import S
 
 from types import UnionType, SimpleNamespace as ns, GenericAlias
-from typing import get_args, get_origin, Union, Mapping, List, Any, Callable
+from typing import get_args, get_origin, Union, Mapping, List, Any, Callable, Annotated
 from datetime import datetime,date
 from dataclasses import dataclass
 from inspect import Parameter,get_annotations
@@ -259,8 +259,19 @@ class JSONResponse(JSONResponseOrig):
 
 
 # %% ../nbs/api/00_core.ipynb #5fa96e3a
+@dataclass(frozen=True)
+class Alias:
+    "Read a handler param from request data under `name` instead of its Python name, e.g. `Annotated[str, Alias('user-id')]`"
+    name: str
+
 async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
     "In `data` find param named `arg` of type in `p` (`arg` is ignored for body types)"
+    alias = None
+    if get_origin(p.annotation) is Annotated:
+        anno, *meta = get_args(p.annotation)
+        p = p.replace(annotation=anno)
+        alias = next((m.name for m in meta if isinstance(m, Alias)), None)
+    key = alias or arg
     anno = p.annotation
     # Special annotation types
     if isinstance(anno, type) and not isinstance(anno, GenericAlias):
@@ -270,7 +281,7 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if issubclass(anno, State): return conn.scope['app'].state
         if anno is dict: return data
         if _is_body(anno):
-            if 'session'.startswith(arg.lower()): return conn.scope.get('session', {})
+            if 'session'.startswith(key.lower()): return conn.scope.get('session', {})
             return await _from_body(conn, p, data)
     if (msg := _check_anno(arg, anno)): return warn(msg)
     # Special param names with no annotations
@@ -291,16 +302,16 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(conn, arg.lower())
         return None
     # Not a special name or a special annotation
-    res = conn.path_params.get(arg, None)
-    if res in (empty,None): res = conn.cookies.get(arg, None)
-    if res in (empty,None): res = hdrs.get(snake2hyphens(arg), None)
-    if res in (empty,None): res = _formitem(conn.query_params, arg)
-    if res in (empty,None): res = _formitem(data, arg)
-    if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = _formitem(vals, arg)  # htmx v4 nests form data under `values`
+    res = conn.path_params.get(key, None)
+    if res in (empty,None): res = conn.cookies.get(key, None)
+    if res in (empty,None): res = hdrs.get(alias or snake2hyphens(key), None)
+    if res in (empty,None): res = _formitem(conn.query_params, key)
+    if res in (empty,None): res = _formitem(data, key)
+    if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = _formitem(vals, key)  # htmx v4 nests form data under `values`
     if res in (empty,None):
         if p.default is empty:
-            if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {arg}")
-            raise ValueError(f"Missing required field: {arg}")
+            if isinstance(conn, Request): raise HTTPException(400, f"Missing required field: {key}")
+            raise ValueError(f"Missing required field: {key}")
         res = p.default
     try: return _fix_anno(anno, res)
     except ValueError as e:
