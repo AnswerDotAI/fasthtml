@@ -18,7 +18,7 @@ The decorated function doubles as a URL builder, so links never need hardcoded p
 
 Handlers return FT trees (from `fastcore.xml`), rendered as HTML automatically: a full page for regular requests, a bare fragment for HTMX requests. In a full page, top-level `Title`, `Meta`, `Link`, and `Style` items go in `<head>`; the rest goes in `<body>`. Strings are sent as HTML, dicts as JSON, and a Starlette `Response` is sent untouched. A return tuple may mix content with special items: any `HttpHeader` (e.g. from `cookie()` or `HtmxResponseHeaders()`) becomes a response header, any `BackgroundTask` runs after the response is sent, and the rest renders as content. `Redirect` picks the right redirect mechanism for HTMX vs regular requests, and `FtResponse` wraps FT content when you need the status code or headers.
 
-Handler parameters are filled from the request: each is looked up in path, cookie, header (snake_case names match Hyphen-Case headers), query, then form data (use `Annotated[T, Alias('name')]` to read a different request name), and cast by calling its annotation on the value. Hyphens in form/query names match underscores in handler parameters and typed body fields. Exact names take precedence within each source. Dictionary and request access retain the original keys. `bool`, `int`, and `date` get smart string parsing; `UploadFile` passes through. Repeated params take the last value unless annotated `list[T]`, which collects them all. A param with no annotation and no special name is ignored, with a warning. A dataclass, TypedDict, namedtuple, or any annotated class collects the whole form body; a `__from_request__` classmethod customizes construction. A missing required param is a 400, a failed cast a 404. These special names need no annotation:
+Handler parameters are filled from the request: each is looked up in path, cookie, header (snake_case names match Hyphen-Case headers), query, then form data, and cast by calling its annotation on the value. Hyphens in form/query names match underscores in handler parameters and typed body fields. To read a different request name, use `Annotated[T, Alias('name')]`. Exact names take precedence within each source. Dictionary and request access retain the original keys. `bool`, `int`, and `date` get smart string parsing; `UploadFile` passes through. Repeated params take the last value unless annotated `list[T]`, which collects them all. A param with no annotation and no special name is ignored, with a warning. A dataclass, TypedDict, namedtuple, or any annotated class collects the whole form body; a `__from_request__` classmethod customizes construction. A missing required param is a 400, a failed cast a 404. These special names need no annotation:
 
     req, ws   the Request / WebSocket connection
     sess      session dict
@@ -54,7 +54,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_ex
            'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'StaticImmutable', 'vurl',
            'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
 
-# %% ../nbs/api/00_core.ipynb #23503b9e
+# %% ../nbs/api/00_core.ipynb #b7a14a169b3297a0
 import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous,hashlib,signal,subprocess
 from uuid import uuid5, NAMESPACE_URL
 
@@ -82,23 +82,23 @@ from email.utils import format_datetime
 from .starlette import *
 from python_multipart.exceptions import MultipartParseError
 
-# %% ../nbs/api/00_core.ipynb #19d3f2a7
+# %% ../nbs/api/00_core.ipynb #1585be45cd347d8d
 def _params(f): return signature_ex(f, True).parameters
 
 empty = Parameter.empty
 
-# %% ../nbs/api/00_core.ipynb #e68a76c9
+# %% ../nbs/api/00_core.ipynb #aecb7676f7cc2369
 def parsed_date(s:str):
     "Convert `s` to a datetime"
     return dtparse.parse(s)
 
-# %% ../nbs/api/00_core.ipynb #7c820373
+# %% ../nbs/api/00_core.ipynb #8615d8ef40e50851
 def snake2hyphens(s:str):
     "Convert `s` from snake case to hyphenated and capitalised"
     s = snake2camel(s)
     return camel2words(s, '-')
 
-# %% ../nbs/api/00_core.ipynb #25f3b8f8
+# %% ../nbs/api/00_core.ipynb #81ad0c31c5e60260
 htmx_hdrs = dict(
     boosted="HX-Boosted",
     current_url="HX-Current-URL",
@@ -123,13 +123,13 @@ def _get_htmx(h):
     res = {k:h.get(v.lower(), None) for k,v in htmx_hdrs.items()}
     return HtmxHeaders(**res)
 
-# %% ../nbs/api/00_core.ipynb #1d53e8e7
+# %% ../nbs/api/00_core.ipynb #49368755a70898a0
 def _mk_list(t, v): return [t(o) for o in listify(v)]
 
-# %% ../nbs/api/00_core.ipynb #5ab74473
+# %% ../nbs/api/00_core.ipynb #58685ffc8373ba6f
 fh_cfg = AttrDict(indent=True)
 
-# %% ../nbs/api/00_core.ipynb #88d12e68
+# %% ../nbs/api/00_core.ipynb #287965806fac1332
 _special_names = {'ws','request','session','scope','data','htmx','app','state','auth','send','api','body','hdrs','ftrs','bodykw','htmlkw','resp','self'}
 
 def _check_anno(arg, anno):
@@ -137,7 +137,7 @@ def _check_anno(arg, anno):
     if anno is empty and arg.lower() not in _special_names and not any(s.startswith(arg.lower()) for s in ('request','session')): return f"`{arg}` has no type annotation and is not a recognised special name, so is ignored."
     if isinstance(anno, type) and not get_origin(anno) and issubclass(anno, (list, tuple)) and not _is_body(anno): return f"`{arg}` uses bare `{anno.__name__}` annotation, so is ignored (use e.g. `{anno.__name__}[str]` instead)."
 
-# %% ../nbs/api/00_core.ipynb #0afb520c
+# %% ../nbs/api/00_core.ipynb #e0ed6b4ddd1014c1
 def _fix_anno(t, o):
     "Create appropriate callable type for casting a `str` to type `t` (or first type in `t` if union)"
     origin = get_origin(t)
@@ -150,7 +150,7 @@ def _fix_anno(t, o):
     if not isinstance(o, (str,list,tuple)): return o
     return res(o[-1]) if isinstance(o,(list,tuple)) else res(o)
 
-# %% ../nbs/api/00_core.ipynb #c58ccadb
+# %% ../nbs/api/00_core.ipynb #3b51bbad3c65426
 def _form_arg(k, v, d):
     "Get type by accessing key `k` from `d`, and use to cast `v`"
     if v is None: return
@@ -160,35 +160,35 @@ def _form_arg(k, v, d):
     if not anno: return v
     return _fix_anno(anno, v)
 
-# %% ../nbs/api/00_core.ipynb #5fc04751
+# %% ../nbs/api/00_core.ipynb #55342e74abb8a521
 @dataclass
 class HttpHeader:
     "A response header as a k,v pair"
     k:str;v:str
 
-# %% ../nbs/api/00_core.ipynb #94e18161
+# %% ../nbs/api/00_core.ipynb #4e1a41ff0d2006f8
 def _to_htmx_header(s): return 'HX-' + s.replace('_', '-').title()
 
 htmx_resps = dict(location=None, push_url=None, redirect=None, refresh=None, replace_url=None,
     reswap=None, retarget=None, reselect=None, trigger=None, trigger_after_settle=None, trigger_after_swap=None)
 
-# %% ../nbs/api/00_core.ipynb #f6a2e62e
+# %% ../nbs/api/00_core.ipynb #1bcf3e6bbeb82969
 @use_kwargs_dict(**htmx_resps)
 def HtmxResponseHeaders(**kwargs):
     "HTMX response headers"
     res = tuple(HttpHeader(_to_htmx_header(k), v) for k,v in kwargs.items())
     return res[0] if len(res)==1 else res
 
-# %% ../nbs/api/00_core.ipynb #56cc589f
+# %% ../nbs/api/00_core.ipynb #9efb05e73d5f5947
 def _annotations(anno):
     "Same as `get_annotations`, but also works on namedtuples"
     if is_namedtuple(anno): return {o:str for o in anno._fields}
     return get_annotations(anno)
 
-# %% ../nbs/api/00_core.ipynb #cb4ed4aa
+# %% ../nbs/api/00_core.ipynb #e5828b2e7682c383
 def _is_body(anno): return issubclass(anno, (dict,ns)) or hasattr(anno,'__from_request__') or _annotations(anno)
 
-# %% ../nbs/api/00_core.ipynb #ffdde66f
+# %% ../nbs/api/00_core.ipynb #a3058a8b3943fd8d
 def _formitem(form, k):
     "Return item `k`, accepting hyphens for underscores and unwrapping single-item form lists"
     if k not in form: k = {o.replace('-', '_'):o for o in form}.get(k, k)
@@ -196,16 +196,16 @@ def _formitem(form, k):
     o = form.getlist(k)
     return o[0] if len(o) == 1 else o if o else None
 
-# %% ../nbs/api/00_core.ipynb #5fe74444
+# %% ../nbs/api/00_core.ipynb #3c3233e509f6970e
 def form2dict(form: FormData) -> dict:
     "Convert starlette form data to a dict"
     if isinstance(form, dict): return form
     return {k: _formitem(form, k) for k in form}
 
-# %% ../nbs/api/00_core.ipynb #8899bc0a
+# %% ../nbs/api/00_core.ipynb #da31ece677242cc6
 DEF_MAXPART = 100*1024*1024
 
-# %% ../nbs/api/00_core.ipynb #42c9cea0
+# %% ../nbs/api/00_core.ipynb #73947311e8867ddf
 async def parse_form(req: Request) -> FormData:
     "Starlette errors on empty multipart/json forms and 500s on malformed multipart, so this handles those situations"
     ctype = req.headers.get("Content-Type", "")
@@ -224,7 +224,7 @@ async def parse_form(req: Request) -> FormData:
         return res
     return await req.form(max_part_size=maxpart)
 
-# %% ../nbs/api/00_core.ipynb #0caedd04
+# %% ../nbs/api/00_core.ipynb #e80f45b5f2d1c328
 async def _from_body(conn, p, data):
     "Create an instance of the annotated type from pre-parsed `data`"
     anno = p.annotation
@@ -240,7 +240,7 @@ async def _from_body(conn, p, data):
     cargs = {k: _form_arg(k, v, d) for k, v in data.items() if not d or k in d}
     return anno(**cargs)
 
-# %% ../nbs/api/00_core.ipynb #88b6da3f
+# %% ../nbs/api/00_core.ipynb #eb20d63ddb8c94ef
 class ApiReturn:
     "Request param: call with browser and API responses; returns kwargs as JSON if the client accepts `application/json`, else `norm`"
     @classmethod
@@ -249,7 +249,7 @@ class ApiReturn:
     def __call__(self, norm=None, **kw): return kw if self.isapi else norm
     def __bool__(self): return bool(self.isapi)
 
-# %% ../nbs/api/00_core.ipynb #7cc39ba9
+# %% ../nbs/api/00_core.ipynb #61ac79f78f6492d6
 class JSONResponse(JSONResponseOrig):
     "Same as starlette's version, but auto-stringifies non serializable types"
     def render(self, content:Any)->bytes:
@@ -258,7 +258,7 @@ class JSONResponse(JSONResponseOrig):
         return res.encode("utf-8")
 
 
-# %% ../nbs/api/00_core.ipynb #5fa96e3a
+# %% ../nbs/api/00_core.ipynb #4d46f096ae3f0e05
 @dataclass(frozen=True)
 class Alias:
     "Read a handler param from request data under `name` instead of its Python name, e.g. `Annotated[str, Alias('user-id')]`"
@@ -283,28 +283,28 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if _is_body(anno):
             if 'session'.startswith(key.lower()): return conn.scope.get('session', {})
             return await _from_body(conn, p, data)
-    if (msg := _check_anno(arg, anno)): return warn(msg)
+    if (msg := _check_anno(key, anno)): return warn(msg)
     # Special param names with no annotations
     if anno is empty:
-        if arg.lower()=='ws' or 'request'.startswith(arg.lower()): return conn
-        if 'session'.startswith(arg.lower()): return conn.scope.get('session', {})
-        if arg.lower()=='scope': return conn.scope
-        if arg.lower()=='data': return data
-        if arg.lower()=='htmx': return _get_htmx(hdrs)
-        if arg.lower()=='app': return conn.scope['app']
-        if arg.lower()=='state': return conn.scope['app'].state
-        if arg.lower()=='auth': return conn.scope.get('auth', None)
-        if arg.lower()=='send':
+        if key.lower()=='ws' or 'request'.startswith(key.lower()): return conn
+        if 'session'.startswith(key.lower()): return conn.scope.get('session', {})
+        if key.lower()=='scope': return conn.scope
+        if key.lower()=='data': return data
+        if key.lower()=='htmx': return _get_htmx(hdrs)
+        if key.lower()=='app': return conn.scope['app']
+        if key.lower()=='state': return conn.scope['app'].state
+        if key.lower()=='auth': return conn.scope.get('auth', None)
+        if key.lower()=='send':
             assert not isinstance(conn, Request), "`send` requires a websocket, not a `Request`"
             return partial(_send_ws, conn)
-        if arg.lower()=='api': return ApiReturn(hdrs.get('accept')=='application/json')
-        if arg.lower()=='body': return (await conn.body()).decode()
-        if arg.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(conn, arg.lower())
+        if key.lower()=='api': return ApiReturn(hdrs.get('accept')=='application/json')
+        if key.lower()=='body': return (await conn.body()).decode()
+        if key.lower() in ('hdrs','ftrs','bodykw','htmlkw'): return getattr(conn, key.lower())
         return None
     # Not a special name or a special annotation
     res = conn.path_params.get(key, None)
     if res in (empty,None): res = conn.cookies.get(key, None)
-    if res in (empty,None): res = hdrs.get(alias or snake2hyphens(key), None)
+    if res in (empty,None): res = hdrs.get(snake2hyphens(key), None)
     if res in (empty,None): res = _formitem(conn.query_params, key)
     if res in (empty,None): res = _formitem(data, key)
     if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = _formitem(vals, key)  # htmx v4 nests form data under `values`
@@ -318,17 +318,17 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if isinstance(conn, Request): raise HTTPException(404, f"{conn.url.path}: {e}") from None
         raise
 
-# %% ../nbs/api/00_core.ipynb #bf42edad
+# %% ../nbs/api/00_core.ipynb #5849a37703c71c4b
 async def _find_ps(conn, data, hdrs, params):
     if conn.query_params: data |= dict(conn.query_params)
     return {arg:await _find_p(conn, data, hdrs, arg, p) for arg,p in params.items()}
 
-# %% ../nbs/api/00_core.ipynb #090f1f0f
+# %% ../nbs/api/00_core.ipynb #b4a0893dd0cac34a
 async def _wrap_req(req, params):
     data = form2dict(await parse_form(req))
     return await _find_ps(req, data, req.headers, params)
 
-# %% ../nbs/api/00_core.ipynb #7a661bfa
+# %% ../nbs/api/00_core.ipynb #4b264f3ec9a80e3a
 def flat_xt(lst):
     "Flatten lists"
     result = []
@@ -338,23 +338,23 @@ def flat_xt(lst):
         else: result.append(item)
     return tuple(result)
 
-# %% ../nbs/api/00_core.ipynb #aacff5ac
+# %% ../nbs/api/00_core.ipynb #4b57d3d58af69e51
 class Beforeware:
     "Wrap a `before` function with `skip` path patterns that bypass it"
     def __init__(self, f, skip=None): self.f,self.skip = f,skip or []
     def __repr__(self): return f'Beforeware({self.f}, skip={self.skip})'
 
-# %% ../nbs/api/00_core.ipynb #78c3c357
+# %% ../nbs/api/00_core.ipynb #de37dcd7b5641749
 async def _handle(f, /, *args, **kwargs):
     return (await f(*args, **kwargs)) if is_async_callable(f) else await run_in_threadpool(f, *args, **kwargs)
 
-# %% ../nbs/api/00_core.ipynb #ad0f0e87
+# %% ../nbs/api/00_core.ipynb #761597782f7f9df6
 async def _wrap_ws(ws, data, params):
     raw = data.pop('HEADERS', {}) or (data.pop('headers') if isinstance(data.get('headers'), dict) else {})  # htmx v4 sends lowercase `headers`
     hdrs = Headers({k.lower():v for k,v in raw.items() if v is not None})
     return await _find_ps(ws, data, hdrs, params)
 
-# %% ../nbs/api/00_core.ipynb #dcc15129
+# %% ../nbs/api/00_core.ipynb #7a3be2b2f30770d7
 async def _send_ws(ws, resp):
     if not resp: return
     res = to_xml(resp, indent=fh_cfg.indent)
@@ -382,12 +382,12 @@ def _ws_endp(recv, conn=None, disconn=None):
     cls.on_receive = _recv
     return cls
 
-# %% ../nbs/api/00_core.ipynb #5b0e7677
+# %% ../nbs/api/00_core.ipynb #ddc64ff604c831b8
 def EventStream(s):
     "Create a text/event-stream response from `s`"
     return StreamingResponse(s, media_type="text/event-stream")
 
-# %% ../nbs/api/00_core.ipynb #0dd0a414
+# %% ../nbs/api/00_core.ipynb #2e11648d17d6d6f5
 def signal_shutdown():
     "Return an `asyncio.Event` set when uvicorn receives a shutdown signal"
     from uvicorn.main import Server
@@ -399,21 +399,21 @@ def signal_shutdown():
         self._orig_handle_exit(*args, **kwargs)
     return event
 
-# %% ../nbs/api/00_core.ipynb #03f4c639
+# %% ../nbs/api/00_core.ipynb #f660c44ff209b90c
 def uri(_arg, **kwargs):
     "Create a URI by URL-encoding `_arg` and appending query parameters from `kwargs`"
     return f"{quote(_arg)}/{urlencode(kwargs, doseq=True)}"
 
-# %% ../nbs/api/00_core.ipynb #bdb2ac14
+# %% ../nbs/api/00_core.ipynb #3e45f287f5af27c5
 def decode_uri(s):
     "Decode a URI created by `uri()` back into argument and keyword dict"
     arg,_,kw = s.partition('/')
     return unquote(arg), {k:v[0] for k,v in parse_qs(kw).items()}
 
-# %% ../nbs/api/00_core.ipynb #b80ce139
+# %% ../nbs/api/00_core.ipynb #580afa399f3bd333
 from starlette.convertors import StringConvertor
 
-# %% ../nbs/api/00_core.ipynb #a27adc1e
+# %% ../nbs/api/00_core.ipynb #2bb9a1ff5768ba68
 StringConvertor.regex = "[^/]*"  # `+` replaced with `*`
 
 @patch
@@ -423,13 +423,13 @@ def to_string(self:StringConvertor, value: str) -> str:
     # assert value, "Must not be empty"  # line removed due to errors
     return value
 
-# %% ../nbs/api/00_core.ipynb #46614165
+# %% ../nbs/api/00_core.ipynb #d99b78e3a99c3ec0
 @patch
 def url_path_for(self:HTTPConnection, name: str, **path_params):
     lp = self.scope['app'].url_path_for(name, **path_params)
     return URLPath(f"{self.scope['root_path']}{lp}", lp.protocol, lp.host)
 
-# %% ../nbs/api/00_core.ipynb #c1707d59
+# %% ../nbs/api/00_core.ipynb #c4d78aa8d576e6cc
 _verbs = dict(get='hx-get', post='hx-post', put='hx-put', delete='hx-delete', patch='hx-patch', link='href')
 
 def _url_for(req, t):
@@ -455,10 +455,10 @@ def _to_xml(req, resp, indent):
     _find_targets(req, resp)
     return to_xml(resp, indent=indent)
 
-# %% ../nbs/api/00_core.ipynb #f1e3ed2d
+# %% ../nbs/api/00_core.ipynb #f2f473dc3aa8e232
 _iter_typs = (tuple,list,map,filter,range,types.GeneratorType)
 
-# %% ../nbs/api/00_core.ipynb #a407dc0e
+# %% ../nbs/api/00_core.ipynb #ce31ff717114b811
 def flat_tuple(o):
     "Flatten nested iterables into a single tuple"
     result = []
@@ -469,12 +469,12 @@ def flat_tuple(o):
         else: result.append(item)
     return tuple(result)
 
-# %% ../nbs/api/00_core.ipynb #d36402e6
+# %% ../nbs/api/00_core.ipynb #aaf0c02fc0142c20
 def noop_body(c, req):
     "Default Body wrap function which just returns the content"
     return c
 
-# %% ../nbs/api/00_core.ipynb #7f49728d
+# %% ../nbs/api/00_core.ipynb #6df817363734849b
 def respond(req, heads, bdy):
     "Default FT response creation function"
     body_wrap = getattr(req, 'body_wrap', noop_body)
@@ -483,13 +483,13 @@ def respond(req, heads, bdy):
     body = Body(body_wrap(*bw_args), *flat_xt(req.ftrs), **req.bodykw)
     return Html(Head(*heads, *flat_xt(req.hdrs)), body, **req.htmlkw)
 
-# %% ../nbs/api/00_core.ipynb #b2007479
+# %% ../nbs/api/00_core.ipynb #2f96c17575a317a
 def is_full_page(req, resp):
     "Check if response should be rendered as full page or fragment"
     if resp and any(getattr(o, 'tag', '')=='html' for o in resp): return True
     return 'hx-request' in req.headers and 'hx-history-restore-request' not in req.headers
 
-# %% ../nbs/api/00_core.ipynb #358badec
+# %% ../nbs/api/00_core.ipynb #99a2f618ca8e26e9
 def _part_resp(req, resp):
     "Partition response into HTTP headers, background tasks, and content"
     resp = flat_tuple(resp)
@@ -506,7 +506,7 @@ def _part_resp(req, resp):
     if len(resp)==1: resp = resp[0]
     return resp,kw
 
-# %% ../nbs/api/00_core.ipynb #da449a7b
+# %% ../nbs/api/00_core.ipynb #d18dc765f6c377c3
 def _canonical(req):
     if not req.app.canonical: return []
     url = str(getattr(req, 'canonical', req.url)).replace('http://', 'https://', 1)
@@ -522,12 +522,12 @@ def _xt_cts(req, resp):
         resp = respond(req, [*heads, *title, *_canonical(req)], bdy)
     return _to_xml(req, resp, indent=fh_cfg.indent)
 
-# %% ../nbs/api/00_core.ipynb #775fb66b
+# %% ../nbs/api/00_core.ipynb #5afa1b8942912373
 def _is_ft_resp(resp):
     "Check if response is a FastTag-compatible type"
     return isinstance(resp, _iter_typs+(HttpHeader,FT)) or hasattr(resp, '__ft__')
 
-# %% ../nbs/api/00_core.ipynb #968d9245
+# %% ../nbs/api/00_core.ipynb #67c986c99e7a6231
 def _resp(req, resp, cls=empty, status_code=200):
     "Create appropriate HTTP response from request and response data"
     if resp is None: resp=''
@@ -547,7 +547,7 @@ def _resp(req, resp, cls=empty, status_code=200):
         cls = HTMLResponse
     return cls(resp, status_code=status_code, **kw)
 
-# %% ../nbs/api/00_core.ipynb #eac44461
+# %% ../nbs/api/00_core.ipynb #15e507d2acd3232e
 class Redirect:
     "Use HTMX or Starlette RedirectResponse as required to redirect to `loc`"
     def __init__(self, loc): self.loc = loc
@@ -555,13 +555,13 @@ class Redirect:
         if 'hx-request' in req.headers: return HtmxResponseHeaders(redirect=self.loc)
         return RedirectResponse(self.loc, status_code=303)
 
-# %% ../nbs/api/00_core.ipynb #1ba52822
+# %% ../nbs/api/00_core.ipynb #92a6fdb45add90f0
 async def _wrap_call(f, req, params):
     "Wrap function call with request parameter injection"
     wreq = await _wrap_req(req, params)
     return await _handle(f, **wreq)
 
-# %% ../nbs/api/00_core.ipynb #b0d1cbbf
+# %% ../nbs/api/00_core.ipynb #49c3d12b947fa377
 # chkstyle: skip
 htmx_exts = {
     "morph": "https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js",
@@ -581,7 +581,7 @@ htmx_exts = {
     "multipart": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/ext/hx-multipart.min.js"
 }
 
-# %% ../nbs/api/00_core.ipynb #60cb52ea
+# %% ../nbs/api/00_core.ipynb #b31e24130b390101
 htmxsrc   = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.js")
 htmx4src  = Script(src="https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/htmx.min.js")
 fhjsscr   = Script(src="https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.12/fasthtml.js")
@@ -590,7 +590,7 @@ scopesrc  = Script(src="https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/s
 viewport  = Meta(name="viewport", content="width=device-width, initial-scale=1, viewport-fit=cover")
 charset   = Meta(charset="utf-8")
 
-# %% ../nbs/api/00_core.ipynb #8bd78eeb
+# %% ../nbs/api/00_core.ipynb #af5fa00cfaef7a8b
 def get_key(key=None, fname='.sesskey'):
     "Get session key from `key` param or read/create from file `fname`"
     if key: return key
@@ -600,12 +600,12 @@ def get_key(key=None, fname='.sesskey'):
     fname.write_text(key)
     return key
 
-# %% ../nbs/api/00_core.ipynb #042666e2
+# %% ../nbs/api/00_core.ipynb #17ff3158cc805754
 def _list(o):
     "Wrap non-list item in a list, returning empty list if None"
     return [] if not o else list(o) if isinstance(o, (tuple,list)) else [o]
 
-# %% ../nbs/api/00_core.ipynb #d276fc71
+# %% ../nbs/api/00_core.ipynb #d2a4061192d883e8
 def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
     "Wrap exception handler with FastHTML request processing"
     async def _f(req, exc):
@@ -615,7 +615,7 @@ def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
         return _resp(req, res, status_code=status_code)
     return _f
 
-# %% ../nbs/api/00_core.ipynb #bc323fd4
+# %% ../nbs/api/00_core.ipynb #f0ddf2219c879e3b
 def qp(p:str, **kw) -> str:
     "Add parameters kw to path p"
     def _sub(m):
@@ -627,7 +627,7 @@ def qp(p:str, **kw) -> str:
     # encode query params
     return p + ('?' + urlencode({k:'' if v in (False,None) else v for k,v in kw.items()},doseq=True) if kw else '')
 
-# %% ../nbs/api/00_core.ipynb #f86690c4
+# %% ../nbs/api/00_core.ipynb #8add43015a5b4c0c
 def def_hdrs(htmx=True, htmx4=False, surreal=True):
     "Default headers for a FastHTML app"
     hdrs = []
@@ -640,7 +640,7 @@ def def_hdrs(htmx=True, htmx4=False, surreal=True):
     elif htmx: hdrs = [htmxsrc,fhjsscr] + hdrs
     return [charset, viewport] + hdrs
 
-# %% ../nbs/api/00_core.ipynb #2c5285ae
+# %% ../nbs/api/00_core.ipynb #54f3bb368193da5c
 cors_allow = Middleware(CORSMiddleware, allow_credentials=True, allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])
 
 iframe_scr = Script(NotStr("""
@@ -666,7 +666,7 @@ iframe_scr = Script(NotStr("""
 """))
 
 
-# %% ../nbs/api/00_core.ipynb #17ced9a3
+# %% ../nbs/api/00_core.ipynb #876c9c8cb63f2cf2
 class _LifespanCtx:
     def __init__(self, gen): self.gen = gen
     async def __aenter__(self): return await anext(self.gen)
@@ -693,7 +693,7 @@ class Lifespan:
 
     def on_event(self, event_type): return lambda f: (getattr(self, event_type)).append(f)
 
-# %% ../nbs/api/00_core.ipynb #3327a1e9
+# %% ../nbs/api/00_core.ipynb #d8d78a64be4bf27
 class FastHTML(Starlette):
     "An HTML-first Starlette app: handler params filled from the request, FT returns rendered as pages or HTMX fragments"
     def __init__(self, debug=False, routes=None, middleware=None, title: str = "FastHTML page", exception_handlers=None,
@@ -732,7 +732,7 @@ class FastHTML(Starlette):
 
     def on_event(self, event_type): return self.lifespan.on_event(event_type)
 
-# %% ../nbs/api/00_core.ipynb #dce68049
+# %% ../nbs/api/00_core.ipynb #b000f60adf333122
 class HostRoute(Route):
     "Route with optional host-header constraint using Starlette's {param} pattern syntax"
     def __init__(self, path, endpoint, *, host=None, **kwargs):
@@ -750,7 +750,7 @@ class HostRoute(Route):
         methods = sorted(self.methods or [])
         return f"{self.__class__.__name__}(path={self.path!r}, name={self.name!r}, methods={methods!r}, host={self.host!r})"
 
-# %% ../nbs/api/00_core.ipynb #e0accf76
+# %% ../nbs/api/00_core.ipynb #a1583c0bcb0420f2
 @patch
 def add_route(self:FastHTML, route):
     "Add or replace a route in the FastHTML app"
@@ -762,10 +762,10 @@ def add_route(self:FastHTML, route):
     self.router.routes.sort(key=lambda r: not getattr(r, 'host', None))
 
 
-# %% ../nbs/api/00_core.ipynb #246bd8d1
+# %% ../nbs/api/00_core.ipynb #4917c9f35ccd9f96
 all_meths = 'get post put delete patch head trace options'.split()
 
-# %% ../nbs/api/00_core.ipynb #26b147ba
+# %% ../nbs/api/00_core.ipynb #46ca67a58ad666b9
 @patch
 def _endp(self:FastHTML, f, body_wrap, before:Optional[Callable|tuple]=None):
     "Create endpoint wrapper with before/after middleware processing"
@@ -794,7 +794,7 @@ def _endp(self:FastHTML, f, body_wrap, before:Optional[Callable|tuple]=None):
         return _resp(req, resp, sig.return_annotation)
     return _f
 
-# %% ../nbs/api/00_core.ipynb #3818575c
+# %% ../nbs/api/00_core.ipynb #a0744b04d81228d6
 @patch
 def _add_ws(self:FastHTML, func, path, conn, disconn, name, middleware):
     "Add websocket route to FastHTML app"
@@ -804,20 +804,20 @@ def _add_ws(self:FastHTML, func, path, conn, disconn, name, middleware):
     self.add_route(route)
     return func
 
-# %% ../nbs/api/00_core.ipynb #669e76eb
+# %% ../nbs/api/00_core.ipynb #2fc600349ae25291
 @patch
 def ws(self:FastHTML, path:str, conn=None, disconn=None, name=None, middleware=None):
     "Add a websocket route at `path`"
     def f(func=noop): return self._add_ws(func, path, conn, disconn, name=name, middleware=middleware)
     return f
 
-# %% ../nbs/api/00_core.ipynb #j6ete5u68fo
+# %% ../nbs/api/00_core.ipynb #17f6217b9e528764
 @patch
 def add_websocket_route(self:FastHTML, path, func, conn=None, disconn=None, name=None, middleware=None):
     "Add a websocket route at `path` (Starlette-compatible API)"
     return self._add_ws(func, path, conn, disconn, name=name, middleware=middleware)
 
-# %% ../nbs/api/00_core.ipynb #919618c3
+# %% ../nbs/api/00_core.ipynb #48e0a2670e869b6b
 def _mk_locfunc(f, p, app=None):
     "Create a location function wrapper with route path and to() method"
     class _lf:
@@ -831,12 +831,12 @@ def _mk_locfunc(f, p, app=None):
 
     return _lf()
 
-# %% ../nbs/api/00_core.ipynb #d2ecc738
+# %% ../nbs/api/00_core.ipynb #a0c09d4bddc479a
 def nested_name(f):
     "Get name of function `f` using '_' to join nested function names"
     return f.__qualname__.replace('.<locals>.', '_')
 
-# %% ../nbs/api/00_core.ipynb #daafe4fc
+# %% ../nbs/api/00_core.ipynb #8f0115f7adff7835
 @patch
 def _add_routes(self:FastHTML, cls, path, methods, name, include_in_schema, body_wrap, host=None, before:Optional[Callable|tuple]=None):
     "Add HTTP routes from methods on endpoint class `cls`"
@@ -848,7 +848,7 @@ def _add_routes(self:FastHTML, cls, path, methods, name, include_in_schema, body
         if handler: self._add_route(handler, path, meth, name, include_in_schema, body_wrap, host=host, before=before)
     return lf
 
-# %% ../nbs/api/00_core.ipynb #3710e48b
+# %% ../nbs/api/00_core.ipynb #329e78f5bbc6ded1
 def _route_pn(func, path, name):
     "Infer route name/function name/path from an endpoint or endpoint class"
     fn = nested_name(func)
@@ -873,7 +873,7 @@ def _add_route(self:FastHTML, func, path, methods, name, include_in_schema, body
     lf.__routename__ = n
     return lf
 
-# %% ../nbs/api/00_core.ipynb #f5cb2c2b
+# %% ../nbs/api/00_core.ipynb #ebf0ff44a915aa0c
 @patch
 def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_schema=True, body_wrap=None, host=None, before:Optional[Callable|tuple]=None):
     "Add a route at `path`"
@@ -883,14 +883,14 @@ def route(self:FastHTML, path:str=None, methods=None, name=None, include_in_sche
 
 for o in all_meths: setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
-# %% ../nbs/api/00_core.ipynb #35c35a96
+# %% ../nbs/api/00_core.ipynb #94d6f8f81d93aa5e
 @patch
 def set_lifespan(self:FastHTML, value):
     "Set the lifespan context manager for the FastHTML app"
     if inspect.isasyncgenfunction(value): value = contextlib.asynccontextmanager(value)
     self.router.lifespan_context = value
 
-# %% ../nbs/api/00_core.ipynb #3a348474
+# %% ../nbs/api/00_core.ipynb #b5e55224f5a20d18
 def serve(
     appname=None, # Name of the module
     app='app', # App instance to be served
@@ -916,14 +916,14 @@ def serve(
         print('Link: '+ S.light_red.bold(link))
         run(f'{appname}:{app}', host=host, port=port, reload=reload, **kwargs)
 
-# %% ../nbs/api/00_core.ipynb #91b08e9a
+# %% ../nbs/api/00_core.ipynb #ddc667c24b6df7dc
 def _spawn(n):
     "Run this script `n` times over, numbering each copy in `FH_PROCNUM`, and wait for them all"
     ps = [subprocess.Popen([sys.executable, *sys.argv], env={**os.environ, 'FH_PROCNUM':str(i)}) for i in range(n)]
     signal.signal(signal.SIGTERM, lambda *a: [p.terminate() for p in ps])
     for p in ps: p.wait()
 
-# %% ../nbs/api/00_core.ipynb #c5220a0e
+# %% ../nbs/api/00_core.ipynb #78dc3bffc42b5d1
 async def _wait_disconnect(req):
     while (await req.receive())["type"] != "http.disconnect": pass
 
@@ -938,7 +938,7 @@ async def until_disconnect(req, coro):
         watch.cancel()
         if not work.done(): work.cancel()
 
-# %% ../nbs/api/00_core.ipynb #c5721d76
+# %% ../nbs/api/00_core.ipynb #3ddda418760bb472
 def cancel_on_disconnect(
     f=None, # Async route handler to wrap
     *,
@@ -952,7 +952,7 @@ def cancel_on_disconnect(
         return await (asyncio.wait_for(c, timeout) if timeout is not None else c)
     return splice_sig(_f, f)
 
-# %% ../nbs/api/00_core.ipynb #8121968a
+# %% ../nbs/api/00_core.ipynb #33e9385190411631
 class Client:
     "A simple httpx ASGI client that doesn't require `async`"
     def __init__(self, app, url="http://testserver"):
@@ -965,7 +965,7 @@ class Client:
 
 for o in ('get', 'post', 'delete', 'put', 'patch', 'options'): setattr(Client, o, partialmethod(Client._sync, o))
 
-# %% ../nbs/api/00_core.ipynb #d5223a9a
+# %% ../nbs/api/00_core.ipynb #d00984c329331d4
 class RouteFuncs:
     "Attr-access store of named route functions (HTTP verb names excluded)"
     def __init__(self): super().__setattr__('_funcs', {})
@@ -976,7 +976,7 @@ class RouteFuncs:
         except KeyError: raise AttributeError(f"No route named {name} found in route functions")
     def __dir__(self): return list(self._funcs.keys())
 
-# %% ../nbs/api/00_core.ipynb #0f08cb5e
+# %% ../nbs/api/00_core.ipynb #55ff40c3aa444235
 class APIRouter:
     "Add routes to an app"
     def __init__(self, prefix:str|None=None, body_wrap=noop_body):
@@ -1016,10 +1016,10 @@ class APIRouter:
         def f(func=noop): return self.wss.append((func, f"{self.prefix}{path}", conn, disconn, name, middleware))
         return f
 
-# %% ../nbs/api/00_core.ipynb #259a0f53
+# %% ../nbs/api/00_core.ipynb #1ea2020dd58c30df
 for o in all_meths: setattr(APIRouter, o, partialmethod(APIRouter.__call__, methods=o))
 
-# %% ../nbs/api/00_core.ipynb #e518de83
+# %% ../nbs/api/00_core.ipynb #e645895044c0f961
 def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None, secure=False, httponly=False, samesite="lax",):
     "Create a 'set-cookie' `HttpHeader`"
     cookie = cookies.SimpleCookie()
@@ -1036,13 +1036,13 @@ def cookie(key: str, value="", max_age=None, expires=None, path="/", domain=None
     cookie_val = cookie.output(header="").strip()
     return HttpHeader("set-cookie", cookie_val)
 
-# %% ../nbs/api/00_core.ipynb #8816f277
+# %% ../nbs/api/00_core.ipynb #c094b01b787efa18
 def reg_re_param(m, s):
     "Register a Starlette URL convertor named `m` matching regex `s`"
     cls = get_class(f'{m}Conv', sup=StringConvertor, regex=s)
     register_url_convertor(m, cls())
 
-# %% ../nbs/api/00_core.ipynb #e9535978
+# %% ../nbs/api/00_core.ipynb #6747ee1f8fa10ddb
 # Starlette doesn't have the '?', so it chomps the whole remaining URL
 reg_re_param("path", ".*?")
 _static_exts = "ico gif jpg jpeg webm css js woff png svg mp4 webp ttf otf eot woff2 txt html map pdf zip tgz gz csv mp3 wav ogg flac aac doc docx xls xlsx ppt pptx epub mobi bmp tiff avi mov wmv mkv xml yaml yml rar 7z tar bz2 htm xhtml apk dmg exe msi swf iso".split()
@@ -1054,14 +1054,14 @@ def static_route_exts(self:FastHTML, prefix='/', static_path='.', exts='static')
     @self.get(f"{prefix}{{fname:path}}.{{ext:{exts}}}")
     async def get(fname:str, ext:str): return FileResponse(f'{static_path}/{fname}.{ext}')
 
-# %% ../nbs/api/00_core.ipynb #b31de65a
+# %% ../nbs/api/00_core.ipynb #f821491210017e95
 @patch
 def static_route(self:FastHTML, ext='', prefix='/', static_path='.'):
     "Add a static route at URL path `prefix` with files from `static_path` and single `ext` (including the '.')"
     @self.get(f"{prefix}{{fname:path}}{ext}")
     async def get(fname:str): return FileResponse(f'{static_path}/{fname}{ext}')
 
-# %% ../nbs/api/00_core.ipynb #f63b7a03
+# %% ../nbs/api/00_core.ipynb #392f9abb139bb38f
 class StaticNoCache(StaticFiles):
     "StaticFiles that sends `Cache-Control: no-cache`, so browsers revalidate on every use"
     def file_response(self, *args, **kwargs):
@@ -1069,7 +1069,7 @@ class StaticNoCache(StaticFiles):
         resp.headers.setdefault("Cache-Control", "no-cache")
         return resp
 
-# %% ../nbs/api/00_core.ipynb #74801f94
+# %% ../nbs/api/00_core.ipynb #a8094de91a8f6335
 class StaticImmutable(StaticFiles):
     "Like `StaticNoCache`, but marks responses as cacheable forever: for versioned URLs such as `vurl` links or content-hashed filenames"
     def file_response(self, *args, **kwargs):
@@ -1077,7 +1077,7 @@ class StaticImmutable(StaticFiles):
         resp.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
         return resp
 
-# %% ../nbs/api/00_core.ipynb #e38fd6c7
+# %% ../nbs/api/00_core.ipynb #7fffdd2e178e66d9
 @flexicache(mtime_policy(arg=0))
 def _vhash(p): return hashlib.blake2b(p.read_bytes(), digest_size=4).hexdigest()
 
@@ -1089,11 +1089,11 @@ def vurl(path, root='.'):
     return urlunsplit(u._replace(query=f'{q}v={_vhash(p)}'))
 
 
-# %% ../nbs/api/00_core.ipynb #7189daf8
+# %% ../nbs/api/00_core.ipynb #fc3c4a11a7f149ed
 from functools import wraps
 from inspect import signature, isawaitable
 
-# %% ../nbs/api/00_core.ipynb #7eed23b7
+# %% ../nbs/api/00_core.ipynb #dcfbe520b21c8a06
 def add_sig_param(f, name, typ=NoneType, kind=Parameter.KEYWORD_ONLY, default=Parameter.empty):
     "Add a parameter to a function's signature"
     sig = signature(f)
@@ -1104,7 +1104,7 @@ def add_sig_param(f, name, typ=NoneType, kind=Parameter.KEYWORD_ONLY, default=Pa
     f.__annotations__[name] = typ
     return f
 
-# %% ../nbs/api/00_core.ipynb #9e5a9e88
+# %% ../nbs/api/00_core.ipynb #bc3a2a5a0b908c62
 class into:
     "Decorator to pass a route's return value into `func`, with keyword params added to the route signature"
     def __init__(self, func):
@@ -1126,7 +1126,7 @@ class into:
             add_sig_param(_inner, k, anno, default=p.default)
         return _inner
 
-# %% ../nbs/api/00_core.ipynb #1960d7ff
+# %% ../nbs/api/00_core.ipynb #e287be9995e1d974
 class MiddlewareBase:
     "Base for middleware: passes non-http/ws scopes through, else returns the `HTTPConnection`"
     async def __call__(self, scope, receive, send) -> None:
@@ -1134,7 +1134,7 @@ class MiddlewareBase:
         await self._app(scope, receive, send)
         
 
-# %% ../nbs/api/00_core.ipynb #83a20f93
+# %% ../nbs/api/00_core.ipynb #abd3179c8f6dab84
 class FtResponse:
     "Wrap an FT response with any Starlette `Response`"
     def __init__(self, content, status_code:int=200, headers=None, cls=HTMLResponse, media_type:str|None=None, background: BackgroundTask | None = None):
@@ -1149,20 +1149,20 @@ class FtResponse:
         headers = {**(self.headers or {}), **httphdrs}
         return self.cls(cts, status_code=self.status_code, headers=headers, media_type=self.media_type, background=tasks)
 
-# %% ../nbs/api/00_core.ipynb #9dc1025e
+# %% ../nbs/api/00_core.ipynb #7ccb00230cdfb99e
 def unqid(seeded=False):
     "Random unique id, base64-encoded and prefixed with '_' so it's usable as an HTML id"
     id4 = UUID(int=random.getrandbits(128), version=4) if seeded else uuid4()
     res = b64encode(id4.bytes)
     return '_' + res.decode().rstrip('=').translate(str.maketrans('+/', '_-'))
 
-# %% ../nbs/api/00_core.ipynb #5b67e014
+# %% ../nbs/api/00_core.ipynb #e70a8dcfe4386a2e
 def _add_ids(s):
     if not isinstance(s, FT): return
     if not getattr(s, 'id', None): s.id = unqid()
     for c in s.children: _add_ids(c)
 
-# %% ../nbs/api/00_core.ipynb #1f590f25
+# %% ../nbs/api/00_core.ipynb #6a8579524fa4bb56
 @patch
 def setup_ws(app:FastHTML, f=noop):
     conns = {}
@@ -1174,7 +1174,7 @@ def setup_ws(app:FastHTML, f=noop):
     app._send = send
     return send
 
-# %% ../nbs/api/00_core.ipynb #a8a91edd
+# %% ../nbs/api/00_core.ipynb #fcb9f273985b611e
 devtools_loc = "/.well-known/appspecific/com.chrome.devtools.json"
 
 @patch
@@ -1184,7 +1184,7 @@ def devtools_json(self:FastHTML, path=None, uuid=None):
     @self.route(devtools_loc)
     def devtools(): return dict(workspace=dict(root=str(path), uuid=uuid))
 
-# %% ../nbs/api/00_core.ipynb #e27908c0
+# %% ../nbs/api/00_core.ipynb #3bf9cb548b4906fd
 @patch
 def get_client(self:FastHTML, asink=False, **kw):
     "Get an httpx client with session cookes set from `**kw`"
@@ -1196,7 +1196,7 @@ def get_client(self:FastHTML, asink=False, **kw):
     client.cookies.update({self.session_cookie: data.decode()})
     return client
 
-# %% ../nbs/api/00_core.ipynb #c845f437
+# %% ../nbs/api/00_core.ipynb #6942fa7012ca3ec6
 @patch
 def decode_session(self:FastHTML, cookie):
     "Decode a signed session cookie"
@@ -1204,7 +1204,7 @@ def decode_session(self:FastHTML, cookie):
     unsigned = itsdangerous.TimestampSigner(self.secret_key).unsign(cookie, max_age=None)
     return loads(b64decode(unsigned).decode())
 
-# %% ../nbs/api/00_core.ipynb #49260e9b
+# %% ../nbs/api/00_core.ipynb #4e64484ff03ceb38
 @patch
 def get_testclient(self:FastHTML, **kw):
     "Get a Starlette `TestClient` with session cookies set from `**kw`"
