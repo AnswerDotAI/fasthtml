@@ -1155,8 +1155,8 @@ def _add_ids(s):
 @patch
 def setup_ws(app:FastHTML, f=noop):
     conns = {}
-    async def on_connect(scope, send): conns[scope.client] = send
-    async def on_disconnect(scope): conns.pop(scope.client)
+    async def on_connect(ws, send): conns[ws.client] = send
+    async def on_disconnect(ws): conns.pop(ws.client)
     app.ws('/ws', conn=on_connect, disconn=on_disconnect)(f)
     async def send(s):
         for o in conns.values(): await o(s)

@@ -49,13 +49,9 @@ website:
     contents:
       - text: "Get Started"
         href: index.ipynb
-      - section: Tutorials
-        contents: tutorials
-      - section: Explanations
-        contents: explains
-      - section: Reference
-        contents: ref
-      - section: Source
-        contents: api
+      - auto: tutorials
+      - auto: explains
+      - auto: ref
+      - auto: api
 
 metadata-files: [nbdev.yml]
