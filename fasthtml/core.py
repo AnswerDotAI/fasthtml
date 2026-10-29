@@ -482,7 +482,7 @@ def respond(req, heads, bdy):
 def is_full_page(req, resp):
     "Check if response should be rendered as full page or fragment"
     if resp and any(getattr(o, 'tag', '')=='html' for o in resp): return True
-    return 'hx-request' in req.headers and 'hx-history-restore-request' not in req.headers
+    return 'hx-request' in req.headers and req.headers.get('hx-request-type') != 'full' and 'hx-history-restore-request' not in req.headers
 
 # %% ../nbs/api/00_core.ipynb #358badec
 def _part_resp(req, resp):
@@ -491,7 +491,7 @@ def _part_resp(req, resp):
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     tasks,resp = partition(resp, risinstance(BackgroundTask))
-    kw = {"headers": {"vary": "HX-Request, HX-History-Restore-Request"}}
+    kw = {"headers": {"vary": "HX-Request, HX-Request-Type, HX-History-Restore-Request"}}
     if http_hdrs: kw['headers'] |= {o.k:str(o.v) for o in http_hdrs}
     if tasks:
         ts = BackgroundTasks()
