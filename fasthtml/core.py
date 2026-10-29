@@ -119,8 +119,14 @@ class HtmxHeaders:
     trigger_name:str|None=None; trigger:str|None=None
     def __bool__(self): return any(hasattr(self,o) for o in htmx_hdrs)
 
+def _get_header(h, k):
+    k = k.lower()
+    res = h.get(k)
+    encoded = h.get(k+'-uri-autoencoded')=='true' or (k=='hx-prompt' and h.get('hx-request-type'))
+    return unquote(res) if res is not None and encoded else res
+
 def _get_htmx(h):
-    res = {k:h.get(v.lower(), None) for k,v in htmx_hdrs.items()}
+    res = {k:_get_header(h, v) for k,v in htmx_hdrs.items()}
     return HtmxHeaders(**res)
 
 # %% ../nbs/api/00_core.ipynb #1d53e8e7
@@ -293,7 +299,7 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
     # Not a special name or a special annotation
     res = conn.path_params.get(arg, None)
     if res in (empty,None): res = conn.cookies.get(arg, None)
-    if res in (empty,None): res = hdrs.get(snake2hyphens(arg), None)
+    if res in (empty,None): res = _get_header(hdrs, snake2hyphens(arg))
     if res in (empty,None): res = _formitem(conn.query_params, arg)
     if res in (empty,None): res = _formitem(data, arg)
     if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = _formitem(vals, arg)  # htmx v4 nests form data under `values`

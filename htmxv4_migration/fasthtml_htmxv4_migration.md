@@ -45,15 +45,15 @@ Sources: [htmx v4 migration guide: Renamed events](https://four.htmx.org/docs/ge
 
 | htmx 2.x | htmx 4.x |
 |-----------|-----------|
-| `htmx:afterOnLoad` | `htmx:after:init` |
-| `htmx:afterProcessNode` | `htmx:after:init` |
+| `htmx:afterOnLoad` | `htmx:after:request` |
+| `htmx:afterProcessNode` | `htmx:after:process` |
 | `htmx:afterRequest` | `htmx:after:request` |
-| `htmx:afterSettle` | `htmx:after:swap` |
+| `htmx:afterSettle` | `htmx:after:settle` |
 | `htmx:afterSwap` | `htmx:after:swap` |
 | `htmx:beforeCleanupElement` | `htmx:before:cleanup` |
 | `htmx:beforeHistorySave` | `htmx:before:history:update` |
 | `htmx:beforeHistoryUpdate` | `htmx:before:history:update` |
-| `htmx:beforeOnLoad` | `htmx:before:init` |
+| `htmx:beforeOnLoad` | `htmx:before:response` |
 | `htmx:beforeProcessNode` | `htmx:before:process` |
 | `htmx:beforeRequest` | `htmx:before:request` |
 | `htmx:beforeSwap` | `htmx:before:swap` |
@@ -61,17 +61,23 @@ Sources: [htmx v4 migration guide: Renamed events](https://four.htmx.org/docs/ge
 | `htmx:configRequest` | `htmx:config:request` |
 | `htmx:historyCacheMiss` | `htmx:before:history:restore` |
 | `htmx:historyRestore` | `htmx:before:history:restore` |
-| `htmx:load` | `htmx:after:init` |
+| `htmx:load` | `htmx:after:process` |
 | `htmx:oobAfterSwap` | `htmx:after:swap` |
 | `htmx:oobBeforeSwap` | `htmx:before:swap` |
 | `htmx:pushedIntoHistory` | `htmx:after:history:push` |
 | `htmx:replacedInHistory` | `htmx:after:history:replace` |
-| `htmx:responseError` | `htmx:error` |
+| `htmx:responseError` | `htmx:response:error` |
 | `htmx:sendAbort` | `htmx:error` |
 | `htmx:sendError` | `htmx:error` |
 | `htmx:swapError` | `htmx:error` |
 | `htmx:targetError` | `htmx:error` |
 | `htmx:timeout` | `htmx:error` |
+
+The lifecycle scopes and timings differ in [released htmx 4](https://github.com/bigskysoftware/htmx/blob/v4.0.0/dist/htmx.js):
+
+- `after:init` fires for request-action and boosted elements. `after:process` fires on each processed subtree root. `htmx.onLoad` receives that root. Use FastHTML's `proc_htmx(selector, callback)` to initialize matching roots and descendants, including the initial body load.
+- `after:settle` fires per swap target, before processing its new content, with `{task, newContent, settleTasks}`. `after:swap` fires once after all swap tasks and their processing, with `{ctx}`.
+- `after:request` fires after reading response text and before swapping. Use `finally:request` for cleanup on success, failure or cancellation. The v2 `beforeOnLoad` and `afterOnLoad` events describe AJAX responses, not element initialization.
 
 ---
 

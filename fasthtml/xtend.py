@@ -353,8 +353,9 @@ def sitemap_xml(app, urls, loc_base=""):
         return Urlset(*urlset, xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
 
 # %% ../nbs/api/02_xtend.ipynb #6a1990ed
-def upload_pb_attrs(id='uploadprog'):
-    "Form `hx_on` progress attr that reveals and updates a hidden `upload_pb` of matching `id`"
+def upload_pb_attrs(id='uploadprog', htmx4=False):
+    "Form attrs for an upload progress bar (htmx2) or request indicator (htmx4)"
+    if htmx4: return {'hx-indicator': f'#{id}'}
     js = """{ const p=document.getElementById('%s');
         if(event.detail.total) {p.classList.remove('hidden'); p.value=event.detail.loaded/event.detail.total*100} }""" % id
     return {'hx-on::xhr:progress': js}
