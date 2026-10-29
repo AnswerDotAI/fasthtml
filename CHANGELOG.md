@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.16
+
+### New Features
+
+- Decode URI-encoded htmx headers like HX-Prompt in params and HtmxHeaders, add htmx4 indicator option to `upload_pb_attrs` ([#945](https://github.com/AnswerDotAI/fasthtml/issues/945))
+
+
 ## 0.14.15
 
 ### Bugs Squashed
