@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.15
+
+### Bugs Squashed
+
+- Update fasthtml-js to 1.0.13 ([#944](https://github.com/AnswerDotAI/fasthtml/pull/944)), thanks to [@jph00](https://github.com/jph00)
+
+
 ## 0.14.14
 
 ### New Features
