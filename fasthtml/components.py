@@ -6,17 +6,17 @@ Docs: https://www.fastht.ml/docs/api/components.html.md"""
 
 # %% auto #0
 __all__ = ['named', 'html_attrs', 'hx_attrs', 'hx_attrs_4only', 'hx_evts', 'hx_evts_4only', 'js_evts', 'hx_attrs_annotations',
-           'hx_evt_attrs', 'js_evt_attrs', 'evt_attrs', 'HxPartial', 'attrmap_x', 'ft_html', 'ft_hx', 'File', 'show',
-           'fill_form', 'fill_dataclass', 'find_inputs', 'html2ft', 'sse_message', 'A', 'Abbr', 'Address', 'Area',
-           'Article', 'Aside', 'Audio', 'B', 'Base', 'Bdi', 'Bdo', 'Blockquote', 'Body', 'Br', 'Button', 'Canvas',
-           'Caption', 'Cite', 'Code', 'Col', 'Colgroup', 'Data', 'Datalist', 'Dd', 'Del', 'Details', 'Dfn', 'Dialog',
-           'Div', 'Dl', 'Dt', 'Em', 'Embed', 'Fencedframe', 'Fieldset', 'Figcaption', 'Figure', 'Footer', 'Form', 'H1',
-           'H2', 'H3', 'H4', 'H5', 'H6', 'Head', 'Header', 'Hgroup', 'Hr', 'I', 'Iframe', 'Img', 'Input', 'Ins', 'Kbd',
-           'Label', 'Legend', 'Li', 'Link', 'Main', 'Map', 'Mark', 'Menu', 'Meta', 'Meter', 'Nav', 'Noscript', 'Object',
-           'Ol', 'Optgroup', 'Option', 'Output', 'P', 'Picture', 'PortalExperimental', 'Pre', 'Progress', 'Q', 'Rp',
-           'Rt', 'Ruby', 'S', 'Samp', 'Script', 'Search', 'Section', 'Select', 'Slot', 'Small', 'Source', 'Span',
-           'Strong', 'Style', 'Sub', 'Summary', 'Sup', 'Table', 'Tbody', 'Td', 'Template', 'Textarea', 'Tfoot', 'Th',
-           'Thead', 'Time', 'Title', 'Tr', 'Track', 'U', 'Ul', 'Var', 'Video', 'Wbr']
+           'hx_evt_attrs', 'js_evt_attrs', 'evt_attrs', 'HxPartial', 'attrmap_x', 'ft_html', 'ft_hx', 'Partial', 'File',
+           'show', 'fill_form', 'fill_dataclass', 'find_inputs', 'html2ft', 'sse_message', 'A', 'Abbr', 'Address',
+           'Area', 'Article', 'Aside', 'Audio', 'B', 'Base', 'Bdi', 'Bdo', 'Blockquote', 'Body', 'Br', 'Button',
+           'Canvas', 'Caption', 'Cite', 'Code', 'Col', 'Colgroup', 'Data', 'Datalist', 'Dd', 'Del', 'Details', 'Dfn',
+           'Dialog', 'Div', 'Dl', 'Dt', 'Em', 'Embed', 'Fencedframe', 'Fieldset', 'Figcaption', 'Figure', 'Footer',
+           'Form', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'Head', 'Header', 'Hgroup', 'Hr', 'I', 'Iframe', 'Img', 'Input',
+           'Ins', 'Kbd', 'Label', 'Legend', 'Li', 'Link', 'Main', 'Map', 'Mark', 'Menu', 'Meta', 'Meter', 'Nav',
+           'Noscript', 'Object', 'Ol', 'Optgroup', 'Option', 'Output', 'P', 'Picture', 'PortalExperimental', 'Pre',
+           'Progress', 'Q', 'Rp', 'Rt', 'Ruby', 'S', 'Samp', 'Script', 'Search', 'Section', 'Select', 'Slot', 'Small',
+           'Source', 'Span', 'Strong', 'Style', 'Sub', 'Summary', 'Sup', 'Table', 'Tbody', 'Td', 'Template', 'Textarea',
+           'Tfoot', 'Th', 'Thead', 'Time', 'Title', 'Tr', 'Track', 'U', 'Ul', 'Var', 'Video', 'Wbr']
 
 # %% ../nbs/api/01_components.ipynb #8e2d405b
 from dataclasses import dataclass, asdict, is_dataclass, make_dataclass, replace, astuple, MISSING
@@ -123,6 +123,12 @@ for o in _all_: _g[o] = partial(ft_hx, o.lower())
 # %% ../nbs/api/01_components.ipynb #dfa8f01c
 HxPartial = partial(ft_hx, 'hx-partial') # For hx v4, manually mapping because Python doesn't allow hyphens
 
+
+# %% ../nbs/api/01_components.ipynb #2b0d9197
+@delegates(HxPartial, keep=True, but='hx_target,hx_swap')
+def Partial(target, *c, swap=None, **kwargs)->FT:
+    "Wrap content in an HTMX4 partial update."
+    return HxPartial(*c, hx_target=target, hx_swap=swap, **kwargs)
 
 # %% ../nbs/api/01_components.ipynb #fab04fb3
 def File(fname):

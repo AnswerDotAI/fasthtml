@@ -49,14 +49,21 @@ def add_toast(sess, message: str, typ: str = "info", dismiss: bool = False):
     assert typ in ("info", "success", "warning", "error"), '`typ` not in ("info", "success", "warning", "error")'
     sess.setdefault(sk, []).append((message, typ, dismiss))
 
+def _toast_content(sess):
+    return [Toast(msg, typ, dismiss, sess['toast_duration']) for msg, typ, dismiss in sess.pop(sk, [])]
+
 def render_toasts(sess):
-    toasts = [Toast(msg, typ, dismiss, sess['toast_duration']) for msg, typ, dismiss in sess.pop(sk, [])]
-    return Div(*toasts, id=tcid, hx_swap_oob=f'beforeend:#{tcid}')
+    return Div(*_toast_content(sess), id=tcid, hx_swap_oob=f'beforeend:#{tcid}')
 
 def toast_after(resp, req, sess):
     if sk in sess and (not resp or isinstance(resp, (tuple,FT,FtResponse))):
         sess['toast_duration'] = req.app.state.toast_duration
-        req.injects.append(render_toasts(sess))
+        if req.app.htmx4:
+            content = _toast_content(sess)
+            fragment = 'hx-request' in req.headers and 'hx-history-restore-request' not in req.headers
+            res = Partial(f'#{tcid}', *content, swap='beforeend') if fragment else Div(*content, id=tcid)
+        else: res = render_toasts(sess)
+        req.injects.append(res)
 
 def setup_toasts(app, duration=5000):
     app.state.toast_duration = duration

@@ -627,7 +627,7 @@ def def_hdrs(htmx=True, htmx4=False, surreal=True):
     "Default headers for a FastHTML app"
     hdrs = []
     if surreal: hdrs = [surrsrc,scopesrc] + hdrs
-    if htmx4: 
+    if htmx and htmx4: 
         # metaCharacter="-" makes htmx4 use dashes instead of colons
         meta_cfg = Meta(name="htmx-config", content=json.dumps({"metaCharacter": "-"}))
         hdrs = [meta_cfg, htmx4src,fhjsscr] + hdrs 
@@ -698,7 +698,7 @@ class FastHTML(Starlette):
         same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey',
         body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, max_part_size=DEF_MAXPART, **bodykw):
         middleware,before,after = map(_list, (middleware,before,after))
-        self.title,self.canonical,self.session_cookie,self.key_fname = title,canonical,session_cookie,key_fname
+        self.htmx4,self.title,self.canonical,self.session_cookie,self.key_fname = htmx4,title,canonical,session_cookie,key_fname
         hdrs,ftrs,exts = map(listify, (hdrs,ftrs,exts))
         if htmx4 and exts: exts = ['ws4' if e in ('ws', 'ws4') else e for e in exts]
         exts = {k:htmx_exts[k] for k in exts}
