@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.17
+
+### New Features
+
+- Add Partial component for HTMX4 partial updates and send toasts as hx-partial in htmx4 apps; only add htmx4 headers when htmx is enabled ([#949](https://github.com/AnswerDotAI/fasthtml/issues/949))
+
+
 ## 0.14.16
 
 ### New Features
