@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.18
+
+### New Features
+
+- htmx-4.0.1 ([#950](https://github.com/AnswerDotAI/fasthtml/issues/950))
+
+
 ## 0.14.17
 
 ### New Features
