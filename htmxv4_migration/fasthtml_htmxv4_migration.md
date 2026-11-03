@@ -73,7 +73,7 @@ Sources: [htmx v4 migration guide: Renamed events](https://four.htmx.org/docs/ge
 | `htmx:targetError` | `htmx:error` |
 | `htmx:timeout` | `htmx:error` |
 
-The lifecycle scopes and timings differ in [released htmx 4](https://github.com/bigskysoftware/htmx/blob/v4.0.0/dist/htmx.js):
+The lifecycle scopes and timings differ in [released htmx 4](https://github.com/bigskysoftware/htmx/blob/v4.0.1/dist/htmx.js):
 
 - `after:init` fires for request-action and boosted elements. `after:process` fires on each processed subtree root. `htmx.onLoad` receives that root. Use FastHTML's `proc_htmx(selector, callback)` to initialize matching roots and descendants, including the initial body load.
 - `after:settle` fires per swap target, before processing its new content, with `{task, newContent, settleTasks}`. `after:swap` fires once after all swap tasks and their processing, with `{ctx}`.
