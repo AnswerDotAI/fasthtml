@@ -310,7 +310,7 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
     # Not a special name or a special annotation
     res = conn.path_params.get(key, None)
     if res in (empty,None): res = conn.cookies.get(key, None)
-    if res in (empty,None): res = hdrs.get(snake2hyphens(key), None)
+    if res in (empty,None): res = _get_header(hdrs, snake2hyphens(key))
     if res in (empty,None): res = _formitem(conn.query_params, key)
     if res in (empty,None): res = _formitem(data, key)
     if res in (empty,None) and isinstance(vals := data.get('values'), dict): res = _formitem(vals, key)  # htmx v4 nests form data under `values`
