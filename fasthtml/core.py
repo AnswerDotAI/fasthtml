@@ -748,12 +748,19 @@ class HostRoute(Route):
 # %% ../nbs/api/00_core.ipynb #e0accf76
 @patch
 def add_route(self:FastHTML, route):
-    "Add or replace a route in the FastHTML app"
+    "Add or replace a route, rejecting ambiguous method overlaps on the same path and host"
     route.methods = [m.upper() for m in listify(route.methods)]
-    self.router.routes = [r for r in self.router.routes if not
-        (r.path==route.path and r.name == route.name and
-            ((route.methods is None) or (set(r.methods) == set(route.methods))))]
-    self.router.routes.append(route)
+    meths = set(route.methods)
+    routes = []
+    for r in self.router.routes:
+        if (r.path==route.path and r.name == route.name and
+            ((route.methods is None) or (set(r.methods or ()) == meths))): continue
+        overlap = set(r.methods or ()) & meths
+        if (r.path == route.path and getattr(r, 'host', None) == getattr(route, 'host', None)
+            and overlap):
+            raise ValueError(f"Overlapping route methods {sorted(overlap)!r} for path {route.path!r}")
+        routes.append(r)
+    self.router.routes = routes + [route]
     self.router.routes.sort(key=lambda r: not getattr(r, 'host', None))
 
 
