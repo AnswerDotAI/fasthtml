@@ -16,7 +16,7 @@ The decorated function doubles as a URL builder, so links never need hardcoded p
     A('More', href=foo.to(a=1))   # <a href="/foo?a=1"> `.to()` fills path params; the rest become query params.
     Div('...', hx_get=foo)        # route functions work directly as htmx attr values: hx-get="/foo"
 
-Handlers return FT trees (from `fastcore.xml`), rendered as HTML automatically: a full page for regular requests, a bare fragment for HTMX requests. In a full page, top-level `Title`, `Meta`, `Link`, and `Style` items go in `<head>`; the rest goes in `<body>`. Strings are sent as HTML, dicts as JSON, and a Starlette `Response` is sent untouched. A return tuple may mix content with special items: any `HttpHeader` (e.g. from `cookie()` or `HtmxResponseHeaders()`) becomes a response header, any `BackgroundTask` runs after the response is sent, and the rest renders as content. `Redirect` picks the right redirect mechanism for HTMX vs regular requests, and `FtResponse` wraps FT content when you need the status code or headers.
+Handlers return FT trees (from `fastcore.xml`), rendered as HTML automatically: a full page for regular requests and htmx 4 `full` requests, a bare fragment for other HTMX requests. In a full page, top-level `Title`, `Meta`, `Link`, and `Style` items go in `<head>`; the rest goes in `<body>`. Strings are sent as HTML, dicts as JSON, and a Starlette `Response` is sent untouched. A return tuple may mix content with special items: any `HttpHeader` (e.g. from `cookie()` or `HtmxResponseHeaders()`) becomes a response header, any `BackgroundTask` runs after the response is sent, and the rest renders as content. `Redirect` picks the right redirect mechanism for HTMX vs regular requests, and `FtResponse` wraps FT content when you need the status code or headers.
 
 Handler parameters are filled from the request: each is looked up in path, cookie, header (snake_case names match Hyphen-Case headers), query, then form data, and cast by calling its annotation on the value. Hyphens in form/query names match underscores in handler parameters and typed body fields. Exact names take precedence within each source. Dictionary and request access retain the original keys. `bool`, `int`, and `date` get smart string parsing; `UploadFile` passes through. Repeated params take the last value unless annotated `list[T]`, which collects them all. A param with no annotation and no special name is ignored, with a warning. A dataclass, TypedDict, namedtuple, or any annotated class collects the whole form body; a `__from_request__` classmethod customizes construction. A missing required param is a 400, a failed cast a 404. These special names need no annotation:
 
@@ -482,7 +482,7 @@ def respond(req, heads, bdy):
 def is_full_page(req, resp):
     "Check if response should be rendered as full page or fragment"
     if resp and any(getattr(o, 'tag', '')=='html' for o in resp): return True
-    return 'hx-request' in req.headers and 'hx-history-restore-request' not in req.headers
+    return 'hx-request' in req.headers and req.headers.get('hx-request-type') != 'full' and 'hx-history-restore-request' not in req.headers
 
 # %% ../nbs/api/00_core.ipynb #358badec
 def _part_resp(req, resp):
@@ -491,7 +491,7 @@ def _part_resp(req, resp):
     resp = resp + tuple(getattr(req, 'injects', ()))
     http_hdrs,resp = partition(resp, risinstance(HttpHeader))
     tasks,resp = partition(resp, risinstance(BackgroundTask))
-    kw = {"headers": {"vary": "HX-Request, HX-History-Restore-Request"}}
+    kw = {"headers": {"vary": "HX-Request, HX-Request-Type, HX-History-Restore-Request"}}
     if http_hdrs: kw['headers'] |= {o.k:str(o.v) for o in http_hdrs}
     if tasks:
         ts = BackgroundTasks()
