@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.19
+
+### New Features
+
+- Await uvicorn serve task in JupyUviAsync.stop instead of polling port, so shutdown fully completes and serve errors are re-raised ([#951](https://github.com/AnswerDotAI/fasthtml/issues/951))
+
+
 ## 0.14.18
 
 ### New Features
