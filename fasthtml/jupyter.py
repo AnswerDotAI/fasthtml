@@ -12,7 +12,7 @@ import asyncio, time, uvicorn
 from threading import Thread
 from fastcore.utils import *
 from fastcore.meta import delegates
-from fastcore.net import wait_port_free, wait_port_free_async
+from fastcore.net import wait_port_free
 from .common import *
 from .common import show as _show
 from fastcore.parallel import startthread
@@ -32,7 +32,7 @@ def nb_serve(app, log_level="error", port=8000, host='0.0.0.0', daemon=False, **
 async def nb_serve_async(app, log_level="error", port=8000, host='0.0.0.0', **kwargs):
     "Async version of `nb_serve`"
     server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, host=host, port=port, **kwargs))
-    asyncio.get_running_loop().create_task(server.serve())
+    server._serve_task = asyncio.get_running_loop().create_task(server.serve())
     while not server.started: await asyncio.sleep(0.01)
     return server
 
@@ -112,8 +112,7 @@ class JupyUviAsync(JupyUvi):
 
     async def stop(self):
         self.server.should_exit = True
-        await wait_port_free_async(self.port, self.host)
-
+        await self.server._serve_task
 
 # %% ../nbs/api/06_jupyter.ipynb #a448e420
 from starlette.testclient import TestClient
