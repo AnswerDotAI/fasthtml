@@ -607,7 +607,9 @@ def _wrap_ex(f, status_code, hdrs, ftrs, htmlkw, bodykw, body_wrap):
         req.hdrs,req.ftrs,req.htmlkw,req.bodykw = map(deepcopy, (hdrs, ftrs, htmlkw, bodykw))
         req.body_wrap = body_wrap
         res = await _handle(f, req, exc)
-        return _resp(req, res, status_code=status_code)
+        code = status_code if isinstance(status_code, int) else getattr(exc, 'status_code', 500)
+        if not isinstance(code, int): code = 500
+        return _resp(req, res, status_code=code)
     return _f
 
 # %% ../nbs/api/00_core.ipynb #bc323fd4
