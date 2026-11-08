@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.20
+
+### New Features
+
+- Use exception `status_code` for responses from class-keyed exception handlers, defaulting to 500 when no int code is available ([#952](https://github.com/AnswerDotAI/fasthtml/issues/952))
+
+
 ## 0.14.19
 
 ### New Features
