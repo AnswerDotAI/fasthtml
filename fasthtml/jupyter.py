@@ -8,7 +8,7 @@ Docs: https://www.fastht.ml/docs/api/jupyter.html.md"""
 __all__ = ['nb_serve', 'nb_serve_async', 'show', 'render_ft', 'htmx_config_port', 'JupyUvi', 'JupyUviAsync', 'HTMX', 'ws_client']
 
 # %% ../nbs/api/06_jupyter.ipynb #2c69d9d0
-import asyncio, time, uvicorn
+import asyncio, json, time, uvicorn
 from threading import Thread
 from fastcore.utils import *
 from fastcore.meta import delegates
@@ -48,8 +48,10 @@ def render_ft(**kw):
     "Call once in a notebook or solveit dialog to auto-render components with HTMX support"
     @patch
     def _repr_html_(self:FT):
-        scr_proc = Script('if (window.htmx) htmx.process(document.body)')
-        return to_xml(Div(self, scr_proc, **kw))
+        uid = unqid()
+        selector = json.dumps(f'[data-ft-output="{uid}"]')
+        scr = Script(f'if (window.htmx) htmx.process(document.querySelector({selector}))')
+        return to_xml(Div(self, scr, **(kw | {'data-ft-output': uid})))
 
 # %% ../nbs/api/06_jupyter.ipynb #1daaa0e1
 def htmx_config_port(port=8000):
