@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.21
+
+### New Features
+
+- Scope htmx.process in FT `_repr_html_` to the rendered output element via unique data-ft-output id instead of whole document body ([#954](https://github.com/AnswerDotAI/fasthtml/issues/954))
+
+
 ## 0.14.20
 
 ### New Features
