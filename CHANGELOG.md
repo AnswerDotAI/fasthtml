@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.22
+
+### New Features
+
+- Add fasthtml.proxy for streaming HTTP and WebSocket forwarding, BearerSessionMiddleware for bearer auth, and JSON 401 for API OAuth requests ([#955](https://github.com/AnswerDotAI/fasthtml/issues/955))
+
+
 ## 0.14.21
 
 ### New Features
