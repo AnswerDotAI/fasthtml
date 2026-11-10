@@ -49,10 +49,10 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_ex
            'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date',
            'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'ApiReturn',
            'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple',
-           'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML',
-           'HostRoute', 'nested_name', 'serve', 'until_disconnect', 'cancel_on_disconnect', 'Client', 'RouteFuncs',
-           'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'StaticImmutable', 'vurl', 'add_sig_param', 'into',
-           'MiddlewareBase', 'FtResponse', 'unqid']
+           'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan',
+           'BearerSessionMiddleware', 'FastHTML', 'HostRoute', 'nested_name', 'serve', 'until_disconnect',
+           'cancel_on_disconnect', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache',
+           'StaticImmutable', 'vurl', 'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
 import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous,hashlib,signal,subprocess
@@ -689,6 +689,25 @@ class Lifespan:
         for f in self.shutdown: await _handle(f)
 
     def on_event(self, event_type): return lambda f: (getattr(self, event_type)).append(f)
+
+# %% ../nbs/api/00_core.ipynb #375b0f62
+class BearerSessionMiddleware(SessionMiddleware):
+    "Accept signed session cookies through Authorization within `bearer_path`."
+    @delegates(SessionMiddleware)
+    def __init__(self, app, secret_key, bearer_path='/', **kwargs):
+        self.bearer_path = bearer_path
+        super().__init__(app, secret_key, **kwargs)
+
+    async def __call__(self, scope, receive, send):
+        if scope['type'] in ('http', 'websocket') and scope['path'].startswith(self.bearer_path):
+            conn = HTTPConnection(scope)
+            if 'authorization' in conn.headers:
+                scheme, _, token = conn.headers['authorization'].partition(' ')
+                value = cookies.SimpleCookie().value_encode(token if scheme.lower()=='bearer' else '')[1]
+                cookie = '; '.join(conn.headers.getlist('cookie') + [f'{self.session_cookie}={value}'])
+                scope = scope | dict(headers=[(k,v) for k,v in scope['headers'] if k!=b'cookie'] +
+                    [(b'cookie', cookie.encode('latin-1'))])
+        await super().__call__(scope, receive, send)
 
 # %% ../nbs/api/00_core.ipynb #3327a1e9
 class FastHTML(Starlette):

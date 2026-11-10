@@ -2,7 +2,8 @@
 
 Modules:
 
-- `fasthtml.core`: The `FastHTML` subclass of `Starlette`."""
+- `fasthtml.core`: The `FastHTML` subclass of `Starlette`.
+- `fasthtml.proxy`: Streaming HTTP responses and bidirectional WebSocket forwarding"""
 
 __version__ = "0.14.22"
 from .core import *
