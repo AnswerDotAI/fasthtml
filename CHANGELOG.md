@@ -2,6 +2,34 @@
 
 <!-- do not remove -->
 
+## 0.14.22
+
+### New Features
+
+- Add fasthtml.proxy for streaming HTTP and WebSocket forwarding, BearerSessionMiddleware for bearer auth, and JSON 401 for API OAuth requests ([#955](https://github.com/AnswerDotAI/fasthtml/issues/955))
+
+
+## 0.14.21
+
+### New Features
+
+- Scope htmx.process in FT `_repr_html_` to the rendered output element via unique data-ft-output id instead of whole document body ([#954](https://github.com/AnswerDotAI/fasthtml/issues/954))
+
+
+## 0.14.20
+
+### New Features
+
+- Use exception `status_code` for responses from class-keyed exception handlers, defaulting to 500 when no int code is available ([#952](https://github.com/AnswerDotAI/fasthtml/issues/952))
+
+
+## 0.14.19
+
+### New Features
+
+- Await uvicorn serve task in JupyUviAsync.stop instead of polling port, so shutdown fully completes and serve errors are re-raised ([#951](https://github.com/AnswerDotAI/fasthtml/issues/951))
+
+
 ## 0.14.18
 
 ### New Features

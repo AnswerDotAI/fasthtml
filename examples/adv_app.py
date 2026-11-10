@@ -41,15 +41,15 @@ proc_htmx('.markdown', e => e.innerHTML = marked.parse(e.textContent));
 # The `FastHTML` class is a subclass of `Starlette`, so you can use any parameters that `Starlette` accepts. In addition, you can add your Beforeware here, and any headers you want included in HTML responses.
 def _not_found(req, exc): return Titled('Oh no!', Div('We could not find that page :('))
 app = FastHTML(before=bware,
-               # These are the same as Starlette exception_handlers, except they also support `FT` results
-               exception_handlers={404: _not_found},
-               # PicoCSS is a simple CSS system for getting started; for more complex styling try MonsterUI (which wraps uikit and Tailwind)
-               hdrs=(picolink, # PicoCSS headers
-                     # Look at fasthtml/js.py to see how to add Javascript libraries to FastHTML, like this one.
-                     SortableJS('.sortable'),
-                     # MarkdownJS is actually provided as part of FastHTML, but we've included the js code here so that you can see how it works.
-                     Script(markdown_js, type='module'))
-                )
+   # These are the same as Starlette exception_handlers, except they also support `FT` results
+   exception_handlers={404: _not_found},
+   # PicoCSS is a simple CSS system for getting started; for more complex styling try MonsterUI (which wraps uikit and Tailwind)
+   hdrs=(picolink, # PicoCSS headers
+         # Look at fasthtml/js.py to see how to add Javascript libraries to FastHTML, like this one.
+         SortableJS('.sortable'),
+         # MarkdownJS is actually provided as part of FastHTML, but we've included the js code here so that you can see how it works.
+         Script(markdown_js, type='module'))
+)
 # We add `rt` as a shortcut for `app.route`, which is what we'll use to decorate our route handlers.
 rt = app.route
 
@@ -135,8 +135,7 @@ def show(id:int):
     todo = todos[id]
     # `hx_swap` determines how the update should occur. We use "outerHTML" to replace the entire todo `Li` element.
     # `rm.to(id=todo.id)` is a shortcut for `f'/rm?id={todo.id}'`. All routes have this `to` method.
-    btn = Button('delete', hx_post=rm.to(id=todo.id),
-                 hx_target=f'#todo-{todo.id}', hx_swap="outerHTML")
+    btn = Button('delete', hx_post=rm.to(id=todo.id), hx_target=f'#todo-{todo.id}', hx_swap="outerHTML")
     # The "markdown" class is used here because that's the CSS selector we used in the JS earlier. This will trigger the JS to parse the markdown.
     # Because `class` is a reserved keyword in Python, we use `cls` instead, which FastHTML auto-converts.
     return Div(H2(todo.title), Div(todo.details, cls="markdown"), btn)
@@ -179,17 +178,15 @@ def index(auth):
     title = f"{auth}'s Todo list"
     top = Grid(H1(title), Div(A('logout', href=logout), style='text-align: right'))
     new_inp = Input(id="new-title", name="title", placeholder="New Todo")
-    add = Form(Group(new_inp, Button("Add")),
-               hx_post=create, target_id='todo-list', hx_swap="afterbegin")
+    add = Form(Group(new_inp, Button("Add")), hx_post=create, target_id='todo-list', hx_swap="afterbegin")
     # Treating a table as a callable (i.e with `todos(...)` here) queries the table. Because we called `xtra` in our Beforeware, this queries the todos for the current user only.
     # We can include the todo objects directly as children of the `Form`, because the `Todo` class has `__ft__` defined. This is automatically called by FastHTML to convert the `Todo` objects into `FT` objects when needed.
     # The reason we put the todo list inside a form is so that we can use the 'sortable' js library to reorder them. That library calls the js `end` event when dragging is complete, so our trigger here causes our `/reorder` handler to be called.
-    frm = Form(*todos(order_by='priority'),
-               id='todo-list', cls='sortable', hx_post=reorder, hx_trigger="end")
+    frm = Form(*todos(order_by='priority'), id='todo-list', cls='sortable', hx_post=reorder, hx_trigger="end")
     # We create an empty 'current-todo' Div at the bottom of our page, as a target for the details and editing views.
     card = Card(P('Drag/drop todos to reorder them'),
-                Ul(frm),
-                header=add, footer=Div(id='current-todo'))
+        Ul(frm),
+        header=add, footer=Div(id='current-todo'))
     # PicoCSS uses `<Main class='container'>` page content; `Container` is a tiny function that generates that.
     return Title(title), Container(top, card)
 

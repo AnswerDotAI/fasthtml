@@ -8,11 +8,11 @@ Docs: https://www.fastht.ml/docs/api/jupyter.html.md"""
 __all__ = ['nb_serve', 'nb_serve_async', 'show', 'render_ft', 'htmx_config_port', 'JupyUvi', 'JupyUviAsync', 'HTMX', 'ws_client']
 
 # %% ../nbs/api/06_jupyter.ipynb #2c69d9d0
-import asyncio, time, uvicorn
+import asyncio, json, time, uvicorn
 from threading import Thread
 from fastcore.utils import *
 from fastcore.meta import delegates
-from fastcore.net import wait_port_free, wait_port_free_async
+from fastcore.net import wait_port_free
 from .common import *
 from .common import show as _show
 from fastcore.parallel import startthread
@@ -32,7 +32,7 @@ def nb_serve(app, log_level="error", port=8000, host='0.0.0.0', daemon=False, **
 async def nb_serve_async(app, log_level="error", port=8000, host='0.0.0.0', **kwargs):
     "Async version of `nb_serve`"
     server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, host=host, port=port, **kwargs))
-    asyncio.get_running_loop().create_task(server.serve())
+    server._serve_task = asyncio.get_running_loop().create_task(server.serve())
     while not server.started: await asyncio.sleep(0.01)
     return server
 
@@ -48,8 +48,10 @@ def render_ft(**kw):
     "Call once in a notebook or solveit dialog to auto-render components with HTMX support"
     @patch
     def _repr_html_(self:FT):
-        scr_proc = Script('if (window.htmx) htmx.process(document.body)')
-        return to_xml(Div(self, scr_proc, **kw))
+        uid = unqid()
+        selector = json.dumps(f'[data-ft-output="{uid}"]')
+        scr = Script(f'if (window.htmx) htmx.process(document.querySelector({selector}))')
+        return to_xml(Div(self, scr, **(kw | {'data-ft-output': uid})))
 
 # %% ../nbs/api/06_jupyter.ipynb #1daaa0e1
 def htmx_config_port(port=8000):
@@ -112,8 +114,7 @@ class JupyUviAsync(JupyUvi):
 
     async def stop(self):
         self.server.should_exit = True
-        await wait_port_free_async(self.port, self.host)
-
+        await self.server._serve_task
 
 # %% ../nbs/api/06_jupyter.ipynb #a448e420
 from starlette.testclient import TestClient

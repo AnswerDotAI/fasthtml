@@ -234,11 +234,11 @@ class OAuth:
         if not skip: skip = [redir_path,error_path,login_path]
         redir_handler = app.post if redir_method == 'post' else app.get
         store_attr()
-        async def before(req, session):
+        async def before(req, session, api):
             if 'auth' not in req.scope: req.scope['auth'] = session.get('auth')
             auth = req.scope['auth']
-            if not auth: return self.redir_login(session)
-            res = await _arun(self.check_invalid(req, session, auth))
+            res = self.redir_login(session) if not auth else await _arun(self.check_invalid(req, session, auth))
+            if api and isinstance(res, RedirectResponse): return JSONResponse({'error':'Not authenticated.'}, status_code=401)
             if res: return res
         app.before.append(Beforeware(before, skip=skip))
 
