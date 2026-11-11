@@ -171,6 +171,8 @@ def _fill_item(item, obj):
             else: attr['value'] = val
         if tag=='textarea': cs=(val,)
         if tag == 'select':
+            for opt in cs:
+                if opt.tag == 'option': opt.attrs.pop('selected', None)
             if isinstance(val, list):
                 for opt in cs:
                     if opt.tag == 'option' and opt.get('value') in val:
