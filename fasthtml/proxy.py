@@ -6,7 +6,7 @@ Register proxy handlers with Starlette's `Route` and `WebSocketRoute`. FastHTML'
 
 Connection-nominated headers and explicitly excluded names are removed. Repeated end-to-end values remain separate, with lowercase names.
 
-`proxy_websocket` connects upstream before accepting the caller. It forwards the selected subprotocol and relays text and binary frames. Either peer disconnecting cancels the other forwarding task and closes the upstream connection. Supply a complete URL, including any query parameters.
+`proxy_websocket` connects upstream before accepting the caller. Upstream HTTP 401, 403 and 404 responses accept and close the caller with code 1008. It forwards the selected subprotocol and relays text and binary frames. Either peer disconnecting cancels the other forwarding task and closes the upstream connection. Supply a complete URL, including any query parameters.
 
 The relay reads raw ASGI events from `receive()`. A `websocket.receive` event carries `text` or `bytes`. A `websocket.disconnect` event carries a close `code`. `receive_text()` and `receive_bytes()` extract one data field instead.
 
@@ -75,26 +75,31 @@ async def proxy_websocket(
     headers=None, # Additional upstream handshake headers
 ):
     "Relay text and binary frames until either peer disconnects."
-    async with websockets.connect(url, additional_headers=headers,
-        subprotocols=websocket.scope['subprotocols'], max_size=None) as target:
-        await websocket.accept(subprotocol=target.subprotocol)
-        async def to_target():
-            while True:
-                message = await websocket.receive()
-                if message['type']=='websocket.disconnect': return
-                await target.send(message['text'] if 'text' in message else message['bytes'])
-        async def to_client():
-            async for message in target:
-                if isinstance(message, str): await websocket.send_text(message)
-                else: await websocket.send_bytes(message)
-        tasks = [asyncio.create_task(to_target()), asyncio.create_task(to_client())]
-        try:
-            done,_ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-            for task in done: task.result()
-        finally:
-            for task in tasks: task.cancel()
-            await asyncio.gather(*tasks, return_exceptions=True)
-            if websocket.client_state.name!='DISCONNECTED':
-                code = target.close_code if target.close_code not in (None, 1005, 1006, 1015) else 1011
-                await websocket.close(code=code, reason=target.close_reason or '')
+    try:
+        async with websockets.connect(url, additional_headers=headers,
+            subprotocols=websocket.scope['subprotocols'] or None, max_size=None) as target:
+            await websocket.accept(subprotocol=target.subprotocol)
+            async def to_target():
+                while True:
+                    message = await websocket.receive()
+                    if message['type']=='websocket.disconnect': return
+                    await target.send(message['text'] if 'text' in message else message['bytes'])
+            async def to_client():
+                async for message in target:
+                    if isinstance(message, str): await websocket.send_text(message)
+                    else: await websocket.send_bytes(message)
+            tasks = [asyncio.create_task(to_target()), asyncio.create_task(to_client())]
+            try:
+                done,_ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+                for task in done: task.result()
+            finally:
+                for task in tasks: task.cancel()
+                await asyncio.gather(*tasks, return_exceptions=True)
+                if websocket.client_state.name!='DISCONNECTED':
+                    code = target.close_code if target.close_code not in (None, 1005, 1006, 1015) else 1011
+                    await websocket.close(code=code, reason=target.close_reason or '')
+    except websockets.exceptions.InvalidStatus as e:
+        if e.response.status_code not in (401, 403, 404): raise
+        await websocket.accept()
+        await websocket.close(code=1008, reason=f'Upstream refused connection ({e.response.status_code})')
 
