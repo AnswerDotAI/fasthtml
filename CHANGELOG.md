@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.23
+
+### New Features
+
+- Close proxied websockets with code 1008 when upstream refuses with 401/403/404, and pass None for empty subprotocol lists ([#959](https://github.com/AnswerDotAI/fasthtml/issues/959))
+
+
 ## 0.14.22
 
 ### New Features
