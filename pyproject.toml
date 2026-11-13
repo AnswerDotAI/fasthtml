@@ -35,6 +35,9 @@ version = {attr = "fasthtml.__version__"}
 [tool.setuptools.packages.find]
 include = ["fasthtml"]
 
+[tool.setuptools.package-data]
+fasthtml = ["py.typed"]
+
 [tool.nbdev]
 allowed_metadata_keys = ['solveit']
 allowed_cell_metadata_keys = ['solveit_ai']
