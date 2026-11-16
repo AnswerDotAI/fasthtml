@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.24
+
+### Bugs Squashed
+
+- Make `nb_serve_async` raise when server startup fails, instead of waiting forever for it to start ([#960](https://github.com/AnswerDotAI/fasthtml/issues/960))
+
+
 ## 0.14.23
 
 ### New Features
