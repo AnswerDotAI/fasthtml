@@ -21,6 +21,9 @@ Documentation = "https://www.fastht.ml/docs/"
 [project.entry-points.nbdev]
 fasthtml = "fasthtml._modidx:d"
 
+[project.entry-points.pyskills]
+fasthtml = "fasthtml.skill"
+
 [project.optional-dependencies]
 dev = ['ipython', 'lxml', 'pysym2md>=0.0.6', 'monsterui', 'PyJWT', 'fastlite', 'pytest-asyncio']
 
