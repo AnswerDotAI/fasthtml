@@ -32,8 +32,14 @@ def nb_serve(app, log_level="error", port=8000, host='0.0.0.0', daemon=False, **
 async def nb_serve_async(app, log_level="error", port=8000, host='0.0.0.0', **kwargs):
     "Async version of `nb_serve`"
     server = uvicorn.Server(uvicorn.Config(app, log_level=log_level, host=host, port=port, **kwargs))
-    server._serve_task = asyncio.get_running_loop().create_task(server.serve())
-    while not server.started: await asyncio.sleep(0.01)
+    async def serve():
+        try: await server.serve()
+        except SystemExit as e: raise RuntimeError(f'Uvicorn exited with status {e.code}') from e
+    server._serve_task = asyncio.get_running_loop().create_task(serve())
+    while not server.started and not server._serve_task.done(): await asyncio.sleep(0.01)
+    if not server.started:
+        await server._serve_task
+        raise RuntimeError('Server exited before startup completed')
     return server
 
 # %% ../nbs/api/06_jupyter.ipynb #654b36bb

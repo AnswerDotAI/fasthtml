@@ -69,6 +69,7 @@ async def echo_http(request):
     return response
 
 async def echo_ws(ws):
+    if status := ws.query_params.get('deny'): return await ws.send_denial_response(Response(status_code=int(status)))
     await ws.accept(subprotocol='echo')
     await ws.send_text(await ws.receive_text())
     await ws.send_bytes(await ws.receive_bytes())
@@ -79,7 +80,7 @@ def test_proxy():
     with running_server(upstream) as url:
         async def forward_http(request):
             return ProxyResponse(request, url, headers=proxy_headers(request.headers, exclude=(b'authorization',)))
-        async def forward_ws(ws): await proxy_websocket(ws, url.replace('http', 'ws')+'/ws')
+        async def forward_ws(ws): await proxy_websocket(ws, url.replace('http', 'ws')+'/ws?'+ws.url.query)
         app = Starlette(routes=[Route('/', forward_http, methods=['PATCH']), WebSocketRoute('/ws', forward_ws)])
         with TestClient(app) as proxy:
             body = b'["a", {"b":2}]'
@@ -97,3 +98,5 @@ def test_proxy():
                 ws.send_bytes(b'\x00bytes')
                 assert ws.receive_bytes() == b'\x00bytes'
                 assert ws.receive()['code'] == 1000
+            for status in (401, 403, 404):
+                with proxy.websocket_connect(f'/ws?deny={status}') as ws: assert ws.receive()['code'] == 1008
