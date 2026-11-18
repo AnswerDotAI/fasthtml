@@ -71,6 +71,7 @@ async def echo_http(request):
 async def echo_ws(ws):
     if status := ws.query_params.get('deny'): return await ws.send_denial_response(Response(status_code=int(status)))
     await ws.accept(subprotocol='echo')
+    await ws.send_text(ws.headers.get('x-api-token', ''))
     await ws.send_text(await ws.receive_text())
     await ws.send_bytes(await ws.receive_bytes())
     await ws.close(code=1000)
@@ -80,7 +81,8 @@ def test_proxy():
     with running_server(upstream) as url:
         async def forward_http(request):
             return ProxyResponse(request, url, headers=proxy_headers(request.headers, exclude=(b'authorization',)))
-        async def forward_ws(ws): await proxy_websocket(ws, url.replace('http', 'ws')+'/ws?'+ws.url.query)
+        async def forward_ws(ws):
+            await proxy_websocket(ws, url.replace('http', 'ws')+'/ws?'+ws.url.query, headers=[(b'x-api-token', b'user:key')])
         app = Starlette(routes=[Route('/', forward_http, methods=['PATCH']), WebSocketRoute('/ws', forward_ws)])
         with TestClient(app) as proxy:
             body = b'["a", {"b":2}]'
@@ -93,6 +95,7 @@ def test_proxy():
             assert res.headers.get_list('x-tag') == ['a', 'b']
             with proxy.websocket_connect('/ws', subprotocols=['echo']) as ws:
                 assert ws.accepted_subprotocol == 'echo'
+                assert ws.receive_text() == 'user:key'
                 ws.send_text('hello')
                 assert ws.receive_text() == 'hello'
                 ws.send_bytes(b'\x00bytes')

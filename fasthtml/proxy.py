@@ -72,11 +72,11 @@ class ProxyResponse(Response):
 async def proxy_websocket(
     websocket, # Incoming Starlette WebSocket, not yet accepted
     url, # Complete upstream WebSocket URL, including query parameters
-    headers=None, # Additional upstream handshake headers
+    headers=None, # Additional upstream headers, as a mapping or string/byte pairs
 ):
     "Relay text and binary frames until either peer disconnects."
     try:
-        async with websockets.connect(url, additional_headers=headers,
+        async with websockets.connect(url, additional_headers=httpx2.Headers(headers).multi_items(),
             subprotocols=websocket.scope['subprotocols'] or None, max_size=None) as target:
             await websocket.accept(subprotocol=target.subprotocol)
             async def to_target():
