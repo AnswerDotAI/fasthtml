@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.26
+
+### New Features
+
+- Accept header mappings or string/byte pairs in `proxy_websocket` by normalizing via httpx2.Headers before upstream connect ([#963](https://github.com/AnswerDotAI/fasthtml/issues/963))
+
+
 ## 0.14.25
 
 ### New Features
