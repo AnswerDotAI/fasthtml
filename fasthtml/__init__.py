@@ -6,5 +6,5 @@ Modules:
 - `fasthtml.proxy`: Streaming HTTP responses and bidirectional WebSocket forwarding
 - `fasthtml.skill`: Write and review idiomatic FastHTML apps."""
 
-__version__ = "0.14.26"
+__version__ = "0.14.27"
 from .core import *
