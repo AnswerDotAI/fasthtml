@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.25
+
+### New Features
+
+- Bump htmx 4 to 4.0.2 and make `ws_client` use hx-ws-connect when app.htmx4 is enabled ([#962](https://github.com/AnswerDotAI/fasthtml/issues/962))
+
+
 ## 0.14.24
 
 ### Bugs Squashed
