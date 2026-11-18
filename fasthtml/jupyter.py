@@ -156,10 +156,10 @@ def HTMX(path="/", host='localhost', app=None, port=8000, height="auto", link=Fa
 def ws_client(app, nm='', host='localhost', port=8000, ws_connect='/ws', frame=True, link=True, **kwargs):
     path = f'/{nm}'
     c = Main('', cls="container", id=unqid())
+    ws_attrs = dict(hx_ws_connect=ws_connect) if app.htmx4 else dict(hx_ext='ws', ws_connect=ws_connect)
     @app.get(path)
     def f():
-        return Div(c, id=nm or '_dest', hx_trigger='load',
-                   hx_ext="ws", ws_connect=ws_connect, **kwargs)
+        return Div(c, id=nm or '_dest', hx_trigger='load', **ws_attrs, **kwargs)
     if link: display(HTML(f'<a href="http://{host}:{port}{path}" target="_blank">open in browser</a>'))
     if frame: display(HTMX(path, host=host, port=port))
     def send(o): asyncio.create_task(app._send(o))
