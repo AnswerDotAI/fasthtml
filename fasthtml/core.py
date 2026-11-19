@@ -274,10 +274,8 @@ async def _find_p(conn, data, hdrs, arg:str, p:Parameter):
         if issubclass(anno, Starlette): return conn.scope['app']
         if issubclass(anno, HTTPConnection): return conn
         if issubclass(anno, State): return conn.scope['app'].state
-        if anno is dict: return data
-        if _is_body(anno):
-            if 'session'.startswith(arg.lower()): return conn.scope.get('session', {})
-            return await _from_body(conn, p, data)
+        if anno is dict: return conn.scope.get('session', {}) if 'session'.startswith(arg.lower()) else data
+        if _is_body(anno): return await _from_body(conn, p, data)
     if (msg := _check_anno(arg, anno)): return warn(msg)
     # Special param names with no annotations
     if anno is empty:
