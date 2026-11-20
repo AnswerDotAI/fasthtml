@@ -258,7 +258,8 @@ class OAuth:
             res = await _arun(self.get_auth(info, ident, session, state))
             if not res: return self.redir_login(session)
             req.scope['auth'] = session['auth'] = ident
-            return res
+            nxt = session.pop('next', '')
+            return RedirectResponse(nxt, status_code=303) if nxt.startswith('/') and not nxt.startswith('//') else res
 
         @app.get(logout_path)
         async def logout(session):
