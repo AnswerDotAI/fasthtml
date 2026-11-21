@@ -7,5 +7,7 @@ Modules:
 - `fasthtml.skill`: Write and review idiomatic FastHTML apps.
 - `fasthtml.vite`: Vite+ asset headers and development server integration for FastHTML"""
 
-__version__ = "0.14.27"
+__version__ = "0.14.28"
+
+
 from .core import *
