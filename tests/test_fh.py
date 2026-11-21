@@ -64,6 +64,7 @@ async def echo_http(request):
     response = StreamingResponse(iter([body[:1], body[1:]]), status_code=201, headers={
         'content-type': request.headers.get('content-type', 'application/octet-stream'),
         'x-query': request.url.query, 'x-method': request.method,
+        'x-transfer-encoding': request.headers.get('transfer-encoding', ''),
         'x-private': request.headers.get('x-private', ''), 'x-auth': request.headers.get('authorization', '')})
     response.raw_headers += [(b'x-tag', value.encode()) for value in request.headers.getlist('x-tag')]
     return response
@@ -83,7 +84,7 @@ def test_proxy():
             return ProxyResponse(request, url, headers=proxy_headers(request.headers, exclude=(b'authorization',)))
         async def forward_ws(ws):
             await proxy_websocket(ws, url.replace('http', 'ws')+'/ws?'+ws.url.query, headers=[(b'x-api-token', b'user:key')])
-        app = Starlette(routes=[Route('/', forward_http, methods=['PATCH']), WebSocketRoute('/ws', forward_ws)])
+        app = Starlette(routes=[Route('/', forward_http, methods=['GET', 'PATCH']), WebSocketRoute('/ws', forward_ws)])
         with TestClient(app) as proxy:
             body = b'["a", {"b":2}]'
             headers = [('Content-Type', 'application/json'), ('X-Tag', 'a'), ('X-Tag', 'b'),
@@ -93,6 +94,9 @@ def test_proxy():
             assert res.headers['content-type']=='application/json' and res.headers['x-query']=='q=one&q=two'
             assert (res.headers['x-method'], res.headers['x-private'], res.headers['x-auth']) == ('PATCH', '', '')
             assert res.headers.get_list('x-tag') == ['a', 'b']
+            res = proxy.get('/')
+            assert res.content == b'' and res.headers['x-transfer-encoding'] == ''
+            assert proxy.request('GET', '/', content=iter([body[:1], body[1:]])).content == body
             with proxy.websocket_connect('/ws', subprotocols=['echo']) as ws:
                 assert ws.accepted_subprotocol == 'echo'
                 assert ws.receive_text() == 'user:key'

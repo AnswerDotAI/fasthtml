@@ -56,10 +56,15 @@ class ProxyResponse(Response):
         self.fallback = fallback
 
     async def __call__(self, scope, receive, send):
+        stream = self.request.stream()
+        first = await anext(stream)
+        async def body():
+            yield first
+            async for chunk in stream: yield chunk
         try:
             async with httpx2.AsyncClient(timeout=httpx2.Timeout(None, connect=10)) as client:
                 async with client.stream(self.request.method, self.url, headers=self.fwd,
-                    params=self.request.url.query, content=self.request.stream()) as r:
+                    params=self.request.url.query, content=body() if first else None) as r:
                     response = StreamingResponse(r.aiter_raw(), status_code=r.status_code)
                     replaced = {k for k,v in self.raw_headers}
                     response.raw_headers = [(k,v) for k,v in proxy_headers(r.headers) if k not in replaced] + self.raw_headers

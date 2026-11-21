@@ -25,7 +25,7 @@ fasthtml = "fasthtml._modidx:d"
 fasthtml = "fasthtml.skill"
 
 [project.optional-dependencies]
-dev = ['ipython', 'lxml', 'pysym2md>=0.0.6', 'monsterui', 'PyJWT', 'fastlite', 'pytest-asyncio']
+dev = ['ipython', 'lxml', 'pysym2md>=0.0.6', 'monsterui', 'PyJWT', 'fastlite']
 
 
 [project.scripts]
@@ -48,6 +48,3 @@ lib_path = "fasthtml"
 [tool.chkstyle]
 skip_paths = ["_modidx.py"]
 ignore = ["closing-bracket", "inefficient-multiline-signature", "inefficient-multiline-expression"]
-
-[tool.pytest.ini_options]
-asyncio_default_fixture_loop_scope = 'function'
