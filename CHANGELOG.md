@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.27
+
+### New Features
+
+- Add fasthtml.vite for Vite+ asset/dev integration and omit empty body streaming in ProxyResponse ([#964](https://github.com/AnswerDotAI/fasthtml/issues/964))
+
+
 ## 0.14.26
 
 ### New Features
