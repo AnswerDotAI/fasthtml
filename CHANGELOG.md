@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.28
+
+### New Features
+
+- Add app.startup and app.shutdown decorators with managed background tasks, and build option to `add_vite` ([#965](https://github.com/AnswerDotAI/fasthtml/issues/965))
+
+
 ## 0.14.27
 
 ### New Features
