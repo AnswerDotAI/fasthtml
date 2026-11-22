@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.30
+
+### New Features
+
+- Add `proxy_routes`, per-loop pooled HTTP client with cookies disabled, and header set/strip enhancements in fasthtml.proxy ([#967](https://github.com/AnswerDotAI/fasthtml/issues/967))
+
+
 ## 0.14.29
 
 ### New Features
