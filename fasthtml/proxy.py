@@ -6,7 +6,7 @@ Register proxy handlers with Starlette's `Route` and `WebSocketRoute`. FastHTML'
 
 Connection-nominated headers and explicitly excluded names are removed. Repeated end-to-end values remain separate, with lowercase names.
 
-`proxy_websocket` connects upstream before accepting the caller. Upstream HTTP 401, 403 and 404 responses accept and close the caller with code 1008. It forwards the selected subprotocol and relays text and binary frames. Either peer disconnecting cancels the other forwarding task and closes the upstream connection. Supply a complete URL, including any query parameters.
+`proxy_websocket` connects upstream before accepting the caller. Upstream HTTP 4xx and 5xx refusals forward their status, body, and content type via `send_denial_response` when the server supports the WebSocket denial extension, or otherwise accept and close the caller with code 1008. It forwards the selected subprotocol and relays text and binary frames. Either peer disconnecting cancels the other forwarding task and closes the upstream connection. Supply a complete URL, including any query parameters.
 
 The relay reads raw ASGI events from `receive()`. A `websocket.receive` event carries `text` or `bytes`. A `websocket.disconnect` event carries a close `code`. `receive_text()` and `receive_bytes()` extract one data field instead.
 
@@ -104,7 +104,11 @@ async def proxy_websocket(
                     code = target.close_code if target.close_code not in (None, 1005, 1006, 1015) else 1011
                     await websocket.close(code=code, reason=target.close_reason or '')
     except websockets.exceptions.InvalidStatus as e:
-        if e.response.status_code not in (401, 403, 404): raise
-        await websocket.accept()
-        await websocket.close(code=1008, reason=f'Upstream refused connection ({e.response.status_code})')
+        if e.response.status_code < 400: raise
+        if 'websocket.http.response' in websocket.scope.get('extensions', {}):
+            await websocket.send_denial_response(Response(bytes(e.response.body), status_code=e.response.status_code,
+                media_type=e.response.headers.get('content-type')))
+        else:
+            await websocket.accept()
+            await websocket.close(code=1008, reason=f'Upstream refused connection ({e.response.status_code})')
 

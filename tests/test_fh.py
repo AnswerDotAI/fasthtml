@@ -1,5 +1,5 @@
 from fasthtml.common import *
-from starlette.testclient import TestClient
+from starlette.testclient import TestClient, WebSocketDenialResponse
 import httpx2, socket, uvicorn
 from fasthtml.proxy import ProxyResponse, proxy_headers, proxy_websocket
 from contextlib import contextmanager
@@ -70,7 +70,7 @@ async def echo_http(request):
     return response
 
 async def echo_ws(ws):
-    if status := ws.query_params.get('deny'): return await ws.send_denial_response(Response(status_code=int(status)))
+    if status := ws.query_params.get('deny'): return await ws.send_denial_response(Response(f'denied {status}', status_code=int(status), media_type='text/plain'))
     await ws.accept(subprotocol='echo')
     await ws.send_text(ws.headers.get('x-api-token', ''))
     await ws.send_text(await ws.receive_text())
@@ -105,5 +105,9 @@ def test_proxy():
                 ws.send_bytes(b'\x00bytes')
                 assert ws.receive_bytes() == b'\x00bytes'
                 assert ws.receive()['code'] == 1000
-            for status in (401, 403, 404):
-                with proxy.websocket_connect(f'/ws?deny={status}') as ws: assert ws.receive()['code'] == 1008
+            for status in (400, 401, 403, 404, 429, 502):
+                try:
+                    with proxy.websocket_connect(f'/ws?deny={status}'): assert False
+                except WebSocketDenialResponse as e:
+                    assert (e.status_code, e.text) == (status, f'denied {status}')
+                    assert e.headers['content-type'].startswith('text/plain')
