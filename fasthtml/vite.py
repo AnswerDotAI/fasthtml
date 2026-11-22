@@ -1,6 +1,6 @@
 """Vite+ asset headers and development server integration for FastHTML
 
-Import explicitly from `fasthtml.vite` rather than `fasthtml.common`. Production apps mount a built `dist/` directory and inject hashed asset tags from `.vite/manifest.json`. Development mode (`dev=True`) runs `vp dev` inside the application lifespan for hot module replacement.
+Import explicitly from `fasthtml.vite` rather than `fasthtml.common`. Production apps mount a built `dist/` directory and inject hashed asset tags from `.vite/manifest.json`. Pass `build=True` to run `vp run build` on startup before loading the manifest. Development mode (`dev=True`) runs `vp dev` inside the application lifespan for hot module replacement.
 
 ```python
 from fasthtml.common import FastHTML
@@ -13,7 +13,7 @@ add_vite(app, directory='.')
 
 __all__ = ['vite_headers', 'add_vite']
 
-import asyncio, json
+import asyncio, json, subprocess
 from pathlib import Path
 from .components import Link, Script
 from .core import FastHTML, StaticImmutable
@@ -49,6 +49,7 @@ def add_vite(
     directory='.', # Base directory containing `dirname`
     dev=False, # Own a localhost `vp dev` server with hot module replacement
     port=5173, # Port for the `vp dev` server when `dev=True`
+    build=False, # Run `vp run build` on startup before loading the manifest
 ):
     "Configure a FastHTML app to serve Vite+ assets or own a localhost `vp dev` server."
     pwd = Path(directory).resolve()/dirname
@@ -78,6 +79,8 @@ def add_vite(
         app.set_lifespan(lifespan)
         return
     outdir = pwd/'dist'
-    app.mount(f'/{dirname}', app=StaticImmutable(directory=outdir), name=dirname)
-    @app.on_event('startup')
-    def _(): app.hdrs[0:0] = vite_headers(outdir, entry=f'src/{entry_file}', base=f'/{dirname}/')
+    app.mount(f'/{dirname}', app=StaticImmutable(directory=outdir, check_dir=False), name=dirname)
+    @app.startup
+    def _():
+        if build: subprocess.run(['vp', 'run', 'build'], cwd=pwd, check=True)
+        app.hdrs[0:0] = vite_headers(outdir, entry=f'src/{entry_file}', base=f'/{dirname}/')

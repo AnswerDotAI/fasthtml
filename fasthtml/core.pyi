@@ -1,9 +1,52 @@
-"""The `FastHTML` subclass of `Starlette`."""
-__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'htmx_exts', 'htmxsrc', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'ApiReturn', 'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'FastHTML', 'HostRoute', 'nested_name', 'serve', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
-import json, uuid, inspect, types, asyncio, inspect, random, contextlib, itsdangerous
+"""The `FastHTML` subclass of `Starlette`.
+
+Create an app with `app = FastHTML()`. The `@rt` decorator adds routes (`rt = app.route`), inferring what it can from the function:
+
+    @rt
+    def index(): ...      # GET,POST /
+    @rt
+    def foo(): ...        # GET,POST /foo
+    @rt('/hi')
+    def get(): ...        # GET /hi (function named after a verb handles just that verb)
+    @rt('/cards/{id}')
+    class Cards: ...      # class route group: each verb-named method (get, patch, ...) becomes a handler
+
+The decorated function doubles as a URL builder, so links never need hardcoded paths:
+
+    A('More', href=foo.to(a=1))   # <a href="/foo?a=1"> `.to()` fills path params; the rest become query params.
+    Div('...', hx_get=foo)        # route functions work directly as htmx attr values: hx-get="/foo"
+
+Handlers return FT trees (from `fastcore.xml`), rendered as HTML automatically: a full page for regular requests, a bare fragment for HTMX requests. In a full page, top-level `Title`, `Meta`, `Link`, and `Style` items go in `<head>`; the rest goes in `<body>`. Strings are sent as HTML, dicts as JSON, and a Starlette `Response` is sent untouched. A return tuple may mix content with special items: any `HttpHeader` (e.g. from `cookie()` or `HtmxResponseHeaders()`) becomes a response header, any `BackgroundTask` runs after the response is sent, and the rest renders as content. `Redirect` picks the right redirect mechanism for HTMX vs regular requests, and `FtResponse` wraps FT content when you need the status code or headers.
+
+Handler parameters are filled from the request: each is looked up in path, cookie, header (snake_case names match Hyphen-Case headers), query, then form data, and cast by calling its annotation on the value. Hyphens in form/query names match underscores in handler parameters and typed body fields. Exact names take precedence within each source. Dictionary and request access retain the original keys. `bool`, `int`, and `date` get smart string parsing; `UploadFile` passes through. Repeated params take the last value unless annotated `list[T]`, which collects them all. A param with no annotation and no special name is ignored, with a warning. A dataclass, TypedDict, namedtuple, or any annotated class collects the whole form body; a `__from_request__` classmethod customizes construction. A missing required param is a 400, a failed cast a 404. These special names need no annotation:
+
+    req, ws   the Request / WebSocket connection
+    sess      session dict
+    app       the FastHTML app
+    state     app.state
+    scope     ASGI scope
+    auth      scope['auth']
+    htmx      HtmxHeaders (parsed HX-* request headers)
+    body      raw body text
+    data      parsed form data as a dict
+    api       ApiReturn (API vs browser dual responses)
+    send      websocket send function
+    hdrs,ftrs the per-request copies of the app's `hdrs`/`ftrs` (head and footer content)
+    htmlkw    the per-request copy of the app's `<html>` attrs
+    bodykw    the per-request copy of the app's `<body>` attrs
+    resp      the handler's response (injected into `after` functions)
+
+`before`/`after` functions (app-level, with `Beforeware` skip patterns, or per-route `before=`) get the same param injection as handlers. A `before` returning a value responds with it and skips the handler (the usual auth-guard pattern).
+
+See the [Handling Handlers tutorial](https://www.fastht.ml/docs/ref/handlers.html.md) for worked examples of the above.
+
+Docs: https://www.fastht.ml/docs/api/core.html.md"""
+__all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_exts', 'htmxsrc', 'htmx4src', 'fhjsscr', 'surrsrc', 'scopesrc', 'viewport', 'charset', 'cors_allow', 'iframe_scr', 'all_meths', 'devtools_loc', 'parsed_date', 'snake2hyphens', 'HtmxHeaders', 'HttpHeader', 'HtmxResponseHeaders', 'form2dict', 'parse_form', 'ApiReturn', 'JSONResponse', 'flat_xt', 'Beforeware', 'EventStream', 'signal_shutdown', 'uri', 'decode_uri', 'flat_tuple', 'noop_body', 'respond', 'is_full_page', 'Redirect', 'get_key', 'qp', 'def_hdrs', 'Lifespan', 'BearerSessionMiddleware', 'FastHTML', 'HostRoute', 'nested_name', 'serve', 'until_disconnect', 'cancel_on_disconnect', 'Client', 'RouteFuncs', 'APIRouter', 'cookie', 'reg_re_param', 'StaticNoCache', 'StaticImmutable', 'vurl', 'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
+import json, uuid, inspect, types, asyncio, logging, random, contextlib, itsdangerous, hashlib, signal, subprocess
+from uuid import uuid5, NAMESPACE_URL
 from fastcore.utils import *
 from fastcore.xml import *
-from fastcore.meta import use_kwargs_dict, delegates
+from fastcore.meta import use_kwargs_dict, delegates, splice_sig
 from fastcore.style import S
 from types import UnionType, SimpleNamespace as ns, GenericAlias
 from typing import get_args, get_origin, Union, Mapping, List, Any, Callable
@@ -12,7 +55,7 @@ from dataclasses import dataclass
 from inspect import Parameter, get_annotations
 from functools import partialmethod, update_wrapper
 from http import cookies
-from urllib.parse import urlencode, parse_qs, quote, unquote
+from urllib.parse import urlencode, parse_qs, quote, unquote, urlsplit, urlunsplit
 from copy import deepcopy
 from warnings import warn
 from dateutil import parser as dtparse
@@ -21,6 +64,7 @@ from uuid import uuid4, UUID
 from base64 import b64encode, b64decode
 from email.utils import format_datetime
 from .starlette import *
+from python_multipart.exceptions import MultipartParseError
 
 def _params(f):
     ...
@@ -33,21 +77,27 @@ def parsed_date(s: str):
 def snake2hyphens(s: str):
     """Convert `s` from snake case to hyphenated and capitalised"""
     ...
-htmx_hdrs = dict(boosted='HX-Boosted', current_url='HX-Current-URL', history_restore_request='HX-History-Restore-Request', prompt='HX-Prompt', request='HX-Request', target='HX-Target', trigger_name='HX-Trigger-Name', trigger='HX-Trigger')
+htmx_hdrs = dict(boosted='HX-Boosted', current_url='HX-Current-URL', history_restore_request='HX-History-Restore-Request', prompt='HX-Prompt', request='HX-Request', request_type='HX-Request-Type', source='HX-Source', target='HX-Target', trigger_name='HX-Trigger-Name', trigger='HX-Trigger')
 
 @dataclass
 class HtmxHeaders:
+    """Parsed HX-* request headers"""
     boosted: str | None = None
     current_url: str | None = None
     history_restore_request: str | None = None
     prompt: str | None = None
     request: str | None = None
+    request_type: str | None = None
+    source: str | None = None
     target: str | None = None
     trigger_name: str | None = None
     trigger: str | None = None
 
     def __bool__(self):
         ...
+
+def _get_header(h, k):
+    ...
 
 def _get_htmx(h):
     ...
@@ -71,6 +121,7 @@ def _form_arg(k, v, d):
 
 @dataclass
 class HttpHeader:
+    """A response header as a k,v pair"""
     k: str
     v: str
 
@@ -91,15 +142,16 @@ def _is_body(anno):
     ...
 
 def _formitem(form, k):
-    """Return single item `k` from `form` if len 1, otherwise return list"""
+    """Return item `k`, accepting hyphens for underscores and unwrapping single-item form lists"""
     ...
 
 def form2dict(form: FormData) -> dict:
     """Convert starlette form data to a dict"""
     ...
+DEF_MAXPART = 100 * 1024 * 1024
 
 async def parse_form(req: Request) -> FormData:
-    """Starlette errors on empty multipart forms, so this checks for that situation"""
+    """Starlette errors on empty multipart/json forms and 500s on malformed multipart, so this handles those situations"""
     ...
 
 async def _from_body(conn, p, data):
@@ -107,6 +159,7 @@ async def _from_body(conn, p, data):
     ...
 
 class ApiReturn:
+    """Request param: call with browser and API responses; returns kwargs as JSON if the client accepts `application/json`, else `norm`"""
 
     @classmethod
     async def __from_request__(cls, data, req):
@@ -142,6 +195,7 @@ def flat_xt(lst):
     ...
 
 class Beforeware:
+    """Wrap a `before` function with `skip` path patterns that bypass it"""
 
     def __init__(self, f, skip=None):
         ...
@@ -149,7 +203,7 @@ class Beforeware:
     def __repr__(self):
         ...
 
-async def _handle(f, *args, **kwargs):
+async def _handle(f, /, *args, **kwargs):
     ...
 
 async def _wrap_ws(ws, data, params):
@@ -166,6 +220,7 @@ def EventStream(s):
     ...
 
 def signal_shutdown():
+    """Return an `asyncio.Event` set when uvicorn receives a shutdown signal"""
     ...
 
 def uri(_arg, **kwargs):
@@ -247,8 +302,9 @@ class Redirect:
 async def _wrap_call(f, req, params):
     """Wrap function call with request parameter injection"""
     ...
-htmx_exts = {'morph': 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js', 'head-support': 'https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.4/head-support.js', 'preload': 'https://cdn.jsdelivr.net/npm/htmx-ext-preload@2.1.1/preload.js', 'class-tools': 'https://cdn.jsdelivr.net/npm/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://cdn.jsdelivr.net/npm/htmx-ext-loading-states@2.0.1/loading-states.js', 'multi-swap': 'https://cdn.jsdelivr.net/npm/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://cdn.jsdelivr.net/npm/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js', 'debug': 'https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js', 'ws': 'https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.3/ws.js', 'chunked-transfer': 'https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js'}
+htmx_exts = {'morph': 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js', 'head-support': 'https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.4/head-support.js', 'preload': 'https://cdn.jsdelivr.net/npm/htmx-ext-preload@2.1.1/preload.js', 'class-tools': 'https://cdn.jsdelivr.net/npm/htmx-ext-class-tools@2.0.1/class-tools.js', 'loading-states': 'https://cdn.jsdelivr.net/npm/htmx-ext-loading-states@2.0.1/loading-states.js', 'multi-swap': 'https://cdn.jsdelivr.net/npm/htmx-ext-multi-swap@2.0.0/multi-swap.js', 'path-deps': 'https://cdn.jsdelivr.net/npm/htmx-ext-path-deps@2.0.0/path-deps.js', 'remove-me': 'https://cdn.jsdelivr.net/npm/htmx-ext-remove-me@2.0.0/remove-me.js', 'debug': 'https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js', 'ws': 'https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.3/ws.js', 'ws4': 'https://cdn.jsdelivr.net/npm/htmx.org@4.0.2/dist/ext/hx-ws.min.js', 'chunked-transfer': 'https://cdn.jsdelivr.net/npm/htmx-ext-transfer-encoding-chunked@0.4.0/transfer-encoding-chunked.js', 'sse4': 'https://cdn.jsdelivr.net/npm/htmx.org@4.0.2/dist/ext/hx-sse.min.js', 'live': 'https://cdn.jsdelivr.net/npm/htmx.org@4.0.2/dist/ext/hx-live.min.js', 'multipart': 'https://cdn.jsdelivr.net/npm/htmx.org@4.0.2/dist/ext/hx-multipart.min.js'}
 htmxsrc = Script(src='https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.js')
+htmx4src = Script(src='https://cdn.jsdelivr.net/npm/htmx.org@4.0.2/dist/htmx.min.js')
 fhjsscr = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/fasthtml-js@1.0.13/fasthtml.js')
 surrsrc = Script(src='https://cdn.jsdelivr.net/gh/answerdotai/surreal@main/surreal.js')
 scopesrc = Script(src='https://cdn.jsdelivr.net/gh/gnat/css-scope-inline@main/script.js')
@@ -271,11 +327,11 @@ def qp(p: str, **kw) -> str:
     """Add parameters kw to path p"""
     ...
 
-def def_hdrs(htmx=True, surreal=True):
+def def_hdrs(htmx=True, htmx4=False, surreal=True):
     """Default headers for a FastHTML app"""
     ...
 cors_allow = Middleware(CORSMiddleware, allow_credentials=True, allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])
-iframe_scr = Script(NotStr("\n    function sendmsg() {\n        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');\n    }\n    window.onload = function() {\n        sendmsg();\n        document.body.addEventListener('htmx:afterSettle',    sendmsg);\n        document.body.addEventListener('htmx:wsAfterMessage', sendmsg);\n    };"))
+iframe_scr = Script(NotStr("\n    function sendmsg() {\n        window.parent.postMessage({height: document.documentElement.offsetHeight}, '*');\n    }\n\n    window.onload = function() {\n        sendmsg();\n\n        const ver = window.htmx?.version || '';\n        const isV4 = ver.startsWith('4.');\n        const mc = window.htmx?.config?.metaCharacter || ':';\n\n        if (isV4) {\n            document.body.addEventListener(`htmx${mc}after${mc}swap`, sendmsg);\n            document.body.addEventListener(`htmx${mc}after${mc}ws${mc}message`, sendmsg);\n        } else {\n            document.body.addEventListener('htmx:afterSettle', sendmsg);\n            document.body.addEventListener('htmx:wsAfterMessage', sendmsg);\n        }\n    };\n"))
 
 class _LifespanCtx:
 
@@ -294,9 +350,13 @@ class _LifespanCtx:
     async def __anext__(self):
         ...
 
-class Lifespan:
+def _log_bg_exc(t):
+    ...
 
-    def __init__(self, startup=None, shutdown=None, ls=None):
+class Lifespan:
+    """Combine `on_startup`/`on_shutdown` callbacks, background startup tasks, and an optional lifespan generator into one context manager"""
+
+    def __init__(self, startup=None, shutdown=None, ls=None, bg=None):
         ...
 
     def __call__(self, app):
@@ -305,15 +365,31 @@ class Lifespan:
     async def _run(self, app):
         ...
 
-    def on_event(self, event_type):
+class BearerSessionMiddleware(SessionMiddleware):
+    """Accept signed session cookies through Authorization within `bearer_path`."""
+
+    def __init__(self, app, secret_key, bearer_path='/', *, session_cookie: 'str'='session', max_age: 'int | None'=1209600, path: 'str'='/', same_site: "Literal['lax', 'strict', 'none']"='lax', https_only: 'bool'=False, domain: 'str | None'=None, partitioned: 'bool'=False):
+        ...
+
+    async def __call__(self, scope, receive, send):
         ...
 
 class FastHTML(Starlette):
+    """An HTML-first Starlette app: handler params filled from the request, FT returns rendered as pages or HTMX fragments"""
 
-    def __init__(self, debug=False, routes=None, middleware=None, title: str='FastHTML page', exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, **bodykw):
+    def __init__(self, debug=False, routes=None, middleware=None, title: str='FastHTML page', exception_handlers=None, on_startup=None, on_shutdown=None, lifespan=None, hdrs=None, ftrs=None, exts=None, before=None, after=None, surreal=True, htmx=True, htmx4=False, default_hdrs=True, sess_cls=SessionMiddleware, secret_key=None, session_cookie='session_', max_age=365 * 24 * 3600, sess_path='/', same_site='lax', sess_https_only=False, sess_domain=None, key_fname='.sesskey', body_wrap=noop_body, htmlkw=None, nb_hdrs=False, canonical=True, max_part_size=DEF_MAXPART, **bodykw):
+        ...
+
+    def startup(self, f=None, bg=False):
+        """Register a callback `f` to run on app startup, or as a managed background task if `bg=True`"""
+        ...
+
+    def shutdown(self, f):
+        """Register a callback `f` to run on app shutdown"""
         ...
 
     def on_event(self, event_type):
+        """Register a callback for `'startup'` or `'shutdown'` (Starlette-compatible API)"""
         ...
 
     def add_route(self, route):
@@ -405,8 +481,23 @@ def _route_pn(func, path, name):
 for o in all_meths:
     setattr(FastHTML, o, partialmethod(FastHTML.route, methods=o))
 
-def serve(appname=None, app='app', host='0.0.0.0', port=None, reload=True, **kwargs):
+def serve(appname=None, app='app', host='0.0.0.0', port=None, reload=True, procs=None, **kwargs):
     """Run the app in an async server, with live reload set as the default."""
+    ...
+
+def _spawn(n):
+    """Run this script `n` times over, numbering each copy in `FH_PROCNUM`, and wait for them all"""
+    ...
+
+async def _wait_disconnect(req):
+    ...
+
+async def until_disconnect(req, coro):
+    """Await `coro`, cancelling it (and returning an empty response) if the client disconnects first"""
+    ...
+
+def cancel_on_disconnect(f=None, *, timeout=None):
+    """Route decorator: cancel the handler when the client disconnects"""
     ...
 
 class Client:
@@ -421,6 +512,7 @@ for o in ('get', 'post', 'delete', 'put', 'patch', 'options'):
     setattr(Client, o, partialmethod(Client._sync, o))
 
 class RouteFuncs:
+    """Attr-access store of named route functions (HTTP verb names excluded)"""
 
     def __init__(self):
         ...
@@ -465,15 +557,31 @@ def cookie(key: str, value='', max_age=None, expires=None, path='/', domain=None
     ...
 
 def reg_re_param(m, s):
+    """Register a Starlette URL convertor named `m` matching regex `s`"""
     ...
 reg_re_param('path', '.*?')
 _static_exts = 'ico gif jpg jpeg webm css js woff png svg mp4 webp ttf otf eot woff2 txt html map pdf zip tgz gz csv mp3 wav ogg flac aac doc docx xls xlsx ppt pptx epub mobi bmp tiff avi mov wmv mkv xml yaml yml rar 7z tar bz2 htm xhtml apk dmg exe msi swf iso'.split()
 reg_re_param('static', '|'.join(_static_exts))
 
 class StaticNoCache(StaticFiles):
+    """StaticFiles that sends `Cache-Control: no-cache`, so browsers revalidate on every use"""
 
     def file_response(self, *args, **kwargs):
         ...
+
+class StaticImmutable(StaticFiles):
+    """Like `StaticNoCache`, but marks responses as cacheable forever: for versioned URLs such as `vurl` links or content-hashed filenames"""
+
+    def file_response(self, *args, **kwargs):
+        ...
+
+@flexicache(mtime_policy(arg=0))
+def _vhash(p):
+    ...
+
+def vurl(path, root='.'):
+    """Return `path` as a URL with a `v` query param hashing the file's contents, so the URL changes when the file does"""
+    ...
 from functools import wraps
 from inspect import signature, isawaitable
 
@@ -491,6 +599,7 @@ class into:
         ...
 
 class MiddlewareBase:
+    """Base for middleware: passes non-http/ws scopes through, else returns the `HTTPConnection`"""
 
     async def __call__(self, scope, receive, send) -> None:
         ...
@@ -505,6 +614,7 @@ class FtResponse:
         ...
 
 def unqid(seeded=False):
+    """Random unique id, base64-encoded and prefixed with '_' so it's usable as an HTML id"""
     ...
 
 def _add_ids(s):

@@ -55,7 +55,7 @@ __all__ = ['empty', 'htmx_hdrs', 'fh_cfg', 'htmx_resps', 'DEF_MAXPART', 'htmx_ex
            'StaticImmutable', 'vurl', 'add_sig_param', 'into', 'MiddlewareBase', 'FtResponse', 'unqid']
 
 # %% ../nbs/api/00_core.ipynb #23503b9e
-import json,uuid,inspect,types,asyncio,inspect,random,contextlib,itsdangerous,hashlib,signal,subprocess
+import json,uuid,inspect,types,asyncio,logging,random,contextlib,itsdangerous,hashlib,signal,subprocess
 from uuid import uuid5, NAMESPACE_URL
 
 from fastcore.utils import *
@@ -673,22 +673,31 @@ class _LifespanCtx:
     def __aiter__(self): return self.gen
     async def __anext__(self): return await self.gen.__anext__()
 
+def _log_bg_exc(t):
+    if not t.cancelled() and (exc := t.exception()):
+        logging.getLogger('fasthtml').exception('Background startup task failed', exc_info=exc)
+
 class Lifespan:
-    "Combine `on_startup`/`on_shutdown` callbacks and an optional lifespan generator into one context manager"
-    def __init__(self, startup=None, shutdown=None, ls=None):
-        startup,shutdown = listify(startup),listify(shutdown)
+    "Combine `on_startup`/`on_shutdown` callbacks, background startup tasks, and an optional lifespan generator into one context manager"
+    def __init__(self, startup=None, shutdown=None, ls=None, bg=None):
+        startup,shutdown,bg = listify(startup),listify(shutdown),listify(bg)
         store_attr()
 
     def __call__(self, app): return _LifespanCtx(self._run(app))
 
     async def _run(self, app):
         for f in self.startup: await _handle(f)
-        if self.ls:
-            async for state in self.ls(app): yield state
-        else: yield
+        tasks = [asyncio.create_task(_handle(f)) for f in self.bg]
+        for t in tasks: t.add_done_callback(_log_bg_exc)
+        try:
+            if self.ls:
+                async for state in self.ls(app): yield state
+            else: yield
+        finally:
+            for t in tasks: t.cancel()
+            for t in tasks:
+                with contextlib.suppress(Exception, asyncio.CancelledError): await t
         for f in self.shutdown: await _handle(f)
-
-    def on_event(self, event_type): return lambda f: (getattr(self, event_type)).append(f)
 
 # %% ../nbs/api/00_core.ipynb #375b0f62
 class BearerSessionMiddleware(SessionMiddleware):
@@ -746,7 +755,22 @@ class FastHTML(Starlette):
         excs = {k:_wrap_ex(v, k, hdrs, ftrs, htmlkw, bodykw, body_wrap=body_wrap) for k,v in exception_handlers.items()}
         super().__init__(debug, routes, middleware=middleware, exception_handlers=excs, lifespan=self.lifespan)
 
-    def on_event(self, event_type): return self.lifespan.on_event(event_type)
+    def startup(self, f=None, bg=False):
+        "Register a callback `f` to run on app startup, or as a managed background task if `bg=True`"
+        def _reg(f):
+            (self.lifespan.bg if bg else self.lifespan.startup).append(f)
+            return f
+        return _reg(f) if callable(f) else _reg
+
+    def shutdown(self, f):
+        "Register a callback `f` to run on app shutdown"
+        self.lifespan.shutdown.append(f)
+        return f
+
+    def on_event(self, event_type):
+        "Register a callback for `'startup'` or `'shutdown'` (Starlette-compatible API)"
+        if event_type not in ('startup', 'shutdown'): raise ValueError(f"Unknown event_type: {event_type!r}")
+        return getattr(self, event_type)
 
 # %% ../nbs/api/00_core.ipynb #dce68049
 class HostRoute(Route):
