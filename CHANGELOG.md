@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.29
+
+### New Features
+
+- Forward upstream 4xx/5xx WebSocket denials via `send_denial_response` when supported, falling back to close 1008 ([#966](https://github.com/AnswerDotAI/fasthtml/issues/966))
+
+
 ## 0.14.28
 
 ### New Features
