@@ -1,7 +1,7 @@
 from fasthtml.common import *
 from starlette.testclient import TestClient, WebSocketDenialResponse
 import httpx2, socket, uvicorn
-from fasthtml.proxy import ProxyResponse, proxy_headers, proxy_websocket
+from fasthtml.proxy import ProxyResponse, proxy_headers, proxy_routes, proxy_websocket
 from contextlib import contextmanager
 from threading import Thread
 from starlette.applications import Starlette
@@ -63,9 +63,12 @@ async def echo_http(request):
     body = await request.body()
     response = StreamingResponse(iter([body[:1], body[1:]]), status_code=201, headers={
         'content-type': request.headers.get('content-type', 'application/octet-stream'),
-        'x-query': request.url.query, 'x-method': request.method,
+        'x-path': request.scope['raw_path'].decode(), 'x-query': request.url.query, 'x-method': request.method,
         'x-transfer-encoding': request.headers.get('transfer-encoding', ''),
-        'x-private': request.headers.get('x-private', ''), 'x-auth': request.headers.get('authorization', '')})
+        'x-private': request.headers.get('x-private', ''), 'x-auth': request.headers.get('authorization', ''),
+        'x-user': request.headers.get('x-user', ''), 'x-secret': request.headers.get('x-secret', ''),
+        'x-cookie': request.headers.get('cookie', '')})
+    if request.query_params.get('setcookie'): response.headers['set-cookie'] = 'sid=alice'
     response.raw_headers += [(b'x-tag', value.encode()) for value in request.headers.getlist('x-tag')]
     return response
 
@@ -78,13 +81,26 @@ async def echo_ws(ws):
     await ws.close(code=1000)
 
 def test_proxy():
-    upstream = Starlette(routes=[Route('/', echo_http, methods=['GET', 'PATCH']), WebSocketRoute('/ws', echo_ws)])
+    upstream = Starlette(routes=[
+        Route('/', echo_http, methods=['GET', 'PATCH']),
+        Route('/{path:path}', echo_http, methods=['GET', 'PATCH']),
+        WebSocketRoute('/ws', echo_ws),
+    ])
     with running_server(upstream) as url:
         async def forward_http(request):
             return ProxyResponse(request, url, headers=proxy_headers(request.headers, exclude=(b'authorization',)))
         async def forward_ws(ws):
             await proxy_websocket(ws, url.replace('http', 'ws')+'/ws?'+ws.url.query, headers=[(b'x-api-token', b'user:key')])
-        app = Starlette(routes=[Route('/', forward_http, methods=['GET', 'PATCH']), WebSocketRoute('/ws', forward_ws)])
+        async def check(conn):
+            if conn.headers.get('x-deny'): return Response('blocked', status_code=403, media_type='text/plain')
+        def app_headers(conn):
+            return proxy_headers(conn.headers, exclude=('authorization', 'cookie'),
+                set={'x-user': 'alice', 'x-secret': None, 'x-api-token': 'user:key'})
+        app = Starlette(routes=[
+            Route('/', forward_http, methods=['GET', 'PATCH']),
+            WebSocketRoute('/ws', forward_ws),
+            *proxy_routes('/app', lambda conn: url, headers=app_headers, before=check, ws=True),
+        ])
         with TestClient(app) as proxy:
             body = b'["a", {"b":2}]'
             headers = [('Content-Type', 'application/json'), ('X-Tag', 'a'), ('X-Tag', 'b'),
@@ -97,6 +113,26 @@ def test_proxy():
             res = proxy.get('/')
             assert res.content == b'' and res.headers['x-transfer-encoding'] == ''
             assert proxy.request('GET', '/', content=iter([body[:1], body[1:]])).content == body
+            # Pooled client never leaks upstream Set-Cookie across callers
+            assert proxy.get('/?setcookie=1').headers['set-cookie'] == 'sid=alice'
+            proxy.cookies.clear()
+            assert proxy.get('/').headers['x-cookie'] == ''
+            # Prefix proxy: before guard, 307 redirect, path quoting, and header stripping/setting
+            assert proxy.get('/app', headers={'x-deny': '1'}, follow_redirects=False).status_code == 403
+            redir = proxy.get('/app?a=1&b=2', follow_redirects=False)
+            assert (redir.status_code, redir.headers['location']) == (307, '/app/?a=1&b=2')
+            res = proxy.get('/app/sub/a b?k=v', headers={'Authorization': 'no', 'X-User': 'bob', 'X-Secret': 'leaked'})
+            assert (res.status_code, res.headers['x-path'], res.headers['x-query']) == (201, '/sub/a%20b', 'k=v')
+            assert (res.headers['x-user'], res.headers['x-secret'], res.headers['x-auth']) == ('alice', '', '')
+            with proxy.websocket_connect('/app/ws', subprotocols=['echo']) as ws:
+                assert ws.receive_text() == 'user:key'
+                ws.send_text('hi'); assert ws.receive_text() == 'hi'
+                ws.send_bytes(b'ok'); assert ws.receive_bytes() == b'ok'
+                assert ws.receive()['code'] == 1000
+            try:
+                with proxy.websocket_connect('/app/ws', headers={'x-deny': '1'}): assert False
+            except WebSocketDenialResponse as e:
+                assert (e.status_code, e.text) == (403, 'blocked')
             with proxy.websocket_connect('/ws', subprotocols=['echo']) as ws:
                 assert ws.accepted_subprotocol == 'echo'
                 assert ws.receive_text() == 'user:key'
