@@ -21,10 +21,10 @@ try: from IPython import display
 except ImportError: display=None
 
 # %% ../nbs/api/04_pico.ipynb #100414ae
-picocss = "https://cdn.jsdelivr.net/npm/@anyblades/pico@latest/css/pico.min.css"
+picocss = "https://cdn.jsdelivr.net/npm/@sveti/blades@latest/css/pico.min.css"
 picolink = (Link(rel="stylesheet", href=picocss),
             Style(":root { --pico-font-size: 100%; }"))
-picocondcss = "https://cdn.jsdelivr.net/npm/@anyblades/pico@latest/css/pico.conditional.min.css"
+picocondcss = "https://cdn.jsdelivr.net/npm/@sveti/blades@latest/css/pico.conditional.min.css"
 picocondlink = (Link(rel="stylesheet", href=picocondcss),
                 Style(":root { --pico-font-size: 100%; }"))
 
