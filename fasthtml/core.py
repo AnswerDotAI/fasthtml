@@ -378,9 +378,10 @@ def _ws_endp(recv, conn=None, disconn=None):
     return cls
 
 # %% ../nbs/api/00_core.ipynb #5b0e7677
-def EventStream(s):
+def EventStream(s, headers=None):
     "Create a text/event-stream response from `s`"
-    return StreamingResponse(s, media_type="text/event-stream")
+    hdrs = {'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'} | (headers or {})
+    return StreamingResponse(s, media_type="text/event-stream", headers=hdrs)
 
 # %% ../nbs/api/00_core.ipynb #0dd0a414
 def signal_shutdown():

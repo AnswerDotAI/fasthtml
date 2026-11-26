@@ -238,7 +238,8 @@ class OAuth:
             if 'auth' not in req.scope: req.scope['auth'] = session.get('auth')
             auth = req.scope['auth']
             res = self.redir_login(session) if not auth else await _arun(self.check_invalid(req, session, auth))
-            if api and isinstance(res, RedirectResponse): return JSONResponse({'error':'Not authenticated.'}, status_code=401)
+            if (api or req.headers.get('accept')=='text/event-stream') and isinstance(res, RedirectResponse):
+                return JSONResponse({'error':'Not authenticated.'}, status_code=401)
             if res: return res
         app.before.append(Beforeware(before, skip=skip))
 

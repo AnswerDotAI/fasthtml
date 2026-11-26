@@ -215,7 +215,7 @@ async def _send_ws(ws, resp):
 def _ws_endp(recv, conn=None, disconn=None):
     ...
 
-def EventStream(s):
+def EventStream(s, headers=None):
     """Create a text/event-stream response from `s`"""
     ...
 
