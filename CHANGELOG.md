@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.14.31
+
+### Bugs Squashed
+
+- Add default SSE headers and headers arg to EventStream; return 401 JSON for unauthenticated SSE requests in OAuth ([#969](https://github.com/AnswerDotAI/fasthtml/issues/969))
+
+
 ## 0.14.30
 
 ### New Features
